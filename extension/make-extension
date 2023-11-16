@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e -u -o pipefail
+cd $(dirname "$0")/src
+
+# https://extensionworkshop.com/documentation/publish/package-your-extension/
+
+shopt -s nullglob
+files=(*.{html,js,png,json,svg})
+zip -q ../extension.zip "${files[@]}"
+
+# create a version with manifest v2
+mkdir -p ../src2
+rsync -a -d "${files[@]}" ../src2
+jq '.manifest_version=2 | . + {"browser_action": .action} | del(.action)' < manifest.json > ../src2/manifest.json
+sed -i 's/is_manifest_v2 = false/is_manifest_v2 = true/' ../src2/*.js
+cd ../src2;
+zip -q ../extension2.zip "${files[@]}"

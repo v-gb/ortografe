@@ -1,0 +1,41 @@
+{
+    "manifest_version": 3,
+    "name": "Français simplifié",
+    "version": "0.7",
+
+    "description": "Réécrit les pages web de l'orthographe normale a une orthographe simplifiée (mais pas phonétique)",
+
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "{84c49640-7034-11ee-bf45-47727e58e2aa}"
+        },
+        "gecko_android": {
+            "strict_min_version": "113.0"
+        }
+    },
+
+    "icons": {
+        "64": "Emblem_of_La_Francophonie.64.png",
+        "128": "Emblem_of_La_Francophonie.128.png"
+    },
+
+    "action": {
+        "default_icon": {
+            "64": "Emblem_of_La_Francophonie.64.png",
+            "128": "Emblem_of_La_Francophonie.128.png"
+        },
+        "default_popup": "options.html"
+    },
+
+    "permissions": ["storage"],
+    "options_ui": {
+	"page": "options.html"
+    },
+
+    "content_scripts": [
+	{
+	    "matches": ["*://*/*"],
+	    "js": ["dict.js", "rewrite.js"]
+	}
+    ]
+}

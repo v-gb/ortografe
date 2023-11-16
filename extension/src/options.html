@@ -1,0 +1,41 @@
+<!doctype html>
+
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="utf-8" />
+  </head>
+
+  <body>
+    <form>
+    <fieldset>
+      <legend>Configuration:</legend>
+
+      <div>
+	<input type="checkbox" id="disable-checkbox" name="disable-checkbox"/>
+	<label for="disable-checkbox">désactiver la réécriture</label>
+      </div>
+
+      <div>
+	<input type="checkbox" id="disable-watch-checkbox" name="disable-watch-checkbox"/>
+	<label for="disable-watch-checkbox">désactiver la réécriture quand la page change</label>
+      </div>
+
+      <div>
+	<input type="checkbox" id="color-checkbox" name="color-checkbox"/>
+	<label for="color-checkbox">surligner les mots réécrits</label>
+      </div>
+
+      <div>
+	<input type="checkbox" id="trivial-checkbox" name="trivial-checkbox"/>
+	<label for="trivial-checkbox">(pour debugger) réécrire les "a" en "X"</label>
+      </div>
+      <br>
+      <button type="submit">Sauvegarder</button>
+      <div id='error'/>
+    </fieldset>
+    </form>
+
+    <script src="options.js"></script>
+  </body>
+</html>
