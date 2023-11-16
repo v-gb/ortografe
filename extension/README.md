@@ -1,4 +1,4 @@
-This is the source for browser extensions for [firefox](https://addons.mozilla.org/fr/firefox/addon/fran%C3%A7ais-simplifi%C3%A9/) and [chrome](https://chromewebstore.google.com/detail/français-simplifié/jdicbfmgcajnpealjodkghahiakdafcl).
+This is the source for browser extensions for [firefox](https://addons.mozilla.org/fr/firefox/addon/fran%C3%A7ais-simplifi%C3%A9/) and [chrome](https://chromewebstore.google.com/detail/français-simplifié/jdicbfmgcajnpealjodkghahiakdafcl). See these pages for what the extensions do.
 
 # How to tweak and try locally
 
