@@ -2,42 +2,46 @@
 set -e -u -o pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-cut -d , -f 2,6 ../erofa/DOR-numérique_v1.0.2.csv |
-    sed 's/\r//g' |
-    grep -v '^,$' |
-    sed 's/ *([^)]*)//g' |
-    tail -n +2 |
-    LANG=C sort -u |
-    {
-        cat
-        # missing
-        echo ceux,ceus
-        echo hispanophone,hispanofone
-        echo sinophone,sinofone
-        echo poux,pous
-        echo choux,chous
-        # corrections (last entry takes precedence when the dict is loaded)
-        echo coordonner,coordoner
-    } |
-    cat > dict.csv
+if false; then
+    :
+else
+    cut -d , -f 2,6 ../erofa/DOR-numérique_v1.0.2.csv |
+        sed 's/\r//g' |
+        grep -v '^,$' |
+        sed 's/ *([^)]*)//g' |
+        tail -n +2 |
+        LANG=C sort -u |
+        {
+            cat
+            # missing
+            echo ceux,ceus
+            echo hispanophone,hispanofone
+            echo sinophone,sinofone
+            echo poux,pous
+            echo choux,chous
+            # corrections (last entry takes precedence when the dict is loaded)
+            echo coordonner,coordoner
+        } |
+        cat > dict.csv
 
-# add a few conjugated forms, from EROFA as well
-ssconvert ../erofa/Verbes-conjugués-top-2k-Lexique.xlsx /tmp/tmp.csv
-{
-    sqlite3 <<'EOF'
+    # add a few conjugated forms, from EROFA as well
+    ssconvert ../erofa/Verbes-conjugués-top-2k-Lexique.xlsx /tmp/tmp.csv
+    {
+        sqlite3 <<'EOF'
 .mode csv
 .import /tmp/tmp.csv t
 select "1_ortho", "Grafie érofiène corecte" from t
-          union all
-          select "grafie alternative", "Grafie érofiène corecte" from t
-          where "grafie alternative" != '' and "grafie alternative" != "Grafie érofiène corecte"
+union all
+select "grafie alternative", "Grafie érofiène corecte" from t
+where "grafie alternative" != '' and "grafie alternative" != "Grafie érofiène corecte"
 EOF
-} \
-    | tr -d '"' \
-    | LANG=C sort \
-    | cat >> dict.csv
+    } \
+        | tr -d '"' \
+        | LANG=C sort \
+        | cat >> dict.csv
 
-# so we rewrite oeuvre, not just œuvre
-cat dict.csv | grep -E '^[^,]*(œ|æ)' | sed -r -e 's/^([^,]*)œ/\1oe/g' -e 's/^([^,]*)æ/\1ae/g' >> dict.csv
+    # so we rewrite oeuvre, not just œuvre
+    cat dict.csv | grep -E '^[^,]*(œ|æ)' | sed -r -e 's/^([^,]*)œ/\1oe/g' -e 's/^([^,]*)æ/\1ae/g' >> dict.csv
+fi
 
 { echo -n 'const fr_dict = "'; tr '\n' '/' < dict.csv; echo '"'; } > src/dict.js
