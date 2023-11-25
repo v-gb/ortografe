@@ -17,7 +17,7 @@ seen_words = set()
 seen_words_with_tags = set()
 pre1990 = []
 post1990 = {}
-dont_want = re.compile('[-0-9.+()&/ ]')
+dont_want = re.compile('[-0-9.+()&/ ,"]')
 extracted_files = list(sorted(glob.glob("extracted-*.gen.json")))
 debug = set(s for arg in sys.argv[1:] for s in arg.split(','))
 
