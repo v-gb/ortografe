@@ -201,6 +201,7 @@ function watch_for_changes(options, table, root) {
     function record_change(n) {
         if (count == 0) {
             const delay = Math.round((5000 + time_of_last_rewrite - performance.now())/100.)
+            if (false) { console.log(`detected changes, delay of ${delay}`) }
             setTimeout(timeout_fired(delay, count + n), 100)
         }
         count += n;
