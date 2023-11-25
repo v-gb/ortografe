@@ -69,7 +69,7 @@ def csv_writer(fd):
 
 min_gen_csv_writer = csv_writer(open('min.gen.csv', 'w'))
 min_gen_csv.sort(key=lambda j: j[0])
-min_gen_csv_writer.writerow(('ortho','phon','h_aspire'))
+min_gen_csv_writer.writerow(('word','ipa','h_aspire'))
 for row in min_gen_csv:
     min_gen_csv_writer.writerow(row)
 
