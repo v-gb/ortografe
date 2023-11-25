@@ -40,8 +40,19 @@ EOF
         | LANG=C sort \
         | cat >> dict.csv
 
-    # so we rewrite oeuvre, not just œuvre
-    cat dict.csv | grep -E '^[^,]*(œ|æ)' | sed -r -e 's/^([^,]*)œ/\1oe/g' -e 's/^([^,]*)æ/\1ae/g' >> dict.csv
+    {
+        sqlite3 <<'EOF'
+.mode csv
+create table t(before,after);
+.import dict.csv t
+select replace(replace(before,"œ","oe"),"æ","ae") as rewritten, after
+from t
+where rewritten != before and rewritten != after
+EOF
+    } \
+        | tr -d '"' \
+        | LANG=C sort \
+        | cat >> dict.csv
 
     {
         sqlite3 <<'EOF'
