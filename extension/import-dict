@@ -5,24 +5,30 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 if false; then
     :
 else
-    cut -d , -f 2,6 ../erofa/DOR-numérique_v1.0.2.csv |
-        sed 's/\r//g' |
-        grep -v '^,$' |
-        sed 's/ *([^)]*)//g' |
-        tail -n +2 |
-        LANG=C sort -u |
-        {
-            cat
-            # missing
-            echo ceux,ceus
-            echo hispanophone,hispanofone
-            echo sinophone,sinofone
-            echo poux,pous
-            echo choux,chous
-            # corrections (last entry takes precedence when the dict is loaded)
-            echo coordonner,coordoner
-        } |
-        cat > dict.csv
+    {
+        sqlite3 <<'EOF'
+.mode csv
+.import ../erofa/DOR-numérique_v1.0.2.csv t
+select "Grafie initiale","Grafie modifiée"
+from t
+where "Grafie initiale" != ''
+EOF
+    } \
+        | tr -d '"' \
+        | sed 's/ *([^)]*)//g' \
+        | LANG=C sort -u \
+        | {
+        cat
+        # missing
+        echo ceux,ceus
+        echo hispanophone,hispanofone
+        echo sinophone,sinofone
+        echo poux,pous
+        echo choux,chous
+        # corrections (last entry takes precedence when the dict is loaded)
+        echo coordonner,coordoner
+    } \
+        | cat > dict.csv
 
     # add a few conjugated forms, from EROFA as well
     ssconvert ../erofa/Verbes-conjugués-top-2k-Lexique.xlsx /tmp/tmp.csv
