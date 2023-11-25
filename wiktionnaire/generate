@@ -1,0 +1,33 @@
+#!/bin/bash
+
+dump=frwiktionary-20231120-pages-articles-multistream.xml.bz2
+date=$(cut -d - -f 2 <<< "$dump")
+url=https://wikimedia.bringyour.com/frwiktionary/$date/$dump
+
+if ! [ -f extracted-$date.gen.json.zst ]; then
+    if ! [ -f $dump ]; then
+        curl $url -O
+    fi
+
+    # https://github.com/tatuylonen/wiktextract
+    # http://www.lrec-conf.org/proceedings/lrec2022/pdf/2022.lrec-1.140.pdf
+    # https://github.com/tatuylonen/wiktextract/pulls?page=2&q=is%3Apr+french
+    # https://pypi.org/project/wiktextract/
+    if ! [ -f extracted.gen.json ]; then
+        # With 6 processes, this takes a bit less than 5h and about (7 * 2.?GB) 15GB of memory.
+        # The resulting json is 1.5GB (150MB zstd'ed), compared to 680MB compressed xml input.
+        podman run --mount type=bind,source=$dump,destination=/tmp/$dump -it --rm ghcr.io/tatuylonen/wiktextract /tmp/$dump --pronunciations --dump-file-language-code fr --language-code fr --num-processes 6 --out - > extracted-$date.gen.json
+    fi
+
+    zstd extracted-$date.gen.json
+fi
+
+if ! [ -f extracted-$date.gen.json ]; then
+    unzstd extracted-$date.gen.json.zst
+fi
+
+
+if ! [ -f min.gen.csv ] || ! [ -f 1990.gen.csv ] ; then
+    (echo "date:$date"; echo "url:$url") > source.gen
+    ./generate.py
+fi
