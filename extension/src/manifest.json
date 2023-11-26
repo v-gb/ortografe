@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Français simplifié",
-    "version": "0.9",
+    "version": "1.0",
 
     "description": "Réécrit les pages web de l'orthographe normale a une orthographe simplifiée (mais pas phonétique)",
 
