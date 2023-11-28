@@ -75,7 +75,7 @@ function make_walk(root) {
         });    
 }
 
-async function plausibly_french(root) {
+async function plausibly_french(root, debug) {
     const t1 = performance.now();
     const walk = make_walk(root);
     let buf = ""
@@ -83,6 +83,9 @@ async function plausibly_french(root) {
         if (/[^\s]/.test(walk.currentNode.nodeValue)) {
             buf += walk.currentNode.nodeValue + "\n";
         }
+    }
+    if (debug) {
+        console.log("language detection", buf)
     }
     const t2 = performance.now();
     const { isReliable, languages } = await b.i18n.detectLanguage(buf);
@@ -169,7 +172,7 @@ function watch_for_changes(options, table, root) {
     // (because even if we know where changes happen, we might be under a notranslate attribute
     // for instance). It seems simpler to just wait for the page to update, and once things have
     // stabilize look at it (i.e. same thing as would happen if a new page was loaded).
-    const debug = false;
+    const debug = options.debug_changes;
     let count = 0;
     let time_of_last_rewrite = -10_000;
     let last_changes = [];
@@ -231,7 +234,9 @@ function load_dict(options) {
 
 async function rewrite_main() {
     const before_storage = performance.now()
-    const options = await b.storage.local.get(['disable', 'disable_watch', 'color','trivial'])
+    const options = await b.storage.local.get(
+        ['disable', 'disable_watch', 'color','trivial', 'debug_changes', 'debug_language']
+    )
     const after_storage = performance.now();
     console.log(`reading options: ${after_storage - before_storage}ms`, options)
     if (options.disable) { return };
@@ -240,7 +245,7 @@ async function rewrite_main() {
     // iterating over <style> nodes even though they contain nothing,
     // and setting their nodeValue messes up pages for some reason
     const root = document.body;
-    if (!(await plausibly_french(root))) { return }
+    if (!(await plausibly_french(root, options.debug_language))) { return }
     const num_changes = await rewrite_under(options, table, root);
     const after_rewrite = performance.now()
     console.log(`rewriting all texts: ${num_changes} changes in ${after_rewrite - after_storage}ms`)
