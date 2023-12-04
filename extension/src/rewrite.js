@@ -68,6 +68,7 @@ function make_walk(root) {
                  || node.nodeName == "CODE"
                  || node.nodeName == "SCRIPT"
                  || node.nodeName == "STYLE"
+                 || node.nodeName == "style" // happens inside <svg>, on reddit
                  || node.nodeName == "TEXTAREA"
                  || node.isContentEditable)
                 ? NodeFilter.FILTER_REJECT
