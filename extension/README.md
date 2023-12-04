@@ -52,3 +52,6 @@ https://stackoverflow.com/questions/77354847/how-to-run-a-content-script-without
 Note that this problem is firefox-specific. Chrome just runs the
 extension. So we keep using v3 for chrome, as they intend to deprecate
 v2.
+
+Another problem is that with v3, firefox refuses to run any extension
+on file:// url. Again, this works properly with v2, or v3 in chrome.
