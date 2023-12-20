@@ -113,6 +113,7 @@ async function rewrite_under(options, table, root){
             // - indo-européenne => ["indo", "-", "européenne"], otherwise we won't rewrite
             // - truc.com/bidule => ["truc.com/bidule"] but truc. com => ["truc", " ."; "com"]
             // - non breakable space should be a word boundary, same as regular spaces
+            // \p{L} is any unicode letter I think: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
             const words1 = n.nodeValue.split(/(\p{L}+(?:[-:./_0-9?]+\p{L}+)*)/u)
             for (word1 of words1) {
                 const words2 =
