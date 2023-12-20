@@ -79,6 +79,13 @@ EOF
     cp dict.gen.csv dict.external-sources.gen.csv
 
     tail -n +2 ../homemade-data/dict.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
+
+    # Capitalized words in the dict are treated as exceptions, for
+    # cases when the capitalized version of the word is almost never the common
+    # noun, but is instead a proper noun that we don't want to rewrite
+    for w in Pierre Cannes; do
+        echo $w,bug-if-displayed
+    done >> dict.gen.csv
 fi
 
 { echo -n 'const fr_dict = "'; tr '\n' '/' < dict.gen.csv; echo '"'; } > src/dict.js

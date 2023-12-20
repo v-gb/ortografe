@@ -43,7 +43,9 @@ function rewrite_word(table, s) {
         //   héroine into éroine, or Cannes into Canes, whether it makes sense or not
         const [ processed_word, postprocess ] =
               is_capitalized(word)
-              ? [ uncapitalize(word), capitalize ]
+              ? (table.has(word) // capitalized words in dict are exceptions
+                 ? [ '', (x) => x ]
+                 : [ uncapitalize(word), capitalize ])
               : [ word, (x) => x ]
         let repl = postprocess(table.get(processed_word))
         if (!repl && is_plural(processed_word)) {
