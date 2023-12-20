@@ -21,6 +21,9 @@ dont_want = re.compile('[-0-9.+()&/ ,"]')
 extracted_files = list(sorted(glob.glob("extracted-*.gen.json")))
 debug = set(s for arg in sys.argv[1:] for s in arg.split(','))
 
+rect_tag = "orthographe rectifiée de 1990"
+trad_tag = "orthographe traditionnelle"
+
 for line in open(extracted_files[-1]):
     if not line.startswith("{"):
         continue
@@ -33,6 +36,15 @@ for line in open(extracted_files[-1]):
             and (ipa := or_key_error(lambda: j["sounds"][0]["ipa"])) is not None
     ):
         tags = j.get("tags")
+        # rectifications tags in a weird place for couteux and coûteux for some reason
+        more_tags = [ v["tags"]
+                      for v in j.get("sounds")
+                      if 'tags' in v
+                      for v_tags in [ v["tags"] ]
+                      if any(rect_tag in s or trad_tag in s for s in v_tags)
+                     ]
+        if tags or more_tags:
+            tags = (tags or []) + more_tags
         first_instance = word not in seen_words
         seen_words.add(word)
         first_instance_with_tags = tags is not None and word not in seen_words_with_tags
@@ -42,8 +54,8 @@ for line in open(extracted_files[-1]):
         # we line up such words on their phonetic. We run into homophones (envoûter, envoûté), or
         # multiple traditional spellings that each have their own rectified spellings (péquenot
         # péquenaud -> pèquenot pèquenaud).
-        rect = any("orthographe rectifiée de 1990" in s for s in tags or [])
-        trad = any("orthographe traditionnelle" in s for s in tags or [])
+        rect = any(rect_tag in s for s in tags or [])
+        trad = any(trad_tag in s for s in tags or [])
         h_aspire = any("h aspir" in s for s in tags or [])
         if j.get("word") in debug:
             print({'word':word, 'rect':rect, 'trad':trad, 'h_aspire':h_aspire, 'fi': first_instance, 'fi_tags':first_instance_with_tags, 'ipa':ipa})
