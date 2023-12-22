@@ -1,0 +1,85 @@
+<!doctype html>
+
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+
+    <h2 style="text-align:center">Convertisseur à l'orthographe <a href="http://erofa.free.fr/">Érofa</a></h2>
+    <main>
+      <div id="container">
+        <textarea id="user-text" autofocus>
+Érofa propose trois règles pour simplifier l'orthographe du français sans choquer, dont vous pouvez voir l'effet à droite (ou en dessous) :
+
+1) Les consonnes doubles qui n'ont pas d'effet sur la prononciation sont simplifiées.
+Exemples: sonnerie, appelle, accord, lutte, verre
+Non-exemples: messe, accident, évidemment, surréalisme
+
+2) Les x finaux muets deviennent des s.
+Exemples: bijoux, choix, veux, deux
+Non-exemples: dix, duplex, Chamonix
+
+3) Les ph, h et y grecques ou similaires sont simplifiés.
+Exemples: photographie, rythme, humain, psychologie, chaos, théâtre, huile, déhancher
+Non-exemples: hache, ahuri, pays, rugby, Hercules, hellénique
+
+À vous d'éditer ce texte pour voir ce qui change ! Babar est le roi des élé...
+</textarea>
+        <div id="converted-text" class="notranslate"></div>
+      </div>
+
+      <p>Vous pouvez aussi convertir toutes les pages webs que vous visitez, en installant une extension pour votre navigateur internet :</p>
+      <ul>
+        <li><img src="https://www.google.fr/chrome/static/images/chrome-logo-m100.svg" style="height: 1em"> <a href="https://chromewebstore.google.com/detail/fran%C3%A7ais-simplifi%C3%A9/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr">pour google Chrome</a> (non supporté sur téléphone) </li>
+        <li><img src="https://www.mozilla.org/media/protocol/img/logos/firefox/browser/logo.eb1324e44442.svg" style="height: 1em"> <a href="https://addons.mozilla.org/fr/firefox/addon/fran%C3%A7ais-simplifi%C3%A9/"> pour Firefox </a> </li>
+        <li><img src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg" style="height: 1em"> pas encore supporté pour Safari </li>
+      </ul>
+
+      <p> Voici des liens pour plus d'informations: </p>
+      <ul>
+        <li>sur l'orthographe proposée, <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">version courte</a></li>
+        <li>sur l'orthographe proposée, <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">version longue</a> (peut-être 60 pages, mais ça se lit très bien)</li>
+        <li>sur l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme</li>
+        <li><a href="https://github.com/v-gb/orthographe">code source</a> de cette page</li>
+      </ul>
+    </main>
+  </body>
+  <script src="site/dict_snapshot.js" defer></script>
+  <script src="extension/src/rewrite.js" defer></script>
+  <script src="site/page.js" defer></script>
+  <style>
+    p {
+        max-width: 45em;
+    }
+    main {
+        max-width: 55em;
+        margin: auto;
+    }
+    main * {
+        font-size: 1.05rem;
+    }
+    #converted-text {
+        white-space: pre-wrap;
+        flex: 1 1 0px;
+        min-width: 15em;
+        max-width: 30em;
+        background-color: #FAF9F6;
+    }
+    /* https://css-tricks.com/snippets/css/a-guide-to-flexbox/ */
+    #user-text {
+        background-color: #FAF9F6;
+        flex: 1 1 0px;
+        min-width: 15em;
+        min-height: 20em;
+        max-width: 30em;
+    }
+    #container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1em;
+    }
+  </style>
+</html>
