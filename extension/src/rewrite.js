@@ -1,5 +1,3 @@
-const b = window.chrome ? chrome : browser;
-
 function is_capitalized(s) {
     return s && s.charAt(0).toLowerCase() != s.charAt(0)
 }
@@ -78,7 +76,7 @@ function make_walk(root) {
         });    
 }
 
-async function plausibly_french(root, debug) {
+async function plausibly_french(b, root, debug) {
     const t1 = performance.now();
     const walk = make_walk(root);
     let buf = ""
@@ -100,74 +98,70 @@ async function plausibly_french(root, debug) {
     return languages.some((l) => l.language == 'fr' && l.percentage >= 30)
 }
 
-async function rewrite_under(options, table, root){
+function rewrite_under(options, table, root){
     let count = 0
     let to_remove = []
-    try {
-        const walk = make_walk(root);
-        while(n=walk.nextNode()) {
-            let regular_text = ""
-            // we want to split on words, although there's some ambiguity as to
-            // what that means
-            // - l'analyse => ["l", "'", "analyse"], otherwise we won't rewrite
-            // - indo-européenne => ["indo", "-", "européenne"], otherwise we won't rewrite
-            // - truc.com/bidule => ["truc.com/bidule"] but truc. com => ["truc", " ."; "com"]
-            // - non breakable space should be a word boundary, same as regular spaces
-            // \p{L} is any unicode letter I think: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
-            const words1 = n.nodeValue.split(/(\p{L}+(?:[-:./_0-9?]+\p{L}+)*)/u)
-            for (word1 of words1) {
-                const words2 =
-                      // if we have a word made purely of letters and dashes (but no slashes,
-                      // dots, etc), then actually treat that as multiple words, to handle
-                      // the indo-européenne case above
-                      word1.includes("-") && /^[-\p{L}]*$/u.test(word1)
-                      ? word1.split(/(-)/)
-                      : [ word1 ]
-                for (word of words2) {
-                    const repl = rewrite_word(table, word)
-                    if (!options.color) {
-                        regular_text = regular_text + (repl ? repl : word)
-                        continue
-                    }
-                    if (!repl) {
-                        regular_text = regular_text + word
-                    }
-                    if (repl && regular_text) {
-                        count += 1
-                        n.parentNode.insertBefore(document.createTextNode(regular_text), n)
-                        regular_text = ""
-                    }
-                    if (repl) {
-                        count += 1
-                        const span = document.createElement('span');
-                        span.appendChild(document.createTextNode(repl));
-                        span.style.backgroundColor = 'orange'
-                        n.parentNode.insertBefore(span, n)
-                    }
-                }
-            }
-            if (n.nodeValue != regular_text) {
-                // don't touch the dom if we don't make changes, to avoid what I think
-                // is self-triggering in the mutation observer. And it might be faster
+    const walk = make_walk(root);
+    while(n=walk.nextNode()) {
+        let regular_text = ""
+        // we want to split on words, although there's some ambiguity as to
+        // what that means
+        // - l'analyse => ["l", "'", "analyse"], otherwise we won't rewrite
+        // - indo-européenne => ["indo", "-", "européenne"], otherwise we won't rewrite
+        // - truc.com/bidule => ["truc.com/bidule"] but truc. com => ["truc", " ."; "com"]
+        // - non breakable space should be a word boundary, same as regular spaces
+        // \p{L} is any unicode letter I think: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
+        const words1 = n.nodeValue.split(/(\p{L}+(?:[-:./_0-9?]+\p{L}+)*)/u)
+        for (word1 of words1) {
+            const words2 =
+                  // if we have a word made purely of letters and dashes (but no slashes,
+                  // dots, etc), then actually treat that as multiple words, to handle
+                  // the indo-européenne case above
+                  word1.includes("-") && /^[-\p{L}]*$/u.test(word1)
+                  ? word1.split(/(-)/)
+                  : [ word1 ]
+            for (word of words2) {
+                const repl = rewrite_word(table, word)
                 if (!options.color) {
+                    regular_text = regular_text + (repl ? repl : word)
+                    continue
+                }
+                if (!repl) {
+                    regular_text = regular_text + word
+                }
+                if (repl && regular_text) {
                     count += 1
-                    n.nodeValue = regular_text
-                } else {
-                    if (regular_text) {
-                        count += 1
-                        n.parentNode.insertBefore(document.createTextNode(regular_text), n)
-                    }
-                    to_remove.push(n)
+                    n.parentNode.insertBefore(document.createTextNode(regular_text), n)
+                    regular_text = ""
+                }
+                if (repl) {
+                    count += 1
+                    const span = document.createElement('span');
+                    span.appendChild(document.createTextNode(repl));
+                    span.style.backgroundColor = 'orange'
+                    n.parentNode.insertBefore(span, n)
                 }
             }
         }
-        for (n of to_remove) {
-            n.remove()
+        if (n.nodeValue != regular_text) {
+            // don't touch the dom if we don't make changes, to avoid what I think
+            // is self-triggering in the mutation observer. And it might be faster
+            if (!options.color) {
+                count += 1
+                n.nodeValue = regular_text
+            } else {
+                if (regular_text) {
+                    count += 1
+                    n.parentNode.insertBefore(document.createTextNode(regular_text), n)
+                }
+                to_remove.push(n)
+            }
         }
-        return count
-    } catch (e) {
-        console.log('what', e)
     }
+    for (n of to_remove) {
+        n.remove()
+    }
+    return count
 }
 
 function watch_for_changes(options, table, root) {
@@ -236,7 +230,8 @@ function load_dict(options) {
     return table
 }
 
-async function rewrite_main() {
+async function extension_main() {
+    const b = window.chrome ? chrome : browser;
     const before_storage = performance.now()
     const options = await b.storage.local.get(
         ['disable', 'disable_watch', 'color','trivial', 'debug_changes', 'debug_language']
@@ -249,7 +244,7 @@ async function rewrite_main() {
     // iterating over <style> nodes even though they contain nothing,
     // and setting their nodeValue messes up pages for some reason
     const root = document.body;
-    if (!(await plausibly_french(root, options.debug_language))) { return }
+    if (!(await plausibly_french(b, root, options.debug_language))) { return }
     const num_changes = await rewrite_under(options, table, root);
     const after_rewrite = performance.now()
     console.log(`rewriting all texts: ${num_changes} changes in ${after_rewrite - after_storage}ms`)
@@ -257,5 +252,3 @@ async function rewrite_main() {
         watch_for_changes(options, table, root)
     }
 }
-
-rewrite_main()

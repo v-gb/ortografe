@@ -35,7 +35,7 @@
     "content_scripts": [
 	{
 	    "matches": ["*://*/*", "file:///*"],
-	    "js": ["dict.js", "rewrite.js"]
+	    "js": ["dict.js", "rewrite.js", "rewrite_main.js"]
 	}
     ]
 }
