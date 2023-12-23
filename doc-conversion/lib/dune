@@ -1,0 +1,10 @@
+(library
+ (name ortografe)
+ (libraries uutf uucp uunf uuseg))
+
+(rule
+ (target dict.ml)
+ (deps %{project_root}/extension/dict.gen.csv)
+ (action (run bash
+              -euo pipefail
+              -c "{ echo 'let value = {|'; cat %{deps}; echo '|}'; } > %{target}")))
