@@ -182,6 +182,7 @@ let capitalize w =
       | `Uchars (w0u :: _) -> Some w0u
       | _ -> None)
 
+let trivial_rewrite = false
 let iter_pure_text src ~f =
   let dict = Lazy.force dict in
   let src = nfc src in
@@ -190,23 +191,30 @@ let iter_pure_text src ~f =
       match what with
       | `Out -> f w
       | `Word ->
-         let wu, recapitalize =
-           match uncapitalize w with
-           | None -> w, (fun x -> x)
-           | Some wu ->
-              if Hashtbl.mem dict w
-              then "", (fun x -> x)
-              else wu, (fun w -> Option.value (capitalize w) ~default:w)
-         in
-         match Hashtbl.find_opt dict wu with
-         | Some res -> f (recapitalize res)
-         | None ->
-            match depluralize wu with
-            | None -> f w
-            | Some wu ->
-              match Hashtbl.find_opt dict wu with
-              | Some res -> f (recapitalize (pluralize res))
+         if trivial_rewrite
+         then
+           if true
+           then f w
+           else
+           f (Core.String.tr w ~target:'c' ~replacement:'o')
+         else
+           let wu, recapitalize =
+             match uncapitalize w with
+             | None -> w, (fun x -> x)
+             | Some wu ->
+                if Hashtbl.mem dict w
+                then "", (fun x -> x)
+                else wu, (fun w -> Option.value (capitalize w) ~default:w)
+           in
+           match Hashtbl.find_opt dict wu with
+           | Some res -> f (recapitalize res)
+           | None ->
+              match depluralize wu with
               | None -> f w
+              | Some wu ->
+                 match Hashtbl.find_opt dict wu with
+                 | Some res -> f (recapitalize (pluralize res))
+                 | None -> f w
     )
 
 let buffer ?(n = 123) buf =
@@ -234,6 +242,8 @@ let maybe_pp_signal ?(pp = false) signals =
   if pp then Markup.pretty_print signals else signals
 
 let text_elt ~buf = function
+  (* potentially, you could rewrite words that span tags. But that's
+     unlikely to be worth the trouble. *)
   | `Text strs -> `Text (List.map (pure_text ~buf ~dst:String) strs)
   | elt -> elt
 
@@ -422,6 +432,267 @@ let epub ?buf ?debug ?pp src ~dst =
       ) else None)
   |> write_out dst
 
+module Pdf = struct
+  (* https://sources.debian.org/data/main/c/camlpdf/2.5.3-1/introduction_to_camlpdf.pdf
+     https://pdfa.org/wp-content/uploads/2023/08/PDF-Operators-CheatSheet.pdf 
+     https://stackoverflow.com/questions/16194992/how-to-read-a-pdf-text-matrix
+
+     maybe : https://www.oreilly.com/library/view/pdf-explained/9781449321581/
+     https://opensource.adobe.com/dc-acrobat-sdk-docs/ ? hm, peut-etre interessant?
+*)
+  open Core
+
+  type pdfio_bytes = Pdfio.bytes
+  let sexp_of_pdfio_bytes b =
+    sexp_of_string (Pdfio.string_of_bytes b)
+     
+  type stream = Pdf.stream =
+    | Got of pdfio_bytes
+    | ToGet of (Pdf.toget [@sexp.opaque])
+  [@@deriving sexp_of]
+             
+  type pdfobject = Pdf.pdfobject =
+    | Null
+    | Boolean of bool
+    | Integer of int
+    | Real of float
+    | String of string
+    | Name of string
+    | Array of pdfobject list
+    | Dictionary of (string * pdfobject) list
+    | Stream of (pdfobject * stream) ref
+    | Indirect of int
+  [@@deriving sexp_of]
+
+  type ('a, 'b) hashtbl = ('a, 'b) Stdlib.Hashtbl.t
+  let sexp_of_hashtbl = Sexplib.Conv.sexp_of_hashtbl
+                
+  type objectdata = Pdf.objectdata =
+    | Parsed of pdfobject
+    | ParsedAlreadyDecrypted of pdfobject
+    | ToParse
+    | ToParseFromObjectStream of (int, int list) hashtbl * int * int
+                                 * (int -> int list -> (int * (objectdata ref * int)) list)
+  [@@deriving sexp_of]
+  type pdfobjmap_key = int [@@deriving sexp_of]
+  type pdfobjmap = (pdfobjmap_key, objectdata ref * int) hashtbl [@@deriving sexp_of]
+                 
+  type pdfobjects = Pdf.pdfobjects = {
+      mutable maxobjnum : int;
+      mutable parse : (pdfobjmap_key -> pdfobject) option;
+      mutable pdfobjects : pdfobjmap;
+      mutable object_stream_ids : (int, int) hashtbl;
+    } [@@deriving sexp_of]
+                  
+  type t = Pdf.t = {
+      mutable major : int;
+      mutable minor : int;
+      mutable root : int;
+      mutable objects : pdfobjects;
+      mutable trailerdict : pdfobject;
+      mutable was_linearized : bool;
+      mutable saved_encryption : (Pdf.saved_encryption [@sexp.opaque]) option;
+    } [@@deriving sexp_of]
+
+  type transform_op = Pdftransform.transform_op =
+    | Scale of (float * float) * float * float
+    | Rotate of (float * float) * float
+    | Translate of float * float
+    | ShearX of (float * float) * float
+    | ShearY of (float * float) * float
+  [@@deriving sexp_of]
+
+  type transform = transform_op list 
+  [@@deriving sexp_of]
+
+  type transform_matrix = Pdftransform.transform_matrix = {
+      a : float;
+      b : float;
+      c : float;
+      d : float;
+      e : float;
+      f : float;
+    }
+  [@@deriving sexp_of]
+
+  type ops = Pdfops.t =
+    | Op_w of float
+    | Op_J of int
+    | Op_j of int
+    | Op_M of float
+    | Op_d of float list * float
+    | Op_ri of string
+    | Op_i of int
+    | Op_gs of string
+    | Op_q
+    | Op_Q
+    | Op_cm of transform_matrix
+    | Op_m of float * float
+    | Op_l of float * float
+    | Op_c of float * float * float * float * float * float
+    | Op_v of float * float * float * float
+    | Op_y of float * float * float * float
+    | Op_h
+    | Op_re of float * float * float * float
+    | Op_S
+    | Op_s
+    | Op_f
+    | Op_F
+    | Op_f'
+    | Op_B
+    | Op_B'
+    | Op_b
+    | Op_b'
+    | Op_n
+    | Op_W
+    | Op_W'
+    | Op_BT
+    | Op_ET
+    | Op_Tc of float
+    | Op_Tw of float
+    | Op_Tz of float
+    | Op_TL of float
+    | Op_Tf of string * float
+    | Op_Tr of int
+    | Op_Ts of float
+    | Op_Td of float * float
+    | Op_TD of float * float
+    | Op_Tm of transform_matrix
+    | Op_T'
+    | Op_Tj of string
+    | Op_TJ of pdfobject
+    | Op_' of string
+    | Op_'' of float * float * string
+    | Op_d0 of float * float
+    | Op_d1 of float * float * float * float * float * float
+    | Op_CS of string
+    | Op_cs of string
+    | Op_SC of float list
+    | Op_sc of float list
+    | Op_SCN of float list
+    | Op_scn of float list
+    | Op_SCNName of string * float list
+    | Op_scnName of string * float list
+    | Op_G of float
+    | Op_g of float
+    | Op_RG of float * float * float
+    | Op_rg of float * float * float
+    | Op_K of float * float * float * float
+    | Op_k of float * float * float * float
+    | Op_sh of string
+    | InlineImage of (pdfobject * pdfio_bytes)
+    | Op_Do of string
+    | Op_MP of string
+    | Op_DP of string * pdfobject
+    | Op_BMC of string
+    | Op_BDC of string * pdfobject
+    | Op_EMC
+    | Op_BX
+    | Op_EX
+    | Op_Unknown of string
+  [@@deriving sexp_of]
+
+  let utf8_of_pagestring text_extractor str =
+    let code_points = Pdftext.codepoints_of_text text_extractor str in
+    let bytes =
+      Bytes.create
+        (List.sum (module Int) code_points
+           ~f:(fun c -> Uchar.utf8_byte_length (Stdlib.Uchar.of_int c))) in
+    let i = ref 0 in
+    List.iter code_points ~f:(fun c ->
+        let c = Stdlib.Uchar.of_int c in
+        i := !i + Stdlib.Bytes.set_utf_8_uchar bytes !i c);
+    Bytes.to_string bytes
+
+  let pagestring_of_utf8 pdf font = (
+    let code_from_codepoint = Pdftext.charcode_extractor_of_font pdf font in
+    fun str ->
+    Uutf.String.fold_utf_8 (fun acc _ chunk ->
+        let c =
+          match chunk with
+          | `Malformed _ -> Stdlib.Uchar.rep
+          | `Uchar c -> c
+        in
+        match code_from_codepoint (Stdlib.Uchar.to_int c) with
+        | None -> acc
+        | Some c -> c :: acc)
+    [] str
+    |> List.rev
+    |> List.map ~f:(fun i -> Char.of_int_exn i)
+    |> String.of_char_list
+  )
+
+  let pdf ?buf src =
+    let buf = buffer buf in
+    let pdf = Pdfread.pdf_of_input None None (Pdfio.input_of_string src) in
+    let pages = Pdfpage.pages_of_pagetree pdf in
+    let new_pages =
+      List.filter_map pages ~f:(fun page ->
+          match Pdf.lookup_direct pdf "/Font" page.resources with
+          | None -> None
+          | Some font_dict ->
+             let ops = Pdfops.parse_operators pdf page.resources page.Pdfpage.content in
+             (* problemes :
+                - coupure des textes au milieu des mots
+                - file:///home/valentin/T%C3%A9l%C3%A9chargements/Coment-instaler-le-convertisseur-ortografique-conv.pdf est n'imp
+              *)
+             eprint_s [%sexp ~~(page.resources : pdfobject)];
+             eprint_s [%sexp (ops : ops list)];
+             let new_ops =
+               let current_font = ref (lazy None) in
+               let map_text s =
+                 match force !current_font with
+                 | None -> s
+                 | Some (_font, text_extractor, of_utf8) ->
+                    let utf8 = utf8_of_pagestring text_extractor s in
+                    if true then eprint_s [%sexp ("zzz", (s : string), (utf8 : string), (of_utf8 utf8 : string))];
+                    let new_utf8 =
+                      if false
+                      then String.concat (String.split utf8 ~on:'a') ~sep:"à"
+                      else pure_text ~buf utf8 ~dst:String
+                    in
+                    if String.(<>) utf8 new_utf8 then
+                      eprint_s [%sexp "rewrite", (utf8 : string), (new_utf8 : string)];
+                    of_utf8 new_utf8
+               in
+               List.map ops ~f:(function
+                   | Op_Tf (font, _) as op ->
+                      current_font := lazy (
+                        (* would be worth looking if we can cache this by the indirect number 
+                           that the font dictionary points to *)
+                        match Pdf.lookup_direct pdf font font_dict with
+                        | None -> None
+                        | Some font ->
+                           Some (font,
+                                 Pdftext.text_extractor_of_font pdf font,
+                                 pagestring_of_utf8 pdf font)
+                                );
+                      op
+                   | Op_Tj s -> Op_Tj (map_text s)
+                   | Op_TJ o ->
+                      Op_TJ (match o with
+                             | Array l ->
+                                Array (List.map l ~f:(function
+                                           | String s -> Pdf.String (map_text s)
+                                           | elt -> elt))
+                             | _ -> o)
+                   | Op_' s -> Op_' (map_text s)
+                   | Op_'' (a, b, s) -> Op_'' (a, b, map_text s)
+                   | op -> op)
+             in
+             let stream = Pdfops.stream_of_ops new_ops in
+             Some { page with content = [stream] })
+    in
+    let new_pdf = Pdfpage.change_pages false pdf new_pages in
+    let pdfoutput, z = Pdfio.input_output_of_bytes 123 in
+    Pdfwrite.pdf_to_output None false new_pdf pdfoutput;
+    Pdfio.string_of_bytes (Pdfio.extract_bytes_from_input_output pdfoutput z)
+end
+
+let pdf ?buf src ~dst =
+  Pdf.pdf ?buf src
+  |> write_out dst
+
 let main () =
   Dyn_protect.with_ (fun dp ->
       let src, dst, type_ =
@@ -442,6 +713,7 @@ let main () =
              | ".docx" -> `Docx
              | ".doc" -> `Doc
              | ".epub" -> `Epub
+             | ".pdf" -> `Pdf
              | _ -> `Text (* realistically, this includes markdown *)
            in
            let out_ch = Out_channel.open_bin new_name in
@@ -456,6 +728,7 @@ let main () =
       | `Html -> html src ~dst
       | `Text -> pure_text src ~dst
       | `Xhtml -> xhtml src ~dst
+      | `Pdf -> pdf src ~dst
     )
 
 module Private = struct
