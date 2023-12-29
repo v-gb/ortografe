@@ -604,8 +604,21 @@ module Pdf = struct
         i := !i + Stdlib.Bytes.set_utf_8_uchar bytes !i c);
     Bytes.to_string bytes
 
-  let pagestring_of_utf8 pdf font = (
-    let code_from_codepoint = Pdftext.charcode_extractor_of_font pdf font in
+  let text_of_charcodes font charcodes =
+    (* camlpdf doesn't provide this?? *)
+    String.of_char_list (
+        if Pdftext.is_identity_h font
+        then List.concat_map charcodes ~f:(fun i ->
+                 [ Char.of_int_exn ((i lsr 8) land 255);
+                   Char.of_int_exn (i land 255);
+               ])
+        else List.map charcodes ~f:(fun i -> Char.of_int_exn i)
+      )
+
+  (* regarder repo cpdf-source *)
+  let pagestring_of_utf8 pdf fontdict = (
+    let code_from_codepoint = Pdftext.charcode_extractor_of_font ~debug:true pdf fontdict in
+    let font = Pdftext.read_font pdf fontdict in
     fun str ->
     Uutf.String.fold_utf_8 (fun acc _ chunk ->
         let c =
@@ -614,14 +627,85 @@ module Pdf = struct
           | `Uchar c -> c
         in
         match code_from_codepoint (Stdlib.Uchar.to_int c) with
-        | None -> acc
+        | None ->
+           (match code_from_codepoint (Char.to_int 'Z') with
+            | None ->
+               (match code_from_codepoint (Char.to_int 'z') with
+                | None -> eprint_s [%sexp "dropping", (chunk : [ `Malformed of string | `Uchar of Uchar.t ])]; acc
+                | Some c -> c :: acc)
+            | Some c -> c :: acc)
         | Some c -> c :: acc)
     [] str
     |> List.rev
-    |> List.map ~f:(fun i -> Char.of_int_exn i)
-    |> String.of_char_list
+    |> text_of_charcodes font
   )
 
+  type fontdescriptor = Pdftext.fontdescriptor =
+    {ascent : float;
+     descent : float;
+     avgwidth : float;
+     maxwidth : float;
+     flags : int;
+     fontbbox: float * float * float * float;
+     italicangle : float;
+     capheight : float;
+     xheight : float;
+     stemv : float;
+     fontfile : (Pdftext.fontfile [@sexp.opaque]) option;
+     charset : string list option;
+     tounicode : (int, string) hashtbl option}
+  [@@deriving sexp_of]
+
+  type composite_CIDfont = Pdftext.composite_CIDfont =
+    {cid_system_info : (Pdftext.cid_system_info [@sexp.opaque]);
+     cid_basefont : string;
+     cid_fontdescriptor : fontdescriptor;
+     cid_widths : (int * float) list;
+     cid_default_width : int}
+  [@@deriving sexp_of]
+
+  type font = Pdftext.font =
+    | StandardFont of (Pdftext.standard_font  [@sexp.opaque]) * (Pdftext.encoding  [@sexp.opaque])
+    | SimpleFont of (Pdftext.simple_font [@sexp.opaque])
+    | CIDKeyedFont of string * composite_CIDfont *(Pdftext.cmap_encoding [@sexp.opaque])
+  [@@deriving sexp_of]
+
+  let filter_excessive_twiddling l =
+    let rec foo acc1 count acc2 = function
+      | Real n :: String r :: rest when Float.(<) (Float.abs n) 30. ->
+         foo (r :: acc1) (count +. n) acc2 rest
+      | Real n :: String string :: rest ->
+         let acc2 =
+           match acc1 with
+           | [] -> acc2
+           | _ :: _ -> String (String.concat (List.rev acc1)) :: acc2
+         in
+         let acc2 = Real (n +. count) :: acc2 in
+         foo [string] 0. acc2 rest
+      | [] ->
+         let acc2 =
+           match acc1 with
+           | [] -> acc2
+           | _ :: _ ->
+              let acc2 = String (String.concat (List.rev acc1)) :: acc2 in
+              if Float.(=) count 0.
+              then acc2
+              else String "" :: Real count :: acc2
+         in
+         List.rev acc2
+      | _ -> raise Exit
+    in
+    match l with
+    | String r :: rest ->
+       (try foo [r] 0. [] rest
+        with Exit -> l)
+    | _ -> l
+
+  (* a essayer :
+     - filtrer les operations qui ne serve a rien
+     - regarder addtext pour voir les calculs de taille de font, pour voir si je peux
+       determiner les adjustements de positions qui ne servent a pas grand chose
+   *)
   let pdf ?buf src =
     let buf = buffer buf in
     let pdf = Pdfread.pdf_of_input None None (Pdfio.input_of_string src) in
@@ -634,7 +718,6 @@ module Pdf = struct
              let ops = Pdfops.parse_operators pdf page.resources page.Pdfpage.content in
              (* problemes :
                 - coupure des textes au milieu des mots
-                - file:///home/valentin/T%C3%A9l%C3%A9chargements/Coment-instaler-le-convertisseur-ortografique-conv.pdf est n'imp
               *)
              eprint_s [%sexp ~~(page.resources : pdfobject)];
              eprint_s [%sexp (ops : ops list)];
@@ -643,17 +726,19 @@ module Pdf = struct
                let map_text s =
                  match force !current_font with
                  | None -> s
-                 | Some (_font, text_extractor, of_utf8) ->
+                 | Some (_font_name, _font, text_extractor, of_utf8) ->
                     let utf8 = utf8_of_pagestring text_extractor s in
-                    if true then eprint_s [%sexp ("zzz", (s : string), (utf8 : string), (of_utf8 utf8 : string))];
                     let new_utf8 =
                       if false
-                      then String.concat (String.split utf8 ~on:'a') ~sep:"à"
+                      then
+                        if true
+                        then utf8
+                        else String.concat (String.split utf8 ~on:'a') ~sep:"o"
                       else pure_text ~buf utf8 ~dst:String
-                    in
-                    if String.(<>) utf8 new_utf8 then
-                      eprint_s [%sexp "rewrite", (utf8 : string), (new_utf8 : string)];
-                    of_utf8 new_utf8
+               in
+               if true || String.(<>) utf8 new_utf8 then
+                 eprint_s [%sexp "rewrite", (utf8 : string), (new_utf8 : string)];
+               of_utf8 new_utf8
                in
                List.map ops ~f:(function
                    | Op_Tf (font, _) as op ->
@@ -662,16 +747,18 @@ module Pdf = struct
                            that the font dictionary points to *)
                         match Pdf.lookup_direct pdf font font_dict with
                         | None -> None
-                        | Some font ->
+                        | Some font_obj ->
                            Some (font,
-                                 Pdftext.text_extractor_of_font pdf font,
-                                 pagestring_of_utf8 pdf font)
+                                 font_obj,
+                                 Pdftext.text_extractor_of_font pdf font_obj,
+                                 pagestring_of_utf8 pdf font_obj)
                                 );
                       op
                    | Op_Tj s -> Op_Tj (map_text s)
                    | Op_TJ o ->
                       Op_TJ (match o with
                              | Array l ->
+                                let l = filter_excessive_twiddling l in
                                 Array (List.map l ~f:(function
                                            | String s -> Pdf.String (map_text s)
                                            | elt -> elt))
