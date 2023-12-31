@@ -3,7 +3,7 @@
     "name": "Français simplifié",
     "version": "1.2",
 
-    "description": "Réécrit les pages web de l'orthographe normale a une orthographe simplifiée (mais pas phonétique)",
+    "description": "Réécrit les pages web de l'orthographe normale à une orthographe simplifiée (mais pas phonétique)",
 
     "browser_specific_settings": {
         "gecko": {
