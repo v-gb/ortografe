@@ -617,7 +617,7 @@ module Pdf = struct
 
   (* regarder repo cpdf-source *)
   let pagestring_of_utf8 pdf fontdict = (
-    let code_from_codepoint = Pdftext.charcode_extractor_of_font ~debug:true pdf fontdict in
+    let code_from_codepoint = Pdftext.charcode_extractor_of_font pdf fontdict in
     let font = Pdftext.read_font pdf fontdict in
     fun str ->
     Uutf.String.fold_utf_8 (fun acc _ chunk ->
@@ -719,8 +719,8 @@ module Pdf = struct
              (* problemes :
                 - coupure des textes au milieu des mots
               *)
-             eprint_s [%sexp ~~(page.resources : pdfobject)];
-             eprint_s [%sexp (ops : ops list)];
+             (* eprint_s [%sexp ~~(page.resources : pdfobject)];
+              * eprint_s [%sexp (ops : ops list)]; *)
              let new_ops =
                let current_font = ref (lazy None) in
                let map_text s =
@@ -736,7 +736,7 @@ module Pdf = struct
                         else String.concat (String.split utf8 ~on:'a') ~sep:"o"
                       else pure_text ~buf utf8 ~dst:String
                in
-               if true || String.(<>) utf8 new_utf8 then
+               if false && String.(<>) utf8 new_utf8 then
                  eprint_s [%sexp "rewrite", (utf8 : string), (new_utf8 : string)];
                of_utf8 new_utf8
                in
