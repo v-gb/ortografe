@@ -93,7 +93,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 100_000_000) () =
                   Dream.log "upload ext:%S size:%s" ext
                     (Core.Byte_units.Short.to_string
                        (Core.Byte_units.of_bytes_int (String.length fcontents)));
-                  (match Ortografe.convert_string ~ext fcontents with
+                  (match Ortografe.convert_string ~convert_uppercase:false ~ext fcontents with
                    | exception e -> respond_error_text (`Status 422) (Printexc.to_string e)
                    | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
                    | Some (new_ext, new_body) ->

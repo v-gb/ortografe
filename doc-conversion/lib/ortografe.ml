@@ -188,7 +188,34 @@ let capitalize w =
         | _ -> None
       else None)
 
-let iter_pure_text src ~f =
+let map_case w ~f =
+  let b = Buffer.create (String.length w) in
+  let add l = List.iter (fun u -> Buffer.add_utf_8_uchar b u) l in
+  if
+    Uutf.String.fold_utf_8 (fun bad _i -> function
+        | `Malformed _ -> true
+        | `Uchar c ->
+           bad ||
+             match f c with
+             | `Uchars l -> add l; false
+             | `Self -> true
+      ) false w
+  then None
+  else Some (Buffer.contents b)
+
+let lowercase w =
+  map_case w ~f:(fun c ->
+      if Uucp.Case.is_upper c
+      then Uucp.Case.Map.to_lower c
+      else `Self)
+       
+let uppercase w =
+  map_case w ~f:(fun c ->
+      if Uucp.Case.is_lower c
+      then Uucp.Case.Map.to_upper c
+      else `Self)
+
+let iter_pure_text ~convert_uppercase src ~f =
   let dict = Lazy.force dict in
   let src = nfc src in
   iter_words src ~f:(fun what start len ->
@@ -202,7 +229,20 @@ let iter_pure_text src ~f =
            | Some wu ->
               if Hashtbl.mem dict w
               then "", (fun x -> x)
-              else wu, (fun w -> Option.value (capitalize w) ~default:w)
+              else
+                match
+                  if convert_uppercase
+                  then lowercase w
+                  else None
+                with
+                | None -> wu, (fun w -> Option.value (capitalize w) ~default:w)
+                | Some wl ->
+                   if
+                     match capitalize wl with
+                     | None -> false
+                     | Some c -> Hashtbl.mem dict c
+                   then "", (fun x -> x)
+                   else wl, (fun w -> Option.value (uppercase w) ~default:w)
          in
          match Hashtbl.find_opt dict wu with
          | Some res -> f (recapitalize res)
@@ -220,14 +260,14 @@ let buffer ?(n = 123) buf =
   | Some buf -> Buffer.clear buf; buf
   | None -> Buffer.create n
 
-let pure_text (type a) ?buf src ~(dst : a out) : a =
+let pure_text (type a) ?buf ~convert_uppercase src ~(dst : a out) : a =
   match dst with
   | String ->
      let b = buffer buf ~n:(String.length src) in
-     iter_pure_text src ~f:(Buffer.add_string b);
+     iter_pure_text ~convert_uppercase src ~f:(Buffer.add_string b);
      Buffer.contents b
   | Channel ch ->
-     iter_pure_text src ~f:(Out_channel.output_string ch)
+     iter_pure_text ~convert_uppercase src ~f:(Out_channel.output_string ch)
 
 let maybe_debug_signal ?(debug = false) signals =
   if debug
@@ -239,11 +279,11 @@ let maybe_debug_signal ?(debug = false) signals =
 let maybe_pp_signal ?(pp = false) signals =
   if pp then Markup.pretty_print signals else signals
 
-let text_elt ~buf = function
-  | `Text strs -> `Text (List.map (pure_text ~buf ~dst:String) strs)
+let text_elt ~convert_uppercase ~buf = function
+  | `Text strs -> `Text (List.map (pure_text ~convert_uppercase ~buf ~dst:String) strs)
   | elt -> elt
 
-let html_transform ~buf signal =
+let html_transform ~buf ~convert_uppercase signal =
   (* maybe we should check the tag ns for the xhtml case *)
   let notranslate_pattern = Core.String.Search_pattern.create "notranslate" in
   let stack = Core.Stack.create () in
@@ -269,11 +309,11 @@ let html_transform ~buf signal =
            | Some (_, hide) -> hide_current := hide)
        | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ -> ());
       if not !hide_current
-      then text_elt ~buf elt
+      then text_elt ~convert_uppercase ~buf elt
       else elt)
     signal
 
-let html ?buf ?debug ?pp src ~dst =
+let html ?buf ?debug ?pp ~convert_uppercase src ~dst =
   (* https://v3.ocaml.org/p/markup/latest/doc/Markup/index.html
      Note: no implicit closing of tags *)
   let buf = buffer buf in
@@ -281,7 +321,7 @@ let html ?buf ?debug ?pp src ~dst =
     (Markup.string src)
   |> Markup.signals
   |> maybe_debug_signal ?debug
-  |> html_transform ~buf
+  |> html_transform ~buf ~convert_uppercase
   |> maybe_pp_signal ?pp
   |> Markup.write_html
   |> markup_output dst
@@ -296,11 +336,11 @@ let xml ?debug ?pp ~transform src ~dst =
   |> Markup.write_xml
   |> markup_output dst
 
-let xhtml ?buf ?debug ?pp src ~dst =
+let xhtml ?buf ?debug ?pp ~convert_uppercase src ~dst =
   let buf = buffer buf in
-  xml ?debug ?pp src ~dst ~transform:(html_transform ~buf)
+  xml ?debug ?pp src ~dst ~transform:(html_transform ~buf ~convert_uppercase)
 
-let docx_transform ~buf signal =
+let docx_transform ~buf ~convert_uppercase signal =
   let stack = Core.Stack.create () in
   Markup.map (fun elt ->
       (match elt with
@@ -311,13 +351,13 @@ let docx_transform ~buf signal =
        | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ -> ());
       match Core.Stack.top stack with
       | Some ("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "t") ->
-         text_elt ~buf elt
+         text_elt ~buf ~convert_uppercase elt
       | _ -> elt
     ) signal
 
-let docx_xml ?buf ?debug ?pp src ~dst =
+let docx_xml ?buf ?debug ?pp ~convert_uppercase src ~dst =
   let buf = buffer buf in
-  xml ?debug ?pp src ~dst ~transform:(docx_transform ~buf)
+  xml ?debug ?pp src ~dst ~transform:(docx_transform ~buf ~convert_uppercase)
 
 module Workaround_zipc = struct
   module File = struct
@@ -404,7 +444,7 @@ let read_whole_zip src =
       count file;
       Some (contents ()))
 
-let docx ?buf ?debug ?pp src ~dst =
+let docx ?buf ?debug ?pp ~convert_uppercase src ~dst =
   let buf = buffer buf in
   let count = count_size () in
   map_zip src (fun member file contents ->
@@ -413,7 +453,7 @@ let docx ?buf ?debug ?pp src ~dst =
       | "word/footnotes.xml"
       | "word/endnotes.xml" ->
          count file;
-         Some (docx_xml ~buf ?debug ?pp (contents ()) ~dst:String)
+         Some (docx_xml ~buf ?debug ?pp ~convert_uppercase (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 
@@ -431,7 +471,7 @@ let sys_command_exn str =
   if i <> 0
   then failwith (str ^ " exited with code " ^ Int.to_string i)
 
-let doc ?buf ?debug ?pp src ~dst =
+let doc ?buf ?debug ?pp ~convert_uppercase src ~dst =
   let buf = buffer buf in
   (* should put a time limit and memory, perhaps with the cgroup exe? *)
   let d = Filename.temp_dir "ortografe" "tmp" in
@@ -448,9 +488,9 @@ let doc ?buf ?debug ?pp src ~dst =
         In_channel.with_open_bin docx_path (fun ic ->
             In_channel.input_all ic)
       in
-      docx ~buf ?debug ?pp src ~dst)
+      docx ~buf ?debug ?pp ~convert_uppercase src ~dst)
 
-let epub ?buf ?debug ?pp src ~dst =
+let epub ?buf ?debug ?pp ~convert_uppercase src ~dst =
   let buf = buffer buf in
   let count = count_size () in
   map_zip src (fun member file contents ->
@@ -460,18 +500,18 @@ let epub ?buf ?debug ?pp src ~dst =
       | ".xhtml" | ".html" -> (* in principle we'd need to read the root file to know how
                                  to interpret the various files. *)
          count file;
-         Some (xhtml ~buf ?debug ?pp (contents ()) ~dst:String)
+         Some (xhtml ~buf ?debug ?pp ~convert_uppercase (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 
-let htmlz ?buf ?debug ?pp src ~dst =
+let htmlz ?buf ?debug ?pp ~convert_uppercase src ~dst =
   let buf = buffer buf in
   let count = count_size () in
   map_zip src (fun member file contents ->
       match Filename.extension (Zipc.Member.path member) with
       | ".html" ->
          count file;
-         Some (html ~buf ?debug ?pp (contents ()) ~dst:String)
+         Some (html ~buf ?debug ?pp ~convert_uppercase (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
   
@@ -485,31 +525,31 @@ let of_ext ext =
   | ".epub" -> Some (ext, `Epub)
   | _ -> None
 
-let convert typ src ~dst =
+let convert typ ~convert_uppercase src ~dst =
   match typ with
-  | `Html -> html src ~dst
-  | `Xhtml -> xhtml src ~dst
-  | `Htmlz -> htmlz src ~dst
-  | `Docx -> docx src ~dst
-  | `Doc -> doc src ~dst
-  | `Epub -> epub src ~dst
-  | `Text -> pure_text src ~dst
+  | `Html -> html ~convert_uppercase src ~dst
+  | `Xhtml -> xhtml ~convert_uppercase src ~dst
+  | `Htmlz -> htmlz ~convert_uppercase src ~dst
+  | `Docx -> docx ~convert_uppercase src ~dst
+  | `Doc -> doc ~convert_uppercase src ~dst
+  | `Epub -> epub ~convert_uppercase src ~dst
+  | `Text -> pure_text ~convert_uppercase src ~dst
 
-let convert_string ~ext src =
+let convert_string ~ext ~convert_uppercase src =
   match
     match String.lowercase_ascii ext with
     | ".txt" | ".md" | ".mkd" -> Some (ext, `Text)
     | _ -> of_ext ext
   with
   | None -> None
-  | Some (ext, typ) -> Some (ext, convert typ src ~dst:String)
+  | Some (ext, typ) -> Some (ext, convert typ ~convert_uppercase src ~dst:String)
 
 let open_channel dp name =
   let out_ch = Out_channel.open_bin name in
   Dyn_protect.add dp ~finally:(fun () -> Out_channel.close out_ch);
   out_ch
 
-let convert_files src dst =
+let convert_files ~convert_uppercase src dst =
   Dyn_protect.with_ (fun dp ->
       let src, dst, typ =
         match src with
@@ -531,7 +571,7 @@ let convert_files src dst =
            in
            In_channel.input_all (open_in name), open_channel dp new_name, typ
       in
-      convert typ src ~dst:(Channel dst)
+      convert typ ~convert_uppercase src ~dst:(Channel dst)
     )
   
 module Private = struct

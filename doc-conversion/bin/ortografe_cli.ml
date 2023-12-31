@@ -15,7 +15,8 @@ let () =
          C.Arg.value (C.Arg.pos 0 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"INPUT_FILE" []))
        and+ arg2 =
          C.Arg.value (C.Arg.pos 1 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"OUTPUT_FILE" []))
+       and+ convert_uppercase = C.Arg.value (C.Arg.flag (C.Arg.info ["convert-uppercase"]))
        in
-       Ortografe.convert_files arg1 arg2)
+       Ortografe.convert_files ~convert_uppercase arg1 arg2)
   in
   exit (C.Cmd.eval cmd)
