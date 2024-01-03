@@ -1,0 +1,9 @@
+(executable
+ (name server)
+ (libraries core
+            dream
+            cmdliner
+            ortografe
+            )
+ (preprocess (pps ppx_jane lwt_ppx))
+ )

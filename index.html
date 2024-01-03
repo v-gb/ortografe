@@ -31,11 +31,40 @@ Non-exemples: hache, ahuri, pays, rugby, Hercule, hellénique
       </section>
 
       <section>
+        <form action="/conv" method="post" enctype="multipart/form-data">
+          <p>Vous pouvez aussi convertir un document
+            <label class="upload">
+              <input style="display:none" type="file" name="file" accept=".doc,.docx,.html,.xhtml,.epub,.txt,.mkd,.md" onchange="form.submit()"/>
+              choisir un fichier
+            </label>
+        . Les formats acceptés sont:</p>
+        </form>
+        <ul>
+          <!-- need to look at licences again
+               https://en.wikipedia.org/wiki/LibreOffice#/media/File:LibreOffice_7.5_Writer_Icon.png
+               in general, finding icons on wikipedia is the way to go
+            -->
+          <li>fichiers textes (.txt, .mkd, .md)
+          <li>fichiers <img src="https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg" alt="Microsoft Office Word (2019–present).svg"> Word, <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/LibreOffice_7.5_Writer_Icon.png" alt="LibreOffice 7.5 Writer Icon.png"> LibreOffice, <a title="OpenOffice.org, LGPL &lt;http://www.gnu.org/licenses/lgpl.html&gt;, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:OOoWriter3logo.png"><img alt="OOoWriter3logo" src="https://upload.wikimedia.org/wikipedia/commons/f/f8/OOoWriter3logo.png"></a> OpenOffice (.doc, .docx) </li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg#/media/File:Epub_logo_color.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Epub_logo_color.svg" alt="Epub logo color.svg"></a> livres numériques (.epub)
+            <br>
+            Vous pouvez trouver sur internet des livres classiques au format numérique, par exemple  <a href="https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Le_Capitaine_Fracasse">Capitaine Fracasse</a>, <a href="https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Les_Trois_Mousquetaires">Les trois mousquetaires</a> ou <a href="https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Vingt_mille_lieues_sous_les_mers">Vingt mille lieues sous les mers</a> sur <a href="https://fr.wikisource.org/wiki/Wikisource:Accueil">wikisource</a>.
+          </li>
+          <li><a title="Adobe Systems
+
+                        CMetalCore, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:PDF_file_icon.svg"><img alt="PDF file icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/256px-PDF_file_icon.svg.png"></a> fichiers PDF : pas directement supporté</li>
+          Si vous avez le fichier original utilisé pour créer le PDF, convertissez ça, le résultat sera nettement meilleur.
+          <br>
+          Si vous n'avez pas le fichier original, vous pouvez transformer le fichier PDF en fichier Word (par exemple avec <a href="https://www.adobe.com/acrobat/online/pdf-to-word.html">Adobe</a> ou <a href="https://tools.pdf24.org/en/pdf-to-word">Pdf24</a>), puis soumettre le fichier Word ici.
+        </ul>
+      </section>
+
+      <section>
         <p>Vous pouvez aussi convertir toutes les pages webs que vous visitez, en installant une extension pour votre navigateur internet :</p>
         <ul>
-          <li><img src="https://www.google.fr/chrome/static/images/chrome-logo-m100.svg" style="height: 1em"> <a href="https://chromewebstore.google.com/detail/orthographe-simplifi%C3%A9e/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr">pour google Chrome</a> (non supporté sur téléphone) </li>
-          <li><img src="https://www.mozilla.org/media/protocol/img/logos/firefox/browser/logo.eb1324e44442.svg" style="height: 1em"> <a href="https://addons.mozilla.org/fr/firefox/addon/orthographe-simplifi%C3%A9e/"> pour Firefox </a> </li>
-          <li><img src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg" style="height: 1em"> pas encore supporté pour Safari </li>
+          <li><img src="https://www.google.fr/chrome/static/images/chrome-logo-m100.svg"> <a href="https://chromewebstore.google.com/detail/orthographe-simplifi%C3%A9e/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr">pour google Chrome</a> (non supporté sur téléphone) </li>
+          <li><img src="https://www.mozilla.org/media/protocol/img/logos/firefox/browser/logo.eb1324e44442.svg"> <a href="https://addons.mozilla.org/fr/firefox/addon/orthographe-simplifi%C3%A9e/"> pour Firefox </a> </li>
+          <li><img src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg"> pas encore supporté pour Safari </li>
         </ul>
       </section>
 
@@ -48,11 +77,12 @@ Non-exemples: hache, ahuri, pays, rugby, Hercule, hellénique
           <li><a href="https://github.com/v-gb/ortografe">code source</a> de cette page</li>
         </ul>
       </section>
+
     </main>
   </body>
-  <script src="site/dict_snapshot.js" defer></script>
-  <script src="extension/src/rewrite.js" defer></script>
-  <script src="site/page.js" defer></script>
+  <script src="static/dict_snapshot.js" defer></script>
+  <script src="static/rewrite.js" defer></script>
+  <script src="static/page.js" defer></script>
   <style>
     p {
         max-width: 45em;
@@ -84,6 +114,25 @@ Non-exemples: hache, ahuri, pays, rugby, Hercule, hellénique
         flex-wrap: wrap;
         justify-content: center;
         gap: 1em;
+    }
+    img {
+        height: 1em;
+    }
+    .upload {
+        display: inline;
+        background-color: #1652F0;
+        border: 1px solid #1652F0;
+        border-radius: 4px;
+        box-sizing: border-box;
+        color: #FFFFFF;
+        cursor: pointer;
+        font-family: Graphik,-apple-system,system-ui,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
+        font-size: 1.10rem;
+        line-height: 1.15;
+        padding: 6px 8px;
+        text-align: center;
+        text-transform: none;
+        width: fit-content;
     }
   </style>
 </html>
