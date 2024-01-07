@@ -415,11 +415,12 @@ let epub ?buf ?debug ?pp src ~dst =
   map_zip src (fun member file contents ->
       (* The xhtml is the bulk of the pages, but in principle, we
          could rewrite more stuff: content.opf, toc.ncx *)
-      if String.ends_with (Zipc.Member.path member) ~suffix:".xhtml"
-      then (
-        count file;
-        Some (xhtml ~buf ?debug ?pp (contents ()) ~dst:String)
-      ) else None)
+      match Filename.extension (Zipc.Member.path member) with
+      | ".xhtml" | ".html" -> (* in principle we'd need to read the root file to know how
+                                 to interpret the various files. *)
+         count file;
+         Some (xhtml ~buf ?debug ?pp (contents ()) ~dst:String)
+      | _ -> None)
   |> write_out dst
 
 let of_ext ext =
