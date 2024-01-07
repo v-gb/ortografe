@@ -422,42 +422,58 @@ let epub ?buf ?debug ?pp src ~dst =
       ) else None)
   |> write_out dst
 
-let main () =
+let of_ext ext =
+  match ext with
+  | ".html" -> Some (ext, `Html)
+  | ".xhtml" -> Some (ext, `Xhtml)
+  | ".docx" -> Some (ext, `Docx)
+  | ".doc" -> Some (".docx", `Doc)
+  | ".epub" -> Some (ext, `Epub)
+  | _ -> None
+
+let convert typ src ~dst =
+  match typ with
+  | `Html -> html src ~dst
+  | `Xhtml -> xhtml src ~dst
+  | `Docx -> docx src ~dst
+  | `Doc -> doc src ~dst
+  | `Epub -> epub src ~dst
+  | `Text -> pure_text src ~dst
+
+let convert_string ~ext src =
+  match
+    match ext with
+    | ".txt" | ".md" | ".mkd" -> Some (ext, `Text)
+    | _ -> of_ext ext
+  with
+  | None -> None
+  | Some (ext, typ) -> Some (ext, convert typ src ~dst:String)
+
+let convert_files args =
   Dyn_protect.with_ (fun dp ->
-      let src, dst, type_ =
-        match Sys.argv with
-        | [||] | [|_|] ->
-           In_channel.input_all In_channel.stdin, Out_channel.stdout, `Text
-        | argv ->
-           let name = argv.(1) in
-           let new_name =
-             if Array.length argv > 2
-             then argv.(2)
-             else Filename.remove_extension name ^ "-conv" ^ Filename.extension name
+      let src, dst, typ =
+        match args with
+        | [] -> In_channel.input_all In_channel.stdin, Out_channel.stdout, `Text
+        | name :: rest ->
+           let new_ext, typ =
+             let ext = (Filename.extension name) in
+             Option.value (of_ext (Filename.extension name)) ~default:(ext, `Text)
            in
-           let type_ =
-             match Filename.extension name with
-             | ".html" -> `Html
-             | ".xhtml" -> `Xhtml
-             | ".docx" -> `Docx
-             | ".doc" -> `Doc
-             | ".epub" -> `Epub
-             | _ -> `Text (* realistically, this includes markdown *)
+           let new_name =
+             match rest with
+             | new_name :: _ -> new_name
+             | [] -> Filename.remove_extension name ^ "-conv" ^ new_ext
            in
            let out_ch = Out_channel.open_bin new_name in
            Dyn_protect.add dp ~finally:(fun () -> Out_channel.close out_ch);
-           In_channel.input_all (open_in name), out_ch, type_
+           In_channel.input_all (open_in name), out_ch, typ
       in
-      let dst = Channel dst in
-      match type_ with
-      | `Doc -> doc src ~dst
-      | `Docx -> docx src ~dst
-      | `Epub -> epub src ~dst
-      | `Html -> html src ~dst
-      | `Text -> pure_text src ~dst
-      | `Xhtml -> xhtml src ~dst
+      convert typ src ~dst:(Channel dst)
     )
 
+let main () =
+  convert_files (Core.List.drop (Array.to_list Sys.argv) 1)
+  
 module Private = struct
   let docx_document = docx_document
   let read_whole_zip = read_whole_zip
