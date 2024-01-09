@@ -14,12 +14,42 @@ let my_error_template _error debug_info suggested_response =
   " code (Dream.html_escape reason) (Dream.html_escape debug_info));
   Lwt.return suggested_response
 
+let where_to_find_static_files () =
+  if Sys.file_exists "/static" (* when in container *)
+  then "/static"
+  else
+    (* In dev, setup symlinks to the files in the repo, so we can just
+       modify the files and reload without fiddling with the server. *)
+    let repo_root =
+      let root = ref (Filename.dirname Sys.executable_name) in
+      while not (Sys.file_exists (Filename.concat !root ".git")
+                 || Sys.file_exists (Filename.concat !root ".jj"))
+      do
+        root := Filename.dirname !root;
+        match !root with
+        | "." | ".." | "/" -> failwith "server expects to run in container or in repo"
+        | _ -> ()
+      done;
+      !root
+    in
+    (* maybe we should read the COPY line from the docker file, to
+       avoid duplicating? *)
+    let static_root = "/tmp/static" in
+    ListLabels.iter
+      [ "site/client/index.html"
+      ; "site/client/page.js"
+      ; "extension/src/rewrite.js"
+      ; "extension/src/dict.js"
+      ] ~f:(fun f ->
+        let src = Filename.concat repo_root f in
+        let dst = Filename.concat static_root (Filename.basename f) in
+        if Sys.file_exists dst then Unix.unlink dst;
+        Unix.symlink src dst
+      );
+    static_root
+
 let run ?(log = true) ?port ?tls () =
-  let static_root =
-    if Sys.file_exists "/static" (* when in container *)
-    then "/static"
-    else "/tmp/static"
-  in
+  let static_root = where_to_find_static_files () in
   Dream.run ?port ?tls
     ~interface:"0.0.0.0" (* apparently only listens on lo otherwise *)
     ~error_handler:(Dream.error_template my_error_template)
