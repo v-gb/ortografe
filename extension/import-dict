@@ -8,7 +8,7 @@ else
     {
         sqlite3 <<'EOF'
 .mode csv
-.import ../erofa/DOR-numérique_v1.0.2.csv t
+.import ../data/erofa/DOR-numérique_v1.0.2.csv t
 select "Grafie initiale","Grafie modifiée"
 from t
 where "Grafie initiale" != ''
@@ -31,7 +31,7 @@ EOF
         | cat > dict.gen.csv
 
     # add a few conjugated forms, from EROFA as well
-    ssconvert ../erofa/Verbes-conjugués-top-2k-Lexique.xlsx /tmp/tmp.csv
+    ssconvert ../data/erofa/Verbes-conjugués-top-2k-Lexique.xlsx /tmp/tmp.csv
     {
         sqlite3 <<'EOF'
 .mode csv
@@ -65,7 +65,7 @@ EOF
 .mode csv
 create table t(before,after);
 .import dict.gen.csv t
-.import ../wiktionnaire/1990.csv t1990
+.import ../data/wiktionnaire/1990.csv t1990
 select t1990.pre1990,after
 from t1990
 join t on t.before = t1990.post1990
@@ -78,7 +78,7 @@ EOF
 
     cp dict.gen.csv dict.external-sources.gen.csv
 
-    tail -n +2 ../homemade-data/dict.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
+    tail -n +2 ../data/homemade/dict.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
 
     # Capitalized words in the dict are treated as exceptions, for
     # cases when the capitalized version of the word is almost never the common
