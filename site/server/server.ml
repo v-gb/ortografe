@@ -97,11 +97,7 @@ let main () =
   in
   let cmd =
     C.Cmd.group (C.Cmd.info "ortografe")
-      [ C.Cmd.v (C.Cmd.info "conv")
-          (let+ args = C.Arg.value (C.Arg.pos_all C.Arg.string [] (C.Arg.info []))
-           in
-           Ortografe.convert_files args)
-      ; C.Cmd.v (C.Cmd.info "serve")
+      [ C.Cmd.v (C.Cmd.info "serve")
           (let+ port = C.Arg.value (C.Arg.opt (C.Arg.some C.Arg.int) None (C.Arg.info ["p"]))
            and+ tls = C.Arg.value (C.Arg.flag (C.Arg.info ["tls"]))
            and+ no_log = C.Arg.value (C.Arg.flag (C.Arg.info ["no-log"]))

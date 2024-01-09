@@ -10,8 +10,7 @@ val doc : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> string -> dst:'a out -> 'a
 val max_size : int ref
 
 val convert_string : ext:string -> string -> (string * string) option
-val convert_files : string list -> unit
-val main : unit -> unit
+val convert_files : string option -> string option -> unit
 
 (**/**)
 module Private : sig

@@ -450,30 +450,35 @@ let convert_string ~ext src =
   | None -> None
   | Some (ext, typ) -> Some (ext, convert typ src ~dst:String)
 
-let convert_files args =
+let open_channel dp name =
+  let out_ch = Out_channel.open_bin name in
+  Dyn_protect.add dp ~finally:(fun () -> Out_channel.close out_ch);
+  out_ch
+
+let convert_files src dst =
   Dyn_protect.with_ (fun dp ->
       let src, dst, typ =
-        match args with
-        | [] -> In_channel.input_all In_channel.stdin, Out_channel.stdout, `Text
-        | name :: rest ->
+        match src with
+        | None ->
+           In_channel.input_all In_channel.stdin,
+           (match dst with
+            | None -> Out_channel.stdout
+            | Some new_name -> open_channel dp new_name),
+           `Text
+        | Some name ->
            let new_ext, typ =
              let ext = (Filename.extension name) in
              Option.value (of_ext (Filename.extension name)) ~default:(ext, `Text)
            in
            let new_name =
-             match rest with
-             | new_name :: _ -> new_name
-             | [] -> Filename.remove_extension name ^ "-conv" ^ new_ext
+             match dst with
+             | Some new_name -> new_name
+             | None -> Filename.remove_extension name ^ "-conv" ^ new_ext
            in
-           let out_ch = Out_channel.open_bin new_name in
-           Dyn_protect.add dp ~finally:(fun () -> Out_channel.close out_ch);
-           In_channel.input_all (open_in name), out_ch, typ
+           In_channel.input_all (open_in name), open_channel dp new_name, typ
       in
       convert typ src ~dst:(Channel dst)
     )
-
-let main () =
-  convert_files (Core.List.drop (Array.to_list Sys.argv) 1)
   
 module Private = struct
   let docx_document = docx_document
