@@ -40,6 +40,7 @@ let where_to_find_static_files () =
       ; "site/client/page.js"
       ; "extension/src/rewrite.js"
       ; "extension/src/dict.js"
+      ; "_build/default/doc-conversion/bin/ortografe_cli.exe"
       ] ~f:(fun f ->
         let src = Filename.concat repo_root f in
         let dst = Filename.concat static_root (Filename.basename f) in

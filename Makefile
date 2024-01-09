@@ -2,7 +2,7 @@
 
 server cli &:
 	# these depend on dict.csv, but we assume that's already built if desired
-	dune build --release site/server/server.exe doc-conversion/bin/main.exe
+	dune build --release site/server/server.exe doc-conversion/bin/ortografe_cli.exe
 
 serve: server
 	_build/default/site/server/server.exe serve -p 8081
