@@ -5,8 +5,7 @@ RUN apt-get install --no-install-recommends -y libev4 libssl3 bubblewrap libreof
 # so). Maybe we should start with a bigger image, considering how much
 # stuff that pulls in
 
-COPY _build/default/doc-conversion/server/server.exe /bin/app
-COPY index.html extension/src/rewrite.js site/page.js /static/
-COPY extension/src/dict.js /static/dict_snapshot.js
+COPY _build/default/site/server/server.exe /bin/app
+COPY site/client/index.html site/client/page.js extension/src/rewrite.js  extension/src/dict.js /static/
 
 ENTRYPOINT exec /bin/app serve

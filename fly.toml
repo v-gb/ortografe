@@ -7,7 +7,7 @@ app = "ortografe-server"
 primary_region = "cdg"
 
 [build]
-  dockerfile = "doc-conversion/deployment/Dockerfile"
+  dockerfile = "site/deployment/Dockerfile"
 
 [http_service]
   internal_port = 8080

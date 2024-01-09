@@ -3,9 +3,9 @@ simplifications for French :
 
 - a [browser extension](extension/README.md), to browse the web with
 the adjusted spelling
-- a [website](https://v-gb.github.io/ortografe/), to transcribe text
-interactively without installing anything. [Source html](index.html).
-- a WIP [program](doc-conversion/) that transcribes the text in
-  various file formats (pure text, html, xhtml, .doc, .docx, .epub).
+- a WIP [website](https://ortografe-server.fly.dev/), to transcribe text
+and documents interactively without installing anything. [Source](site/).
+- a [program](doc-conversion/) that transcribes the text of documents
+  in various formats (pure text, html, xhtml, .doc, .docx, .epub).
 
 We may add more tools in the future.
