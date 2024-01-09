@@ -83,6 +83,16 @@ let run ?(log = true) ?port ?tls () =
        ]
 
 let run_for_bench ~log ?port ?tls () =
+  (* benching with [ab -n 50000 -c 500] shows:
+     - 25k requests/s with no logging and no tls
+     - 22k requests/s with no logging
+     - 320 requests/s with tls, logging or not
+     for comparison, a trivial golang server with GOMAXPROCS=1
+     - 24k requests/s with no logging and no tls
+     - 630 requests/s with tls and no logging
+     So tls is not efficient, but in our deployment, the infrastructure
+     takes cares of it.
+ *)
   Dream.run ?port ?tls
   @@ (if log then Dream.logger else Fun.id)
   @@ Dream.router [ Dream.get "/hello" (fun _req -> Lwt.return (Dream.response "hi")) ]
