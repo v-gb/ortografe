@@ -1,17 +1,18 @@
-let my_error_template _error debug_info suggested_response =
-  let status = Dream.status suggested_response in
-  let code = Dream.status_to_int status
-  and reason = Dream.status_to_string status in
+let error_has_body = Dream.new_field ~name:"error-has-body" ()
 
-  Dream.set_header suggested_response "Content-Type" Dream.text_html;
-  Dream.set_body suggested_response (Printf.sprintf "
-    <html>
-    <body>
-      <h1>%d %s</h1>
-      <pre>%s</pre>
-    </body>
-    </html>
-  " code (Dream.html_escape reason) (Dream.html_escape debug_info));
+let my_error_template (error : Dream.error) debug_info suggested_response =
+  (match Dream.field suggested_response error_has_body with
+   | Some _ -> ()
+   | None ->
+      let status = Dream.status suggested_response in
+      Dream.set_header suggested_response "Content-Type" Dream.text_html;
+      Dream.set_body suggested_response
+        (Printf.sprintf "<html><body> <h1>%d %s</h1><pre>%s</pre> </body></html>"
+           (Dream.status_to_int status)
+           (Dream.html_escape (Dream.status_to_string status))
+           (match error.caused_by with
+            | `Client -> ""
+            | `Server -> Dream.html_escape debug_info)));
   Lwt.return suggested_response
 
 let where_to_find_static_files () =
@@ -49,7 +50,27 @@ let where_to_find_static_files () =
       );
     static_root
 
-let run ?(log = true) ?port ?tls () =
+let respond_error_text status str =
+  let code = Dream.status_to_int status
+  and reason = Dream.status_to_string status in
+  let response =
+    Dream.response
+      ~status
+      ~headers:["Content-Type", Dream.text_html]
+      (Printf.sprintf
+         "<html>
+          <body>
+          <h1>Error %d: %s</h1>
+          <pre>%s</pre>
+          </body>
+          </html>"
+         code (Dream.html_escape reason) (Dream.html_escape str))
+  in
+  Dream.set_field response error_has_body ();
+  Lwt.return response
+
+let run ?(log = true) ?port ?tls ?(max_input_size = 100_000_000) () =
+  Ortografe.max_size := max_input_size * 2; (* xml can be quite large when decompressed *)
   let static_root = where_to_find_static_files () in
   Dream.run ?port ?tls
     ~interface:"0.0.0.0" (* apparently only listens on lo otherwise *)
@@ -57,29 +78,34 @@ let run ?(log = true) ?port ?tls () =
   @@ (if log then Dream.logger else Fun.id)
   @@ Dream.router
        [ Dream.post "/conv" (fun request ->
+             (* reads arbitrarily large stuff. There's no changing that without submitting
+                a pull request. The streaming interface still reads everything in
+                memory. So either way, we'll keep the current interface, but at some
+                point, we'll have a throttle. *)
              match%lwt Dream.multipart ~csrf:false request with
              | `Ok ["file", [ fname, fcontents ] ] ->
-                let fname = Option.value fname ~default:"unnamed.txt" in
-                let ext = Filename.extension fname in
-                Dream.log "upload ext:%S size:%s" ext
-                  (Core.Byte_units.Short.to_string
-                     (Core.Byte_units.of_bytes_int (String.length fcontents)));
-                (* reads arbitrarily large stuff. There's no changing that without
-                   submitting a pull request. The streaming interface still reads
-                   everything in memory. So either way, we'll keep the current interface,
-                   but at some point, we'll have a throttle. *)
-                (match Ortografe.convert_string ~ext fcontents with
-                 | None -> failwith ("unsupported file type " ^ ext)
-                 | Some (new_ext, new_body) ->
-                    let new_fname = Filename.remove_extension fname ^ "-conv" ^ new_ext in
-                    Dream.respond
-                      ~headers:
-                      (Dream.mime_lookup new_fname
-                       @ [ "Content-Disposition",
-                           Printf.sprintf "attachment; filename=\"%s\"" (Dream.to_percent_encoded new_fname) ])
-                      new_body
-                )
-             | _ -> Dream.empty `Bad_Request
+                if String.length fcontents > max_input_size
+                then respond_error_text `Payload_Too_Large
+                       ("max size: " ^ Int.to_string max_input_size)
+                else
+                  let fname = Option.value fname ~default:"unnamed.txt" in
+                  let ext = Filename.extension fname in
+                  Dream.log "upload ext:%S size:%s" ext
+                    (Core.Byte_units.Short.to_string
+                       (Core.Byte_units.of_bytes_int (String.length fcontents)));
+                  (match Ortografe.convert_string ~ext fcontents with
+                   | exception e -> respond_error_text (`Status 422) (Printexc.to_string e)
+                   | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
+                   | Some (new_ext, new_body) ->
+                      let new_fname = Filename.remove_extension fname ^ "-conv" ^ new_ext in
+                      Dream.respond
+                        ~headers:
+                        (Dream.mime_lookup new_fname
+                         @ [ "Content-Disposition",
+                             Printf.sprintf "attachment; filename=\"%s\"" (Dream.to_percent_encoded new_fname) ])
+                        new_body
+                  )
+             | _ -> respond_error_text `Bad_Request ""
            )
        ; Dream.get "/" (Dream.from_filesystem static_root "index.html")
        ; Dream.get "/static/**" (Dream.static static_root)
