@@ -61,6 +61,9 @@ let run ?(log = true) ?port ?tls () =
              | `Ok ["file", [ fname, fcontents ] ] ->
                 let fname = Option.value fname ~default:"unnamed.txt" in
                 let ext = Filename.extension fname in
+                Dream.log "upload ext:%S size:%s" ext
+                  (Core.Byte_units.Short.to_string
+                     (Core.Byte_units.of_bytes_int (String.length fcontents)));
                 (* reads arbitrarily large stuff. There's no changing that without
                    submitting a pull request. The streaming interface still reads
                    everything in memory. So either way, we'll keep the current interface,
