@@ -183,7 +183,7 @@ benoîtement,1,benoitement,ADV,,,,benoîtement
 besaiguë,1,besaigüe,NOM,f,s,,besaiguë
 besicles,1,bésicles,NOM,f,p,,besicles
 bizuth,1,bizut,NOM,m,s,,bizuth
-bla-bla,2,blabla/bla-bla,NOM,m,,,bla-bla
+bla-bla,1,blabla,NOM,m,,,bla-bla
 black-out,2,blackout/blackouts,NOM,m,,,black-out
 bleuît,1,bleuit,VER,,,sub:imp:3s;,bleuir
 blue-jean,1,bluejean,NOM,m,s,,blue-jean
@@ -531,7 +531,7 @@ crénelés,1,crènelés,ADJ,m,p,,crénelé
 crû,1,cru,VER,m,s,par:pas;,croître
 crûment,1,crument,ADV,,,,crûment
 cuissot,1,cuisseau,NOM,m,s,,cuissot
-cuissots,1,cuisseaus,NOM,m,p,,cuissot
+cuissots,1,cuisseaux,NOM,m,p,,cuissot
 cédera,1,cèdera,VER,,,ind:fut:3s;,céder
 céderai,1,cèderai,VER,,,ind:fut:1s;,céder
 céderaient,1,cèderaient,VER,,,cnd:pre:3p;,céder
@@ -556,7 +556,7 @@ delirium,1,délirium,NOM,m,s,,delirium
 delirium tremens,2,délirium tremens/déliriums tremens,NOM,m,,,delirium tremens
 dentellière,1,dentelière,ADJ,f,s,,dentellier
 dentellière,1,dentelière,NOM,f,s,,dentellière
-desiderata,2,désidérata/desiderata,NOM,m,,,desiderata
+desiderata,2,désidérata/désidératas,NOM,m,,,desiderata
 dessille,1,décille,VER,,,ind:pre:3s;,dessiller
 dessiller,1,déciller,VER,,,inf;,dessiller
 dessilleront,1,décilleront,VER,,,ind:fut:3p;,dessiller
@@ -924,8 +924,8 @@ exaspéreraient,1,exaspèreraient,VER,,,cnd:pre:3p;,exaspérer
 exaspérerait,1,exaspèrerait,VER,,,cnd:pre:3s;,exaspérer
 excrétera,1,excrètera,VER,,,ind:fut:3s;,excréter
 excédera,1,excèdera,VER,,,ind:fut:3s;,excéder
-exeat,2,exéat/exeat,NOM,m,,,exeat
-exequatur,2,exéquatur/exequatur,NOM,m,,,exequatur
+exeat,2,exéat/exéats,NOM,m,,,exeat
+exequatur,2,exéquatur/exéquaturs,NOM,m,,,exequatur
 exiguë,1,exigüe,ADJ,f,s,,exigu
 exiguës,1,exigües,ADJ,f,p,,exigu
 exiguïté,1,exigüité,NOM,f,s,,exiguïté
@@ -1061,7 +1061,7 @@ gratte-pieds,2,gratte-pied/gratte-pieds,NOM,m,,,gratte-pieds
 grenelle,1,grenèle,VER,,,imp:pre:2s;,greneler
 gri-gri,1,grigri,NOM,m,s,,gri-gri
 grille-pain,2,grille-pain/grille-pains,NOM,m,,,grille-pain
-gris-gris,2,gris-gris/grigris ,NOM,m,,,gris-gris
+gris-gris,1,grigris ,NOM,m,,,gris-gris
 grivelle,1,grivèle,VER,,,ind:pre:3s;,griveler
 grolle,1,grole,NOM,f,s,,grolle
 grolles,1,groles,NOM,f,p,,grolle
@@ -1105,11 +1105,8 @@ huîtrière,1,huitrière,NOM,f,s,,huîtrière
 hébétement,1,hébètement,NOM,m,s,,hébétement
 impresario,1,imprésario,NOM,m,s,,impresario
 impresarios,1,imprésarios,NOM,m,p,,impresario
-in-folio,1,in-folios,ADJ,m,s,,in-folio
 in-folio,2,in-folio/in-folios,NOM,m,,,in-folio
-in-octavo,1,in-octavos,ADJ,,,,in-octavo
 in-octavo,2,in-octavo/in-octavos,NOM,m,,,in-octavo
-in-quarto,1,in-quartos,ADJ,,,,in-quarto
 in-quarto,2,in-quarto/in-quartos,NOM,m,,,in-quarto
 indécelable,1,indècelable,ADJ,,s,,indécelable
 indécelables,1,indècelables,ADJ,,p,,indécelable
@@ -1641,7 +1638,6 @@ refrénés,1,réfrénés,VER,m,p,par:pas;,refréner
 regoûter,1,regouter,VER,,,inf;,regoûter
 regoûté,1,regouté,VER,m,s,par:pas;,regoûter
 relais,1,relai,NOM,m,,,relais
-relaisser,1,relaiser,VER,,,inf;,relaisser
 remboîter,1,remboiter,VER,,,inf;,remboîter
 remonte-pentes,2,remonte-pente/remonte-pentes,NOM,m,,,remonte-pentes
 rempaquette,1,rempaquète,VER,,,ind:pre:3s;,rempaqueter
@@ -1806,7 +1802,7 @@ siégeras,1,siègeras,VER,,,ind:fut:2s;,siéger
 siégerons,1,siègerons,VER,,,ind:fut:1p;,siéger
 siégeront,1,siègeront,VER,,,ind:fut:3p;,siéger
 sketches,1,sketchs,NOM,m,p,,sketch
-skunks,1,"<span class=""recto""><span class=""rule8"">sconse",NOM,m,,,skunks
+skunks,1,sconses,NOM,m,,,skunks
 social-traître,1,social-traitre,NOM,m,s,,social-traître
 soli,1,solos,NOM,m,p,,solo
 sombrero,1,sombréro,NOM,m,s,,sombrero
@@ -1941,7 +1937,7 @@ tire-bouchons,1,tirebouchons,NOM,m,p,,tire-bouchon
 tire-laine,2,tire-laine/tire-laines,NOM,m,,,tire-laine
 tire-lait,2,tire-lait/tire-laits,NOM,m,,,tire-lait
 tire-lire,2,tire-lire/tire-lires,NOM,m,,,tire-lire
-tohu-bohu,2,tohubohu/tohu-bohu,NOM,m,,,tohu-bohu
+tohu-bohu,2,tohubohu/tohubohus,NOM,m,,,tohu-bohu
 tolérera,1,tolèrera,VER,,,ind:fut:3s;,tolérer
 tolérerai,1,tolèrerai,VER,,,ind:fut:1s;,tolérer
 tolérerais,1,tolèrerais,VER,,,cnd:pre:1s;,tolérer
@@ -1953,7 +1949,7 @@ toquade,1,tocade,NOM,f,s,,toquade
 toquades,1,tocades,NOM,f,p,,toquade
 tord-boyaux,2,tord-boyau/tord-boyaux,NOM,m,,,tord-boyaux
 tories,1,torys,NOM,m,p,,tories
-train-train,2,traintrain/train-train,NOM,m,,,train-train
+train-train,2,traintrain/traintrains,NOM,m,,,train-train
 transférera,1,transfèrera,VER,,,ind:fut:3s;,transférer
 transférerai,1,transfèrerai,VER,,,ind:fut:1s;,transférer
 transférerait,1,transfèrerait,VER,,,cnd:pre:3s;,transférer
@@ -2056,17 +2052,14 @@ traîtrises,1,traitrises,NOM,f,p,,traîtrise
 tremolos,1,trémolos,NOM,m,p,,tremolo
 trolle,1,trole,NOM,f,s,,trolle
 trou-trou,1,troutrou,NOM,m,s,,trou-trou
-tsé-tsé,2,tsétsé/tsé-tsé,NOM,f,,,tsé-tsé
+tsé-tsé,2,tsétsé/tsétsés,NOM,f,,,tsé-tsé
 tumuli,1,tumulus,NOM,m,p,,tumulus
-télémesure,1,télèmesure,NOM,f,s,,télémesure
-télémesures,1,télèmesures,NOM,f,p,,télémesure
-téléreportage,1,télèreportage,NOM,m,s,,téléreportage
 underground,1,undergrounds,ADJ,,,,underground
 underground,2,underground/undergrounds,NOM,m,,,underground
 vae soli,1,vae solos,ADV,,,,vae soli
 vantail,1,ventail,NOM,m,s,,vantail
 velum,1,vélum,NOM,m,s,,velum
-veto,2,véto/veto,NOM,m,,,veto
+veto,2,véto/vétos,NOM,m,,,veto
 vide-greniers,2,vide-grenier/vide-greniers,NOM,m,,,vide-greniers
 vide-ordures,2,vide-ordure/vide-ordures,NOM,m,,,vide-ordures
 vide-poches,2,vide-poche/vide-poches,NOM,m,,,vide-poches
