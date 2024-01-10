@@ -143,10 +143,13 @@ let load_dict () =
 
 let dict = lazy (load_dict ())
 
-let string_of_uchar uchar =
-  let nbytes = Uchar.utf_8_byte_length uchar in
+let string_of_uchars uchars =
+  let nbytes = List.fold_left (fun acc c -> acc + Uchar.utf_8_byte_length c) 0 uchars in
   let b = Bytes.create nbytes in
-  ignore (Bytes.set_utf_8_uchar b 0 uchar : int);
+  let i = ref 0 in
+  List.iter (fun c ->
+      i := !i + Bytes.set_utf_8_uchar b !i c
+  ) uchars;
   Bytes.to_string b
 
 let split_on_first_uchar src ~f =
@@ -155,12 +158,9 @@ let split_on_first_uchar src ~f =
   let utf_decode = String.get_utf_8_uchar src 0 in
   let src0 = Uchar.utf_decode_uchar utf_decode in
   match f src0 with
-  | Some src0_new ->
-     if src0 <> src0_new
-     then
-       let src0bytes = Uchar.utf_decode_length utf_decode in
-       Some (string_of_uchar src0_new ^ String.sub src src0bytes (String.length src - src0bytes))
-     else None
+  | Some repl ->
+     let src0bytes = Uchar.utf_decode_length utf_decode in
+     Some (string_of_uchars repl ^ String.sub src src0bytes (String.length src - src0bytes))
   | None -> None  
 
 let depluralize w =
@@ -172,15 +172,21 @@ let pluralize w = w ^ "s"
 
 let uncapitalize w =
   split_on_first_uchar w ~f:(fun w0 ->
-      match Uucp.Case.Map.to_lower w0 with
-      | `Uchars (w0l :: _) -> Some w0l
-      | _ -> None)
+      if Uucp.Case.is_upper w0
+      then
+        match Uucp.Case.Map.to_lower w0 with
+        | `Uchars w0l -> Some w0l
+        | _ -> None
+      else None)
 
 let capitalize w =
   split_on_first_uchar w ~f:(fun w0 ->
-      match Uucp.Case.Map.to_upper w0 with
-      | `Uchars (w0u :: _) -> Some w0u
-      | _ -> None)
+      if Uucp.Case.is_lower w0
+      then
+        match Uucp.Case.Map.to_upper w0 with
+        | `Uchars w0u -> Some w0u
+        | _ -> None
+      else None)
 
 let iter_pure_text src ~f =
   let dict = Lazy.force dict in
