@@ -67,6 +67,9 @@ function make_walk(root) {
                 (node.classList.contains("notranslate")
                  || node.nodeName == "CODE"
                  || node.nodeName == "SCRIPT"
+                 || node.nodeName == "NOSCRIPT" // contains only text when scripting is enabled (~everyone)
+                                                // which messes up language detection. It's not clear how to
+                                                // process these nodes only when JS is disabled, so ignore
                  || node.nodeName == "STYLE"
                  || node.nodeName == "style" // happens inside <svg>, on reddit
                  || node.nodeName == "TEXTAREA"

@@ -253,7 +253,7 @@ let html_transform ~buf signal =
        | `Start_element ((_, tag), attributes) ->
           let hide =
             match tag with
-            | "code" | "script" | "style" | "textarea" -> true
+            | "code" | "script" | "noscript" | "style" | "textarea" -> true
             | _ ->
                List.exists (fun ((_, attr), _value) ->
                    match attr with
