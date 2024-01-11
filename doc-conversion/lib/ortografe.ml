@@ -315,13 +315,9 @@ let docx_transform ~buf signal =
       | _ -> elt
     ) signal
 
-let docx_xml ?buf ?debug ?pp src =
+let docx_xml ?buf ?debug ?pp src ~dst =
   let buf = buffer buf in
-  let res_xml = xml ?debug ?pp src ~dst:String ~transform:(docx_transform ~buf) in
-  (* ms word complains of corrupted files if there's no line break after the
-     initial <?xml version="1.0" encoding="UTF-8" standalone="yes"?> (it can still
-     read the file though, so it's just a scary warning for users). *)
-  Core.String.substr_replace_first res_xml ~pattern:"?>" ~with_:"?>\n"
+  xml ?debug ?pp src ~dst ~transform:(docx_transform ~buf)
 
 let map_zip src f =
   let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in
@@ -382,7 +378,7 @@ let docx ?buf ?debug ?pp src ~dst =
       match Zipc.Member.path member with
       | "word/document.xml" ->
          count file;
-         Some (docx_xml ~buf ?debug ?pp (contents ()))
+         Some (docx_xml ~buf ?debug ?pp (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 
