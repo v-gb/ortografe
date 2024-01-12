@@ -6,79 +6,115 @@
     <meta charset="utf-8" />
   </head>
   <body>
-
-    <h2 style="text-align:center">Convertisseur à l'orthographe <a href="http://erofa.free.fr/">Érofa</a></h2>
+    <h1 style="text-align:center">Ortografe simplifiée</h1>
     <main>
+      <section id="rules" class="notranslate">
+        <div class="to-transcribe">
+          Les linguistes de l'<a href="http://erofa.free.fr/">association
+          Érofa</a> propose trois règles pour simplifier des points difficiles de
+          l'orthographe du français sans choquer :
+        </div>
+        <div class="to-transcribe">
+          1) Les consonnes doubles qui n'ont pas d'effet sur la prononciation
+          sont simplifiées. <br>
+          Exemples: sonnerie, appelle, accord, lutte, verre <br>
+          Non-exemples: messe, accident, évidemment, surréalisme <br>
+        </div>
+        <div class="to-transcribe">
+          2) Les x finaux muets deviennent des s. <br>
+          Exemples: bijoux, choix, veux, deux <br>
+          Non-exemples: dix, duplex, Chamonix <br>
+        </div>
+        <div class="to-transcribe">
+          3) Les ph, h et y grecs ou similaires sont simplifiés. <br>
+          Exemples: photographie, rythme, humain, psychologie, chaos, théâtre,
+          huile, déshabiller <br>
+          Non-exemples: hache, ahuri, pays, rugby, Hercule, hellénique <br>
+        </div>
+      </section>
+
+      <h2>Outils de mise en pratique</h2>
+
+      Les propositions, c'est bien, les utiliser c'est mieux. Nous proposons donc des outils pour faire ça.
+      <strong>décrire les license pour tout ça</strong>
+
+      <h3>Transcription interactive</h3>
+
       <section id="container">
-        <textarea id="user-text" autofocus>
-Érofa propose trois règles pour simplifier l'orthographe du français sans choquer, dont vous pouvez voir l'effet à droite (ou en dessous) :
-
-1) Les consonnes doubles qui n'ont pas d'effet sur la prononciation sont simplifiées.
-Exemples: sonnerie, appelle, accord, lutte, verre
-Non-exemples: messe, accident, évidemment, surréalisme
-
-2) Les x finaux muets deviennent des s.
-Exemples: bijoux, choix, veux, deux
-Non-exemples: dix, duplex, Chamonix
-
-3) Les ph, h et y grecs ou similaires sont simplifiés.
-Exemples: photographie, rythme, humain, psychologie, chaos, théâtre, huile, déshabiller
-Non-exemples: hache, ahuri, pays, rugby, Hercule, hellénique
-
-À vous d'éditer ce texte pour voir ce qui change ! Babar est le roi des élé...
-</textarea>
+        <textarea id="user-text">Babar a une mémoire exceptionnelle, comme tous les élé...</textarea>
         <div id="converted-text" class="notranslate"></div>
       </section>
 
+      <h3>Transcription de documents en ligne</h3>
+
       <section>
         <form action="/conv" method="post" enctype="multipart/form-data">
-          <p>Vous pouvez aussi convertir un document
-            <label class="upload">
-              <input style="display:none" type="file" name="file" accept=".doc,.docx,.html,.xhtml,.epub,.txt,.mkd,.md" onchange="form.submit()"/>
-              choisir un fichier
-            </label>
-        . Les formats acceptés sont:</p>
+          <label class="upload">
+            <input style="display:none" type="file" name="file" accept=".doc,.docx,.html,.xhtml,.epub,.txt,.mkd,.md" onchange="form.submit()"/>
+            choisir un fichier
+          </label>
         </form>
+        <p>Les formats acceptés sont:</p>
         <ul>
           <!-- need to look at licences again
                https://en.wikipedia.org/wiki/LibreOffice#/media/File:LibreOffice_7.5_Writer_Icon.png
                in general, finding icons on wikipedia is the way to go
             -->
           <li>fichiers textes (.txt, .mkd, .md)
-          <li>fichiers <img src="https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg" alt="Microsoft Office Word (2019–present).svg"> Word, <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/LibreOffice_7.5_Writer_Icon.png" alt="LibreOffice 7.5 Writer Icon.png"> LibreOffice, <a title="OpenOffice.org, LGPL &lt;http://www.gnu.org/licenses/lgpl.html&gt;, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:OOoWriter3logo.png"><img alt="OOoWriter3logo" src="https://upload.wikimedia.org/wikipedia/commons/f/f8/OOoWriter3logo.png"></a> OpenOffice (.doc, .docx) </li>
-          <li><a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg#/media/File:Epub_logo_color.svg"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Epub_logo_color.svg" alt="Epub logo color.svg"></a> livres numériques (.epub)
+          <li>fichiers <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg" alt="Microsoft Office Word (2019–present).svg"> Word, <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/4/45/LibreOffice_7.5_Writer_Icon.png" alt="LibreOffice 7.5 Writer Icon.png"> LibreOffice, <a title="OpenOffice.org, LGPL &lt;http://www.gnu.org/licenses/lgpl.html&gt;, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:OOoWriter3logo.png"><img class="icon" alt="OOoWriter3logo" src="https://upload.wikimedia.org/wikipedia/commons/f/f8/OOoWriter3logo.png"></a> OpenOffice (.doc, .docx) </li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg#/media/File:Epub_logo_color.svg"><img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Epub_logo_color.svg" alt="Epub logo color.svg"></a> livres numériques (.epub)
             <br>
             Vous pouvez trouver sur internet des livres classiques au format numérique, par exemple  <a href="https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Le_Capitaine_Fracasse">Capitaine Fracasse</a>, <a href="https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Les_Trois_Mousquetaires">Les trois mousquetaires</a> ou <a href="https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Vingt_mille_lieues_sous_les_mers">Vingt mille lieues sous les mers</a> sur <a href="https://fr.wikisource.org/wiki/Wikisource:Accueil">wikisource</a>.
           </li>
           <li><a title="Adobe Systems
 
-                        CMetalCore, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:PDF_file_icon.svg"><img alt="PDF file icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/256px-PDF_file_icon.svg.png"></a> fichiers PDF : pas directement supporté</li>
+                        CMetalCore, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:PDF_file_icon.svg"><img class="icon" alt="PDF file icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/256px-PDF_file_icon.svg.png"></a> fichiers PDF : pas directement supporté</li>
           Si vous avez le fichier original utilisé pour créer le PDF, convertissez ça, le résultat sera nettement meilleur.
           <br>
           Si vous n'avez pas le fichier original, vous pouvez transformer le fichier PDF en fichier Word (par exemple avec <a href="https://www.adobe.com/acrobat/online/pdf-to-word.html">Adobe</a> ou <a href="https://tools.pdf24.org/en/pdf-to-word">Pdf24</a>), puis soumettre le fichier Word ici.
         </ul>
       </section>
 
-      <section>
-        <p>Vous pouvez aussi <a href="static/ortografe_cli.exe">télécharger le programme de conversion</a> (que pour linux).</p>
-      </section>
+      <h3>Transcription de documents sur votre ordinateur</h3>
 
       <section>
-        <p>Vous pouvez aussi convertir toutes les pages webs que vous visitez, en installant une extension pour votre navigateur internet :</p>
+        <p>Téléchargez <a href="static/ortografe_cli.exe">le programme de conversion</a> (ne supporte que linux, pas Windows et pas MacOS).</p>
+      </section>
+
+      <h3>Transcription des pages internet lors de votre navigation</h3>
+
+      <section>
+        <a href="https://addons.mozilla.org/user-media/previews/full/293/293754.png?modified=1704030233"><img src="https://addons.mozilla.org/user-media/previews/thumbs/293/293754.jpg?modified=1704030233" style="max-width:100%"/></a>
+        <p>Lisez en orthographe simplifiée pendant votre navigation, en installation une extension pour votre navigateur internet :</p>
         <ul>
-          <li><img src="https://www.google.fr/chrome/static/images/chrome-logo-m100.svg"> <a href="https://chromewebstore.google.com/detail/orthographe-simplifi%C3%A9e/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr">pour google Chrome</a> (non supporté sur téléphone) </li>
-          <li><img src="https://www.mozilla.org/media/protocol/img/logos/firefox/browser/logo.eb1324e44442.svg"> <a href="https://addons.mozilla.org/fr/firefox/addon/orthographe-simplifi%C3%A9e/"> pour Firefox </a> </li>
-          <li><img src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg"> pas encore supporté pour Safari </li>
+          <li><img class="icon" src="https://www.google.fr/chrome/static/images/chrome-logo-m100.svg"> <a href="https://chromewebstore.google.com/detail/orthographe-simplifi%C3%A9e/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr">pour google Chrome</a> (non supporté sur téléphone) </li>
+          <li><img class="icon" src="https://www.mozilla.org/media/protocol/img/logos/firefox/browser/logo.eb1324e44442.svg"> <a href="https://addons.mozilla.org/fr/firefox/addon/orthographe-simplifi%C3%A9e/"> pour Firefox </a> </li>
+          <li><img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg"> pas encore supporté pour Safari </li>
         </ul>
       </section>
 
+      <h3>Correcteur d'orthographe</h3>
+
+      <a href="https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/">Extension pour Firefox</a>
+      <strong>à faire mieux</strong>
+
+      <h3>Données</h3>
+
+      Nous fournissons un dictionnaire qui décrit le passage de
+      l'orthographe usuelle à l'orthographe proposée, qui a été
+      calculé de façon <strong>semi-automatisé. <a href="??">lien à
+      ajouter</a></strong>
+
+      <h2>Pour aller plus loin</h2>
+
       <section>
-        <p> Voici des liens pour plus d'informations: </p>
         <ul>
-          <li>sur l'orthographe proposée, <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">version courte</a></li>
-          <li>sur l'orthographe proposée, <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">version longue</a> (peut-être 60 pages, mais ça se lit très bien)</li>
-          <li>sur l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme</li>
+          <li>plus d'information sur l'orthographe proposée, <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">version courte</a></li>
+          <li>plus d'information sursur l'orthographe proposée, <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">version longue</a> (peut-être 60 pages, mais ça se lit très bien)</li>
+          <li>plus d'information sursur l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme</li>
+          <li><strong><a href="mailto:...">Contactez-nous</a> si vous avez des problèmes</strong>, questions ou suggestions !</li>
           <li><a href="https://github.com/v-gb/ortografe">code source</a> de cette page</li>
+          <li><strong>Publication sur notre travail...</strong></li>
         </ul>
       </section>
 
@@ -88,6 +124,9 @@ Non-exemples: hache, ahuri, pays, rugby, Hercule, hellénique
   <script src="static/rewrite.js" defer></script>
   <script src="static/page.js" defer></script>
   <style>
+    h1 {
+        font-size: 3rem;
+    }
     p {
         max-width: 45em;
     }
@@ -98,19 +137,30 @@ Non-exemples: hache, ahuri, pays, rugby, Hercule, hellénique
     main * {
         font-size: 1.05rem;
     }
+    h2 {
+        font-size: 2.5rem;
+    }
+    h3 {
+        font-size: 1.3rem;
+    }
     #converted-text {
         white-space: pre-wrap;
         flex: 1 1 0px;
         min-width: 15em;
         max-width: 30em;
-        background-color: #FAF9F6;
+        min-height: 6em;
+        border: 1px solid;
+        background-color: #e5fbe5;
+        padding: 3px;
+        border-radius: 6px;
+        box-sizing: border-box;
     }
     /* https://css-tricks.com/snippets/css/a-guide-to-flexbox/ */
     #user-text {
         background-color: #FAF9F6;
         flex: 1 1 0px;
         min-width: 15em;
-        min-height: 20em;
+        min-height: 6em;
         max-width: 30em;
     }
     #container {
@@ -119,16 +169,36 @@ Non-exemples: hache, ahuri, pays, rugby, Hercule, hellénique
         justify-content: center;
         gap: 1em;
     }
-    img {
+    .icon {
         height: 1em;
+    }
+    #rules {
+        display: flex;
+        flex-direction: column;        
+    }
+    .to-transcribe {
+        margin-right:25%;
+    }
+    .transcribe-result {
+        margin-left:25%;
+        width: fit-content;
+        border: 1px solid;
+        background-color: #e5fbe5;
+        padding-top: 1px;
+        padding-bottom: 2px;
+        padding-left: 4px;
+        padding-right: 4px;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-top: 0.15em;
+        margin-bottom: 1em;
     }
     .upload {
         display: inline;
-        background-color: #1652F0;
-        border: 1px solid #1652F0;
+        background-color: #e5fbe5;
+        border: 1px solid;
         border-radius: 4px;
         box-sizing: border-box;
-        color: #FFFFFF;
         cursor: pointer;
         font-family: Graphik,-apple-system,system-ui,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
         font-size: 1.10rem;
