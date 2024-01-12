@@ -79,7 +79,7 @@ function make_walk(root) {
         });    
 }
 
-async function plausibly_french(b, root, debug) {
+async function plausibly_french_once(b, root, debug) {
     const t1 = performance.now();
     const walk = make_walk(root);
     let buf = ""
@@ -96,9 +96,36 @@ async function plausibly_french(b, root, debug) {
     // I've seen cases where isReliable:false, which was needlessly conservative
     const t3 = performance.now();
     console.log(`detected language: DOM traversal: ${t2 - t1}ms, detection: ${t3 - t2}ms, isReliable: ${isReliable}`, languages.map((e) => e.language + '=' + e.percentage).join(' '))
-    // rewrite even if french is not the main language, because oftentimes there is a fair
-    // amount of english in the doc that distorts even pages that visually contain mostly french
-    return languages.some((l) => l.language == 'fr' && l.percentage >= 30)
+    if (buf.length == 0) {
+        return null
+    } else {
+        // rewrite even if french is not the main language, because oftentimes there is a
+        // fair amount of english in the doc that distorts even pages that visually
+        // contain mostly french
+        return languages.some((l) => l.language == 'fr' && l.percentage >= 30)
+    }
+}
+
+async function plausibly_french(b, root, debug) {
+    let delay = 100;
+    while (true) {
+        const res = await plausibly_french_once(b, root, debug)
+        if (res !== null) {
+            return res;
+        }
+        // for pages that contain nothing like deezer, just wait to figure out the
+        // language. If the page contains a placeholder saying "please wait for the page
+        // to load or similar, at least that placeholder would inform us of the language,
+        // so the fact that we won't run the language detection again seems ok.
+        await new Promise((resolve) => {
+            const observer = new MutationObserver((_mutations) => {
+                observer.disconnect();
+                setTimeout(resolve, delay)
+                delay = Math.min(delay * 2, 1000)
+            })
+            observer.observe(root, { childList: true, characterData: true, subtree: true })
+        });
+    }
 }
 
 function rewrite_under(options, table, root){
