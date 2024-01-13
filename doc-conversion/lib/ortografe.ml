@@ -463,7 +463,7 @@ let epub ?buf ?debug ?pp src ~dst =
   |> write_out dst
 
 let of_ext ext =
-  match ext with
+  match String.lowercase_ascii ext with
   | ".html" -> Some (ext, `Html)
   | ".xhtml" -> Some (ext, `Xhtml)
   | ".docx" -> Some (ext, `Docx)
@@ -482,7 +482,7 @@ let convert typ src ~dst =
 
 let convert_string ~ext src =
   match
-    match ext with
+    match String.lowercase_ascii ext with
     | ".txt" | ".md" | ".mkd" -> Some (ext, `Text)
     | _ -> of_ext ext
   with
