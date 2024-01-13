@@ -409,7 +409,9 @@ let docx ?buf ?debug ?pp src ~dst =
   let count = count_size () in
   map_zip src (fun member file contents ->
       match Zipc.Member.path member with
-      | "word/document.xml" ->
+      | "word/document.xml"
+      | "word/footnotes.xml"
+      | "word/endnotes.xml" ->
          count file;
          Some (docx_xml ~buf ?debug ?pp (contents ()) ~dst:String)
       | _ -> None)
