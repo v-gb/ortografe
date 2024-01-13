@@ -1,7 +1,7 @@
 function rewrite(text, elt) {
     // ideally, we´d be a bit smarter and not rewrite everything on
     // every single keystroke here
-    const options = {color:true, trivial:false}
+    const options = {color:true, trivial:false, background_color:'#b9f4b9'}
     if (table === null) {
         table = load_dict(options);
     }
@@ -10,7 +10,7 @@ function rewrite(text, elt) {
 }
 
 function rewrite2(src, dst, color) {
-    const options = {color:color, trivial:false}
+    const options = {color:false, trivial:false}
     if (table === null) {
         table = load_dict(options);
     }
@@ -28,6 +28,6 @@ user_text.oninput = function() {
 for (const e of document.getElementsByClassName('to-transcribe')) {
     const dst = document.createElement('tr');
     dst.classList.add('transcribe-result')
-    rewrite2(e, dst, false)
+    rewrite2(e, dst)
     e.parentNode.insertBefore(dst, e.nextSibling)
 }

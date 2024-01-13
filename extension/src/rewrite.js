@@ -131,6 +131,7 @@ async function plausibly_french(b, root, debug) {
 function rewrite_under(options, table, root){
     let count = 0
     let to_remove = []
+    const backgroundColor = options.background_color || 'orange'
     const walk = make_walk(root);
     while(n=walk.nextNode()) {
         let regular_text = ""
@@ -168,7 +169,7 @@ function rewrite_under(options, table, root){
                     count += 1
                     const span = document.createElement('span');
                     span.appendChild(document.createTextNode(repl));
-                    span.style.backgroundColor = 'orange'
+                    span.style.backgroundColor = backgroundColor;
                     n.parentNode.insertBefore(span, n)
                 }
             }

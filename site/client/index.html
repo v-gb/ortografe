@@ -1,51 +1,65 @@
 <!doctype html>
 
-<html>
+<html lang="fr">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <head>
     <meta charset="utf-8" />
+    <title>Ortografe simplifiée</title>
+    <meta name="description" content="Outils pour mettre en pratique la proposition Érofa de simplification de l'orthographe du français." />
+    <!-- It would be good to have the open-graph stuff
+         https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML -->
+    <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
+    <script src="static/dict.js" defer></script>
+    <script src="static/rewrite.js" defer></script>
+    <script src="static/page.js" defer></script>
   </head>
   <body>
     <h1 style="text-align:center">Ortografe simplifiée</h1>
     <main>
+      <noscript>
+        <p>
+          Ce site utilise du javascript pour transcrire entre orthographes. Il va être
+          difficile de comprendre si vous n'activez pas le javascript.
+        </p>
+      </noscript>
       <section id="rules" class="notranslate">
-        <div class="to-transcribe">
+        <p class="to-transcribe">
           Les linguistes de l'<a href="http://erofa.free.fr/">association
           Érofa</a> propose trois règles pour simplifier des points difficiles de
           l'orthographe du français sans choquer :
-        </div>
-        <div class="to-transcribe">
+        </p>
+        <p class="to-transcribe">
           1) Les consonnes doubles qui n'ont pas d'effet sur la prononciation
           sont simplifiées. <br>
           Exemples: sonnerie, appelle, accord, lutte, verre <br>
           Non-exemples: messe, accident, évidemment, surréalisme <br>
-        </div>
-        <div class="to-transcribe">
+        </p>
+        <p class="to-transcribe">
           2) Les x finaux muets deviennent des s. <br>
           Exemples: bijoux, choix, veux, deux <br>
           Non-exemples: dix, duplex, Chamonix <br>
-        </div>
-        <div class="to-transcribe">
+        </p>
+        <p class="to-transcribe">
           3) Les ph, h et y grecs ou similaires sont simplifiés. <br>
           Exemples: photographie, rythme, humain, psychologie, chaos, théâtre,
           huile, déshabiller <br>
           Non-exemples: hache, ahuri, pays, rugby, Hercule, hellénique <br>
-        </div>
+        </p>
       </section>
 
       <h2>Outils de mise en pratique</h2>
 
-      Les propositions, c'est bien, les utiliser c'est mieux. Nous proposons donc des outils pour faire ça.
-      <strong>décrire les license pour tout ça</strong>
+      Des propositions, c'est bien, les utiliser c'est mieux. Nous proposons donc des outils pour faire ça.
+      <todo>décrire les license pour tout ça</todo>
 
       <h3>Transcription interactive</h3>
 
       <section id="container">
-        <textarea id="user-text">Babar a une mémoire exceptionnelle, comme tous les élé...</textarea>
+        <textarea id="user-text">Babar a une mémoire exceptionnelle, car c'est un élé...</textarea>
         <div id="converted-text" class="notranslate"></div>
       </section>
 
-      <h3>Transcription de documents en ligne</h3>
+      <h3>Transcription de documents</h3>
 
       <section>
         <form action="/conv" method="post" enctype="multipart/form-data">
@@ -61,6 +75,7 @@
                in general, finding icons on wikipedia is the way to go
             -->
           <li>fichiers textes (.txt, .mkd, .md)
+          <li>pages web (.html, .xhtml)</li>
           <li>fichiers <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg" alt="Microsoft Office Word (2019–present).svg"> Word, <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/4/45/LibreOffice_7.5_Writer_Icon.png" alt="LibreOffice 7.5 Writer Icon.png"> LibreOffice, <a title="OpenOffice.org, LGPL &lt;http://www.gnu.org/licenses/lgpl.html&gt;, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:OOoWriter3logo.png"><img class="icon" alt="OOoWriter3logo" src="https://upload.wikimedia.org/wikipedia/commons/f/f8/OOoWriter3logo.png"></a> OpenOffice (.doc, .docx) </li>
           <li><a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg#/media/File:Epub_logo_color.svg"><img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Epub_logo_color.svg" alt="Epub logo color.svg"></a> livres numériques (.epub)
             <br>
@@ -81,7 +96,7 @@
         <p>Téléchargez <a href="static/ortografe_cli.exe">le programme de conversion</a> (ne supporte que linux, pas Windows et pas MacOS).</p>
       </section>
 
-      <h3>Transcription des pages internet lors de votre navigation</h3>
+      <h3>Transcription des pages internet que vous visitez</h3>
 
       <section>
         <a href="https://addons.mozilla.org/user-media/previews/full/293/293754.png?modified=1704030233"><img src="https://addons.mozilla.org/user-media/previews/thumbs/293/293754.jpg?modified=1704030233" style="max-width:100%"/></a>
@@ -96,33 +111,29 @@
       <h3>Correcteur d'orthographe</h3>
 
       <a href="https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/">Extension pour Firefox</a>
-      <strong>à faire mieux</strong>
+      <todo>à faire mieux</todo>
 
       <h3>Données</h3>
 
       Nous fournissons un dictionnaire qui décrit le passage de
       l'orthographe usuelle à l'orthographe proposée, qui a été
-      calculé de façon <strong>semi-automatisé. <a href="??">lien à
-      ajouter</a></strong>
+      calculé de façon semi-automatisé. <todo><a href="??">lien à
+      ajouter</a></todo>
 
       <h2>Pour aller plus loin</h2>
 
       <section>
         <ul>
-          <li>plus d'information sur l'orthographe proposée, <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">version courte</a></li>
-          <li>plus d'information sursur l'orthographe proposée, <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">version longue</a> (peut-être 60 pages, mais ça se lit très bien)</li>
-          <li>plus d'information sursur l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme</li>
-          <li><strong><a href="mailto:...">Contactez-nous</a> si vous avez des problèmes</strong>, questions ou suggestions !</li>
+          <li>plus d'information sur l'orthographe proposée, version <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">courte</a> ou <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">longue</a> (mais ça se lit très bien)<todo>pointer vers doc sans le dico pour pas effrayer les gens</todo></li>
+          <li>plus d'information sur l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme</li>
+          <li><todo><a href="mailto:...">Contactez-nous</a> si vous avez des problèmes</todo>, questions ou suggestions !</li>
           <li><a href="https://github.com/v-gb/ortografe">code source</a> de cette page</li>
-          <li><strong>Publication sur notre travail...</strong></li>
+          <li><todo>Publication sur notre travail...</todo></li>
         </ul>
       </section>
 
     </main>
   </body>
-  <script src="static/dict.js" defer></script>
-  <script src="static/rewrite.js" defer></script>
-  <script src="static/page.js" defer></script>
   <style>
     h1 {
         font-size: 3rem;
@@ -190,8 +201,7 @@
         padding-right: 4px;
         border-radius: 4px;
         box-sizing: border-box;
-        margin-top: 0.5em;
-        margin-bottom: 1em;
+        margin-top: -0.5em;
     }
     .upload {
         display: inline;
@@ -207,6 +217,9 @@
         text-align: center;
         text-transform: none;
         width: fit-content;
+    }
+    todo {
+        background-color:#ffcccb;
     }
   </style>
 </html>
