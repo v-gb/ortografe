@@ -12,6 +12,94 @@
     <script src="static/dict.js" defer></script>
     <script src="static/rewrite.js" defer></script>
     <script src="static/page.js" defer></script>
+    <style>
+      h1 {
+          font-size: 3rem;
+      }
+      p {
+          max-width: 45em;
+      }
+      main {
+          max-width: 55em;
+          margin: auto;
+      }
+      main * {
+          font-size: 1.05rem;
+      }
+      h2 {
+          font-size: 2.5rem;
+      }
+      h3 {
+          font-size: 1.3rem;
+      }
+      #converted-text {
+          white-space: pre-wrap;
+          flex: 1 1 0px;
+          min-width: 15em;
+          max-width: 30em;
+          min-height: 6em;
+          border: 2px solid #b9f4b9;
+          background-color: #e5fbe5;
+          padding: 3px;
+          border-radius: 6px;
+          box-sizing: border-box;
+      }
+      /* https://css-tricks.com/snippets/css/a-guide-to-flexbox/ */
+      #user-text {
+          background-color: #FAF9F6;
+          flex: 1 1 0px;
+          min-width: 15em;
+          min-height: 6em;
+          max-width: 30em;
+      }
+      #container {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1em;
+      }
+      .icon {
+          height: 1em;
+      }
+      #rules {
+          display: flex;
+          flex-direction: column;        
+      }
+      .to-transcribe {
+          margin-right:25%;
+      }
+      .transcribe-result {
+          margin-left:25%;
+          width: fit-content;
+          border: 2px solid #b9f4b9;
+          background-color: #e5fbe5;
+          padding-top: 1px;
+          padding-bottom: 2px;
+          padding-left: 4px;
+          padding-right: 4px;
+          border-radius: 4px;
+          box-sizing: border-box;
+          margin-top: -0.5em;
+      }
+      .upload {
+          display: inline;
+          background-color: #e5fbe5;
+          border: 1.5px solid;
+          border-radius: 4px;
+          box-sizing: border-box;
+          cursor: pointer;
+          font-family: Graphik,-apple-system,system-ui,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
+          font-size: 1.10rem;
+          line-height: 1.15;
+          padding: 6px 8px;
+          text-align: center;
+          text-transform: none;
+          width: fit-content;
+      }
+      .todo {
+          background-color:#ffcccb;
+      }
+    </style>
   </head>
   <body>
     <h1 style="text-align:center">Ortografe simplifiée</h1>
@@ -49,8 +137,10 @@
 
       <h2>Outils de mise en pratique</h2>
 
-      Des propositions, c'est bien, les utiliser c'est mieux. Nous proposons donc des outils pour faire ça.
-      <todo>décrire les license pour tout ça</todo>
+      <p>
+        Des propositions, c'est bien, les utiliser c'est mieux. Nous proposons donc des outils pour faire ça.
+        <span class=todo>décrire les license pour tout ça</span>
+      </p>
 
       <h3>Transcription interactive</h3>
 
@@ -93,7 +183,7 @@
       <h3>Transcription de documents sur votre ordinateur</h3>
 
       <section>
-        <p>Téléchargez <a href="static/ortografe_cli.exe">le programme de conversion</a> (ne supporte que linux, pas Windows et pas MacOS).</p>
+        <p>Téléchargez <a href="static/ortografe_cli.exe" download="ortografe-cli">le programme de conversion</a> (ne supporte que linux, pas Windows et pas MacOS).</p>
       </section>
 
       <h3>Transcription des pages internet que vous visitez</h3>
@@ -111,115 +201,27 @@
       <h3>Correcteur d'orthographe</h3>
 
       <a href="https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/">Extension pour Firefox</a>
-      <todo>à faire mieux</todo>
+      <span class=todo>à faire mieux</span>
 
       <h3>Données</h3>
 
       Nous fournissons un dictionnaire qui décrit le passage de
       l'orthographe usuelle à l'orthographe proposée, qui a été
-      calculé de façon semi-automatisé. <todo><a href="??">lien à
-      ajouter</a></todo>
+      calculé de façon semi-automatisé. <span class=todo><a href="??">lien à
+      ajouter</a></span>
 
       <h2>Pour aller plus loin</h2>
 
       <section>
         <ul>
-          <li>plus d'information sur l'orthographe proposée, version <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">courte</a> ou <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">longue</a> (mais ça se lit très bien)<todo>pointer vers doc sans le dico pour pas effrayer les gens</todo></li>
+          <li>plus d'information sur l'orthographe proposée, version <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">courte</a> ou <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">longue</a> (mais ça se lit très bien)<span class=todo>pointer vers doc sans le dico pour pas effrayer les gens</span></li>
           <li>plus d'information sur l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme</li>
-          <li><todo><a href="mailto:...">Contactez-nous</a> si vous avez des problèmes</todo>, questions ou suggestions !</li>
+          <li><span class=todo><a href="mailto:...">Contactez-nous</a> si vous avez des problèmes</span>, questions ou suggestions !</li>
           <li><a href="https://github.com/v-gb/ortografe">code source</a> de cette page</li>
-          <li><todo>Publication sur notre travail...</todo></li>
+          <li><span class=todo>Publication sur notre travail...</span></li>
         </ul>
       </section>
 
     </main>
   </body>
-  <style>
-    h1 {
-        font-size: 3rem;
-    }
-    p {
-        max-width: 45em;
-    }
-    main {
-        max-width: 55em;
-        margin: auto;
-    }
-    main * {
-        font-size: 1.05rem;
-    }
-    h2 {
-        font-size: 2.5rem;
-    }
-    h3 {
-        font-size: 1.3rem;
-    }
-    #converted-text {
-        white-space: pre-wrap;
-        flex: 1 1 0px;
-        min-width: 15em;
-        max-width: 30em;
-        min-height: 6em;
-        border: 2px solid #b9f4b9;
-        background-color: #e5fbe5;
-        padding: 3px;
-        border-radius: 6px;
-        box-sizing: border-box;
-    }
-    /* https://css-tricks.com/snippets/css/a-guide-to-flexbox/ */
-    #user-text {
-        background-color: #FAF9F6;
-        flex: 1 1 0px;
-        min-width: 15em;
-        min-height: 6em;
-        max-width: 30em;
-    }
-    #container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 1em;
-    }
-    .icon {
-        height: 1em;
-    }
-    #rules {
-        display: flex;
-        flex-direction: column;        
-    }
-    .to-transcribe {
-        margin-right:25%;
-    }
-    .transcribe-result {
-        margin-left:25%;
-        width: fit-content;
-        border: 2px solid #b9f4b9;
-        background-color: #e5fbe5;
-        padding-top: 1px;
-        padding-bottom: 2px;
-        padding-left: 4px;
-        padding-right: 4px;
-        border-radius: 4px;
-        box-sizing: border-box;
-        margin-top: -0.5em;
-    }
-    .upload {
-        display: inline;
-        background-color: #e5fbe5;
-        border: 1.5px solid;
-        border-radius: 4px;
-        box-sizing: border-box;
-        cursor: pointer;
-        font-family: Graphik,-apple-system,system-ui,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
-        font-size: 1.10rem;
-        line-height: 1.15;
-        padding: 6px 8px;
-        text-align: center;
-        text-transform: none;
-        width: fit-content;
-    }
-    todo {
-        background-color:#ffcccb;
-    }
-  </style>
 </html>
