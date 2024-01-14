@@ -2,7 +2,9 @@
  (name server)
  (libraries core
             dream
+            hyper
             cmdliner
+            uri
             ortografe
             )
  (preprocess (pps ppx_jane lwt_ppx))

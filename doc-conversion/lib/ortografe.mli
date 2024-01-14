@@ -12,6 +12,11 @@ val max_size : int ref
 val convert_string : ext:string -> convert_uppercase:bool -> string -> (string * string) option
 val convert_files : convert_uppercase:bool -> string option -> string option -> unit
 
+val map_zip
+    : string
+      -> (Zipc.Member.t -> Zipc.File.t -> (unit -> string) -> string option)
+      -> string
+
 (**/**)
 module Private : sig
   val docx_document : string -> string
