@@ -464,10 +464,22 @@ let epub ?buf ?debug ?pp src ~dst =
       | _ -> None)
   |> write_out dst
 
+let htmlz ?buf ?debug ?pp src ~dst =
+  let buf = buffer buf in
+  let count = count_size () in
+  map_zip src (fun member file contents ->
+      match Filename.extension (Zipc.Member.path member) with
+      | ".html" ->
+         count file;
+         Some (html ~buf ?debug ?pp (contents ()) ~dst:String)
+      | _ -> None)
+  |> write_out dst
+  
 let of_ext ext =
   match String.lowercase_ascii ext with
   | ".html" -> Some (ext, `Html)
   | ".xhtml" -> Some (ext, `Xhtml)
+  | ".htmlz" -> Some (ext, `Htmlz) (* export format on wikisource for instance *)
   | ".docx" -> Some (ext, `Docx)
   | ".doc" -> Some (".docx", `Doc)
   | ".epub" -> Some (ext, `Epub)
@@ -477,6 +489,7 @@ let convert typ src ~dst =
   match typ with
   | `Html -> html src ~dst
   | `Xhtml -> xhtml src ~dst
+  | `Htmlz -> htmlz src ~dst
   | `Docx -> docx src ~dst
   | `Doc -> doc src ~dst
   | `Epub -> epub src ~dst
