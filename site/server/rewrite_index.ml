@@ -1,33 +1,8 @@
 open Core
 
-module Tmp = struct
-  type name = string * string
-  [@@deriving sexp_of]
+type tree = Ortografe.More_markup.tree [@@deriving sexp_of]
 
-  type 'a node =
-    [ `Element of name * (name * string) list * 'a list
-    | `Text of string
-    | `Doctype of (Markup.doctype [@sexp.opaque])
-    | `Xml of (Markup.xml_declaration [@sexp.opaque])
-    | `PI of string * string
-    | `Comment of string ]
-  [@@deriving sexp_of]
-
-  type tree = tree node
-  [@@deriving sexp_of]
-end
-
-type tree = Tmp.tree [@@deriving sexp_of]
-
-let trees signals =
-  (* should try to upstream this, this is boilerplate that should be provided upstream *)
-  Markup.trees signals
-    ~text:(fun s -> `Text (String.concat s))
-    ~element:(fun a b c -> `Element (a, b, c))
-    ~comment:(fun a -> `Comment a)
-    ~pi:(fun a b -> `PI (a, b))
-    ~xml:(fun a -> `Xml a)
-    ~doctype:(fun a -> `Doctype a)
+let trees = Ortografe.More_markup.trees
 
 let trees_of_string src : tree list =
   Markup.parse_html

@@ -154,6 +154,82 @@ let%expect_test "docx" = (
      </w:t> |}];
 )
 
+
+let%expect_test "noisy docx" = (
+    let xml ~transform src =
+      (* we print a sexp because xml pp doesn't respect meaningful whitespaces, so it
+         changes the meaning of the doc in confusing ways *)
+      Markup.parse_xml
+        (Markup.string src)
+      |> Markup.signals
+      |> transform
+      |> Ortografe.More_markup.trees
+      |> Markup.to_list
+      |> [%sexp_of: Ortografe.More_markup.tree list]
+      |> Sexp.to_string_hum
+    in
+    let text = {|<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" mc:Ignorable="w14 wp14 w15"><w:body><w:p><w:pPr><w:pStyle w:val="Normal"/><w:bidi w:val="0"/><w:jc w:val="left"/><w:rPr></w:rPr></w:pPr><w:r><w:rPr></w:rPr><w:t>Un deu</w:t></w:r><w:r><w:rPr></w:rPr><w:t>s</w:t></w:r><w:r><w:rPr></w:rPr><w:t xml:space="preserve"> trois quatre.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="Normal"/><w:bidi w:val="0"/><w:jc w:val="left"/><w:rPr></w:rPr></w:pPr><w:r><w:rPr></w:rPr></w:r></w:p><w:sectPr><w:type w:val="nextPage"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:left="1134" w:right="1134" w:gutter="0" w:header="0" w:top="1134" w:footer="0" w:bottom="1134"/><w:pgNumType w:fmt="decimal"/><w:formProt w:val="false"/><w:textDirection w:val="lrTb"/><w:docGrid w:type="default" w:linePitch="100" w:charSpace="0"/></w:sectPr></w:body></w:document>
+ |}
+    in
+    print_string (diff_strings ~context:3
+                    (xml ~transform:Fn.id text)
+                    (xml ~transform:Ortografe.Private.join_consecutive_ish_text_nodes text));
+    [%expect{|
+                    (Element (docx:rPr ())))))
+                 (Element
+                  (docx:r
+      -            ((Element (docx:rPr ())) (Element (docx:t ((Text "Un deu")))))))
+      -          (Element
+      -           (docx:r ((Element (docx:rPr ())) (Element (docx:t ((Text s)))))))
+      -          (Element
+      -           (docx:r
+                   ((Element (docx:rPr ()))
+      -             (Element
+      -              (docx:t ((xml:space preserve)) ((Text " trois quatre."))))))))))
+      +             (Element (docx:t ((Text "Un deus trois quatre."))))))))))
+              (Element
+               (docx:p
+                ((Element |}];
+    let text = {|<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" mc:Ignorable="w14 wp14"><w:body><w:p w:rsidR="A" w:rsidRDefault="B"><w:pPr><w:spacing w:line="360" w:lineRule="auto"/><w:ind w:left="5670"/><w:jc w:val="both"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">M. </w:t></w:r><w:r w:rsidR="C"><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr><w:t>Jacques d</w:t></w:r><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">e </w:t></w:r><w:proofErr w:type="spellStart"/><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr><w:t>Bravil</w:t></w:r><w:proofErr w:type="spellEnd"/></w:p></w:body></w:document>|} in
+    print_string (diff_strings ~context:3
+                    (xml ~transform:Fn.id text)
+                    (xml ~transform:Ortografe.Private.join_consecutive_ish_text_nodes text));
+    [%expect{|
+                      ((Element
+                        (docx:rFonts ((docx:ascii Arial) (docx:hAnsi Arial)) ()))
+                       (Element (docx:sz ((docx:val 22)) ())))))
+      -             (Element (docx:t ((xml:space preserve)) ((Text "M. ")))))))
+      -          (Element
+      -           (docx:r ((docx:rsidR C))
+      -            ((Element
+      -              (docx:rPr
+      -               ((Element
+      -                 (docx:rFonts ((docx:ascii Arial) (docx:hAnsi Arial)) ()))
+      -                (Element (docx:sz ((docx:val 22)) ())))))
+      -             (Element (docx:t ((Text "Jacques d")))))))
+      -          (Element
+      -           (docx:r
+      -            ((Element
+      -              (docx:rPr
+      -               ((Element
+      -                 (docx:rFonts ((docx:ascii Arial) (docx:hAnsi Arial)) ()))
+      -                (Element (docx:sz ((docx:val 22)) ())))))
+      -             (Element (docx:t ((xml:space preserve)) ((Text "e ")))))))
+      -          (Element (docx:proofErr ((docx:type spellStart)) ()))
+      -          (Element
+      -           (docx:r
+      -            ((Element
+      -              (docx:rPr
+      -               ((Element
+      -                 (docx:rFonts ((docx:ascii Arial) (docx:hAnsi Arial)) ()))
+      -                (Element (docx:sz ((docx:val 22)) ())))))
+      -             (Element (docx:t ((Text Bravil)))))))
+      -          (Element (docx:proofErr ((docx:type spellEnd)) ()))))))))))))
+      +             (Element (docx:t ((Text "M. Jacques de Bravil")))))))))))))))))
+|}];    
+  )
+
 let%expect_test "epub" = (
     let src = In_channel.read_all "epub.md" in
     Sys_unix.command_exn "pandoc epub.md -o epub.epub";
