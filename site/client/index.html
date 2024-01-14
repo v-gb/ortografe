@@ -1,11 +1,11 @@
 <!doctype html>
 
 <html lang="fr">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <head>
-    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
     <title>Ortografe simplifiée</title>
-    <meta name="description" content="Outils pour mettre en pratique la proposition Érofa de simplification de l'orthographe du français." />
+    <meta name="description" content="Outils pour mettre en pratique la proposition Érofa de simplification de l'orthographe du français.">
     <!-- It would be good to have the open-graph stuff
          https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML -->
     <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
@@ -52,7 +52,7 @@
           min-height: 6em;
           max-width: 30em;
       }
-      #container {
+      #interactive-transcription {
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
@@ -66,10 +66,12 @@
           flex-direction: column;        
       }
       .to-transcribe {
-          margin-right:25%;
+          margin-right:calc(100% - clamp(70%, 30em, 85%));
+          /* margin-right:25%; */
       }
       .transcribe-result {
-          margin-left:25%;
+          margin-left:calc(100% - clamp(70%, 30em, 85%));
+          /* margin-left:25%; */
           width: fit-content;
           border: 2px solid #b9f4b9;
           background-color: #e5fbe5;
@@ -110,7 +112,8 @@
           difficile de comprendre si vous n'activez pas le javascript.
         </p>
       </noscript>
-      <section id="rules" class="notranslate">
+
+      <div id="rules" class="notranslate">
         <p class="to-transcribe">
           Les linguistes de l'<a href="http://erofa.free.fr/">association Érofa</a>
           proposent trois règles pour simplifier des points difficiles de l'orthographe du
@@ -133,28 +136,32 @@
           huile, déshabiller <br>
           Non-exemples&#8239;: hache, ahuri, pays, rugby, Hercule, hellénique <br>
         </p>
-      </section>
-
-      <h2>Outils de mise en pratique</h2>
-
-      <p>
-        Des propositions, c'est bien, les utiliser c'est mieux. Nous proposons donc des outils pour faire ça.
-        <span class=todo>décrire les license pour tout ça</span>
-      </p>
-
-      <h3>Transcription interactive</h3>
-
-      <section id="container">
-        <textarea id="user-text">Babar a une mémoire exceptionnelle, car c'est un élé...</textarea>
-        <div id="converted-text" class="notranslate"></div>
-      </section>
-
-      <h3>Transcription de documents</h3>
+      </div>
 
       <section>
+        <h2>Outils de mise en pratique</h2>
+
+        <p>
+          Des propositions, c'est bien, les utiliser c'est mieux. Nous proposons donc des outils pour faire ça.
+          <span class=todo>décrire les license pour tout ça</span>
+        </p>
+      </section>
+      
+      <section>
+        <h3>Transcription interactive</h3>
+
+        <div id="interactive-transcription">
+          <textarea id="user-text">Babar a une mémoire exceptionnelle, car c'est un élé...</textarea>
+          <div id="converted-text" class="notranslate"></div>
+        </div>
+      </section>
+
+      <section>
+        <h3>Transcription de documents</h3>
+
         <form action="/conv" method="post" enctype="multipart/form-data">
           <label class="upload">
-            <input style="display:none" type="file" name="file" accept=".doc,.docx,.html,.xhtml,.epub,.txt,.mkd,.md" onchange="form.submit()"/>
+            <input style="display:none" type="file" name="file" accept=".doc,.docx,.html,.xhtml,.epub,.txt,.mkd,.md" onchange="form.submit()">
             choisir un fichier
           </label>
         </form>
@@ -180,16 +187,16 @@
         </ul>
       </section>
 
-      <h3>Transcription de documents sur votre ordinateur</h3>
-
       <section>
+        <h3>Transcription de documents sur votre ordinateur</h3>
+
         <p>Téléchargez <a href="static/ortografe_cli.exe" download="ortografe-cli">le programme de conversion</a> (ne supporte que linux, pas Windows et pas MacOS).</p>
       </section>
 
-      <h3>Transcription des pages internet que vous visitez</h3>
-
       <section>
-        <a href="https://addons.mozilla.org/user-media/previews/full/293/293754.png?modified=1704030233"><img src="https://addons.mozilla.org/user-media/previews/thumbs/293/293754.jpg?modified=1704030233" style="max-width:100%"/></a>
+        <h3>Transcription des pages internet que vous visitez</h3>
+
+        <a href="https://addons.mozilla.org/user-media/previews/full/293/293754.png?modified=1704030233"><img src="https://addons.mozilla.org/user-media/previews/thumbs/293/293754.jpg?modified=1704030233" style="max-width:100%"></a>
         <p>Lisez en orthographe simplifiée pendant votre navigation, en installation une extension pour votre navigateur internet&#8239;:</p>
         <ul>
           <li><img class="icon" src="https://www.google.fr/chrome/static/images/chrome-logo-m100.svg"> <a href="https://chromewebstore.google.com/detail/orthographe-simplifi%C3%A9e/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr">pour google Chrome</a> (non supporté sur téléphone) </li>
@@ -198,21 +205,27 @@
         </ul>
       </section>
 
-      <h3>Correcteur d'orthographe</h3>
+      <section>
+        <h3>Correcteur d'orthographe</h3>
 
-      <a href="https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/">Extension pour Firefox</a>
-      <span class=todo>à faire mieux</span>
-
-      <h3>Données</h3>
-
-      Nous fournissons un dictionnaire qui décrit le passage de
-      l'orthographe usuelle à l'orthographe proposée, qui a été
-      calculé de façon semi-automatisé. <span class=todo><a href="??">lien à
-      ajouter</a></span>
-
-      <h2>Pour aller plus loin</h2>
+        <a href="https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/">Extension pour Firefox</a>
+        <span class=todo>à faire mieux</span>
+      </section>
 
       <section>
+        <h3>Données</h3>
+
+        <p>
+          Nous fournissons un dictionnaire qui décrit le passage de
+          l'orthographe usuelle à l'orthographe proposée, qui a été
+          calculé de façon semi-automatisé. <span class=todo><a href="??">lien à
+              ajouter</a></span>
+        </p>
+      </section>
+
+      <section>
+        <h2>Pour aller plus loin</h2>
+
         <ul>
           <li>plus d'information sur l'orthographe proposée, version <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">courte</a> ou <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">longue</a> (mais ça se lit très bien)<span class=todo>pointer vers doc sans le dico pour pas effrayer les gens</span></li>
           <li>plus d'information sur l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme</li>
