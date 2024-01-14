@@ -13,6 +13,12 @@
     <script src="/static/rewrite.js" defer></script>
     <script src="/static/page.js" defer></script>
     <style>
+      body {
+          margin: 0;
+      }
+      .main-with-margin {
+          margin: 0 8px 8px 8px;
+      }
       main {
           max-width: 55em;
           margin: auto;
@@ -22,9 +28,11 @@
       }
       h1 {
           font-size: 3rem;
+          font-family: sans-serif;
       }
       h2 {
           font-size: 2.5rem;
+          font-family: sans-serif;
       }
       h3 {
           font-size: 1.3rem;
@@ -104,7 +112,6 @@
           gap:0.3em;
           margin-left: 0.7em;
       }
-
       .books li:not(:last-child) {
           margin-bottom: 2px;
       }
@@ -127,11 +134,55 @@
       .note {
           font-size: 0.8em;
       }
+
+      body {
+          display:flex;
+          flex-direction: column;
+      }
+      nav {
+          background-color: #F5F5F5;
+          .nav-limited-width {
+              max-width: 55em;
+              margin: auto;
+          }
+          ul {
+              margin: 0;
+              padding: 0;
+              list-style-type: none;
+              font-size: 1.1em;
+              font-weight: bold;
+              display:flex;
+              flex-direction: row;
+          }
+          a {
+              display: block;
+              margin: 0;
+              padding: 20px 20px 20px;
+          }
+          a:link, a:visited {
+              font-family: sans-serif;
+              color: inherit;
+              text-decoration: unset;
+          }
+          a:hover {
+              text-decoration-line: underline;
+          }
+      }
     </style>
   </head>
   <body>
-    <h1 style="text-align:center">Ortografe simplifiée</h1>
+    <nav>
+      <div class=nav-limited-width>
+        <ul>
+          <li><a href="#regles">Règles</a></li>
+          <li><a href="#outils">Outils</a></li>
+          <li><a href="#aller-plus-loin">Aller plus loin</a></li>
+        </ul>
+      </div>
+    </nav>
     <main>
+      <div class=main-with-margin>
+      <h1 style="text-align:center">Ortografe simplifiée</h1>
       <p>
         Les linguistes de l'<a href="http://erofa.free.fr/">association Érofa</a>
         proposent trois règles pour simplifier des points difficiles de l'orthographe du
@@ -147,7 +198,7 @@
         Notez également que ces changements sont bâtis sur les rectifications de 1990, qui sont donc (en partie) appliquées.
       </p>
 
-      <section>
+      <section id="regles">
         <h2>Les règles</h2>
         <div id="rules" class="notranscribe">
           <p class="to-transcribe" style="margin-top:0em"> Vous avez dû constater que les
@@ -182,7 +233,7 @@
         </div>
       </section>
 
-      <section>
+      <section id="outils">
         <h2>Outils de mise en pratique</h2>
 
         <p>
@@ -296,8 +347,8 @@
         </ul>
       </section>
 
-      <section>
-        <h2>Pour aller plus loin</h2>
+      <section id="aller-plus-loin">
+        <h2>Aller plus loin</h2>
 
         <ul>
           <li>plus d'information sur l'orthographe proposée (très lisible sans être expert)
@@ -318,6 +369,7 @@
       <footer>
         Vous pouvez retrouver l'origine des diverses icônes utilisées dans cette page en cliquant dessus. Aucunes n'ont été modifiées.
       </footer>
+      </div>
     </main>
   </body>
 </html>
