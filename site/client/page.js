@@ -26,8 +26,9 @@ user_text.oninput = function() {
     rewrite(this.value, converted_text)
 }
 for (const e of document.getElementsByClassName('to-transcribe')) {
-    const dst = document.createElement('tr');
+    const src = e.tagName == 'P' ? e : e.lastElementChild
+    const dst = document.createElement(src.tagName);
     dst.classList.add('transcribe-result')
-    rewrite2(e, dst)
+    rewrite2(src, dst)
     e.parentNode.insertBefore(dst, e.nextSibling)
 }

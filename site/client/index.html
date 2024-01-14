@@ -66,11 +66,11 @@
           flex-direction: column;        
       }
       .to-transcribe {
-          margin-right:calc(100% - clamp(70%, 30em, 85%));
+          margin-right:calc(100% - clamp(75%, 30em, 85%));
           /* margin-right:25%; */
       }
       .transcribe-result {
-          margin-left:calc(100% - clamp(70%, 30em, 85%));
+          margin-left:calc(100% - clamp(75%, 30em, 85%));
           /* margin-left:25%; */
           width: fit-content;
           border: 2px solid #b9f4b9;
@@ -82,6 +82,7 @@
           border-radius: 4px;
           box-sizing: border-box;
           margin-top: -0.5em;
+          margin-bottom: 0em;
       }
       .upload {
           display: inline;
@@ -101,6 +102,12 @@
       .todo {
           background-color:#ffcccb;
       }
+      .pseudolist {
+          display:flex;
+          flex-direction: row;
+          gap:0.3em;
+          margin-left: 0.7em;
+      }
     </style>
   </head>
   <body>
@@ -119,23 +126,32 @@
           proposent trois règles pour simplifier des points difficiles de l'orthographe du
           français sans choquer&#8239;:
         </p>
-        <p class="to-transcribe">
-          1) Les consonnes doubles qui n'ont pas d'effet sur la prononciation
-          sont simplifiées. <br>
-          Exemples&#8239;: sonnerie, appelle, accord, lutte, verre <br>
-          Non-exemples&#8239;: messe, accident, évidemment, surréalisme <br>
-        </p>
-        <p class="to-transcribe">
-          2) Les x finaux muets deviennent des s. <br>
-          Exemples&#8239;: bijoux, choix, veux, deux <br>
-          Non-exemples&#8239;: dix, duplex, Chamonix <br>
-        </p>
-        <p class="to-transcribe">
-          3) Les ph, h et y grecs ou similaires sont simplifiés. <br>
-          Exemples&#8239;: photographie, rythme, humain, psychologie, chaos, théâtre,
-          huile, déshabiller <br>
-          Non-exemples&#8239;: hache, ahuri, pays, rugby, Hercule, hellénique <br>
-        </p>
+        <div class="to-transcribe pseudolist">
+          <p><span style="letter-spacing: -0.1em;">1.</span></p>
+          <p>
+            Les consonnes doubles qui n'ont pas d'effet sur la prononciation
+            sont simplifiées. <br>
+            Exemples&#8239;: sonnerie, appelle, accord, lutte, verre <br>
+            Mais pas&#8239;: messe, accident, ennui, surréalisme <br>
+          </p>
+        </div>
+        <div class="to-transcribe pseudolist">
+          <p><span style="letter-spacing: -0.1em;">2.</span></p>
+          <p>
+              Les x finaux muets deviennent des s. <br>
+              Exemples&#8239;: bijoux, choix, veux, deux <br>
+              Mais pas&#8239;: dix, duplex, Chamonix <br>
+            </p>
+        </div>
+        <div class="to-transcribe pseudolist">
+          <p><span style="letter-spacing: -0.1em;">3.</span></p>
+            <p>
+              Les ph, h et y grecs ou similaires sont simplifiés. <br>
+              Exemples&#8239;: photographie, rythme, humain, psychologie, chaos, théâtre,
+              huile, déshabiller <br>
+              Mais pas&#8239;: hache, ahuri, pays, rugby, Hercule, hellénique <br>
+            </p>
+        </div>
       </div>
 
       <section>
