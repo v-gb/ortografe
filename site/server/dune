@@ -6,6 +6,7 @@
    dream
    hyper
    ortografe
+   core_unix.sys_unix
    uri
  )
  (preprocess (pps ppx_jane lwt_ppx))

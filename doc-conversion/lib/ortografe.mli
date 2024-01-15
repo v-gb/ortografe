@@ -4,6 +4,7 @@ type 'a out =
 
 val pure_text : ?buf:Buffer.t -> convert_uppercase:bool -> string -> dst:'a out -> 'a
 val html : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> convert_uppercase:bool -> string -> dst:'a out -> 'a
+val htmlz : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> convert_uppercase:bool -> string -> dst:'a out -> 'a
 val docx : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> convert_uppercase:bool -> string -> dst:'a out -> 'a
 val epub : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> convert_uppercase:bool -> string -> dst:'a out -> 'a
 val doc : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> convert_uppercase:bool -> string -> dst:'a out -> 'a

@@ -15,36 +15,38 @@ let my_error_template (error : Dream.error) debug_info suggested_response =
             | `Server -> Dream.html_escape debug_info)));
   Lwt.return suggested_response
 
+let repo_root () =
+  let root = ref (Filename.dirname Sys.executable_name) in
+  while not (Sys.file_exists (Filename.concat !root ".git")
+             || Sys.file_exists (Filename.concat !root ".jj"))
+  do
+    root := Filename.dirname !root;
+    match !root with
+    | "." | ".." | "/" -> failwith "server expects to run in container or in repo"
+    | _ -> ()
+  done;
+  !root
+
 let where_to_find_static_files () =
   if Sys.file_exists "/static" (* when in container *)
   then "/static"
   else
     (* In dev, setup symlinks to the files in the repo, so we can just
        modify the files and reload without fiddling with the server. *)
-    let repo_root =
-      let root = ref (Filename.dirname Sys.executable_name) in
-      while not (Sys.file_exists (Filename.concat !root ".git")
-                 || Sys.file_exists (Filename.concat !root ".jj"))
-      do
-        root := Filename.dirname !root;
-        match !root with
-        | "." | ".." | "/" -> failwith "server expects to run in container or in repo"
-        | _ -> ()
-      done;
-      !root
-    in
+    let repo_root = repo_root () in
     (* maybe we should read the COPY line from the docker file, to
        avoid duplicating? *)
     let static_root = "/tmp/static" in
     ListLabels.iter
-      [ "site/client/index.html"
-      ; "site/client/page.js"
-      ; "extension/src/rewrite.js"
-      ; "extension/src/dict.js"
-      ; "_build/default/doc-conversion/bin/ortografe_cli.exe"
-      ] ~f:(fun f ->
-        let src = Filename.concat repo_root f in
-        let dst = Filename.concat static_root (Filename.basename f) in
+      [ "site/client/index.html", None
+      ; "site/client/page.js", None
+      ; "extension/src/rewrite.js", None
+      ; "extension/src/dict.js", None
+      ; "_build/default/doc-conversion/bin/ortografe_cli.exe", None
+      ; Book_import.directory ~root:repo_root, Some "books"
+      ] ~f:(fun (f, dst) ->
+        let src = if Filename.is_relative f then Filename.concat repo_root f else f in
+        let dst = Filename.concat static_root (Option.value dst ~default:(Filename.basename f)) in
         if Sys.file_exists dst then Unix.unlink dst;
         Unix.symlink src dst
       );
@@ -148,14 +150,15 @@ let main () =
            and+ no_log = C.Arg.value (C.Arg.flag (C.Arg.info ["no-log"]))
            in
            run_for_bench ?port ~log:(not no_log) ~tls ())
-      ; C.Cmd.v (C.Cmd.info "conv-page")
-          (let+ url =
-             C.Arg.required (C.Arg.pos 0 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"URL" []))
-           and+ arg2 =
-             C.Arg.value (C.Arg.pos 1 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"OUTPUT_FILE" []))
-           in
-           let dst = Option.value arg2 ~default:(Filename.basename url) in
-           Book_import.import_from_wikisource url ~dst)
+      ; C.Cmd.v (C.Cmd.info "download-all")
+          (let+ () = return () in
+           Book_import.download_all ~root:(repo_root ()))
+      ; C.Cmd.v (C.Cmd.info "convert-all")
+          (let+ () = return () in
+           Book_import.convert_all ~root:(repo_root ()))
+      ; C.Cmd.v (C.Cmd.info "books-html")
+          (let+ () = return () in
+           print_string (Book_import.html ~root:(repo_root ())))
       ]
   in
   exit (C.Cmd.eval cmd)

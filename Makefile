@@ -1,18 +1,20 @@
-.PHONY: server cli serve build-container run-container fly-deploy
+.PHONY: books server cli serve build-container run-container fly-deploy
 
 server cli &:
 	@ # these depend on dict.csv, but we assume that's already built if desired
 	dune build --release site/server/server.exe doc-conversion/bin/ortografe_cli.exe
 
-serve: server
+books: server
+	_build/default/site/server/server.exe convert-all
+serve: server books
 	_build/default/site/server/server.exe serve -p 8081
-serve-w: server
+serve-w: server books
 	@ # problem: dune doesn't know to keep rebuilding the cli client. Maybe
 	@ # we should have a target that builds the exe while depending on all
 	@ # other things of interest.
 	dune exec -w --release -- site/server/server.exe serve -p 8081
 
-build-container: server cli
+build-container: server cli books
 	podman build -f site/deployment/Dockerfile . -t ortografe-server
 
 run-container: build-container
