@@ -1,15 +1,16 @@
 (library
  (name ortografe)
- (libraries uutf
-            uucp
-            uunf
-            uuseg
-            markup
-            zipc
-            core
-            )
- (preprocess (pps ppx_jane))
+ (libraries
+   core
+   markup
+   uucp
+   uunf
+   uuseg
+   uutf
+   zipc
  )
+ (preprocess (pps ppx_jane))
+)
 
 (rule
  (target dict.ml)

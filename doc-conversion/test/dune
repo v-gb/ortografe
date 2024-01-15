@@ -1,7 +1,13 @@
 (library
  (name test_ortografe)
  (inline_tests
-   (deps test.docx epub.md (sandbox always))
+  (deps test.docx epub.md (sandbox always))
  )
- (libraries ortografe patience_diff core core_unix.sys_unix core_unix)
+ (libraries
+   core
+   core_unix
+   core_unix.sys_unix
+   ortografe
+   patience_diff
+ )
  (preprocess (pps ppx_jane)))
