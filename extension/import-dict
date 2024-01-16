@@ -93,4 +93,4 @@ if [ "${INSIDE_DUNE-}" ]; then
 else
     target=src/dict.js
 fi
-{ echo -n 'const fr_dict = "'; tr '\n' '/' < dict.gen.csv; echo '"'; } > $target
+{ echo -n 'const dict_erofa = "'; tr '\n' '/' < dict.gen.csv; echo '"'; } > $target

@@ -250,7 +250,7 @@ function load_dict(options) {
     let table = new Map()
     if (!options.trivial) {
         const t1 = performance.now();
-        for (line of fr_dict.split("/")) {
+        for (line of dict_erofa.split("/")) {
             let [a,b] = line.split(",")
             if (a && b && a != b) {
                 table.set(a, b)
