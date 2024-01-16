@@ -65,6 +65,12 @@ let extract_zip ~data ~dst =
 mkdir -p %{Sys.quote dst} && unzip -q %{Sys.quote tmp} -d %{Sys.quote dst} && rm -f %{Sys.quote tmp}
 |}]
 
+let make_the_html_mobile_friendly html =
+  String.substr_replace_first
+    html
+    ~pattern:"<head>"
+    ~with_:{|<head><meta name="viewport" content="width=device-width, initial-scale=1"/>|}
+
 let convert_wikisource epub ~dst =
    (* Sometimes you see headings that are uppercase in the source, instead by using
       text-transform or font-variant, so just convert those. *)
@@ -76,10 +82,13 @@ let convert_wikisource epub ~dst =
            ereader would provide its own). So add CSS settings to make the look of the
            converted xhtml and the wikisource html similar. *)
         match Filename.basename (Zipc.Member.path member) with
+        | f when String.is_suffix f ~suffix:".html"
+                 || String.is_suffix f ~suffix:".xhtml"
+          -> Some (make_the_html_mobile_friendly (contents ()))
         | "main.css" ->
            Some (contents () ^ {|
 body {
-  max-width:36em;
+  max-width: min(90%, 36em);
   margin: 0 auto;
   font-size:0.875em;
   line-height:1.6;
@@ -98,7 +107,19 @@ p {
 
 let convert_gutenberg zip ~dst =
   let data = Ortografe.htmlz ~convert_uppercase:true zip ~dst:String in
-  extract_zip ~data ~dst
+  let new_data =
+    Ortografe.map_zip data
+      (fun member _file contents ->
+        (* There's missing CSS in the wikisource epubs (or maybe it's intended that the
+           ereader would provide its own). So add CSS settings to make the look of the
+           converted xhtml and the wikisource html similar. *)
+        match Filename.basename (Zipc.Member.path member) with
+        | f when String.is_suffix f ~suffix:".html"
+                 || String.is_suffix f ~suffix:".xhtml"
+          -> Some (make_the_html_mobile_friendly (contents ()))
+        | _ -> None)
+  in
+  extract_zip ~data:new_data ~dst
 
 let convert url ~root ~title =
   let url = Uri.of_string url in
