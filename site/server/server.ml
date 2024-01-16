@@ -43,11 +43,12 @@ let where_to_find_static_files () =
       ; "extension/src/rewrite.js", None
       ; "extension/src/dict.js", None
       ; "_build/default/doc-conversion/bin/ortografe_cli.exe", None
-      ; Book_import.directory ~root:repo_root, Some "books"
+      ; Book_import.directory
+          ~root:(Filename.concat repo_root "_build/default"), Some "books"
       ] ~f:(fun (f, dst) ->
         let src = if Filename.is_relative f then Filename.concat repo_root f else f in
         let dst = Filename.concat static_root (Option.value dst ~default:(Filename.basename f)) in
-        if Sys.file_exists dst then Unix.unlink dst;
+        (try Unix.unlink dst with Unix.Unix_error _ -> ());
         Unix.symlink src dst
       );
     static_root
@@ -155,7 +156,7 @@ let main () =
            Book_import.download_all ~root:(repo_root ()))
       ; C.Cmd.v (C.Cmd.info "convert-all")
           (let+ () = return () in
-           Book_import.convert_all ~root:(repo_root ()))
+           Book_import.convert_all ~root:(Sys.getenv "INSIDE_DUNE"))
       ; C.Cmd.v (C.Cmd.info "books-html")
           (let+ () = return () in
            print_string (Book_import.html ~root:(repo_root ())))

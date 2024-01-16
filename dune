@@ -1,0 +1,13 @@
+(rule
+ (targets (dir dl-conv.gen))
+ (deps    (glob_files dl.gen/*))
+ (action  (run site/server/server.exe convert-all)))
+
+;; add spurious dependencies to server.exe, so we can
+;; make dune exec server.exe build the runtime deps of
+;; the exe on top of the exe itself
+(rule
+ (deps
+   dl-conv.gen
+   doc-conversion/bin/ortografe_cli.exe)
+ (action (copy site/server/server.exe server_with_deps.exe)))
