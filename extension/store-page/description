@@ -1,8 +1,12 @@
-Cette extension réécrit les pages web, pour passer de l'orthographe du français standard, à l'orthographe proposée par le linguiste Claude Gruaz.
+Cette extension réécrit les pages web, pour passer de l'orthographe du français standard à d'autres orthographes.
 
-Le but de cette extension est de répondre à la question "en pratique, ça donne quoi cette orthographe modifiée ?".
+Deux orthographes sont supportées :
+- par défaut, l'orthographe rationalisée des linguistes de l'association Érofa
+- l'orthographe des rectifications 1990 (tout n'est pas pris en compte)
 
-Vous pouvez en apprendre plus sur l'orthographe proposée et sa justification <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele/">dans les grandes lignes</a> ou <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">dans les détails</a>.
+Le but de cette extension est de répondre à la question "en pratique, ça donne quoi ces orthographes modifiées ?".
+
+Vous pouvez en apprendre plus sur l'orthographe Érofa et sa justification <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele/">dans les grandes lignes</a> ou <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">dans les détails</a>.
 
 Aucun texte ni information sur les pages que vous visitez n'est envoyé à aucun serveur.
 

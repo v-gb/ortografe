@@ -12,13 +12,24 @@
       <legend>Configuration:</legend>
 
       <div>
-	<input type="checkbox" id="disable-checkbox" name="disable-checkbox"/>
-	<label for="disable-checkbox">désactiver la réécriture</label>
-      </div>
-
-      <div>
 	<input type="checkbox" id="color-checkbox" name="color-checkbox"/>
 	<label for="color-checkbox">surligner les mots réécrits</label>
+      </div>
+      <br>
+      <div>
+        Comment réécrire :
+        <div>
+          <input type="radio" id="rewrite-disable" name="rewrite-radio" value="disable"/>
+          <label for="rewrite-disable">ne rien réécrire</label>
+        </div>
+        <div>
+          <input type="radio" id="rewrite-erofa" name="rewrite-radio" value="erofa"/>
+          <label for="rewrite-erofa">convertir vers l'orthographe érofa (défaut)</label>
+        </div>
+        <div>
+          <input type="radio" id="rewrite-rect1990" name="rewrite-radio" value="rect1990"/>
+          <label for="rewrite-rect1990">convertir vers les rectifications de 1990</label>
+        </div>
       </div>
 
       <br>

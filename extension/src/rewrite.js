@@ -250,7 +250,8 @@ function load_dict(options) {
     let table = new Map()
     if (!options.trivial) {
         const t1 = performance.now();
-        for (line of dict_erofa.split("/")) {
+        const dict = options.rewrite == 'rect1990' ? dict_rect1990 : dict_erofa;
+        for (line of dict.split("/")) {
             let [a,b] = line.split(",")
             if (a && b && a != b) {
                 table.set(a, b)
@@ -262,15 +263,22 @@ function load_dict(options) {
     return table
 }
 
+function normalize_options(options) {
+    if (!options.rewrite) {
+        options.rewrite = options.disable ? 'disable' : 'erofa';
+    }
+}
+
 async function extension_main() {
     const b = window.chrome ? chrome : browser;
     const before_storage = performance.now()
     const options = await b.storage.local.get(
-        ['disable', 'disable_watch', 'color','trivial', 'debug_changes', 'debug_language']
+        ['rewrite', 'disable', 'disable_watch', 'color','trivial', 'debug_changes', 'debug_language']
     )
+    normalize_options(options)
     const after_storage = performance.now();
     console.log(`reading options: ${after_storage - before_storage}ms`, options)
-    if (options.disable) { return };
+    if (options.rewrite == 'disable') { return };
     const table = load_dict(options);
     // start at document.body, because iterating over document means
     // iterating over <style> nodes even though they contain nothing,
