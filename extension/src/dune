@@ -1,0 +1,13 @@
+(rule
+ (action (copy ../dict.js dict.js))
+ (mode promote))
+
+(rule
+ (targets
+   Emblem_of_La_Francophonie.128padded.png
+   Emblem_of_La_Francophonie.128.png
+   Emblem_of_La_Francophonie.64.png
+ )
+ (mode promote)
+ (deps    Emblem_of_La_Francophonie.svg)
+ (action  (run ../make-icon)))

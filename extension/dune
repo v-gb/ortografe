@@ -1,0 +1,20 @@
+(rule
+ (targets
+   dict.external-sources.gen.csv
+   dict.gen.csv
+   dict.js)
+ (mode promote)
+ (deps
+   import-dict
+   ../data/erofa/DOR-numerique_v1.0.2.csv
+   ../data/erofa/Verbes-conjugues-top-2k-Lexique.xlsx
+   ../data/wiktionnaire/1990.csv
+   ../data/homemade/dict.adds.csv
+ )
+ (action  (run ./import-dict)))
+
+(rule
+ (targets extension.zip extension2.zip (dir src2))
+ (mode promote)
+ (deps    (glob_files src/*.{html,js,png,json,svg}))
+ (action  (run ./make-extension)))

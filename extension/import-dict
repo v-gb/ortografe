@@ -88,4 +88,9 @@ EOF
     done >> dict.gen.csv
 fi
 
-{ echo -n 'const fr_dict = "'; tr '\n' '/' < dict.gen.csv; echo '"'; } > src/dict.js
+if [ "${INSIDE_DUNE-}" ]; then
+    target=dict.js
+else
+    target=src/dict.js
+fi
+{ echo -n 'const fr_dict = "'; tr '\n' '/' < dict.gen.csv; echo '"'; } > $target
