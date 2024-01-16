@@ -8,7 +8,7 @@ else
     {
         sqlite3 <<'EOF'
 .mode csv
-.import ../data/erofa/DOR-numérique_v1.0.2.csv t
+.import ../data/erofa/DOR-numerique_v1.0.2.csv t
 select "Grafie initiale","Grafie modifiée"
 from t
 where "Grafie initiale" != ''
@@ -31,7 +31,7 @@ EOF
         | cat > dict.gen.csv
 
     # add a few conjugated forms, from EROFA as well
-    ssconvert ../data/erofa/Verbes-conjugués-top-2k-Lexique.xlsx /tmp/tmp.csv
+    ssconvert ../data/erofa/Verbes-conjugues-top-2k-Lexique.xlsx /tmp/tmp.csv
     {
         sqlite3 <<'EOF'
 .mode csv
