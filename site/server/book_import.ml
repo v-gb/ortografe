@@ -20,7 +20,7 @@ let suf = function
 
 let dl_path ~root ~title ~source =
   root ^/ "dl.gen" ^/ (title ^ suf source)
-let conv_path ~root ~title ~source =
+let conv_path ~root ~title ~source:_ =
   root ^/ "dl-conv.gen" ^/ title
 
 let directory ~root = root ^/ "dl-conv.gen"
