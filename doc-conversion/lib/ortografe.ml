@@ -286,6 +286,7 @@ let text_elt ~convert_uppercase ~buf = function
 let html_transform ~buf ~convert_uppercase signal =
   (* maybe we should check the tag ns for the xhtml case *)
   let notranslate_pattern = Core.String.Search_pattern.create "notranslate" in
+  let notranscribe_pattern = Core.String.Search_pattern.create "notranscribe" in
   let stack = Core.Stack.create () in
   let hide_current = ref false in
   Markup.map (fun elt ->
@@ -297,7 +298,9 @@ let html_transform ~buf ~convert_uppercase signal =
             | _ ->
                List.exists (fun ((_, attr), _value) ->
                    match attr with
-                   | "class" -> Core.String.Search_pattern.matches notranslate_pattern attr
+                   | "class" ->
+                      Core.String.Search_pattern.matches notranslate_pattern attr
+                      || Core.String.Search_pattern.matches notranscribe_pattern attr
                    | "contenteditable" -> true
                    | _ -> false) attributes
           in

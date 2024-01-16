@@ -65,6 +65,7 @@ function make_walk(root) {
             return node.nodeType == 3
                 ? NodeFilter.FILTER_ACCEPT :
                 (node.classList.contains("notranslate")
+                 || node.classList.contains("notranscribe")
                  || node.nodeName == "CODE"
                  || node.nodeName == "SCRIPT"
                  || node.nodeName == "NOSCRIPT" // contains only text when scripting is enabled (~everyone)

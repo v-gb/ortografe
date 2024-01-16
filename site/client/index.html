@@ -106,13 +106,6 @@
   <body>
     <h1 style="text-align:center">Ortografe simplifiée</h1>
     <main>
-      <noscript>
-        <p>
-          Ce site utilise du javascript pour transcrire entre orthographes. Il va être
-          difficile de comprendre si vous n'activez pas le javascript.
-        </p>
-      </noscript>
-
       <p>
         Les linguistes de l'<a href="http://erofa.free.fr/">association Érofa</a>
         proposent trois règles pour simplifier des points difficiles de l'orthographe du
@@ -140,7 +133,7 @@
 
       <section>
         <h2>Les règles</h2>
-        <div id="rules" class="notranslate">
+        <div id="rules" class="notranscribe">
           <p class="to-transcribe" style="margin-top:0em"> Vous avez dû constaté que les
             textes se lisent bien, même sans explication, et vous avez peut-être deviné une
             partie des règles&#8239;:</p>
@@ -186,9 +179,13 @@
       <section>
         <h3>Transcription interactive</h3>
 
+        <noscript>
+          <p><strong>Cet fonctionalité requiert du javascript.</strong></p>
+        </noscript>
+
         <div id="interactive-transcription">
           <textarea id="user-text">Babar a une mémoire exceptionnelle, car c'est un élé...</textarea>
-          <div id="converted-text" class="notranslate"></div>
+          <div id="converted-text" class="notranscribe"></div>
         </div>
       </section>
 
