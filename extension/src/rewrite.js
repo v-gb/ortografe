@@ -132,7 +132,7 @@ async function plausibly_french(b, root, debug) {
 function rewrite_under(options, table, root){
     let count = 0
     let to_remove = []
-    const backgroundColor = options.background_color || 'orange'
+    const backgroundColor = options.background_color || '#b9f4b9'
     const walk = make_walk(root);
     while(n=walk.nextNode()) {
         let regular_text = ""
