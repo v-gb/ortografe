@@ -88,9 +88,44 @@ EOF
     done >> dict.gen.csv
 fi
 
+{
+    # sqlite doesn't support outer joins, so we do two left joins
+    # to combine the wiktionary and lexique+recto/verso data.
+    # In a couple of cases, the two dbs don't agree ("absous"
+    # is one case), so we just drop these cases.
+    # The resulting table includes regular plurals that we could
+    # drop, but the table is small so whatever.
+    sqlite3 <<'EOF'
+.mode csv
+.import ../data/lexique/1990.csv l
+.import ../data/wiktionnaire/1990.csv w
+select distinct l.ortho,coalesce(l.post90,w.post1990)
+from l
+left join w on l.ortho = w.pre1990
+where (l.post90 is null
+       or w.post1990 is null
+       or l.post90 = w.post1990)
+and l.type = 1
+union all
+select distinct l.ortho,coalesce(l.post90,w.post1990)
+from w
+left join l on l.ortho = w.pre1990
+where (l.post90 is null
+       or w.post1990 is null)
+and l.type = 1
+order by l.ortho
+EOF
+} \
+    | tr -d '"' \
+    | LANG=C sort \
+    | cat >> dict1990.gen.csv
+
 if [ "${INSIDE_DUNE-}" ]; then
     target=dict.js
 else
     target=src/dict.js
 fi
-{ echo -n 'const dict_erofa = "'; tr '\n' '/' < dict.gen.csv; echo '"'; } > $target
+{
+    echo -n 'const dict_erofa = "'; tr '\n' '/' < dict.gen.csv; echo '"';
+    echo -n 'const dict_rect1990 = "'; tr '\n' '/' < dict1990.gen.csv; echo '"';
+} > $target
