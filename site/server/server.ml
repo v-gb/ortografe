@@ -1,3 +1,55 @@
+let read_until_close_or_max_size ~max_size stream =
+  (* This is Dream's read_until_close function, with just an extra
+     check when growing the buffer. 
+     With this, sending a 1GB makes the send reject 10x faster
+     and use little memory instead of 3GB (which is more than the
+     prod server has). *)
+  let promise, resolver = Lwt.wait () in
+  let length = ref 0 in
+  let buffer = ref (Bigstringaf.create 4096) in
+  let close _code =
+    Bigstringaf.sub !buffer ~off:0 ~len:!length
+    |> Bigstringaf.to_string
+    |> Ok
+    |> Lwt.wakeup_later resolver
+  in
+  let abort exn = Lwt.wakeup_later_exn resolver exn in
+  let rec loop () =
+    Dream.read_stream stream
+      ~data:(fun chunk offset chunk_length _binary _fin ->
+        let new_length = !length + chunk_length in
+        if new_length > max_size
+        then Lwt.wakeup_later resolver (Error `Too_big)
+        else (
+          if new_length > Bigstringaf.length !buffer then begin
+              let new_buffer = Bigstringaf.create (new_length * 2) in
+              Bigstringaf.blit
+                !buffer ~src_off:0 new_buffer ~dst_off:0 ~len:!length;
+              buffer := new_buffer
+            end;
+          Bigstringaf.blit
+            chunk ~src_off:offset !buffer ~dst_off:!length ~len:chunk_length;
+          length := new_length;
+          loop ()))
+      ~flush:loop
+      ~ping:(fun buffer offset length ->
+        Dream.pong_stream stream buffer offset length ~close ~exn:abort loop)
+      ~pong:(fun _buffer _offset _length ->
+        loop ())
+      ~close
+      ~exn:abort
+  in
+  loop ();
+  promise
+
+let limit_body_size ~max_size request =
+  match%lwt read_until_close_or_max_size ~max_size (Dream.body_stream request) with
+  | Error _ as e -> Lwt.return e
+  | Ok body ->
+     Dream.set_body request body;
+     Lwt.return (Ok ())
+
+
 let error_has_body = Dream.new_field ~name:"error-has-body" ()
 
 let my_error_template (error : Dream.error) debug_info suggested_response =
@@ -73,8 +125,11 @@ let respond_error_text status str =
   in
   Dream.set_field response error_has_body ();
   Lwt.return response
+  
+let hum_size_of_bytes n =
+  Core.Byte_units.Short.to_string (Core.Byte_units.of_bytes_int n)
 
-let run ?(log = true) ?port ?tls ?(max_input_size = 100_000_000) () =
+let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
   Ortografe.max_size := max_input_size * 2; (* xml can be quite large when decompressed *)
   let static_root = where_to_find_static_files () in
   Dream.run ?port ?tls
@@ -83,21 +138,17 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 100_000_000) () =
   @@ (if log then Dream.logger else Fun.id)
   @@ Dream.router
        [ Dream.post "/conv" (fun request ->
-             (* reads arbitrarily large stuff. There's no changing that without submitting
-                a pull request. The streaming interface still reads everything in
-                memory. So either way, we'll keep the current interface, but at some
-                point, we'll have a throttle. *)
-             match%lwt Dream.multipart ~csrf:false request with
-             | `Ok ["file", [ fname, fcontents ] ] ->
-                if String.length fcontents > max_input_size
-                then respond_error_text `Payload_Too_Large
-                       ("max size: " ^ Int.to_string max_input_size)
-                else
+             match%lwt limit_body_size ~max_size:max_input_size request with
+             | Error `Too_big ->
+                respond_error_text `Payload_Too_Large
+                  ("max size: " ^ hum_size_of_bytes max_input_size)
+             | Ok () ->
+                match%lwt Dream.multipart ~csrf:false request with
+                | `Ok ["file", [ fname, fcontents ] ] ->
                   let fname = Option.value fname ~default:"unnamed.txt" in
                   let ext = Filename.extension fname in
                   Dream.log "upload ext:%S size:%s" ext
-                    (Core.Byte_units.Short.to_string
-                       (Core.Byte_units.of_bytes_int (String.length fcontents)));
+                    (hum_size_of_bytes (String.length fcontents));
                   (match Ortografe.convert_string ~ext fcontents
                            ~options:{ convert_uppercase = false
                                     ; dict = Lazy.force Ortografe.erofa }
