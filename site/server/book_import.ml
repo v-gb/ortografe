@@ -71,10 +71,11 @@ let make_the_html_mobile_friendly html =
     ~pattern:"<head>"
     ~with_:{|<head><meta name="viewport" content="width=device-width, initial-scale=1"/>|}
 
+let options = lazy { Ortografe.convert_uppercase = true; dict = Lazy.force Ortografe.erofa }
 let convert_wikisource epub ~dst =
    (* Sometimes you see headings that are uppercase in the source, instead by using
       text-transform or font-variant, so just convert those. *)
-  let epub = Ortografe.epub ~convert_uppercase:true epub ~dst:String in
+  let epub = Ortografe.epub epub ~dst:String ~options:(Lazy.force options) in
   let epub_conv =
     Ortografe.map_zip epub
       (fun member _file contents ->
@@ -106,7 +107,7 @@ p {
   extract_zip ~data:epub_conv ~dst
 
 let convert_gutenberg zip ~dst =
-  let data = Ortografe.htmlz ~convert_uppercase:true zip ~dst:String in
+  let data = Ortografe.htmlz zip ~dst:String ~options:(Lazy.force options) in
   let new_data =
     Ortografe.map_zip data
       (fun member _file contents ->

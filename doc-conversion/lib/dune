@@ -13,8 +13,11 @@
 )
 
 (rule
- (target dict.ml)
- (deps %{project_root}/extension/dict.gen.csv)
- (action (run bash
-              -euo pipefail
-              -c "{ echo 'let value = {|'; cat %{deps}; echo '|}'; } > %{target}")))
+ (deps
+   (:erofa %{project_root}/extension/dict.gen.csv)
+   (:rect1990 %{project_root}/extension/dict1990.gen.csv))
+ (action (with-stdout-to dict.ml
+          (run bash
+               -euo pipefail
+               -c "echo 'let erofa = {|'; cat %{erofa}; echo '|}';
+                   echo 'let rect1990 = {|'; cat %{rect1990}; echo '|}';"))))

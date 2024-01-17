@@ -16,7 +16,21 @@ let () =
        and+ arg2 =
          C.Arg.value (C.Arg.pos 1 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"OUTPUT_FILE" []))
        and+ convert_uppercase = C.Arg.value (C.Arg.flag (C.Arg.info ["convert-uppercase"]))
+       and+ base_dict =
+         C.Arg.value
+           (C.Arg.opt
+              (C.Arg.enum [ "erofa", `Erofa; "1990", `Rect1990; "empty", `Empty ])
+              `Erofa
+              (C.Arg.info ["--base-dict"]))
        in
-       Ortografe.convert_files ~convert_uppercase arg1 arg2)
+       let dict =
+         match base_dict with
+         | `Erofa -> Lazy.force Ortografe.erofa
+         | `Rect1990 -> Lazy.force Ortografe.rect1990
+         | `Empty -> Hashtbl.create 1
+       in
+       Ortografe.convert_files
+         ~options:{ convert_uppercase; dict  }
+         arg1 arg2)
   in
   exit (C.Cmd.eval cmd)

@@ -1,6 +1,9 @@
 open Core
 
-let convert_uppercase = false
+let options =
+  { Ortografe.convert_uppercase = false
+  ; dict = force Ortografe.erofa
+  }
 
 let pp_xml src =
   Markup.parse_xml
@@ -47,7 +50,7 @@ Capitalisation: Choix.
 Tirets: plouf-européennes
 Majuscules: HISTOIRE.
 " in
-  let rewrite1 = Ortografe.pure_text ~convert_uppercase test ~dst:String in
+  let rewrite1 = Ortografe.pure_text ~options test ~dst:String in
   print_string rewrite1;
   [%expect "
     Mots simples: coment chois fotografie.
@@ -57,11 +60,20 @@ Majuscules: HISTOIRE.
     Capitalisation: Chois.
     Tirets: plouf-europ\195\169\195\168nes
     Majuscules: HISTOIRE. "];
-  let rewrite2 = Ortografe.pure_text ~convert_uppercase:true test ~dst:String in
+  let rewrite2 =
+    Ortografe.pure_text test ~dst:String
+      ~options:{options with convert_uppercase = true}
+  in
   print_string (diff_strings rewrite1 rewrite2 ~context:0);
   [%expect "
     -Majuscules: HISTOIRE.
-    +Majuscules: ISTOIRE."]
+    +Majuscules: ISTOIRE."];
+  let rewrite3 =
+    Ortografe.pure_text "Le maître a dû goûter." ~dst:String
+      ~options:{options with dict = force Ortografe.rect1990 }
+  in
+  print_string rewrite3;
+  [%expect "Le maitre a d\195\187 gouter."]
 )
 
 
@@ -88,7 +100,7 @@ let%expect_test "html" = (
 </head>
 </html>
 |} in
-    print_string (Ortografe.html ~pp:true ~convert_uppercase html ~dst:String);
+    print_string (Ortografe.html ~pp:true ~options html ~dst:String);
     [%expect {|
 <!DOCTYPE html>
 <html class="" lang="fr" dir="ltr">
@@ -126,7 +138,7 @@ let%expect_test "docx" = (
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" mc:Ignorable="w14 wp14 w15"><w:body><w:p><w:pPr><w:pStyle w:val="Normal"/><w:bidi w:val="0"/><w:jc w:val="left"/><w:rPr></w:rPr></w:pPr><w:r><w:rPr></w:rPr><w:t>Allusion choix</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="Normal"/><w:bidi w:val="0"/><w:jc w:val="left"/><w:rPr></w:rPr></w:pPr><w:r><w:rPr></w:rPr></w:r></w:p><w:sectPr><w:type w:val="nextPage"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:left="1134" w:right="1134" w:gutter="0" w:header="0" w:top="1134" w:footer="0" w:bottom="1134"/><w:pgNumType w:fmt="decimal"/><w:formProt w:val="false"/><w:textDirection w:val="lrTb"/></w:sectPr></w:body></w:document> |}];
     let orig_xml = pp_xml (Ortografe.Private.docx_document docx) in
-    let new_xml = pp_xml (Ortografe.Private.docx_document (Ortografe.docx ~convert_uppercase docx ~dst:String)) in
+    let new_xml = pp_xml (Ortografe.Private.docx_document (Ortografe.docx ~options docx ~dst:String)) in
     print_string (diff_strings orig_xml new_xml);
     [%expect {|
      <w:t>
@@ -139,7 +151,7 @@ let%expect_test "epub" = (
     let src = In_channel.read_all "epub.md" in
     Sys_unix.command_exn "pandoc epub.md -o epub.epub";
     Out_channel.write_all "epub-conv.epub"
-      ~data:(Ortografe.epub ~convert_uppercase (In_channel.read_all "epub.epub") ~dst:String);
+      ~data:(Ortografe.epub ~options (In_channel.read_all "epub.epub") ~dst:String);
     Sys_unix.command_exn "pandoc epub-conv.epub -o epub-conv.md";
     let src_conv = In_channel.read_all "epub-conv.md" in
     print_string src;
@@ -170,7 +182,7 @@ let%expect_test "doc" = (
        specify the source file type, just use a .docx file as a .doc *)
     let docx = In_channel.read_all "test.docx" in
     let orig_xml = pp_xml (Ortografe.Private.docx_document docx) in
-    let new_xml = pp_xml (Ortografe.Private.docx_document (Ortografe.docx ~convert_uppercase docx ~dst:String)) in
+    let new_xml = pp_xml (Ortografe.Private.docx_document (Ortografe.docx ~options docx ~dst:String)) in
     print_string (diff_strings orig_xml new_xml);
     [%expect {|
      <w:t>
