@@ -69,11 +69,18 @@ Majuscules: HISTOIRE.
     -Majuscules: HISTOIRE.
     +Majuscules: ISTOIRE."];
   let rewrite3 =
-    Ortografe.pure_text "Le maître a dû goûter." ~dst:String
+    Ortografe.pure_text
+      ~dst:String
       ~options:{options with dict = force Ortografe.rect1990 }
+      {|
+Le maître a dû goûter ce week-end.
+Un sèche-cheveux, des sèche-cheveux.
+|}
   in
   print_string rewrite3;
-  [%expect "Le maitre a d\195\187 gouter."]
+  [%expect "
+    Le maitre a d\195\187 gouter ce week-end.
+    Un s\195\168che-cheveus, des s\195\168che-cheveus."]
 )
 
 
