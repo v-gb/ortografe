@@ -113,7 +113,7 @@ let split_including_delims str c =
   do () done;
   List.rev !l
 
-let iter_words src ~f = (
+let iter_words src ~f ~f_mem = (
     iter_words1 src ~f:(fun what start len ->
         match what with
         | `Out -> f what start len
@@ -128,9 +128,13 @@ let iter_words src ~f = (
                 true
                 (String.sub src start len)
            then
-             List.iter
-               (fun (start', len') -> f what (start + start') len')
-               (split_including_delims (String.sub src start len) '-')
+             let sub = String.sub src start len in
+             if f_mem sub
+             then f what start len
+             else
+               List.iter
+                 (fun (start', len') -> f what (start + start') len')
+                 (split_including_delims sub '-')
            else f what start len
       )
   )
@@ -224,41 +228,41 @@ let uppercase w =
 let iter_pure_text ~options src ~f =
   let dict = options.dict in
   let src = nfc src in
-  iter_words src ~f:(fun what start len ->
-      let w = String.sub src start len in
-      match what with
-      | `Out -> f w
-      | `Word ->
-         let wu, recapitalize =
-           match uncapitalize w with
-           | None -> w, (fun x -> x)
-           | Some wu ->
-              if Hashtbl.mem dict w
-              then "", (fun x -> x)
-              else
-                match
-                  if options.convert_uppercase
-                  then lowercase w
-                  else None
-                with
-                | None -> wu, (fun w -> Option.value (capitalize w) ~default:w)
-                | Some wl ->
-                   if
-                     match capitalize wl with
-                     | None -> false
-                     | Some c -> Hashtbl.mem dict c
-                   then "", (fun x -> x)
-                   else wl, (fun w -> Option.value (uppercase w) ~default:w)
-         in
-         match Hashtbl.find_opt dict wu with
-         | Some res -> f (recapitalize res)
-         | None ->
-            match depluralize wu with
-            | None -> f w
-            | Some wu ->
-              match Hashtbl.find_opt dict wu with
-              | Some res -> f (recapitalize (pluralize res))
-              | None -> f w
+  iter_words src ~f_mem:(Hashtbl.mem dict) ~f:(fun what start len ->
+    let w = String.sub src start len in
+    match what with
+    | `Out -> f w
+    | `Word ->
+       let wu, recapitalize =
+         match uncapitalize w with
+         | None -> w, (fun x -> x)
+         | Some wu ->
+            if Hashtbl.mem dict w
+            then "", (fun x -> x)
+            else
+              match
+                if options.convert_uppercase
+                then lowercase w
+                else None
+              with
+              | None -> wu, (fun w -> Option.value (capitalize w) ~default:w)
+              | Some wl ->
+                 if
+                   match capitalize wl with
+                   | None -> false
+                   | Some c -> Hashtbl.mem dict c
+                 then "", (fun x -> x)
+                 else wl, (fun w -> Option.value (uppercase w) ~default:w)
+       in
+       match Hashtbl.find_opt dict wu with
+       | Some res -> f (recapitalize res)
+       | None ->
+          match depluralize wu with
+          | None -> f w
+          | Some wu ->
+             match Hashtbl.find_opt dict wu with
+             | Some res -> f (recapitalize (pluralize res))
+             | None -> f w
     )
 
 let buffer ?(n = 123) buf =

@@ -79,7 +79,7 @@ Un sèche-cheveux, des sèche-cheveux.
   in
   print_string rewrite3;
   [%expect "
-    Le maitre a d\195\187 gouter ce week-end.
+    Le maitre a d\195\187 gouter ce weekend.
     Un s\195\168che-cheveus, des s\195\168che-cheveus."]
 )
 

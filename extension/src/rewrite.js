@@ -150,7 +150,9 @@ function rewrite_under(options, table, root){
                   // dots, etc), then actually treat that as multiple words, to handle
                   // the indo-européenne case above
                   word1.includes("-") && /^[-\p{L}]*$/u.test(word1)
-                  ? word1.split(/(-)/)
+                  ? (table.has(word1) // for passe-partout -> passepartout
+                     ? [ word1 ]
+                     : word1.split(/(-)/))
                   : [ word1 ]
             for (word of words2) {
                 const repl = rewrite_word(table, word)
