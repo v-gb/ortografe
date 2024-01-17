@@ -12,8 +12,7 @@
  (targets erofa-texte.pdf)
  (deps OA-dictionnaire-EROFA.pdf)
  (action
-  (progn
-   (run qpdf OA-dictionnaire-EROFA.pdf --pages . 1-78,521-523 -- erofa-texte.pdf))))
+  (run qpdf OA-dictionnaire-EROFA.pdf --pages . 1-78,521-523 -- erofa-texte.pdf)))
 
 ;; add spurious dependencies to server.exe, so we can
 ;; make dune exec server.exe build the runtime deps of
