@@ -21,7 +21,7 @@ let suf = function
 let dl_path ~root ~title ~source =
   root ^/ "dl.gen" ^/ (title ^ suf source)
 let conv_path ~root ~title ~source:_ =
-  root ^/ "dl-conv.gen" ^/ title
+  root ^/ "site" ^/ "static" ^/ "books" ^/ title
 
 let directory ~root = root ^/ "dl-conv.gen"
 let mkdir_and_write_all path ~data =

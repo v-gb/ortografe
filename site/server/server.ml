@@ -86,26 +86,8 @@ let where_to_find_static_files () =
     (* In dev, setup symlinks to the files in the repo, so we can just
        modify the files and reload without fiddling with the server. *)
     let repo_root = repo_root () in
-    let static_root = "/tmp/static" in
-    ListLabels.iter
-      (* keep in sync with Dockerfile *)
-      [ "site/client/index.html", None
-      ; "site/client/page.js", None
-      ; "extension/src/rewrite.js", None
-      ; "extension/src/dict.js", None
-      ; "extension/dict.gen.csv", Some "erofa.csv"
-      ; "extension/dict1990.gen.csv", Some "rect1990.csv"
-      ; "_build/default/erofa-texte.pdf", None
-      ; "_build/default/doc-conversion/bin/ortografe_cli.exe", None
-      ; Book_import.directory
-          ~root:(Filename.concat repo_root "_build/default"), Some "books"
-      ] ~f:(fun (f, dst) ->
-        let src = if Filename.is_relative f then Filename.concat repo_root f else f in
-        let dst = Filename.concat static_root (Option.value dst ~default:(Filename.basename f)) in
-        (try Unix.unlink dst with Unix.Unix_error _ -> ());
-        Unix.symlink src dst
-      );
-    static_root
+    (* keep in sync with Dockerfile *)
+    Filename.concat repo_root "_build/default/site/static"
 
 let respond_error_text status str =
   let code = Dream.status_to_int status

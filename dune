@@ -1,26 +1,15 @@
 (rule
- (targets (dir dl-conv.gen))
- (deps    (glob_files dl.gen/*))
- (action  (run site/server/server.exe convert-all)))
-
-(rule
  (target OA-dictionnaire-EROFA.pdf)
  (deps)
  (action (run curl -sS -O http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf)))
-
-(rule
- (targets erofa-texte.pdf)
- (deps OA-dictionnaire-EROFA.pdf)
- (action
-  (run qpdf OA-dictionnaire-EROFA.pdf --pages . 1-78,521-523 -- erofa-texte.pdf)))
 
 ;; add spurious dependencies to server.exe, so we can
 ;; make dune exec server.exe build the runtime deps of
 ;; the exe on top of the exe itself
 (rule
  (deps
-   (glob_files extension/*.zip)
-   dl-conv.gen
-   doc-conversion/bin/ortografe_cli.exe
-   erofa-texte.pdf)
+  (glob_files extension/*.zip)
+  (glob_files site/static/*)
+  site/static/books
+ )
  (action (copy site/server/server.exe server_all.exe)))

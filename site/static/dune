@@ -1,0 +1,17 @@
+(rule (action (copy %{project_root}/extension/dict.gen.csv erofa.csv)))
+(rule (action (copy %{project_root}/extension/dict1990.gen.csv rect1990.csv)))
+(copy_files (files ../client/*.{js,html}))
+(copy_files (files %{project_root}/extension/src/{rewrite,dict}.js))
+(copy_files (files %{project_root}/doc-conversion/bin/ortografe_cli.exe))
+(copy_files (files %{project_root}/erofa-texte.pdf))
+
+(rule
+ (targets (dir books))
+ (deps    (glob_files %{project_root}/dl.gen/*))
+ (action  (run ../server/server.exe convert-all)))
+
+(rule
+ (targets erofa-texte.pdf)
+ (deps %{project_root}/OA-dictionnaire-EROFA.pdf)
+ (action
+  (run qpdf %{project_root}/OA-dictionnaire-EROFA.pdf --pages . 1-78,521-523 -- erofa-texte.pdf)))
