@@ -34,14 +34,16 @@ let where_to_find_static_files () =
     (* In dev, setup symlinks to the files in the repo, so we can just
        modify the files and reload without fiddling with the server. *)
     let repo_root = repo_root () in
-    (* maybe we should read the COPY line from the docker file, to
-       avoid duplicating? *)
     let static_root = "/tmp/static" in
     ListLabels.iter
+      (* keep in sync with Dockerfile *)
       [ "site/client/index.html", None
       ; "site/client/page.js", None
       ; "extension/src/rewrite.js", None
       ; "extension/src/dict.js", None
+      ; "extension/dict.gen.csv", Some "erofa.csv"
+      ; "extension/dict1990.gen.csv", Some "rect1990.csv"
+      ; "_build/default/erofa-texte.pdf", None
       ; "_build/default/doc-conversion/bin/ortografe_cli.exe", None
       ; Book_import.directory
           ~root:(Filename.concat repo_root "_build/default"), Some "books"

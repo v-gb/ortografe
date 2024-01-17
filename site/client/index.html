@@ -135,7 +135,7 @@
       <section>
         <h2>Les règles</h2>
         <div id="rules" class="notranscribe">
-          <p class="to-transcribe" style="margin-top:0em"> Vous avez dû constaté que les
+          <p class="to-transcribe" style="margin-top:0em"> Vous avez dû constater que les
             textes se lisent bien, même sans explication, et vous avez peut-être deviné une
             partie des règles&#8239;:</p>
           <div class="to-transcribe pseudolist">
@@ -173,7 +173,11 @@
         <p>
           Comme vous avez pu constater plus haut, nous proposons des outils pour utiliser
           cette proposition de rationalisation.
-          <span class=todo>décrire les license pour tout ça</span>
+        </p>
+
+        <p> Notez que ces outils utilisent des dictionnaires construits à partir de sources
+          dont la licence ne permet que les utilisations <strong>non-commerciales</strong>
+          (<a href="http://erofa.free.fr/index.php?option=com_content&view=article&id=59&Itemid=68">érofa</a> et <a href="http://www.lexique.org">Lexique</a>).
         </p>
       </section>
       
@@ -240,28 +244,36 @@
       </section>
 
       <section>
-        <h3>Correcteur d'orthographe</h3>
+        <h3>Correcteurs d'orthographe</h3>
 
-        <a href="https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/">Extension pour Firefox</a>
-        <span class=todo>à faire mieux</span>
+        <p>Afin de pouvoir écrire en orthographe Érofa sans que votre ordinateur ne
+           veuille vous corriger en permanence (en soulignants en rouge), vous pouvez
+           enseigner l'orthographe Érofa aux outils suivants&#8239;:
+        </p>
+        <ul>
+          <li>le navigateur <a href="https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/">Firefox</a> (non supporté sur téléphones)</li>
+          <li>l'app d'emails/agenda/contacts <a href="https://addons.thunderbird.net/fr/thunderbird/addon/corecteur-ortografe-simpl-thun/">Thunderbird</a></li>
+          <li>la suite de bureautique <a href="https://extensions.openoffice.org/de/projectrelease/correction-en-orthographe-simplifiee-du-francais-100">OpenOffice</a></li>
+        </ul>
       </section>
 
       <section>
         <h3>Données</h3>
 
-        <p>
-          Nous fournissons un dictionnaire qui décrit le passage de
-          l'orthographe usuelle à l'orthographe proposée, qui a été
-          calculé de façon semi-automatisé. <span class=todo><a href="??">lien à
-              ajouter</a></span>
-        </p>
+        <p>Nous fournissons des données brutes qui décrivent le passage de l'orthographe
+           usuelle à d'autres orthographes. </p>
+
+        <ul>
+          <li><a href="static/erofa.csv" download="erofa.csv">csv érofa</a> contenant l'orthographe avant/après, ce qui inclus partiellement les rectifications de 1990</li>
+          <li><a href="static/rect1990.csv" download="rect1990.csv">csv rectifications de 1990</a>, pareil mais pour les rectifications de 1990</li>
+        </ul>
       </section>
 
       <section>
         <h2>Pour aller plus loin</h2>
 
         <ul>
-          <li>plus d'information sur l'orthographe proposée, version <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">courte</a> ou <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">longue</a> (mais ça se lit très bien)<span class=todo>pointer vers doc sans le dico pour pas effrayer les gens</span></li>
+          <li>plus d'information sur l'orthographe proposée, en <a href="https://lactualite.com/societe/a-quoi-ressemblerait-une-ortografe-rationele">court</a>, <a href="/static/erofa-texte.pdf#page=17">long</a> (mais ça se lit très bien), ou <a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">long incluant un dictionnaire des changements</a></li>
           <li>plus d'information sur l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme</li>
           <li><span class=todo><a href="mailto:...">Contactez-nous</a> si vous avez des problèmes</span>, questions ou suggestions !</li>
           <li><a href="https://github.com/v-gb/ortografe">code source</a> de cette page</li>
