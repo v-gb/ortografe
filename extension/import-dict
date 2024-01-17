@@ -83,7 +83,7 @@ EOF
     # Capitalized words in the dict are treated as exceptions, for
     # cases when the capitalized version of the word is almost never the common
     # noun, but is instead a proper noun that we don't want to rewrite
-    for w in Pierre Cannes Rennes Vienne Bordeaux; do
+    for w in Pierre Cannes Rennes Vienne Bordeaux Rochelle; do
         echo $w,bug-if-displayed
     done >> dict.gen.csv
 
