@@ -198,6 +198,11 @@ let main () =
       ; C.Cmd.v (C.Cmd.info "books-html")
           (let+ () = return () in
            print_string (Book_import.html ~root:(repo_root ())))
+      ; C.Cmd.v (C.Cmd.info "rewrite-index")
+          (let+ arg1 =
+             C.Arg.required (C.Arg.pos 0 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"INPUT_FILE" []))
+           in
+           Rewrite_index.rewrite arg1)
       ]
   in
   exit (C.Cmd.eval cmd)
