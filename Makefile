@@ -1,12 +1,12 @@
-.PHONY: serve serve-w build-container run-container fly-deploy
+.PHONY: all all-w build-container run-container fly-deploy
 
-serve:
-	dune exec -- ./server_with_deps.exe serve -p 8081
-serve-w:
-	dune exec -w -- ./server_with_deps.exe serve -p 8081
+all:
+	dune build ./server_all.exe
+all-w:
+	dune exec -w -- ./server_all.exe serve -p 8081
 
 build-container:
-	dune build -- ./server_with_deps.exe
+	dune build -- ./server_all.exe
 	podman build -f site/deployment/Dockerfile . -t ortografe-server
 
 run-container: build-container

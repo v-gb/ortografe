@@ -8,6 +8,7 @@
 ;; the exe on top of the exe itself
 (rule
  (deps
+   (glob_files extension/*.zip)
    dl-conv.gen
    doc-conversion/bin/ortografe_cli.exe)
- (action (copy site/server/server.exe server_with_deps.exe)))
+ (action (copy site/server/server.exe server_all.exe)))
