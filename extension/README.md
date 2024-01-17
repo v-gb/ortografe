@@ -9,6 +9,13 @@ Run:
 ./make-icon
 ```
 
+Or, alternatively with `dune`:
+
+```bash
+# (cd ../; make install-opam-and-dune)
+# dune build
+```
+
 For firefox: the first time, go to `about:debugging` -> `this firefox`
 -> `load a temporary module`, point to
 `extension/src/manifest.json`, go to `about:addons`, click on
@@ -27,15 +34,17 @@ the refresh icon instead.
 # A few implementation notes
 
 ## manifest.json
-Why `gecko_id`: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings
+### Why `gecko_id`
+https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings
 
-Why storage permissions: for the options
+### Why storage permissions
+For the options
 
-Why `min_version` of 113 for android
+### Why `min_version` of 113 for android
 106: needed for `i18.detectLanguage`
 113: needed for `gecko_android.min_version`
 
-Why `manifest_version` 2:
+### Why `manifest_version` 2:
 
 Because with manifest v3, firefox will not run the extension unless
 the user either interacts with the extension, allows the extension to

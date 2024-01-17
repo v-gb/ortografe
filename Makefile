@@ -1,4 +1,4 @@
-.PHONY: all all-w build-container run-container fly-deploy
+.PHONY: install-opam-and-dune all all-w build-container run-container fly-deploy
 
 all:
 	dune build ./server_all.exe
@@ -15,3 +15,9 @@ run-container: build-container
 
 fly-deploy: build-container
 	fly deploy
+
+install-opam-and-dune:
+	@ # instructions from https://opam.ocaml.org/doc/Install.html
+	bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"
+	opam install dune sexp
+	opam install $(dune describe external-lib-deps | sexp select external_deps | sexp query 'each (index 0)' | sort -u | grep -v [.])
