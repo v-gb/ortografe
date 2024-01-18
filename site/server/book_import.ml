@@ -205,7 +205,7 @@ let html ~root =
         | [] -> "no idea"
         | _ :: _ as l -> String.concat l ~sep:" or "
       in
-      let rel_url = "static/books" ^/ title ^/ guess_main_file in
+      let rel_url = "/static/books" ^/ title ^/ guess_main_file in
       let de =
         match (String.lowercase author).[0] with
         | 'a' | 'e' | 'i' | 'o' | 'u' | 'y' -> "d'"
