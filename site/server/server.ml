@@ -111,6 +111,22 @@ let respond_error_text status str =
 let hum_size_of_bytes n =
   Core.Byte_units.Short.to_string (Core.Byte_units.of_bytes_int n)
 
+let from_filesystem a path request =
+  let%lwt response = Dream.from_filesystem a path request in
+  let cache =
+    (* the big things we'd like to avoid repeating queries for are dict.js
+       and the screenshot *)
+    match path with
+    | "dict.js" -> true
+    | _ ->
+       match Filename.extension path with
+       | ".png" | ".svg" | ".jpg" -> true
+       | _ -> false
+  in
+  if cache
+  then Dream.set_header response "Cache-Control" "max-age=3600";
+  Lwt.return response
+
 let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
   Ortografe.max_size := max_input_size * 2; (* xml can be quite large when decompressed *)
   let static_root = where_to_find_static_files () in
@@ -148,8 +164,8 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                   )
              | _ -> respond_error_text `Bad_Request ""
            )
-       ; Dream.get "/" (Dream.from_filesystem static_root "index.html")
-       ; Dream.get "/static/**" (Dream.static static_root)
+       ; Dream.get "/" (from_filesystem static_root "index.html")
+       ; Dream.get "/static/**" (Dream.static ~loader:from_filesystem static_root)
        ]
 
 let run_for_bench ~log ?port ?tls () =
