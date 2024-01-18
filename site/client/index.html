@@ -117,6 +117,10 @@
       a:visited {
           color: darkgreen;
       }
+      footer {
+          margin-top: 5em;
+          font-size: 0.8em;
+      }
     </style>
   </head>
   <body>
@@ -220,18 +224,29 @@
         </form>
         <p>Les formats acceptés sont&#8239;:</p>
         <ul>
-          <!-- need to look at licences again
-               https://en.wikipedia.org/wiki/LibreOffice#/media/File:LibreOffice_7.5_Writer_Icon.png
-               in general, finding icons on wikipedia is the way to go
-            -->
           <li>fichiers textes (.txt, .mkd, .md)
           <li>pages web (.html, .xhtml, .htmlz)</li>
-          <li>fichiers <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg" alt="Microsoft Office Word (2019–present).svg"> Word, <img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/4/45/LibreOffice_7.5_Writer_Icon.png" alt="LibreOffice 7.5 Writer Icon.png"> LibreOffice, <a title="OpenOffice.org, LGPL &lt;http://www.gnu.org/licenses/lgpl.html&gt;, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:OOoWriter3logo.png"><img class="icon" alt="OOoWriter3logo" src="https://upload.wikimedia.org/wikipedia/commons/f/f8/OOoWriter3logo.png"></a> OpenOffice (.doc, .docx) </li>
-          <li><a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg#/media/File:Epub_logo_color.svg"><img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Epub_logo_color.svg" alt="Epub logo color.svg"></a> livres numériques (.epub), comme ceux de <a href="https://fr.wikisource.org/wiki/Wikisource:Accueil">wikisource</a> plus haut
+          <li>fichiers
+            <a href="https://commons.wikimedia.org/wiki/File:Microsoft_Office_Word_(2019%E2%80%93present).svg">
+              <img class="icon" src="static/word.svg" alt="Microsoft Office Word (2019–present).svg">
+            </a> Word,
+            <a href="https://commons.wikimedia.org/wiki/File:LibreOffice_7.5_Writer_Icon.png">
+              <img class="icon" src="static/libreoffice.png" alt="LibreOffice 7.5 Writer Icon">
+            </a>
+            LibreOffice,
+            <a href="https://commons.wikimedia.org/wiki/File:OOoWriter3logo.png">
+              <img class="icon" src="static/openoffice.png" alt="OOoWriter 3 logo">
+            </a> OpenOffice (.doc, .docx)
           </li>
-          <li><a title="Adobe Systems
-
-                        CMetalCore, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:PDF_file_icon.svg"><img class="icon" alt="PDF file icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/PDF_file_icon.svg/256px-PDF_file_icon.svg.png"></a> fichiers PDF : pas directement supporté <br>
+          <li>
+            <a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg">
+              <img class="icon" src="static/epub.svg" alt="Epub logo color.svg">
+            </a> livres numériques (.epub), comme ceux de <a href="https://fr.wikisource.org/wiki/Wikisource:Accueil">wikisource</a> plus haut
+          </li>
+          <li>
+            <a href="https://commons.wikimedia.org/wiki/File:PDF_file_icon.svg">
+              <img class="icon" alt="PDF file icon" src="static/pdf.svg">
+            </a> fichiers PDF : pas directement supporté <br>
           Si vous avez le fichier original utilisé pour créer le PDF, convertissez ça, le résultat sera nettement meilleur. <br>
           Si vous n'avez pas le fichier original, vous pouvez transformer le fichier PDF en fichier Word (par exemple avec <a href="https://www.adobe.com/acrobat/online/pdf-to-word.html">Adobe</a> ou <a href="https://tools.pdf24.org/en/pdf-to-word">Pdf24</a>), puis soumettre le fichier Word ici.
           </li>
@@ -252,9 +267,9 @@
         <a href="static/screenshot-1280-800.jpg"><img src="static/screenshot-1280-800.jpg" style="max-width:min(35em,100%)"></a>
         <p>Lisez en orthographe simplifiée pendant votre navigation, en installation une extension pour votre navigateur internet&#8239;:</p>
         <ul>
-          <li><img class="icon" src="https://www.google.fr/chrome/static/images/chrome-logo-m100.svg"> <a href="https://chromewebstore.google.com/detail/orthographe-simplifi%C3%A9e/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr">pour google Chrome</a> (non supporté sur téléphone) </li>
-          <li><img class="icon" src="https://www.mozilla.org/media/protocol/img/logos/firefox/browser/logo.eb1324e44442.svg"> <a href="https://addons.mozilla.org/fr/firefox/addon/orthographe-simplifi%C3%A9e/"> pour Firefox </a> </li>
-          <li><img class="icon" src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg"> pas encore supporté pour Safari </li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg"><img class="icon" src="static/chrome.svg"></a> <a href="https://chromewebstore.google.com/detail/orthographe-simplifi%C3%A9e/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr">pour google Chrome</a> (non supporté sur téléphone) </li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Firefox_logo,_2019.svg"><img class="icon" src="static/firefox.svg"></a> <a href="https://addons.mozilla.org/fr/firefox/addon/orthographe-simplifi%C3%A9e/"> pour Firefox </a> </li>
+          <li><a href="https://commons.wikimedia.org/wiki/File:Safari_browser_logo.svg"><img class="icon" src="static/safari.svg"></a> pas encore supporté pour Safari </li>
         </ul>
       </section>
 
@@ -296,6 +311,9 @@
         </ul>
       </section>
 
+      <footer>
+        Vous pouvez retrouver l'origine des diverses icônes utilisées dans cette page en cliquant dessus. Aucune n'ont été modifiées.
+      </footer>
     </main>
   </body>
 </html>

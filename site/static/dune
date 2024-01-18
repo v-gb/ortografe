@@ -21,3 +21,54 @@
 
 (copy_files
  (files %{project_root}/extension/store-page/screenshot-1280-800.jpg))
+
+(rule
+ (target chrome.svg)
+ (action
+   ;; licence is public domain, so nothing more to do
+   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg")))
+
+(rule
+ (target firefox.svg)
+ (action
+  ;; licence is MPL2, although I don't understand what it requires
+  ;; since it's talking about source code
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/a/a0/Firefox_logo%2C_2019.svg")))
+
+;; public domain
+(rule
+ (target safari.svg)
+ (action
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg")))
+
+;; public domain
+(rule
+ (target pdf.svg)
+ (action
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg")))
+
+;; public domain
+(rule
+ (target epub.svg)
+ (action
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f2/Epub_logo_color.svg")))
+
+;; public domain
+(rule
+ (target word.svg)
+ (action
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg")))
+
+;; https://creativecommons.org/licenses/by-sa/4.0/deed.en
+;; should be fine with link + note at the bottom
+(rule
+ (target libreoffice.png)
+ (action
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/4/45/LibreOffice_7.5_Writer_Icon.png")))
+
+;; LGPL?? I guess just link + note at the bottom is going to have to do
+(rule
+ (target openoffice.png)
+ (action
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f8/OOoWriter3logo.png")))
+
