@@ -18,3 +18,6 @@
  (deps %{project_root}/OA-dictionnaire-EROFA.pdf)
  (action
   (run qpdf %{project_root}/OA-dictionnaire-EROFA.pdf --pages . 1-78,521-523 -- erofa-texte.pdf)))
+
+(copy_files
+ (files %{project_root}/extension/store-page/screenshot-1280-800.jpg))
