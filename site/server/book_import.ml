@@ -212,7 +212,7 @@ let html ~root =
         | _ -> "de "
       in
       Buffer.add_string b
-        [%string {|<li><a href="%{rel_url}">%{title}</a> %{de}%{author} (voir l'<a href="%{url}">texte initial</a>)</li>|}];
+        [%string {|<li><cite><a href="%{rel_url}">%{title}</a></cite> %{de}%{author} (voir l'<a href="%{url}">texte initial</a>)</li>|}];
       Buffer.add_string b "\n");
   Buffer.add_string b "</ul>\n";
   Buffer.contents b
