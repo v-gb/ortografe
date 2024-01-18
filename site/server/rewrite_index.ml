@@ -38,20 +38,20 @@ let trees_of_string src : tree list =
   |> Markup.to_list
 
 let string_of_trees trees =
-  Core.List.map trees ~f:(fun tree ->
+  List.map trees ~f:(fun tree ->
       tree
       |> Markup.from_tree Fun.id
       |> Markup.pretty_print
       |> Markup.write_html
       |> Markup.to_string)
-  |> Core.String.concat_lines
+  |> String.concat_lines
 
-let rec rewrite : tree -> tree list = function
+let rec rewrite ~books_html = function
   | `Element (name, attrs, children) as initial
-       when Core.List.exists attrs ~f:(function
+       when List.exists attrs ~f:(function
                 | ((_, "class"), value) ->
-                   Core.List.mem ~equal:String.equal
-                     (Core.String.split value ~on:' ')
+                   List.mem ~equal:String.equal
+                     (String.split value ~on:' ')
                      "to-transcribe"
                 | _ -> false)
     ->
@@ -59,7 +59,7 @@ let rec rewrite : tree -> tree list = function
        if String.(=) (snd name) "p"
        then children
        else
-         match Core.List.last_exn children with
+         match List.last_exn children with
          | `Element (_, _, children) -> children
          | _ -> raise_s [%sexp "hmm", (children : tree list)]
      in
@@ -69,14 +69,16 @@ let rec rewrite : tree -> tree list = function
             ~options:{ convert_uppercase = false; dict = Lazy.force Ortografe.erofa }
             ~dst:String
        |> trees_of_string
-       |> Core.List.hd_exn
+       |> List.hd_exn
      in
      [ initial; new_node ]
+  | `Element ((_, "books"), _, _) ->
+     trees_of_string books_html
   | `Element (name, attrs, children) ->
-     [ `Element (name, attrs, Core.List.concat_map children ~f:rewrite) ]
+     [ `Element (name, attrs, List.concat_map children ~f:(rewrite ~books_html)) ]
   | elt -> [elt]
 
-let rewrite index_html =
+let rewrite index_html books_html =
   (* We insert the converted text into the index.html as compile time, so
      - it works without javascript
      - the layout doesn't move
@@ -85,8 +87,8 @@ let rewrite index_html =
        the transcription to another page, so progress.
    *)
   index_html
-  |> Core.In_channel.read_all
+  |> In_channel.read_all
   |> trees_of_string
-  |> Core.List.concat_map ~f:rewrite
+  |> List.concat_map ~f:(rewrite ~books_html:(In_channel.read_all books_html))
   |> string_of_trees
-  |> (fun data -> Core.Out_channel.write_all "index.html" ~data)
+  |> (fun data -> Out_channel.write_all "index.html" ~data)

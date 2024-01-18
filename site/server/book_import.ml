@@ -104,7 +104,8 @@ p {
 |})
         | _ -> None)
   in
-  extract_zip ~data:epub_conv ~dst
+  extract_zip ~data:epub_conv ~dst;
+  epub_conv
 
 let convert_gutenberg zip ~dst =
   let data = Ortografe.htmlz zip ~dst:String ~options:(Lazy.force options) in
@@ -120,7 +121,8 @@ let convert_gutenberg zip ~dst =
           -> Some (make_the_html_mobile_friendly (contents ()))
         | _ -> None)
   in
-  extract_zip ~data:new_data ~dst
+  extract_zip ~data:new_data ~dst;
+  new_data
 
 let convert url ~root ~title =
   let url = Uri.of_string url in
@@ -170,49 +172,55 @@ let download_all ~root =
     download ~root ~title url;
   )
 
+let guess_main_file ~url ~data =
+  let files =
+    let files = Queue.create () in
+    ignore (
+        Ortografe.map_zip data (fun member _file _contents ->
+            Queue.enqueue files (Zipc.Member.path member);
+            None) : string);
+    Queue.to_list files
+  in
+  match
+    List.filter files ~f:(fun f ->
+        let prefix, ext = Filename.split_extension f in
+        match Filename.basename prefix, ext with
+        | ("nav" | "title" | "about"), _ -> false
+        | _, Some ("html" | "xhtml") -> true
+        | _ -> false)
+  with
+  | [f] -> f
+  | files -> raise_s [%sexp "can't find main .html file for",
+                  (url : string),
+                  ~~(files : string list)]
+
+let html_li ~url ~author ~title ~main_file =
+  let rel_url = "/static/books" ^/ title ^/ main_file in
+  let de =
+    match (String.lowercase author).[0] with
+    | 'a' | 'e' | 'i' | 'o' | 'u' | 'y' -> "d'"
+    | _ -> "de "
+  in
+  [%string {|<li><cite><a href="%{rel_url}">%{title}</a></cite> %{de}%{author} (voir le <a href="%{url}">texte initial</a>)</li>|}]
+  ^ "\n"
+
 let convert_all ~root =
   Sys_unix.command_exn [%string "rm -rf %{Sys.quote (directory ~root)}"];
-  List.iter books ~f:(fun (title, _author, url) ->
-    convert ~root ~title url)
-
-let html ~root =
-  let b = Buffer.create 123 in
-  Buffer.add_string b "<ul>\n";
-  List.iter books ~f:(fun (title, author, url) ->
-      let guess_main_file =
-        let files =
-          let path =
-            let url = Uri.of_string url in
-            let source = which_source ~url in
-            dl_path ~root ~title ~source
-          in
-          let data = In_channel.read_all path in
-          let files = Queue.create () in
-          ignore (
-              Ortografe.map_zip data (fun member _file _contents ->
-                  Queue.enqueue files (Zipc.Member.path member);
-                  None) : string);
-          Queue.to_list files
-        in
-        match
-          List.filter files ~f:(fun f ->
-              let prefix, ext = Filename.split_extension f in
-              match Filename.basename prefix, ext with
-              | ("nav" | "title" | "about"), _ -> false
-              | _, Some ("html" | "xhtml") -> true
-              | _ -> false)
-        with
-        | [] -> "no idea"
-        | _ :: _ as l -> String.concat l ~sep:" or "
-      in
-      let rel_url = "/static/books" ^/ title ^/ guess_main_file in
-      let de =
-        match (String.lowercase author).[0] with
-        | 'a' | 'e' | 'i' | 'o' | 'u' | 'y' -> "d'"
-        | _ -> "de "
-      in
-      Buffer.add_string b
-        [%string {|<li><cite><a href="%{rel_url}">%{title}</a></cite> %{de}%{author} (voir l'<a href="%{url}">texte initial</a>)</li>|}];
-      Buffer.add_string b "\n");
-  Buffer.add_string b "</ul>\n";
-  Buffer.contents b
+  let lis =
+    List.map books ~f:(fun (title, author, url) ->
+        let new_data = convert ~root ~title url in
+        let main_file = guess_main_file ~url ~data:new_data in
+        html_li ~url ~author ~title ~main_file
+      )
+  in
+  let html_fragment =
+    String.concat_lines
+      (List.concat
+         [ [ "<ul class=books>" ]
+         ; lis
+         ; [ "</ul>"]
+         ])
+  in
+  Out_channel.write_all
+    (root ^/ "site" ^/ "static" ^/ "books.html")
+    ~data:html_fragment

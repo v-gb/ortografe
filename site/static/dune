@@ -5,11 +5,13 @@
 (copy_files (files %{project_root}/doc-conversion/bin/ortografe_cli.exe))
 (copy_files (files %{project_root}/erofa-texte.pdf))
 (rule
- (targets index.html)
- (action (run ../server/server.exe rewrite-index %{dep:../client/index.html})))
+ (targets index.html )
+ (action (run ../server/server.exe rewrite-index
+              %{dep:../client/index.html}
+              %{dep:books.html})))
 
 (rule
- (targets (dir books))
+ (targets (dir books) books.html)
  (deps    (glob_files %{project_root}/dl.gen/*))
  (action  (run ../server/server.exe convert-all)))
 

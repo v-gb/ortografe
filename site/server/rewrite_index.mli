@@ -1,1 +1,1 @@
-val rewrite : string -> unit
+val rewrite : string -> string -> unit
