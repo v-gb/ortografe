@@ -10,6 +10,12 @@ primary_region = "cdg"
   dockerfile = "site/deployment/Dockerfile"
 
 [http_service]
+# https://fly.io/docs/networking/services/
+#
+# Apparently, fly turns handles the TLS for us, so our server only ever sees http1.1, not
+# http2. It seems that dream doesn't support http2 without TLS, so we can't request that
+# the fly proxy talk to us this way. Maybe at some point we should turn off the proxying,
+# although that'll probably involve figuring out a story for certificates.
   internal_port = 8080
   force_https = true
   auto_stop_machines = true
