@@ -102,6 +102,13 @@
           gap:0.3em;
           margin-left: 0.7em;
       }
+
+      .books li:not(:last-child) {
+          margin-bottom: 2px;
+      }
+      .books li {
+          list-style-type: none;
+      }
     </style>
   </head>
   <body>
@@ -115,7 +122,7 @@
 
       <p><strong> Allez voir à quoi ressemble le résultat dans les textes suivant avant de lire ce que font les règles ! </strong></p>
 
-      <ul>
+      <ul class=books>
         <li><a href="static/books/Pensées/OPS/c0_Pensees_de_Marc_Aurele__Couat__01.xhtml">Pensées</a> de Marc Aurèle (<a href="https://fr.wikisource.org/wiki/Pens%C3%A9es_de_Marc-Aur%C3%A8le_(Couat)/01">texte initial</a>)</li>
         <li><a href="static/books/Le Misanthrope/OPS/c0_Le_Misanthrope_Edition_Louandre__1910_Acte_I.xhtml">Le Misanthrope</a> de Molière (<a href="https://fr.wikisource.org/wiki/Le_Misanthrope/%C3%89dition_Louandre,_1910/Acte_I">texte initial</a>)</li>
         <li><a href="static/books/Alice au pays des merveilles/OPS/c0_Alice_au_pays_des_merveilles_1.xhtml">Alice au pays des merveilles</a> de Lewis Carroll (<a href="https://fr.wikisource.org/wiki/Alice_au_pays_des_merveilles/1">texte initial</a>)</li>
