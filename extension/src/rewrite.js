@@ -77,7 +77,7 @@ function make_walk(root) {
                  || node.isContentEditable)
                 ? NodeFilter.FILTER_REJECT
                 : NodeFilter.FILTER_SKIP
-        });    
+        });
 }
 
 async function plausibly_french_once(b, root, debug) {

@@ -18,7 +18,7 @@ module Tmp = struct
 end
 
 type tree = Tmp.tree [@@deriving sexp_of]
-           
+
 let trees signals =
   (* should try to upstream this, this is boilerplate that should be provided upstream *)
   Markup.trees signals

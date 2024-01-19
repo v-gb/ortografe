@@ -43,7 +43,7 @@ type options =
   { convert_uppercase : bool
   ; dict : (string, string) Hashtbl.t
   }
-  
+
 let nfc str =
   (* this transforms invalid utf8 into replacement chars, maybe we should rewrite the loop
      to avoid that *)
@@ -171,7 +171,7 @@ let split_on_first_uchar src ~f =
   | Some repl ->
      let src0bytes = Uchar.utf_decode_length utf_decode in
      Some (string_of_uchars repl ^ String.sub src src0bytes (String.length src - src0bytes))
-  | None -> None  
+  | None -> None
 
 let depluralize w =
   if String.ends_with w ~suffix:"s"
@@ -218,7 +218,7 @@ let lowercase w =
       if Uucp.Case.is_upper c
       then Uucp.Case.Map.to_lower c
       else `Self)
-       
+
 let uppercase w =
   map_case w ~f:(fun c ->
       if Uucp.Case.is_lower c
@@ -430,7 +430,7 @@ let map_zip src f =
                 |> Core.Result.ok_or_failwith
               in
               Zipc.add new_member acc
-              
+
       )
       zipc zipc
   in
@@ -527,7 +527,7 @@ let htmlz ?buf ?debug ?pp ~options src ~dst =
          Some (html ~buf ?debug ?pp ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
-  
+
 let of_ext ext =
   match String.lowercase_ascii ext with
   | ".html" -> Some (ext, `Html)
@@ -586,7 +586,7 @@ let convert_files ~options src dst =
       in
       convert typ ~options src ~dst:(Channel dst)
     )
-  
+
 module Private = struct
   let docx_document = docx_document
   let read_whole_zip = read_whole_zip

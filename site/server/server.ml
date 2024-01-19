@@ -1,6 +1,6 @@
 let read_until_close_or_max_size ~max_size stream =
   (* This is Dream's read_until_close function, with just an extra
-     check when growing the buffer. 
+     check when growing the buffer.
      With this, sending a 1GB makes the send reject 10x faster
      and use little memory instead of 3GB (which is more than the
      prod server has). *)
@@ -107,7 +107,7 @@ let respond_error_text status str =
   in
   Dream.set_field response error_has_body ();
   Lwt.return response
-  
+
 let hum_size_of_bytes n =
   Core.Byte_units.Short.to_string (Core.Byte_units.of_bytes_int n)
 
