@@ -4,7 +4,7 @@
 (copy_files (files %{project_root}/extension/src/{rewrite,dict}.js))
 (rule
   (target dict.js.gz)
-  (action  (run gzip -n -k %{dep:dict.js})))
+  (action  (run gzip -f -n -k %{dep:dict.js})))
 (copy_files (files %{project_root}/doc-conversion/bin/ortografe_cli.exe))
 (copy_files (files %{project_root}/erofa-texte.pdf))
 (rule

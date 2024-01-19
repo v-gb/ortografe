@@ -20,10 +20,9 @@ let suf = function
 
 let dl_path ~root ~title ~source =
   root ^/ "dl.gen" ^/ (title ^ suf source)
-let conv_path ~root ~title ~source:_ =
-  root ^/ "site" ^/ "static" ^/ "books" ^/ title
+let conv_path ~title = "books" ^/ title
+let conv_basedir = "books"
 
-let directory ~root = root ^/ "dl-conv.gen"
 let mkdir_and_write_all path ~data =
   if not (Stdlib_sys.file_exists (Filename.dirname path))
   then Unix.mkdir (Filename.dirname path) 0o777;
@@ -133,7 +132,7 @@ let convert url ~root ~title =
                      , "hint: you might need to run "
                      , (Sys.concat_quoted [ (Sys.get_argv ()).(0); "download-all" ] : string)]
   in
-  let dst = conv_path ~root ~title ~source in
+  let dst = conv_path ~title in
   match source with
   | `Wikisource -> convert_wikisource data ~dst
   | `Gutenberg -> convert_gutenberg data ~dst
@@ -150,20 +149,20 @@ let books =
      For project gutenberg, I think no obligations to even link, but I'll do that anyway.
      https://www.gutenberg.org/policy/permission.html
    *)
-  [ "Pensées", "Marc Aurèle", "https://fr.wikisource.org/wiki/Pens%C3%A9es_de_Marc-Aur%C3%A8le_(Couat)/01"
-  ; "Le Misanthrope", "Molière", "https://fr.wikisource.org/wiki/Le_Misanthrope/%C3%89dition_Louandre,_1910/Acte_I"
-  ; "Alice au pays des merveilles", "Lewis Carroll", "https://fr.wikisource.org/wiki/Alice_au_pays_des_merveilles/1"
-  ; "Poil de Carotte", "Jules Renard", "https://fr.wikisource.org/wiki/Poil_de_Carotte/01"
-  ; "Les Fleurs du mal", "Charles Baudelaire", "https://www.gutenberg.org/ebooks/6099"
-  ; "Fables, La cigale et la fourmi", "Jean de La Fontaine", "https://fr.wikisource.org/wiki/Fables_de_La_Fontaine_(%C3%A9d._1874)/La_Cigale_et_la_Fourmi"
-  ; "Fables, Le corbeau et le renard", "Jean de La Fontaine", "https://fr.wikisource.org/wiki/Fables_de_La_Fontaine_(%C3%A9d._1874)/Le_Corbeau_et_le_Renard"
-  ; "Les Voyages de Gulliver", "Jonathan Swift", "https://fr.wikisource.org/wiki/Les_Voyages_de_Gulliver/Voyage_%C3%A0_Lilliput/I"
-  ; "Les Misérables", "Victor Hugo", "https://fr.wikisource.org/wiki/Les_Mis%C3%A9rables/Tome_1/Livre_1/01"
-  ; "Cyrano de Bergerac", "Edmond Rostand", "https://fr.wikisource.org/wiki/Cyrano_de_Bergerac_(Rostand)/Acte_I"
-  ; "Madame Bovary", "Gustave Flaubert", "https://fr.wikisource.org/wiki/Madame_Bovary/Premi%C3%A8re_partie/1"
-  ; "Candide, ou l'Optimisme", "Voltaire", "https://fr.wikisource.org/wiki/Candide,_ou_l%E2%80%99Optimisme/Garnier_1877/Chapitre_1"
-  ; "Le Comte de Monte-Cristo", "Alexandre Dumas", "https://fr.wikisource.org/wiki/Le_Comte_de_Monte-Cristo/Chapitre_1"
-  ; "Vingt mille lieues sous les mers", "Jules Verne", "https://fr.wikisource.org/wiki/Vingt_mille_lieues_sous_les_mers/Partie_1/Chapitre_1"
+  [ "Pensées", "de Marc Aurèle", "https://fr.wikisource.org/wiki/Pens%C3%A9es_de_Marc-Aur%C3%A8le_(Couat)/01"
+  ; "Le Misanthrope", "de Molière", "https://fr.wikisource.org/wiki/Le_Misanthrope/%C3%89dition_Louandre,_1910/Acte_I"
+  ; "Alice au pays des merveilles", "de Lewis Carroll", "https://fr.wikisource.org/wiki/Alice_au_pays_des_merveilles/1"
+  ; "Poil de Carotte", "de Jules Renard", "https://fr.wikisource.org/wiki/Poil_de_Carotte/01"
+  ; "Les Fleurs du mal", "de Charles Baudelaire", "https://www.gutenberg.org/ebooks/6099"
+  ; "Fables, La cigale et la fourmi", "de Jean de La Fontaine", "https://fr.wikisource.org/wiki/Fables_de_La_Fontaine_(%C3%A9d._1874)/La_Cigale_et_la_Fourmi"
+  ; "Fables, Le corbeau et le renard", "de Jean de La Fontaine", "https://fr.wikisource.org/wiki/Fables_de_La_Fontaine_(%C3%A9d._1874)/Le_Corbeau_et_le_Renard"
+  ; "Les Voyages de Gulliver", "de Jonathan Swift", "https://fr.wikisource.org/wiki/Les_Voyages_de_Gulliver/Voyage_%C3%A0_Lilliput/I"
+  ; "Les Misérables", "de Victor Hugo", "https://fr.wikisource.org/wiki/Les_Mis%C3%A9rables/Tome_1/Livre_1/01"
+  ; "Cyrano de Bergerac", "d'Edmond Rostand", "https://fr.wikisource.org/wiki/Cyrano_de_Bergerac_(Rostand)/Acte_I"
+  ; "Madame Bovary", "de Gustave Flaubert", "https://fr.wikisource.org/wiki/Madame_Bovary/Premi%C3%A8re_partie/1"
+  ; "Candide, ou l'Optimisme", "de Voltaire", "https://fr.wikisource.org/wiki/Candide,_ou_l%E2%80%99Optimisme/Garnier_1877/Chapitre_1"
+  ; "Le Comte de Monte-Cristo", "d'Alexandre Dumas", "https://fr.wikisource.org/wiki/Le_Comte_de_Monte-Cristo/Chapitre_1"
+  ; "Vingt mille lieues sous les mers", "de Jules Verne", "https://fr.wikisource.org/wiki/Vingt_mille_lieues_sous_les_mers/Partie_1/Chapitre_1"
   ]
 
 let download_all ~root =
@@ -196,16 +195,11 @@ let guess_main_file ~url ~data =
 
 let html_li ~url ~author ~title ~main_file =
   let rel_url = "/static/books" ^/ title ^/ main_file in
-  let de =
-    match (String.lowercase author).[0] with
-    | 'a' | 'e' | 'i' | 'o' | 'u' | 'y' -> "d'"
-    | _ -> "de "
-  in
-  [%string {|<li><cite><a href="%{rel_url}">%{title}</a></cite> %{de}%{author} (voir le <a href="%{url}">texte initial</a>)</li>|}]
+  [%string {|<li><cite><a href="%{rel_url}">%{title}</a></cite> %{author} (voir le <a href="%{url}">texte initial</a>)</li>|}]
   ^ "\n"
 
 let convert_all ~root =
-  Sys_unix.command_exn [%string "rm -rf %{Sys.quote (directory ~root)}"];
+  Sys_unix.command_exn [%string "rm -rf %{Sys.quote conv_basedir}"];
   let lis =
     List.map books ~f:(fun (title, author, url) ->
         let new_data = convert ~root ~title url in
@@ -221,6 +215,4 @@ let convert_all ~root =
          ; [ "</ul>"]
          ])
   in
-  Out_channel.write_all
-    (root ^/ "site" ^/ "static" ^/ "books.html")
-    ~data:html_fragment
+  Out_channel.write_all "books.html" ~data:html_fragment
