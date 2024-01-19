@@ -2,6 +2,9 @@
 (rule (action (copy %{project_root}/extension/dict1990.gen.csv rect1990.csv)))
 (copy_files (files ../client/*.js))
 (copy_files (files %{project_root}/extension/src/{rewrite,dict}.js))
+(rule
+  (target dict.js.gz)
+  (action  (run gzip -n -k %{dep:dict.js})))
 (copy_files (files %{project_root}/doc-conversion/bin/ortografe_cli.exe))
 (copy_files (files %{project_root}/erofa-texte.pdf))
 (rule

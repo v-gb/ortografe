@@ -111,8 +111,20 @@ let respond_error_text status str =
 let hum_size_of_bytes n =
   Core.Byte_units.Short.to_string (Core.Byte_units.of_bytes_int n)
 
-let from_filesystem a path request =
-  let%lwt response = Dream.from_filesystem a path request in
+let from_filesystem root path request =
+  let disk_path, response_headers =
+    match path with
+    | "dict.js" ->
+       if
+         List.exists (fun s ->
+             String.split_on_char ',' s
+             |> List.exists (fun s -> String.trim s = "gzip"))
+           (Dream.headers request "Accept-Encoding")
+       then "dict.js.gz", [("Content-Encoding", "gzip")]
+       else path, []
+    | _ -> path, []
+  in
+  let%lwt response = Dream.from_filesystem root disk_path request in
   let cache =
     (* the big things we'd like to avoid repeating queries for are dict.js
        and the screenshot *)
@@ -125,6 +137,9 @@ let from_filesystem a path request =
   in
   if cache
   then Dream.set_header response "Cache-Control" "max-age=3600";
+  List.iter
+    (fun (k, v) -> Dream.set_header response k v)
+    response_headers;
   Lwt.return response
 
 let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
