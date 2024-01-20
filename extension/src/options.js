@@ -43,7 +43,8 @@ async function restoreOptions() {
         }
         document.getElementById("rewrite-" + options.rewrite).checked = true;
     } catch (e) {
-        // any exception is debuggable in firefox, so just include it in the page itself
+        // exceptions get swallowed in firefox, making them undebuggable, so just include
+        // them in the page itself
         document.getElementById("error").textContent = e.toString() + "\n" + e.stack + b.storage.local.get.toString();
         throw e
     }
