@@ -1,9 +1,21 @@
 <!doctype html>
 
 <html>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <head>
-    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <style>
+      .btn:hover {
+          background-color: #d9d9d9;
+      }
+      .btn {
+          background-color: #ededed;
+          border: 1px solid grey;
+          border-radius: 4px;
+          line-height: 1.875;
+          padding: 3px 4px;
+      }
+    </style>
   </head>
 
   <body style="min-width:25em;">
@@ -12,49 +24,74 @@
       <legend>Configuration:</legend>
 
       <div>
-	<input type="checkbox" id="color-checkbox" name="color-checkbox"/>
+	<input type="checkbox" id="color-checkbox" name="color-checkbox">
 	<label for="color-checkbox">surligner les mots réécrits</label>
       </div>
       <br>
       <div>
         Comment réécrire :
         <div>
-          <input type="radio" id="rewrite-disable" name="rewrite-radio" value="disable"/>
+          <input type="radio" id="rewrite-disable" name="rewrite-radio" value="disable">
           <label for="rewrite-disable">ne rien réécrire</label>
         </div>
         <div>
-          <input type="radio" id="rewrite-erofa" name="rewrite-radio" value="erofa"/>
+          <input type="radio" id="rewrite-erofa" name="rewrite-radio" value="erofa">
           <label for="rewrite-erofa">convertir vers l'orthographe érofa (défaut)</label>
         </div>
         <div>
-          <input type="radio" id="rewrite-rect1990" name="rewrite-radio" value="rect1990"/>
+          <input type="radio" id="rewrite-rect1990" name="rewrite-radio" value="rect1990">
           <label for="rewrite-rect1990">convertir vers les rectifications de 1990</label>
         </div>
+        <div>
+          <input type="radio" id="rewrite-custom" name="rewrite-radio" value="custom">
+          <label for="rewrite-custom">convertir avec un dictionnaire que vous chargez</label>
+          (actuellement : <span id="dict"></span>)
+        </div>
       </div>
+      <br>
+      <!-- We make people go to the options page, because file input basically doesn't
+           work in popup windows. Essentially, the focus moves away from the popup when
+           the user chooses the file, which makes the popup go away, which prevents
+           anything callback from running. For more details:
+           https://discourse.mozilla.org/t/webextension-prevent-a-popup-panel-to-hide-itself/17857.
+        -->
+      <div id="open-options-page">
+        <button>
+          Ouvrir la page d'options pour charger un dictionnaire
+        </button>
+      </div>
+
+      <form>
+        <div>
+          <label for="load-dict-input" class="btn" id="load-dict">charger un dictionnaire</label>
+          <input style="display:none" type="file" id="load-dict-input">
+        </div>
+        <div id='file_error'></div>
+      </form>
 
       <br>
 
       <details>
         <summary>Pour débugger</summary>
         <div>
-	  <input type="checkbox" id="disable-watch-checkbox" name="disable-watch-checkbox"/>
+	  <input type="checkbox" id="disable-watch-checkbox" name="disable-watch-checkbox">
 	  <label for="disable-watch-checkbox">désactiver la réécriture quand la page change</label>
         </div>
 
         <div>
-	  <input type="checkbox" id="trivial-checkbox" name="trivial-checkbox"/>
+	  <input type="checkbox" id="trivial-checkbox" name="trivial-checkbox">
 	  <label for="trivial-checkbox">réécrire les "a" en "X"</label>
         </div>
         <div>
-	  <input type="checkbox" id="debug-changes-checkbox" name="debug-changes-checkbox"/>
+	  <input type="checkbox" id="debug-changes-checkbox" name="debug-changes-checkbox">
 	  <label for="debug-changes-checkbox">plus de logs à propos des mutations du DOM</label>
         </div>
         <div>
-	  <input type="checkbox" id="debug-language-checkbox" name="debug-language-checkbox"/>
+	  <input type="checkbox" id="debug-language-checkbox" name="debug-language-checkbox">
 	  <label for="debug-language-checkbox">plus de logs à propos de la détection de la langue</label>
         </div>
       </details>
-      <div id='error'/>
+      <div id='error'></div>
     </fieldset>
     </form>
 

@@ -252,12 +252,20 @@ function load_dict(options) {
     let table = new Map()
     if (!options.trivial) {
         const t1 = performance.now();
-        const dict = options.rewrite == 'rect1990' ? dict_rect1990 : dict_erofa;
+        const dict =
+              options.rewrite == 'rect1990' ? dict_rect1990 :
+              options.rewrite == 'custom' ? (options.custom_dict || '') :
+              dict_erofa;
         for (line of dict.split("/")) {
             let [a,b] = line.split(",")
             if (a && b && a != b) {
                 table.set(a, b)
             }
+        }
+        if (table.size == 0) {
+            // table.size is used to indicate the options.trivial elsewhere, so ensure we
+            // don't provide such a table
+            table.set("f3b0686c-b7b6-11ee-9514-dfbe4f72d338", "wonthapppen")
         }
         const t2 = performance.now();
         console.log(`reading table: ${t2 - t1}ms`)
@@ -277,9 +285,16 @@ async function extension_main() {
     const options = await b.storage.local.get(
         ['rewrite', 'disable', 'disable_watch', 'color','trivial', 'debug_changes', 'debug_language']
     )
+    const halfway_storage = performance.now();
+    if (options.rewrite === 'custom') {
+        const more_options = await b.storage.local.get(['custom_dict']);
+        options.custom_dict = more_options.custom_dict;
+    }
     normalize_options(options)
     const after_storage = performance.now();
-    console.log(`reading options: ${after_storage - before_storage}ms`, options)
+    console.log(`reading options: ${after_storage - before_storage}ms`
+                + ` (${after_storage - halfway_storage}ms for custom dict)`,
+                { ...options, custom_dict: "#" + options.custom_dict?.length })
     if (options.rewrite == 'disable') { return };
     const table = load_dict(options);
     // start at document.body, because iterating over document means
