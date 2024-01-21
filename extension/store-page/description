@@ -1,8 +1,9 @@
 Cette extension réécrit les pages web, pour passer de l'orthographe du français standard à d'autres orthographes.
 
-Deux orthographes sont supportées :
+Plusieurs orthographes sont supportées :
 - par défaut, l'orthographe rationalisée des linguistes de l'association Érofa
 - l'orthographe des rectifications 1990 (tout n'est pas pris en compte)
+- des orthographes de votre création
 
 Le but de cette extension est de répondre à la question "en pratique, ça donne quoi ces orthographes modifiées ?".
 
