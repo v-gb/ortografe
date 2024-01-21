@@ -712,39 +712,6 @@ end = struct
     |> join_consecutive_ish_text_nodes
 end
 
-module Workaround_zipc = struct
-  module File = struct
-    (* A wrapped that adds ~version_needed_to_extract:20 .
-       To be deleted once https://github.com/dbuenzli/zipc/issues/3 is fixed *)
-
-    open Zipc
-    open Zipc.File
-    let ( let* ) = Result.bind
-
-    let stored_of_binary_string s =
-      let start = 0 in
-      let len = None in
-      let compression = Stored in
-      let decompressed_size = String.length s in
-      let decompressed_crc_32 = Zipc_deflate.Crc_32.string ~start ?len s in
-      let compressed_size = decompressed_size in
-      make ~start ~compressed_size ~compression s ~decompressed_size
-        ~decompressed_crc_32
-        ~version_needed_to_extract:20
-
-    let deflate_of_binary_string ?level s =
-      let start = 0 in
-      let len = None in
-      let compression = Deflate in
-      let decompressed_size = String.length s in
-      let* decompressed_crc_32, cs =
-        Zipc_deflate.crc_32_and_deflate ?level ~start ?len s
-      in
-      make ~compression cs ~decompressed_size ~decompressed_crc_32
-        ~version_needed_to_extract:20
-  end
-end
-
 let map_zip src f =
   let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in
   let new_zipc =
@@ -757,8 +724,8 @@ let map_zip src f =
            | Some new_content ->
               let new_file =
                 match Zipc.File.compression file with
-                | Stored -> Workaround_zipc.File.stored_of_binary_string new_content |> Core.Result.ok_or_failwith
-                | Deflate -> Workaround_zipc.File.deflate_of_binary_string new_content |> Core.Result.ok_or_failwith
+                | Stored -> Zipc.File.stored_of_binary_string new_content |> Core.Result.ok_or_failwith
+                | Deflate -> Zipc.File.deflate_of_binary_string new_content |> Core.Result.ok_or_failwith
                 | _ -> failwith "unknown compression type, should have failed earlier"
               in
               let new_member =
