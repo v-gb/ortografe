@@ -80,6 +80,20 @@ function make_walk(root) {
         });
 }
 
+function detect_language_fallback(str) {
+    if (str.length == 0) {
+        return { isReliable: false, languages: [] }
+    }
+    const num_diacritics = str.replace(/[^éèêëàçô]/ug, '').length;
+    const languages = [
+        // 0.5% of diacratics seems like it indicates french quite clearly.  Some pages
+        // can have less than that, even.
+        { language: (num_diacritics > 0.005 * str.length) ? 'fr' : 'notfr', percentage: 101 },
+        { language: 'stats', percentage: (100 * num_diacritics)/str.length }
+    ]
+    return { isReliable: true, languages: languages }
+}
+
 async function plausibly_french_once(b, root, debug) {
     const t1 = performance.now();
     const walk = make_walk(root);
@@ -93,7 +107,11 @@ async function plausibly_french_once(b, root, debug) {
         console.log("language detection", buf)
     }
     const t2 = performance.now();
-    const { isReliable, languages } = await b.i18n.detectLanguage(buf);
+    const { isReliable, languages } =
+        // safari doesn't provide this interface 
+          b?.i18n?.detectLanguage
+          ? await b.i18n.detectLanguage(buf)
+          : detect_language_fallback(buf)
     // I've seen cases where isReliable:false, which was needlessly conservative
     const t3 = performance.now();
     console.log(`detected language: DOM traversal: ${t2 - t1}ms, detection: ${t3 - t2}ms, isReliable: ${isReliable}`, languages.map((e) => e.language + '=' + e.percentage).join(' '))
