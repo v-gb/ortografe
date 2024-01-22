@@ -259,7 +259,7 @@ function watch_for_changes(options, table, root) {
         }
         count += n;
     }
-    var observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver((mutations) => {
         if (debug) { last_changes.push(mutations) };
         record_change(mutations.length)
     });
@@ -275,7 +275,7 @@ function load_dict(options) {
               options.rewrite == 'custom' ? (options.custom_dict || '') :
               dict_erofa;
         for (line of dict.split("/")) {
-            let [a,b] = line.split(",")
+            const [a,b] = line.split(",")
             if (a && b && a != b) {
                 table.set(a, b)
             }
