@@ -226,6 +226,27 @@ function rewrite_under(options, table, root){
     return count
 }
 
+const synchronous_updates = new Map([
+    [ 'www.youtube.com', function(options, table, mutations) {
+        let to_rewrite = [];
+        for (m of mutations) {
+            for (node of m.addedNodes) {
+                if (node.nodeType == 1 && node.classList.contains('ytp-caption-segment')) {
+                    to_rewrite.push(node)
+                }
+            }
+        }
+        for (node of to_rewrite) {
+            // The separate loop was to see if it would make the screen update faster
+            // after the DOM was updated. Doesn't seem to help though, sadly, but maybe
+            // the batching is good anyway. Somehow for hand-written subtitles, this seems
+            // to be enough, but not for auto-generated subtitles. We seem to be sometimes
+            // missing updates for auto-generated subtitles in fact. Not clear why that is.
+            rewrite_under(options, table, node)
+        }
+    }]
+])
+
 function watch_for_changes(options, table, root) {
     // now, for dynamic pages, like reddit or lemonde, rewrite text from times
     // to times. It seems ~impossible to avoid traversing the whole document when rewriting
@@ -269,8 +290,13 @@ function watch_for_changes(options, table, root) {
         }
         count += n;
     }
+    const synchronous_update = synchronous_updates.get(location.hostname)
     const observer = new MutationObserver((mutations) => {
         if (debug) { last_changes.push(mutations) };
+        if (synchronous_update) {
+            synchronous_update(options, table, mutations)
+        }
+        // not clear how to avoid looking at the whole page from times to times
         record_change(mutations.length)
     });
     observer.observe(root, { childList: true, characterData: true, subtree: true });
