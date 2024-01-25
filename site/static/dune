@@ -46,6 +46,12 @@
  (action
   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg")))
 
+;; MIT
+(rule
+ (target edge.svg)
+ (action
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f6/Edge_Logo_2019.svg")))
+
 ;; MPL2, same as firefox
 (rule
  (target thunderbird.svg)
