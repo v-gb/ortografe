@@ -747,10 +747,10 @@ let max_size = ref 300_000_000
 let count_size () =
   let total_size = ref 0 in
   (fun file ->
-    (* Not the best, but it helps with non-advertisarial users, and
-       low-tech advertisarial users.  We could ask zipc to respect the
-       compressed size as well (or fork to make it do so, or at least
-       provide a smaller max size). *)
+    (* Zipc enforces that the content is no larger than the size in the metadata, so this
+       check is robust whether large data is submitted accidentally or is adversarial.
+       Zip bombs require no special attention: they are just a way to get a higher
+       compression ratio than deflate supports (1000x). *)
     total_size := !total_size + Zipc.File.decompressed_size file;
     if !total_size > !max_size
     then failwith "files in zip too large")
