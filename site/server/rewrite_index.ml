@@ -41,7 +41,9 @@ let rec rewrite ~books_html = function
      let new_node =
        ("<p class=transcribe-result>" ^ string_of_trees new_children ^ "</p>")
        |> Ortografe.html
-            ~options:{ convert_uppercase = false; dict = Lazy.force Ortografe.erofa }
+            ~options:{ convert_uppercase = false
+                     ; dict = Lazy.force Ortografe.erofa
+                     ; interleaved = true }
             ~dst:String
        |> trees_of_string
        |> List.hd_exn

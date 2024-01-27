@@ -70,7 +70,9 @@ let make_the_html_mobile_friendly html =
     ~pattern:"<head>"
     ~with_:{|<head><meta name="viewport" content="width=device-width, initial-scale=1"/>|}
 
-let options = lazy { Ortografe.convert_uppercase = true; dict = Lazy.force Ortografe.erofa }
+let options = lazy { Ortografe.convert_uppercase = true
+                   ; dict = Lazy.force Ortografe.erofa
+                   ; interleaved = true }
 let convert_wikisource epub ~dst =
    (* Sometimes you see headings that are uppercase in the source, instead by using
       text-transform or font-variant, so just convert those. *)

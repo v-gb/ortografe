@@ -215,3 +215,118 @@ let convert (type a) ?buf ~options src ~(dst : a out) : a =
      Buffer.contents b
   | Channel ch ->
      iter_pure_text ~options src ~f:(Out_channel.output_string ch)
+
+let lsplit2_delim_right str ~on =
+  let open Core in
+  match String.index str on with
+  | None -> None
+  | Some i -> Some (String.prefix str i, String.suffix str (String.length str - i))
+
+let rsplit2_delim_left str ~on =
+  let open Core in
+  match String.rindex str on with
+  | None -> None
+  | Some i -> Some (String.prefix str (i + 1), String.suffix str (String.length str - i - 1))
+
+module Interleaved = struct
+  open Core
+
+  type 'a t =
+    { waiting : [ `Structure of 'a | `Text ] Queue.t
+    ; mutable emit_state : (string * string * string list) option
+    ; embed_text : string -> 'a
+    ; convert_text : string -> string
+    }
+
+  let create ~embed ~convert =
+    { waiting = Queue.create ()
+    ; emit_state = None
+    ; embed_text = embed
+    ; convert_text = convert
+    }
+
+  let emit_structure t a =
+    if Queue.is_empty t.waiting
+    then [a]
+    else (Queue.enqueue t.waiting (`Structure a); [])
+
+  let handle_one_result t s =
+    match Queue.dequeue_exn t.waiting with
+    | `Structure _ -> failwith "bug: dequeued got a structure instead of a text"
+    | `Text ->
+       let res = ref [t.embed_text s] in
+       while
+         match Queue.peek t.waiting with
+         | None | Some `Text -> false
+         | Some (`Structure structure) ->
+            Queue.dequeue_and_ignore_exn t.waiting;
+            res := structure :: !res;
+            true
+       do () done;
+       List.rev !res
+
+  let handle_result t l =
+    List.concat_map l ~f:(handle_one_result t)
+
+  let flush t =
+    match t.emit_state with
+    | None -> None
+    | Some (src_left', left, right) ->
+       let right = List.rev right in
+       t.emit_state <- None;
+       let left' = t.convert_text left in
+       let right_concat' = t.convert_text (String.concat right) in
+       let right' =
+         (* we could also do a character-wise diff2 to line up the strings again *)
+         let i_right = ref 0 in
+         let count = List.length right in
+         List.mapi right ~f:(fun i s ->
+             if i + 1 = count
+             then String.drop_prefix right_concat' !i_right
+             else
+               let i_after = min (String.length right_concat') (!i_right + String.length s) in
+               let res = String.sub right_concat' ~pos:!i_right ~len:(i_after - !i_right) in
+               i_right := i_after;
+               res)
+       in
+       Some (src_left' ^ left' ^ List.hd_exn right', List.tl_exn right')
+
+    let flush_as_list t =
+      match flush t with
+      | None -> []
+      | Some (hd, tl) -> hd :: tl
+
+    let text_when_no_emit_state t src_left' src =
+      assert (Option.is_none t.emit_state);
+      match rsplit2_delim_left src ~on:' ' with
+      | None -> t.emit_state <- Some (src_left', "", [src]); []
+      | Some (_, "") -> [src_left' ^ t.convert_text src]
+      | Some (left, right) -> t.emit_state<- Some (src_left', left, [right]); []
+
+    let emit_text t event =
+      let res =
+        match event with
+        | `Text src ->
+           Queue.enqueue t.waiting `Text;
+           (match t.emit_state with
+            | None -> text_when_no_emit_state t "" src
+            | Some (r_left', r_left, r_right) ->
+               match lsplit2_delim_right src ~on:' ' with
+               | None -> t.emit_state <- Some (r_left', r_left, src :: r_right); []
+               | Some ("", _) ->
+                  let l1 = flush_as_list t in
+                  let l2 = text_when_no_emit_state t "" src in
+                  l1 @ l2
+               | Some (src_left, src_right) ->
+                  t.emit_state <- Some (r_left', r_left, src_left :: r_right);
+                  let l1, src_left' =
+                    let res_left, res_right = Option.value_exn (flush t) in
+                    res_left :: List.drop_last_exn res_right, List.last_exn res_right
+                  in
+                  let l2 = text_when_no_emit_state t src_left' src_right in
+                  l1 @ l2
+           )
+        | `Flush | `Space -> flush_as_list t
+      in
+      handle_result t res
+end  

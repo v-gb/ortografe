@@ -30,7 +30,13 @@ let () =
          | `Empty -> Hashtbl.create 1
        in
        Ortografe.convert_files
-         ~options:{ convert_uppercase; dict  }
+         ~options:{ convert_uppercase
+                  ; dict
+                  ; interleaved =
+                      (match Sys.getenv "INTERLEAVED" with
+                       | "false" -> false
+                       | _ | exception Not_found -> true)
+                  }
          arg1 arg2)
   in
   exit (C.Cmd.eval cmd)

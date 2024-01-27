@@ -3,6 +3,7 @@ val rect1990 : (string, string) Hashtbl.t Lazy.t
 type options =
   { convert_uppercase : bool
   ; dict : (string, string) Hashtbl.t
+  ; interleaved : bool
   }
 
 type 'a out =
@@ -17,7 +18,7 @@ val htmlz : _ convert
 val docx : _ convert
 val epub : _ convert
 val doc : _ convert
-val odt : ?impl:bool -> _ convert
+val odt : _ convert
 
 val convert_string : ext:string -> options:options -> string -> (string * string) option
 val convert_files : options:options -> string option -> string option -> unit

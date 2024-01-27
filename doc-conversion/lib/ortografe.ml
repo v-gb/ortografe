@@ -35,6 +35,7 @@ type 'a out = 'a Common.out =
 type options = Common.options =
   { convert_uppercase : bool
   ; dict : (string, string) Hashtbl.t
+  ; interleaved : bool
   }
 
 type 'a convert = 'a Common.convert

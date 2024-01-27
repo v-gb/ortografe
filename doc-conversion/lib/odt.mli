@@ -1,1 +1,1 @@
-val convert : ?impl:bool -> _ Common.convert
+val convert : _ Common.convert
