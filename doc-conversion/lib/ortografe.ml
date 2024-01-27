@@ -55,56 +55,8 @@ let load_dict str =
 let erofa = lazy (load_dict Dict.erofa)
 let rect1990 = lazy (load_dict Dict.rect1990)
 let pure_text = Text.convert
-
-let html_transform ~buf ~options signal =
-  (* maybe we should check the tag ns for the xhtml case *)
-  let notranslate_pattern = Core.String.Search_pattern.create "notranslate" in
-  let notranscribe_pattern = Core.String.Search_pattern.create "notranscribe" in
-  let stack = Core.Stack.create () in
-  let hide_current = ref false in
-  let convert_text src = pure_text ~buf ~options src ~dst:String in
-  Markup.map (fun elt ->
-      (match elt with
-       | `Start_element ((_, tag), attributes) ->
-          let hide =
-            match tag with
-            | "code" | "script" | "noscript" | "style" | "textarea" -> true
-            | _ ->
-               List.exists (fun ((_, attr), _value) ->
-                   match attr with
-                   | "class" ->
-                      Core.String.Search_pattern.matches notranslate_pattern attr
-                      || Core.String.Search_pattern.matches notranscribe_pattern attr
-                   | "contenteditable" -> true
-                   | _ -> false) attributes
-          in
-          Core.Stack.push stack (tag, !hide_current);
-          hide_current := hide;
-       | `End_element ->
-          (match Core.Stack.pop stack with
-           | None -> ()
-           | Some (_, hide) -> hide_current := hide)
-       | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ -> ());
-      if not !hide_current
-      then More_markup.text_elt ~convert_text elt
-      else elt)
-    signal
-
-let html ?debug ?pp ?buf ~options src ~dst =
-  let buf = buffer buf in
-  More_markup.transform ?debug ?pp
-    ~transform:(html_transform ~buf ~options)
-    ~flavor:`Html
-    src
-  ~dst
-
-let xhtml ?debug ?pp ?buf ~options src ~dst =
-  let buf = buffer buf in
-  More_markup.transform ?debug ?pp
-    ~transform:(html_transform ~buf ~options)
-    ~flavor:`Xml
-    src
-  ~dst
+let html = Html.convert
+let xhtml = Html.convert_xhtml
 
 module Docx : sig
   val xml : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> options:options -> string -> dst:'a out -> 'a
