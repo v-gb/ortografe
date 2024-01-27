@@ -38,7 +38,7 @@ end
   
 (**/**)
 module Private : sig
-  val docx_document : string -> string
+  val grab_from_zip : string -> string -> string
   val read_whole_zip : string -> string
   val join_consecutive_ish_text_nodes : (Markup.signal, 'a) Markup.stream -> (Markup.signal, 'a) Markup.stream
 end

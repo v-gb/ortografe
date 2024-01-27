@@ -138,14 +138,17 @@ let%expect_test "html" = (
 </html> |}]
 )
 
+let docx_document zip =
+  Ortografe.Private.grab_from_zip zip "word/document.xml"
+
 let%expect_test "docx" = (
     let docx = In_channel.read_all "test.docx" in
-    print_string (Ortografe.Private.docx_document docx);
+    print_string (docx_document docx);
     [%expect {|
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" mc:Ignorable="w14 wp14 w15"><w:body><w:p><w:pPr><w:pStyle w:val="Normal"/><w:bidi w:val="0"/><w:jc w:val="left"/><w:rPr></w:rPr></w:pPr><w:r><w:rPr></w:rPr><w:t>Allusion choix</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="Normal"/><w:bidi w:val="0"/><w:jc w:val="left"/><w:rPr></w:rPr></w:pPr><w:r><w:rPr></w:rPr></w:r></w:p><w:sectPr><w:type w:val="nextPage"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:left="1134" w:right="1134" w:gutter="0" w:header="0" w:top="1134" w:footer="0" w:bottom="1134"/><w:pgNumType w:fmt="decimal"/><w:formProt w:val="false"/><w:textDirection w:val="lrTb"/></w:sectPr></w:body></w:document> |}];
-    let orig_xml = pp_xml (Ortografe.Private.docx_document docx) in
-    let new_xml = pp_xml (Ortografe.Private.docx_document (Ortografe.docx ~options docx ~dst:String)) in
+    let orig_xml = pp_xml (docx_document docx) in
+    let new_xml = pp_xml (docx_document (Ortografe.docx ~options docx ~dst:String)) in
     print_string (diff_strings orig_xml new_xml);
     [%expect {|
      <w:t>
@@ -264,8 +267,8 @@ let%expect_test "doc" = (
        invocation of libreoffice works, and since that command line doesn't
        specify the source file type, just use a .docx file as a .doc *)
     let docx = In_channel.read_all "test.docx" in
-    let orig_xml = pp_xml (Ortografe.Private.docx_document docx) in
-    let new_xml = pp_xml (Ortografe.Private.docx_document (Ortografe.docx ~options docx ~dst:String)) in
+    let orig_xml = pp_xml (docx_document docx) in
+    let new_xml = pp_xml (docx_document (Ortografe.docx ~options docx ~dst:String)) in
     print_string (diff_strings orig_xml new_xml);
     [%expect {|
      <w:t>
@@ -329,7 +332,7 @@ let%expect_test "zip_bomb" = (
 
 let%expect_test "just large file" = (
     force set_vm_limit;
-    Sys_unix.command_exn "if ! [ -f /tmp/zip-bomb/large.zip ]; then head -c 5000000000 /dev/zero > /tmp/zip-bomb/large && zip -q /tmp/zip-bomb/large.zip /tmp/zip-bomb/large; fi";
+    Sys_unix.command_exn "if ! [ -f /tmp/zip-bomb/large.zip ]; then head -c 5000000000 /dev/zero > /tmp/zip-bomb/large && zip -q /tmp/zip-bomb/large.zip /tmp/zip-bomb/large && rm -f /tmp/zip-bomb/large; fi";
     let result, duration =
       time (fun () ->
           Result.try_with (fun () ->

@@ -780,15 +780,6 @@ let docx ?debug ?pp ?buf ~options src ~dst =
       | _ -> None)
   |> write_out dst
 
-let docx_document src =
-  let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in
-  match Zipc.find "word/document.xml" zipc with
-  | None -> "<absent>"
-  | Some member ->
-     match Zipc.Member.kind member with
-     | Dir -> "<directory>"
-     | File file -> Zipc.File.to_binary_string file |> Core.Result.ok_or_failwith
-
 let sys_command_exn str =
   let i = Sys.command str in
   if i <> 0
@@ -898,7 +889,14 @@ let convert_files ~options src dst =
     )
 
 module Private = struct
-  let docx_document = docx_document
+  let grab_from_zip src name =
+    let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in
+    match Zipc.find name zipc with
+    | None -> "<absent>"
+    | Some member ->
+       match Zipc.Member.kind member with
+       | Dir -> "<directory>"
+       | File file -> Zipc.File.to_binary_string file |> Core.Result.ok_or_failwith
   let read_whole_zip = read_whole_zip
   let join_consecutive_ish_text_nodes = Docx.join_consecutive_ish_text_nodes
 end
