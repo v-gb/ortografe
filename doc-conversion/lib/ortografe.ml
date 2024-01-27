@@ -1,71 +1,5 @@
 open Common
 
-let docx_ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-
-module More_markup = struct
-  open Core
-
-  type name = string * string [@@deriving equal]
-  let sexp_of_name (ns, name) =
-    let ns =
-      if String.(=) ns Markup.Ns.xml
-      then "xml"
-      else if String.(=) ns docx_ns
-      then "docx"
-      else ns
-    in
-    sexp_of_string (ns ^ ":" ^ name)
-
-  type xml_declaration = Markup.xml_declaration =
-    {version    : string;
-     encoding   : string option;
-     standalone : bool option}
-      [@@deriving equal, sexp_of]
-  type doctype = Markup.doctype =
-    {doctype_name      : string option;
-     public_identifier : string option;
-     system_identifier : string option;
-     raw_text          : string option;
-     force_quirks      : bool}
-      [@@deriving equal, sexp_of]
-  type signal =
-    [ `Start_element of name * (name * string) list
-    | `End_element
-    | `Text of string list
-    | `Doctype of doctype
-    | `Xml of xml_declaration
-    | `PI of string * string
-    | `Comment of string ]
-      [@@deriving equal, sexp_of]
-
-  type 'a node =
-    [ `Element of name * (name * string) list * 'a list
-    | `Text of string
-    | `Doctype of doctype
-    | `Xml of xml_declaration
-    | `PI of string * string
-    | `Comment of string ]
-      [@@deriving sexp_of]
-  let sexp_of_node sexp_of_a node =
-    match node with
-    | `Element (name, [], children) ->
-       [%sexp_of: [ `Element of (name * a list) ]] (`Element (name, children))
-    | _ -> sexp_of_node sexp_of_a node
-
-  type tree = tree node
-  [@@deriving sexp_of]
-
-  let trees signals =
-    (* should try to upstream this, this is boilerplate that should be provided upstream *)
-    Markup.trees signals
-      ~text:(fun s -> `Text (String.concat s))
-      ~element:(fun a b c -> `Element (a, b, c))
-      ~comment:(fun a -> `Comment a)
-      ~pi:(fun a b -> `PI (a, b))
-      ~xml:(fun a -> `Xml a)
-      ~doctype:(fun a -> `Doctype a)
-end
-
 module Dyn_protect = struct
   open Core
   type t = (unit -> unit) Stack.t
@@ -93,6 +27,7 @@ module Dyn_protect = struct
       ) (fun () -> f t)
 end
 
+module More_markup = More_markup
 type 'a out = 'a Common.out =
   | Channel : Out_channel.t -> unit out
   | String : string out
@@ -104,6 +39,7 @@ type options = Common.options =
 
 type 'a convert = 'a Common.convert
 type 'a convert_xml = ?debug:bool -> ?pp:bool -> 'a convert
+let docx_ns = More_markup.docx_ns
 
 let nfc str =
   (* this transforms invalid utf8 into replacement chars, maybe we should rewrite the loop
@@ -335,26 +271,13 @@ let pure_text (type a) ?buf ~options src ~(dst : a out) : a =
   | Channel ch ->
      iter_pure_text ~options src ~f:(Out_channel.output_string ch)
 
-let maybe_debug_signal ?(debug = false) signals =
-  if debug
-  then Markup.map (fun elt ->
-           print_endline (Markup.signal_to_string elt);
-           elt) signals
-  else signals
-
-let maybe_pp_signal ?(pp = false) signals =
-  if pp then Markup.pretty_print signals else signals
-
-let text_elt ~options ~buf = function
-  | `Text strs -> `Text (List.map (pure_text ~options ~buf ~dst:String) strs)
-  | elt -> elt
-
 let html_transform ~buf ~options signal =
   (* maybe we should check the tag ns for the xhtml case *)
   let notranslate_pattern = Core.String.Search_pattern.create "notranslate" in
   let notranscribe_pattern = Core.String.Search_pattern.create "notranscribe" in
   let stack = Core.Stack.create () in
   let hide_current = ref false in
+  let convert_text src = pure_text ~buf ~options src ~dst:String in
   Markup.map (fun elt ->
       (match elt with
        | `Start_element ((_, tag), attributes) ->
@@ -378,36 +301,25 @@ let html_transform ~buf ~options signal =
            | Some (_, hide) -> hide_current := hide)
        | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ -> ());
       if not !hide_current
-      then text_elt ~options ~buf elt
+      then More_markup.text_elt ~convert_text elt
       else elt)
     signal
 
 let html ?debug ?pp ?buf ~options src ~dst =
-  (* https://v3.ocaml.org/p/markup/latest/doc/Markup/index.html
-     Note: no implicit closing of tags *)
   let buf = buffer buf in
-  Markup.parse_html
-    (Markup.string src)
-  |> Markup.signals
-  |> maybe_debug_signal ?debug
-  |> html_transform ~buf ~options
-  |> maybe_pp_signal ?pp
-  |> Markup.write_html
-  |> markup_output dst
+  More_markup.transform ?debug ?pp
+    ~transform:(html_transform ~buf ~options)
+    ~flavor:`Html
+    src
+  ~dst
 
-let xml ?debug ?pp ~transform src ~dst =
-  Markup.parse_xml
-    (Markup.string src)
-  |> Markup.signals
-  |> maybe_debug_signal ?debug
-  |> transform
-  |> maybe_pp_signal ?pp
-  |> Markup.write_xml
-  |> markup_output dst
-
-let xhtml ?buf ?debug ?pp ~options src ~dst =
+let xhtml ?debug ?pp ?buf ~options src ~dst =
   let buf = buffer buf in
-  xml ?debug ?pp src ~dst ~transform:(html_transform ~buf ~options)
+  More_markup.transform ?debug ?pp
+    ~transform:(html_transform ~buf ~options)
+    ~flavor:`Xml
+    src
+  ~dst
 
 module Docx : sig
   val xml : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> options:options -> string -> dst:'a out -> 'a
@@ -675,6 +587,7 @@ end = struct
   let docx_convert ~buf ~options signal =
     let open Core in
     let stack = Stack.create () in
+    let convert_text src = pure_text ~buf ~options src ~dst:String in
     Markup.map (fun elt ->
         (match elt with
          | `Start_element (ns_tag, _) ->
@@ -683,13 +596,13 @@ end = struct
             ignore (Stack.pop stack)
          | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ -> ());
         if [%compare.equal: (string * string) option] (Stack.top stack) (Some (docx_ns, "t"))
-        then text_elt ~buf ~options elt
+        then More_markup.text_elt ~convert_text elt
         else elt
       ) signal
 
   let xml ?buf ?debug ?pp ~options src ~dst =
     let buf = buffer buf in
-    xml ?debug ?pp src ~dst ~transform:(fun signals ->
+    More_markup.transform ~flavor:`Xml ?debug ?pp src ~dst ~transform:(fun signals ->
         signals
         |> drop_squigglies
         |> join_consecutive_ish_text_nodes

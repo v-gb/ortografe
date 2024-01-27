@@ -27,14 +27,7 @@ val map_zip
       -> (Zipc.Member.t -> Zipc.File.t -> (unit -> string) -> string option)
       -> string
 
-module More_markup : sig
-  type name = string * string [@@deriving sexp_of]
-  type 'a node = 'a Markup.node [@@deriving sexp_of]
-  type tree = tree node [@@deriving sexp_of]
-  type signal = Markup.signal [@@deriving sexp_of]
-
-  val trees : (Markup.signal, 'a) Markup.stream -> (tree, 'a) Markup.stream
-end
+module More_markup = More_markup
   
 (**/**)
 module Private : sig
