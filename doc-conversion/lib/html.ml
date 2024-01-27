@@ -34,10 +34,10 @@ let html_transform ~buf ~options signal =
       else elt)
     signal
 
-let convert ?debug ?pp ?buf ~options src ~dst =
+let convert ?buf ~options src ~dst =
   let buf = Common.buffer buf in
-  More_markup.transform ?debug ?pp ~flavor:`Html src ~dst ~transform:(html_transform ~buf ~options)
+  More_markup.transform ~flavor:`Html src ~dst ~transform:(html_transform ~buf ~options)
 
-let convert_xhtml ?debug ?pp ?buf ~options src ~dst =
+let convert_xhtml ?buf ~options src ~dst =
   let buf = Common.buffer buf in
-  More_markup.transform ?debug ?pp ~flavor:`Xml src ~dst ~transform:(html_transform ~buf ~options)
+  More_markup.transform ~flavor:`Xml src ~dst ~transform:(html_transform ~buf ~options)

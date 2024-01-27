@@ -276,22 +276,22 @@ let docx_convert ~buf ~options signal =
       else elt
     ) signal
 
-let convert_xml ?debug ?pp ?buf ~options src ~dst =
+let convert_xml ?buf ~options src ~dst =
   let buf = buffer buf in
-  More_markup.transform ?debug ?pp ~flavor:`Xml src ~dst ~transform:(fun signals ->
+  More_markup.transform ~flavor:`Xml src ~dst ~transform:(fun signals ->
       signals
       |> drop_squigglies
       |> join_consecutive_ish_text_nodes
       |> docx_convert ~buf ~options)
 
-let convert ?debug ?pp ?buf ~options src ~dst =
+let convert ?buf ~options src ~dst =
   let buf = buffer buf in
   Zip.map src (fun member contents ->
       match Zipc.Member.path member with
       | "word/document.xml"
       | "word/footnotes.xml"
       | "word/endnotes.xml" ->
-         Some (convert_xml ~buf ?debug ?pp ~options (contents ()) ~dst:String)
+         Some (convert_xml ~buf ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 
@@ -300,7 +300,7 @@ let sys_command_exn str =
   if i <> 0
   then failwith (str ^ " exited with code " ^ Int.to_string i)
 
-let convert_doc ?debug ?pp ?buf ~options src ~dst =
+let convert_doc ?buf ~options src ~dst =
   let buf = buffer buf in
   (* should put a time limit and memory, perhaps with the cgroup exe? *)
   let d = Filename.temp_dir "ortografe" "tmp" in
@@ -317,7 +317,7 @@ let convert_doc ?debug ?pp ?buf ~options src ~dst =
         In_channel.with_open_bin docx_path (fun ic ->
             In_channel.input_all ic)
       in
-      convert ~buf ?debug ?pp ~options src ~dst)
+      convert ~buf ~options src ~dst)
 
 module Private = struct
   let join_consecutive_ish_text_nodes signals =

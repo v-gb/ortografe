@@ -13,6 +13,14 @@ let pp_xml src =
   |> Markup.write_xml
   |> Markup.to_string
 
+let pp_html src =
+  Markup.parse_html
+    (Markup.string src)
+  |> Markup.signals
+  |> Markup.pretty_print
+  |> Markup.write_html
+  |> Markup.to_string
+
 let diff_strings ?(context = 1) str1 str2 =
   let lines1 = String.split_lines str1 |> Array.of_list in
   let lines2 = String.split_lines str2 |> Array.of_list  in
@@ -107,35 +115,21 @@ let%expect_test "html" = (
 </head>
 </html>
 |} in
-    print_string (Ortografe.html ~pp:true ~options html ~dst:String);
+    let new_html = Ortografe.html ~options html ~dst:String in
+    print_string (diff_strings (pp_html html) (pp_html new_html));
     [%expect {|
-<!DOCTYPE html>
-<html class="" lang="fr" dir="ltr">
- <head>
-  <meta charset="UTF-8">
-  <title>
-   Fotografie — Wikipédia
-  </title>
-  <script>
-   // bug if rewritten: comment
-  </script>
- </head>
- <body>
-  <div class="comment">
-   coment
-  </div>
-  <br>
-  <script>
-   // bug if rewritten: comment
-  </script>
-  <p>
-   Les <span>éléfants</span>
-  </p>
-  <div contenteditable="true">
-   bug if rewritten: comment
-  </div>
- </body>
-</html> |}]
+   <title>
+-   Photographie — Wikipédia
++   Fotografie — Wikipédia
+   </title>
+   <div class="comment">
+-   comment
++   coment
+   </div>
+   <p>
+-   Les <span>éléphants</span>
++   Les <span>éléfants</span>
+   </p> |}]
 )
 
 let docx_document zip =

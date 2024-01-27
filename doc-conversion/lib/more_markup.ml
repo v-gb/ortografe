@@ -64,19 +64,7 @@ let trees signals =
 
 open Common
 
-type 'a convert_xml = ?debug:bool -> ?pp:bool -> 'a convert
-
-let maybe_debug_signal ?(debug = false) signals =
-  if debug
-  then Markup.map (fun elt ->
-           print_endline (Markup.signal_to_string elt);
-           elt) signals
-  else signals
-
-let maybe_pp_signal ?(pp = false) signals =
-  if pp then Markup.pretty_print signals else signals
-
-let transform ?debug ?pp ~transform ~flavor src ~dst =
+let transform ~transform ~flavor src ~dst =
   (* https://v3.ocaml.org/p/markup/latest/doc/Markup/index.html
      Note: no implicit closing of tags *)
   let z =
@@ -84,9 +72,7 @@ let transform ?debug ?pp ~transform ~flavor src ~dst =
      | `Xml -> Markup.parse_xml (Markup.string src)
      | `Html -> Markup.parse_html (Markup.string src))
     |> Markup.signals
-    |> maybe_debug_signal ?debug
     |> transform
-    |> maybe_pp_signal ?pp
   in
   (match flavor with
    | `Xml -> Markup.write_xml z

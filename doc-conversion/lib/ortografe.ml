@@ -38,7 +38,6 @@ type options = Common.options =
   }
 
 type 'a convert = 'a Common.convert
-type 'a convert_xml = ?debug:bool -> ?pp:bool -> 'a convert
 
 let load_dict str =
   let l = String.split_on_char '\n' str in
@@ -59,7 +58,7 @@ let xhtml = Html.convert_xhtml
 let docx = Docx.convert
 let doc = Docx.convert_doc
 
-let epub ?debug ?pp ?buf ~options src ~dst =
+let epub ?buf ~options src ~dst =
   let buf = buffer buf in
   Zip.map src (fun member contents ->
       (* The xhtml is the bulk of the pages, but in principle, we
@@ -67,16 +66,16 @@ let epub ?debug ?pp ?buf ~options src ~dst =
       match Filename.extension (Zipc.Member.path member) with
       | ".xhtml" | ".html" -> (* in principle we'd need to read the root file to know how
                                  to interpret the various files. *)
-         Some (xhtml ~buf ?debug ?pp ~options (contents ()) ~dst:String)
+         Some (xhtml ~buf ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 
-let htmlz ?debug ?pp ?buf ~options src ~dst =
+let htmlz ?buf ~options src ~dst =
   let buf = buffer buf in
   Zip.map src (fun member contents ->
       match Filename.extension (Zipc.Member.path member) with
       | ".html" ->
-         Some (html ~buf ?debug ?pp ~options (contents ()) ~dst:String)
+         Some (html ~buf ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 

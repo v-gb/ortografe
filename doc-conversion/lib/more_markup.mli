@@ -9,12 +9,8 @@ type tree = tree node [@@deriving sexp_of]
 type signal = Markup.signal [@@deriving equal, sexp_of]
 val trees : (Markup.signal, 'a) Markup.stream -> (tree, 'a) Markup.stream
 
-type 'a convert_xml = ?debug:bool -> ?pp:bool -> 'a Common.convert
-
 val transform
-   : ?debug:bool
-  -> ?pp:bool
-  -> transform:((Markup.signal, Markup.sync) Markup.stream ->
+   : transform:((Markup.signal, Markup.sync) Markup.stream ->
                 (Markup.signal, Markup.sync) Markup.stream)
   -> flavor:[ `Xml | `Html ]
   -> string

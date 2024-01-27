@@ -10,13 +10,12 @@ type options =
   }
 
 type 'a convert = ?buf:Buffer.t -> options:options -> string -> dst:'a out -> 'a
-type 'a convert_xml = ?debug:bool -> ?pp:bool -> 'a convert
 val pure_text : _ convert
-val html : 'a convert_xml
-val htmlz : 'a convert_xml
-val docx : 'a convert_xml
-val epub : 'a convert_xml
-val doc : 'a convert_xml
+val html : 'a convert
+val htmlz : 'a convert
+val docx : 'a convert
+val epub : 'a convert
+val doc : 'a convert
 val max_size : int ref
 
 val convert_string : ext:string -> options:options -> string -> (string * string) option
