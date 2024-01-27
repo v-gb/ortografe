@@ -1,3 +1,5 @@
+open Common
+
 let docx_ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
 module More_markup = struct
@@ -91,26 +93,16 @@ module Dyn_protect = struct
       ) (fun () -> f t)
 end
 
-type 'a out =
+type 'a out = 'a Common.out =
   | Channel : Out_channel.t -> unit out
   | String : string out
 
-let write_out (type a) (out : a out) (string : string) : a =
-  match out with
-  | String -> string
-  | Channel ch -> Out_channel.output_string ch string
-
-let markup_output (type a) (out : a out) : ((char, Markup.sync) Markup.stream -> a) =
-  match out with
-  | String -> Markup.to_string
-  | Channel ch -> Markup.to_channel ch
-
-type options =
+type options = Common.options =
   { convert_uppercase : bool
   ; dict : (string, string) Hashtbl.t
   }
 
-type 'a convert = ?buf:Buffer.t -> options:options -> string -> dst:'a out -> 'a
+type 'a convert = 'a Common.convert
 type 'a convert_xml = ?debug:bool -> ?pp:bool -> 'a convert
 
 let nfc str =
@@ -333,11 +325,6 @@ let iter_pure_text ~options src ~f =
              | Some res -> f (recapitalize (pluralize res))
              | None -> f w
     )
-
-let buffer ?(n = 123) buf =
-  match buf with
-  | Some buf -> Buffer.clear buf; buf
-  | None -> Buffer.create n
 
 let pure_text (type a) ?buf ~options src ~(dst : a out) : a =
   match dst with
