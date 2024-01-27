@@ -1,7 +1,7 @@
 const b = window.chrome ? chrome : browser;
 const is_manifest_v2 = false
 
-const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language'];
+const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language', 'debug_lang_test'];
 const all_fields = ['disable'].concat(fields)
 
 async function display_dict_preview() {
@@ -52,7 +52,7 @@ async function saveOptions(e) {
             if (f == 'rewrite') {
                 options[f] = document.querySelector('input[name="rewrite-radio"]:checked').value || 'erofa';
             } else {
-                options[f] = document.getElementById(f.replace("_", "-") + "-checkbox").checked
+                options[f] = document.getElementById(f.replaceAll("_", "-") + "-checkbox").checked
             }
         }
 
@@ -82,7 +82,7 @@ async function restoreOptions() {
         normalize_options(options)
         for (f of fields) {
             if (f != 'disable' && f != 'rewrite') {
-                document.getElementById(f.replace("_", "-") + "-checkbox").checked =
+                document.getElementById(f.replaceAll("_", "-") + "-checkbox").checked =
                     options[f] || false;
             }
         }

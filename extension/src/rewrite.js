@@ -94,7 +94,7 @@ function detect_language_fallback(str) {
     return { isReliable: true, languages: languages }
 }
 
-async function plausibly_french_once(b, root, debug) {
+async function plausibly_french_once(b, root, debug, force_fallback) {
     const t1 = performance.now();
     const walk = make_walk(root);
     let buf = ""
@@ -109,9 +109,9 @@ async function plausibly_french_once(b, root, debug) {
     const t2 = performance.now();
     const { isReliable, languages } =
         // safari doesn't provide this interface 
-          b?.i18n?.detectLanguage
-          ? await b.i18n.detectLanguage(buf)
-          : detect_language_fallback(buf)
+        !force_fallback && b?.i18n?.detectLanguage
+        ? await b.i18n.detectLanguage(buf)
+        : detect_language_fallback(buf)
     // I've seen cases where isReliable:false, which was needlessly conservative
     const t3 = performance.now();
     console.log(`detected language: DOM traversal: ${t2 - t1}ms, detection: ${t3 - t2}ms, isReliable: ${isReliable}`, languages.map((e) => e.language + '=' + e.percentage).join(' '))
@@ -125,10 +125,10 @@ async function plausibly_french_once(b, root, debug) {
     }
 }
 
-async function plausibly_french(b, root, debug) {
+async function plausibly_french(b, root, debug, force_fallback) {
     let delay = 100;
     while (true) {
-        const res = await plausibly_french_once(b, root, debug)
+        const res = await plausibly_french_once(b, root, debug, force_fallback)
         if (res !== null) {
             return res;
         }
@@ -301,7 +301,8 @@ async function extension_main() {
     const b = window.chrome ? chrome : browser;
     const before_storage = performance.now()
     const options = await b.storage.local.get(
-        ['rewrite', 'disable', 'disable_watch', 'color','trivial', 'debug_changes', 'debug_language']
+        ['rewrite', 'disable', 'disable_watch', 'color','trivial', 'debug_changes',
+         'debug_language', 'debug_lang_test']
     )
     const halfway_storage = performance.now();
     if (options.rewrite === 'custom') {
@@ -319,7 +320,10 @@ async function extension_main() {
     // iterating over <style> nodes even though they contain nothing,
     // and setting their nodeValue messes up pages for some reason
     const root = document.body;
-    if (!(await plausibly_french(b, root, options.debug_language))) { return }
+    if (!(await plausibly_french(b,
+                                 root,
+                                 options.debug_language,
+                                 options.debug_lang_test))) { return }
     const num_changes = await rewrite_under(options, table, root);
     const after_rewrite = performance.now()
     console.log(`rewriting all texts: ${num_changes} changes in ${after_rewrite - after_storage}ms`)
