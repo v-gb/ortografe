@@ -1,5 +1,3 @@
-This is the source for browser extensions for [firefox](https://addons.mozilla.org/fr/firefox/addon/orthographe-simplifi%C3%A9e/) and [chrome](https://chromewebstore.google.com/detail/orthographe-simplifiée/jdicbfmgcajnpealjodkghahiakdafcl). See these pages for what the extensions do.
-
 # How to tweak and try locally
 
 Run:

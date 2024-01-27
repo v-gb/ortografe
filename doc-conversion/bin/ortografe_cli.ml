@@ -21,7 +21,7 @@ let () =
            (C.Arg.opt
               (C.Arg.enum [ "erofa", `Erofa; "1990", `Rect1990; "empty", `Empty ])
               `Erofa
-              (C.Arg.info ["--base-dict"]))
+              (C.Arg.info ["base-dict"]))
        in
        let dict =
          match base_dict with
