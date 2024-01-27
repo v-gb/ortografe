@@ -1,3 +1,4 @@
+(copy_files (files ../../extension/extension2.zip))
 (rule (action (copy %{project_root}/extension/dict.gen.csv erofa.csv)))
 (rule (action (copy %{project_root}/extension/dict1990.gen.csv rect1990.csv)))
 (copy_files (files ../client/*.js))
@@ -88,4 +89,3 @@
  (target openoffice.png)
  (action
   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f8/OOoWriter3logo.png")))
-
