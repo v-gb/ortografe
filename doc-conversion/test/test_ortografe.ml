@@ -22,31 +22,34 @@ let pp_html src =
   |> Markup.to_string
 
 let diff_strings ?(context = 1) str1 str2 =
-  let lines1 = String.split_lines str1 |> Array.of_list in
-  let lines2 = String.split_lines str2 |> Array.of_list  in
-  let hunks =
-    Patience_diff_lib.Patience_diff.String.get_hunks
-      ~transform:Fn.id
-      ~context
-      ~prev:lines1
-      ~next:lines2
-      ()
-  in
-  let ranges = Patience_diff_lib.Patience_diff.Hunks.ranges hunks in
-  let b = ref [] in
-  List.iter ranges ~f:(fun range ->
-      match range with
-      | Same a -> Array.iter a ~f:(fun (s, _) -> b := (" ", s) :: !b)
-      | Unified a -> Array.iter a ~f:(fun s -> b := (" ", s) :: !b)
-      | Prev a -> Array.iter a ~f:(fun s -> b := ("-", s) :: !b)
-      | Next a -> Array.iter a ~f:(fun s -> b := ("+", s) :: !b)
-      | Replace (a, a') ->
-         Array.iter a ~f:(fun s -> b := ("-", s) :: !b);
-         Array.iter a' ~f:(fun s -> b := ("+", s) :: !b);
-    );
-  List.rev !b
-  |> List.map ~f:(fun (sign, s) -> sign ^ s ^ "\n")
-  |> String.concat
+  if String.(=) str1 str2
+  then ""
+  else
+    let lines1 = String.split_lines str1 |> Array.of_list in
+    let lines2 = String.split_lines str2 |> Array.of_list  in
+    let hunks =
+      Patience_diff_lib.Patience_diff.String.get_hunks
+        ~transform:Fn.id
+        ~context
+        ~prev:lines1
+        ~next:lines2
+        ()
+    in
+    let ranges = Patience_diff_lib.Patience_diff.Hunks.ranges hunks in
+    let b = ref [] in
+    List.iter ranges ~f:(fun range ->
+        match range with
+        | Same a -> Array.iter a ~f:(fun (s, _) -> b := (" ", s) :: !b)
+        | Unified a -> Array.iter a ~f:(fun s -> b := (" ", s) :: !b)
+        | Prev a -> Array.iter a ~f:(fun s -> b := ("-", s) :: !b)
+        | Next a -> Array.iter a ~f:(fun s -> b := ("+", s) :: !b)
+        | Replace (a, a') ->
+           Array.iter a ~f:(fun s -> b := ("-", s) :: !b);
+           Array.iter a' ~f:(fun s -> b := ("+", s) :: !b);
+      );
+    List.rev !b
+    |> List.map ~f:(fun (sign, s) -> sign ^ s ^ "\n")
+    |> String.concat
 
 let%expect_test "pure text" = (
   let test = "
@@ -269,6 +272,69 @@ let%expect_test "doc" = (
 -     Allusion choix
 +     Alusion chois
      </w:t> |}];
+)
+
+let%expect_test "odt" = (
+    let grab_xml zip =
+      pp_xml (Ortografe.Private.grab_from_zip zip "content.xml")
+      ^ "\n"
+      ^ pp_xml (Ortografe.Private.grab_from_zip zip "styles.xml")
+    in
+    let odt = In_channel.read_all "test.odt" in
+    let orig_xml = grab_xml odt in
+    let new_xml = grab_xml (Ortografe.odt ~options odt ~dst:String) in
+    let new_xml2 = grab_xml (Ortografe.odt ~impl:true ~options odt ~dst:String) in
+    print_string (diff_strings orig_xml new_xml);
+    [%expect {|
+    <text:p text:style-name="P3">
+-    Corps : allumé
++    Corps : alumé
+    </text:p>
+     <text:span text:style-name="T1">
+-     Deux en gras
++     Deus en gras
+     </text:span>
+     <text:span text:style-name="T2">
+-     deux en italique
++     deus en italique
+     </text:span>
+    <text:p text:style-name="P4">
+-    Plusieurs espaces : deux
++    Plusieurs espaces : deus
+     <text:s text:c="2"/>
+     <text:p text:style-name="MP1">
+-     En-tete : homme
++     En-tete : ome
+     </text:p>
+     <text:p text:style-name="MP2">
+-     Pied de page : allure
++     Pied de page : alure
+     </text:p> |}];
+    print_string (diff_strings ~context:5 new_xml new_xml2);
+    [%expect {|
+     </text:span>
+     <text:span text:style-name="T2">
+      u
+     </text:span>
+     <text:span text:style-name="T1">
+-     x
++     s
+     </text:span>
+     en mis-gras, mi-italique
+    </text:p>
+    <text:p text:style-name="P4">
+     Plusieurs espaces : deus
+    <text:p text:style-name="P4">
+     Édité :
+     <text:span text:style-name="T4">
+      fa
+     </text:span>
+-    ux
++    us
+    </text:p>
+   </office:text>
+  </office:body>
+ </office:document-content> |}];
 )
 
 let set_vm_limit =

@@ -15,7 +15,7 @@ This project contains tools to help with proposed spelling simplifications for F
 interactively without installing anything. [Source](site/).
 
 - a [CLI tool](doc-conversion/) that transcribes text and documents in various formats
-  (pure text, .html, .xhtml, .htmlz, .doc, .docx, .epub).
+  (pure text, .html, .xhtml, .htmlz, .doc, .docx, .odt, .epub).
 
 - [data](data/) for this work (it is surprisingly difficult to find structured data)
 
