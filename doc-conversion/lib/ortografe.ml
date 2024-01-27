@@ -110,6 +110,9 @@ type options =
   ; dict : (string, string) Hashtbl.t
   }
 
+type 'a convert = ?buf:Buffer.t -> options:options -> string -> dst:'a out -> 'a
+type 'a convert_xml = ?debug:bool -> ?pp:bool -> 'a convert
+
 let nfc str =
   (* this transforms invalid utf8 into replacement chars, maybe we should rewrite the loop
      to avoid that *)
@@ -392,7 +395,7 @@ let html_transform ~buf ~options signal =
       else elt)
     signal
 
-let html ?buf ?debug ?pp ~options src ~dst =
+let html ?debug ?pp ?buf ~options src ~dst =
   (* https://v3.ocaml.org/p/markup/latest/doc/Markup/index.html
      Note: no implicit closing of tags *)
   let buf = buffer buf in
@@ -764,7 +767,7 @@ let read_whole_zip src =
       count file;
       Some (contents ()))
 
-let docx ?buf ?debug ?pp ~options src ~dst =
+let docx ?debug ?pp ?buf ~options src ~dst =
   let buf = buffer buf in
   let count = count_size () in
   map_zip src (fun member file contents ->
@@ -791,7 +794,7 @@ let sys_command_exn str =
   if i <> 0
   then failwith (str ^ " exited with code " ^ Int.to_string i)
 
-let doc ?buf ?debug ?pp ~options src ~dst =
+let doc ?debug ?pp ?buf ~options src ~dst =
   let buf = buffer buf in
   (* should put a time limit and memory, perhaps with the cgroup exe? *)
   let d = Filename.temp_dir "ortografe" "tmp" in
@@ -810,7 +813,7 @@ let doc ?buf ?debug ?pp ~options src ~dst =
       in
       docx ~buf ?debug ?pp ~options src ~dst)
 
-let epub ?buf ?debug ?pp ~options src ~dst =
+let epub ?debug ?pp ?buf ~options src ~dst =
   let buf = buffer buf in
   let count = count_size () in
   map_zip src (fun member file contents ->
@@ -824,7 +827,7 @@ let epub ?buf ?debug ?pp ~options src ~dst =
       | _ -> None)
   |> write_out dst
 
-let htmlz ?buf ?debug ?pp ~options src ~dst =
+let htmlz ?debug ?pp ?buf ~options src ~dst =
   let buf = buffer buf in
   let count = count_size () in
   map_zip src (fun member file contents ->

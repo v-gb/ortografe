@@ -9,12 +9,14 @@ type options =
   ; dict : (string, string) Hashtbl.t
   }
 
-val pure_text : ?buf:Buffer.t -> options:options -> string -> dst:'a out -> 'a
-val html : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> options:options -> string -> dst:'a out -> 'a
-val htmlz : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> options:options -> string -> dst:'a out -> 'a
-val docx : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> options:options -> string -> dst:'a out -> 'a
-val epub : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> options:options -> string -> dst:'a out -> 'a
-val doc : ?buf:Buffer.t -> ?debug:bool -> ?pp:bool -> options:options -> string -> dst:'a out -> 'a
+type 'a convert = ?buf:Buffer.t -> options:options -> string -> dst:'a out -> 'a
+type 'a convert_xml = ?debug:bool -> ?pp:bool -> 'a convert
+val pure_text : _ convert
+val html : 'a convert_xml
+val htmlz : 'a convert_xml
+val docx : 'a convert_xml
+val epub : 'a convert_xml
+val doc : 'a convert_xml
 val max_size : int ref
 
 val convert_string : ext:string -> options:options -> string -> (string * string) option
