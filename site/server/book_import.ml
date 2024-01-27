@@ -77,7 +77,7 @@ let convert_wikisource epub ~dst =
   let epub = Ortografe.epub epub ~dst:String ~options:(Lazy.force options) in
   let epub_conv =
     Ortografe.map_zip epub
-      (fun member _file contents ->
+      (fun member contents ->
         (* There's missing CSS in the wikisource epubs (or maybe it's intended that the
            ereader would provide its own). So add CSS settings to make the look of the
            converted xhtml and the wikisource html similar. *)
@@ -110,7 +110,7 @@ let convert_gutenberg zip ~dst =
   let data = Ortografe.htmlz zip ~dst:String ~options:(Lazy.force options) in
   let new_data =
     Ortografe.map_zip data
-      (fun member _file contents ->
+      (fun member contents ->
         (* There's missing CSS in the wikisource epubs (or maybe it's intended that the
            ereader would provide its own). So add CSS settings to make the look of the
            converted xhtml and the wikisource html similar. *)
@@ -175,7 +175,7 @@ let guess_main_file ~url ~data =
   let files =
     let files = Queue.create () in
     ignore (
-        Ortografe.map_zip data (fun member _file _contents ->
+        Ortografe.map_zip data (fun member _contents ->
             Queue.enqueue files (Zipc.Member.path member);
             None) : string);
     Queue.to_list files

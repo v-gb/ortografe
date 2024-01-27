@@ -297,6 +297,9 @@ let time f =
   let after = Time_ns.now () in
   x, (Time_ns.diff after before)
 
+let read_whole_zip zip =
+  Ortografe.map_zip zip (fun _ content -> Some (content ()))
+
 let%expect_test "zip_bomb" = (
     let dir = "/tmp/zip-bomb" in
     Core_unix.mkdir_p dir;
@@ -317,8 +320,7 @@ let%expect_test "zip_bomb" = (
     List.iter urls ~f:(fun url ->
         let zip_bomb = In_channel.read_all (dir ^/ Filename.basename url) in
         let result, duration =
-          time (fun () ->
-              Result.try_with (fun () -> Ortografe.Private.read_whole_zip zip_bomb))
+          time (fun () -> Result.try_with (fun () -> read_whole_zip zip_bomb))
         in
         if false
         then print_s [%sexp
@@ -336,7 +338,7 @@ let%expect_test "just large file" = (
     let result, duration =
       time (fun () ->
           Result.try_with (fun () ->
-              Ortografe.Private.read_whole_zip (In_channel.read_all "/tmp/zip-bomb/large.zip")))
+              read_whole_zip (In_channel.read_all "/tmp/zip-bomb/large.zip")))
     in
     print_s [%sexp (result : (_, exn) Result.t)];
     [%expect "(Error (Failure \"files in zip too large\"))"];

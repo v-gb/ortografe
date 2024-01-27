@@ -24,7 +24,7 @@ val convert_files : options:options -> string option -> string option -> unit
 
 val map_zip
     : string
-      -> (Zipc.Member.t -> Zipc.File.t -> (unit -> string) -> string option)
+      -> (Zipc.Member.t -> (unit -> string) -> string option)
       -> string
 
 module More_markup = More_markup
@@ -32,6 +32,5 @@ module More_markup = More_markup
 (**/**)
 module Private : sig
   val grab_from_zip : string -> string -> string
-  val read_whole_zip : string -> string
   val join_consecutive_ish_text_nodes : (Markup.signal, 'a) Markup.stream -> (Markup.signal, 'a) Markup.stream
 end

@@ -352,67 +352,13 @@ end = struct
     |> join_consecutive_ish_text_nodes
 end
 
-let map_zip src f =
-  let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in
-  let new_zipc =
-    Zipc.fold (fun member acc ->
-        match Zipc.Member.kind member with
-        | Dir -> acc
-        | File file ->
-           match f member file (fun () -> Zipc.File.to_binary_string file |> Core.Result.ok_or_failwith) with
-           | None -> acc
-           | Some new_content ->
-              let new_file =
-                match Zipc.File.compression file with
-                | Stored -> Zipc.File.stored_of_binary_string new_content |> Core.Result.ok_or_failwith
-                | Deflate -> Zipc.File.deflate_of_binary_string new_content |> Core.Result.ok_or_failwith
-                | _ -> failwith "unknown compression type, should have failed earlier"
-              in
-              let new_member =
-                Zipc.Member.make
-                  ~mtime:(Zipc.Member.mtime member)
-                  ~mode:(Zipc.Member.mode member)
-                  ~path:(Zipc.Member.path member)
-                  (File new_file)
-                |> Core.Result.ok_or_failwith
-              in
-              Zipc.add new_member acc
-
-      )
-      zipc zipc
-  in
-  Zipc.to_binary_string new_zipc |> Core.Result.ok_or_failwith
-
-let max_size = ref 300_000_000
-let count_size () =
-  let total_size = ref 0 in
-  (fun file ->
-    (* Zipc enforces that the content is no larger than the size in the metadata, so this
-       check is robust whether large data is submitted accidentally or is adversarial.
-       Zip bombs require no special attention: they are just a way to get a higher
-       compression ratio than deflate supports (1000x). *)
-    total_size := !total_size + Zipc.File.decompressed_size file;
-    if !total_size > !max_size
-    then failwith "files in zip too large")
-
-let read_whole_zip src =
-  (* A variation of docx so we can test for zip bombs without having
-     to ensure we build a zip bomb with exactly the right filename
-     inside. *)
-  let count = count_size () in
-  map_zip src (fun _ file contents ->
-      count file;
-      Some (contents ()))
-
 let docx ?debug ?pp ?buf ~options src ~dst =
   let buf = buffer buf in
-  let count = count_size () in
-  map_zip src (fun member file contents ->
+  Zip.map src (fun member contents ->
       match Zipc.Member.path member with
       | "word/document.xml"
       | "word/footnotes.xml"
       | "word/endnotes.xml" ->
-         count file;
          Some (Docx.xml ~buf ?debug ?pp ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
@@ -443,25 +389,21 @@ let doc ?debug ?pp ?buf ~options src ~dst =
 
 let epub ?debug ?pp ?buf ~options src ~dst =
   let buf = buffer buf in
-  let count = count_size () in
-  map_zip src (fun member file contents ->
+  Zip.map src (fun member contents ->
       (* The xhtml is the bulk of the pages, but in principle, we
          could rewrite more stuff: content.opf, toc.ncx *)
       match Filename.extension (Zipc.Member.path member) with
       | ".xhtml" | ".html" -> (* in principle we'd need to read the root file to know how
                                  to interpret the various files. *)
-         count file;
          Some (xhtml ~buf ?debug ?pp ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 
 let htmlz ?debug ?pp ?buf ~options src ~dst =
   let buf = buffer buf in
-  let count = count_size () in
-  map_zip src (fun member file contents ->
+  Zip.map src (fun member contents ->
       match Filename.extension (Zipc.Member.path member) with
       | ".html" ->
-         count file;
          Some (html ~buf ?debug ?pp ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
@@ -525,6 +467,9 @@ let convert_files ~options src dst =
       convert typ ~options src ~dst:(Channel dst)
     )
 
+let max_size = Zip.max_size
+let map_zip = Zip.map
+
 module Private = struct
   let grab_from_zip src name =
     let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in
@@ -534,6 +479,5 @@ module Private = struct
        match Zipc.Member.kind member with
        | Dir -> "<directory>"
        | File file -> Zipc.File.to_binary_string file |> Core.Result.ok_or_failwith
-  let read_whole_zip = read_whole_zip
   let join_consecutive_ish_text_nodes = Docx.join_consecutive_ish_text_nodes
 end
