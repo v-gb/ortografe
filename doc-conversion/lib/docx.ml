@@ -1,6 +1,12 @@
 open Common
 
 let docx_ns = More_markup.docx_ns
+(* This is the spec: http://officeopenxml.com/WPcontentOverview.php.
+   I think that:
+   - all text is inside w:t nodes
+   - all w:t nodes are inside w:p nodes. Tables apparently contain <w:p> for their
+     text for instance.
+ *)
 
 module Sm = struct
   (* [Sm] is a module that implements a small state machine (or parser combinator, I
@@ -260,6 +266,32 @@ let drop_squigglies signals =
       | _ -> Stack.top_exn stack
     ) signals
 
+let docx_convert_interleaved ~buf ~options signal =
+  let open Core in
+  let stack = Stack.create () in
+  let convert_text src = Text.convert ~buf ~options src ~dst:String in
+  let state = Text.Interleaved.create ~embed:(fun s -> `Text [s]) ~convert:convert_text in
+  Markup.transform (fun () elt ->
+      match elt with
+      | `Start_element (ns_tag, _) ->
+         Stack.push stack ns_tag;
+         Text.Interleaved.emit_structure state elt, Some ()
+      | `End_element ->
+         let l =
+           match Stack.pop stack with
+           | Some (ns, "p") when String.(=) ns docx_ns ->
+              Text.Interleaved.emit_text state `Flush
+           | _ -> []
+         in
+         l @ Text.Interleaved.emit_structure state elt, Some ()
+      | `Text strs when
+             [%compare.equal: (string * string) option] (Stack.top stack) (Some (docx_ns, "t"))
+        ->
+         Text.Interleaved.emit_text state (`Text (String.concat strs)), Some ()
+      | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ ->
+         Text.Interleaved.emit_structure state elt, Some ()
+    ) () signal
+
 let docx_convert ~buf ~options signal =
   let open Core in
   let stack = Stack.create () in
@@ -281,8 +313,12 @@ let convert_xml ?buf ~options src ~dst =
   More_markup.transform ~flavor:`Xml src ~dst ~transform:(fun signals ->
       signals
       |> drop_squigglies
-      |> join_consecutive_ish_text_nodes
-      |> docx_convert ~buf ~options)
+      |> if options.interleaved
+         then docx_convert_interleaved ~buf ~options
+         else (fun signals ->
+           signals
+           |> join_consecutive_ish_text_nodes
+           |> docx_convert ~buf ~options))
 
 let convert ?buf ~options src ~dst =
   let buf = buffer buf in

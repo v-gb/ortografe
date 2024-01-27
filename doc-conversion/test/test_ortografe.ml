@@ -153,6 +153,9 @@ let%expect_test "docx" = (
 -     Allusion choix
 +     Alusion chois
      </w:t> |}];
+    let new_xml2 = pp_xml (docx_document (Ortografe.docx ~options:{options with interleaved = false} docx ~dst:String)) in
+    print_string (diff_strings new_xml new_xml2);
+    [%expect {| |}];
 )
 
 
