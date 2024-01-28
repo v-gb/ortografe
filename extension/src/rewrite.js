@@ -96,6 +96,16 @@ function detect_language_fallback(str) {
 
 async function plausibly_french_once(b, root, debug, force_fallback) {
     const t1 = performance.now();
+    const lang = document.documentElement.lang;
+    if (lang) {
+        // Maybe I can remove the rest of the language detection? At least the kind of
+        // upfront detection. It would be vastly simpler. Detection would only really
+        // be useful for mixed language content.
+        const is_fr = lang.startsWith("fr");
+        const t2 = performance.now();
+        console.log(`detected language: attr=${lang}, ${is_fr}: ${t2 - t1}ms`)
+        return is_fr
+    }
     const walk = make_walk(root);
     let buf = ""
     while (buf.length < 10000 && walk.nextNode()) {
