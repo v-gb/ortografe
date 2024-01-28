@@ -33,6 +33,5 @@ module More_markup = More_markup
 (**/**)
 module Private : sig
   val grab_from_zip : string -> string -> string
-  val join_consecutive_ish_text_nodes
-      : (Markup.signal, 'a) Markup.stream -> (Markup.signal, 'a) Markup.stream
+  val convert_docx_xml : _ convert
 end

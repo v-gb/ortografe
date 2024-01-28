@@ -154,5 +154,5 @@ module Private = struct
        match Zipc.Member.kind member with
        | Dir -> "<directory>"
        | File file -> Zipc.File.to_binary_string file |> Core.Result.ok_or_failwith
-  let join_consecutive_ish_text_nodes = Docx.Private.join_consecutive_ish_text_nodes
+  let convert_docx_xml = Docx.convert_xml
 end
