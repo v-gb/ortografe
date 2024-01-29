@@ -270,7 +270,9 @@ module Interleaved = struct
        let left' = t.convert_text left in
        let right_concat' = t.convert_text (String.concat right) in
        let right' =
-         (* we could also do a character-wise diff2 to line up the strings again *)
+         (* we could also do a character-wise diff2 to line up the strings again.
+            Or at least line up the longest prefix and longest suffix, and only then
+            reassign characters left-to-right in a greedy fashion. *)
          let i_right = ref 0 in
          let count = List.length right in
          List.mapi right ~f:(fun i s ->
