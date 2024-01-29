@@ -77,6 +77,7 @@ async function storage_get(fields) {
 
 async function restoreOptions() {
     try {
+        document.getElementById('manifest-version').innerText = is_manifest_v2 ? "2" : "3"
         const options = await storage_get(all_fields)
         console.log('loaded', options)
         normalize_options(options)
