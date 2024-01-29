@@ -8,6 +8,6 @@ module Interleaved : sig
       the document around the converted words. *)
   type 'structure t
   val create : embed:(string -> 'structure) -> convert:(string -> string) -> 'structure t
-  val emit_structure : 's t -> 's -> 's list
-  val emit_text : 's t -> [< `Flush | `Space | `Text of string ] -> 's list
+  val emit_structure : 's t -> 's -> [< `Flush | `Space | `Not_special ] -> 's list
+  val emit_text : 's t -> string -> 's list
 end

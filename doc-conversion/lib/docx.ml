@@ -275,21 +275,20 @@ let docx_convert_interleaved ~buf ~options signal =
       match elt with
       | `Start_element (ns_tag, _) ->
          Stack.push stack ns_tag;
-         Text.Interleaved.emit_structure state elt, Some ()
+         Text.Interleaved.emit_structure state elt `Not_special, Some ()
       | `End_element ->
-         let l =
+         let effect =
            match Stack.pop stack with
-           | Some (ns, "p") when String.(=) ns docx_ns ->
-              Text.Interleaved.emit_text state `Flush
-           | _ -> []
+           | Some (ns, "p") when String.(=) ns docx_ns -> `Flush
+           | _ -> `Not_special
          in
-         l @ Text.Interleaved.emit_structure state elt, Some ()
+         Text.Interleaved.emit_structure state elt effect, Some ()
       | `Text strs when
              [%compare.equal: (string * string) option] (Stack.top stack) (Some (docx_ns, "t"))
         ->
-         Text.Interleaved.emit_text state (`Text (String.concat strs)), Some ()
+         Text.Interleaved.emit_text state (String.concat strs), Some ()
       | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ ->
-         Text.Interleaved.emit_structure state elt, Some ()
+         Text.Interleaved.emit_structure state elt `Not_special, Some ()
     ) () signal
 
 let docx_convert ~buf ~options signal =

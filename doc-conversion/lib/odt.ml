@@ -43,17 +43,15 @@ let odt_transform_interleaved ~buf ~options signal =
       match elt with
       | `Start_element (ns_tag, _) ->
          Stack.push stack ns_tag;
-         Text.Interleaved.emit_structure state elt, Some ()
+         Text.Interleaved.emit_structure state elt `Not_special, Some ()
       | `End_element ->
-         let l =
+         let effect =
            match Stack.pop stack with
-           | Some (ns, ("h" | "p")) when String.(=) ns text_ns ->
-              Text.Interleaved.emit_text state `Flush
-           | Some (ns, ("s" | "tab" | "line-break")) when String.(=) ns text_ns ->
-              Text.Interleaved.emit_text state `Space
-           | _ -> []
+           | Some (ns, ("h" | "p")) when String.(=) ns text_ns -> `Flush
+           | Some (ns, ("s" | "tab" | "line-break")) when String.(=) ns text_ns -> `Space
+           | _ -> `Not_special
          in
-         l @ Text.Interleaved.emit_structure state elt, Some ()
+         Text.Interleaved.emit_structure state elt effect, Some ()
       | `Text strs when (
         let ns, tag = Stack.top_exn stack in
         match tag with
@@ -64,9 +62,9 @@ let odt_transform_interleaved ~buf ~options signal =
           -> String.(=) ns text_ns
         | _ -> false
       ) ->
-         Text.Interleaved.emit_text state (`Text (String.concat strs)), Some ()
+         Text.Interleaved.emit_text state (String.concat strs), Some ()
        | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ ->
-         Text.Interleaved.emit_structure state elt, Some ()
+         Text.Interleaved.emit_structure state elt `Not_special, Some ()
     ) () signal
 
 let convert ?buf ~options src ~dst =

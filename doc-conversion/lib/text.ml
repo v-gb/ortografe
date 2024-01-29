@@ -243,11 +243,6 @@ module Interleaved = struct
     ; convert_text = convert
     }
 
-  let emit_structure t a =
-    if Queue.is_empty t.waiting
-    then [a]
-    else (Queue.enqueue t.waiting (`Structure a); [])
-
   let handle_one_result t s =
     match Queue.dequeue_exn t.waiting with
     | `Structure _ -> failwith "bug: dequeued got a structure instead of a text"
@@ -301,30 +296,37 @@ module Interleaved = struct
     | Some (_, "") -> [src_left' ^ t.convert_text src]
     | Some (left, right) -> t.emit_state<- Some (src_left', left, [right]); []
 
-  let emit_text t event =
+  let emit_text t src =
+    Queue.enqueue t.waiting `Text;
     let res =
-      match event with
-      | `Text src ->
-         Queue.enqueue t.waiting `Text;
-         (match t.emit_state with
-          | None -> text_when_no_emit_state t "" src
-          | Some (r_left', r_left, r_right) ->
-             match lsplit2_delim_right src ~on:' ' with
-             | None -> t.emit_state <- Some (r_left', r_left, src :: r_right); []
-             | Some ("", _) ->
-                let l1 = flush_as_list t in
-                let l2 = text_when_no_emit_state t "" src in
-                l1 @ l2
-             | Some (src_left, src_right) ->
-                t.emit_state <- Some (r_left', r_left, src_left :: r_right);
-                let l1, src_left' =
-                  let res_left, res_right = Option.value_exn (flush t) in
-                  res_left :: List.drop_last_exn res_right, List.last_exn res_right
-                in
-                let l2 = text_when_no_emit_state t src_left' src_right in
-                l1 @ l2
-         )
-      | `Flush | `Space -> flush_as_list t
+      match t.emit_state with
+      | None -> text_when_no_emit_state t "" src
+      | Some (r_left', r_left, r_right) ->
+         match lsplit2_delim_right src ~on:' ' with
+         | None -> t.emit_state <- Some (r_left', r_left, src :: r_right); []
+         | Some ("", _) ->
+            let l1 = flush_as_list t in
+            let l2 = text_when_no_emit_state t "" src in
+            l1 @ l2
+         | Some (src_left, src_right) ->
+            t.emit_state <- Some (r_left', r_left, src_left :: r_right);
+            let l1, src_left' =
+              let res_left, res_right = Option.value_exn (flush t) in
+              res_left :: List.drop_last_exn res_right, List.last_exn res_right
+            in
+            let l2 = text_when_no_emit_state t src_left' src_right in
+            l1 @ l2
     in
     handle_result t res
+
+  let emit_structure_not_special t a =
+    if Queue.is_empty t.waiting
+    then [a]
+    else (Queue.enqueue t.waiting (`Structure a); [])
+
+  let emit_structure t a effect =
+    match effect with
+    | `Not_special -> emit_structure_not_special t a
+    | `Flush | `Space ->
+       handle_result t (flush_as_list t) @ [a]
 end  
