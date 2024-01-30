@@ -80,65 +80,110 @@ function make_walk(root) {
         });
 }
 
-function detect_language_fallback(str) {
+function lazy(f) {
+    let res = null;
+    return () => {
+        if (res == null) {
+            res = f()
+        }
+        return res
+    }
+}
+
+async function detect_language_with_browser_api(b, lazystr, lang) {
+    if (!b?.i18n?.detectLanguage) {
+        return  { res: null, fallback: true }
+    }
+    const [str, dur] = lazystr();
     if (str.length == 0) {
-        return { isReliable: false, languages: [] }
+        return { res: null, fallback: false }
+    }
+    const { isReliable, languages } = await b.i18n.detectLanguage(str)
+    // I've seen cases where isReliable:false, which was needlessly conservative.
+    //
+    // Rewrite even if lang is not the main language, because oftentimes there is a
+    // fair amount of english in the doc that distorts even pages that visually
+    // contain mostly lang.
+    return {
+        res: languages.some((l) => l.language == lang && l.percentage >= 30),
+        why: [`isReliable:${isReliable}`,
+              languages.map((e) => e.language + '=' + e.percentage).join(' '),
+              `dom-traversal:${dur}ms`]
+    }
+}
+
+function detect_language_with_lang_attr(lang) {
+    const doclang = document.documentElement.lang;
+    if (!doclang) {
+        return { res: null, fallback: true }
+    }
+    // Much simpler and faster than looking at the text, but I think not as good as
+    // looking at the language on the page. I feel like something with pure english
+    // content and a tiny bit of navbar in lang gets treated as lang.
+    return { res: doclang.startsWith(lang), why: [`html.lang:${doclang}`] }
+}
+
+function detect_language_custom(lazystr, lang) {
+    if (lang != 'fr') {
+        return { res: null, fallback: true };
+    }
+    const [str, dur] = lazystr();
+    if (str.length == 0) {
+        return { res: null, fallback: false };
     }
     const num_diacritics = str.replace(/[^éèêëàçô]/ug, '').length;
-    const languages = [
-        // 0.5% of diacratics seems like it indicates french quite clearly.  Some pages
-        // can have less than that, even.
-        { language: (num_diacritics > 0.005 * str.length) ? 'fr' : 'notfr', percentage: 101 },
-        { language: 'stats', percentage: (100 * num_diacritics)/str.length }
-    ]
-    return { isReliable: true, languages: languages }
+    // 0.5% of diacratics seems like it indicates french quite clearly.  Some pages
+    // can have less than that, even.
+    return { res : (num_diacritics > 0.005 * str.length),
+             why: [`diacritics:${((100 * num_diacritics)/str.length).toFixed(1)}%`,
+                   `dom-traversal:${dur}ms`]
+           }
 }
 
-async function plausibly_french_once(b, root, debug, force_fallback) {
-    const t1 = performance.now();
-    const lang = document.documentElement.lang;
-    if (lang) {
-        // Maybe I can remove the rest of the language detection? At least the kind of
-        // upfront detection. It would be vastly simpler. Detection would only really
-        // be useful for mixed language content.
-        const is_fr = lang.startsWith("fr");
-        const t2 = performance.now();
-        console.log(`detected language: attr=${lang}, ${is_fr}: ${t2 - t1}ms`)
-        return is_fr
-    }
-    const walk = make_walk(root);
-    let buf = ""
-    while (buf.length < 10000 && walk.nextNode()) {
-        if (/[^\s]/.test(walk.currentNode.nodeValue)) {
-            buf += walk.currentNode.nodeValue + "\n";
+async function plausibly_lang_once_unlogged(b, lang, root, debug, force_fallback) {
+    const lazystr = lazy(() => {
+        const t1 = performance.now();
+        const walk = make_walk(root);
+        let buf = "";
+        while (buf.length < 10000 && walk.nextNode()) {
+            if (/[^\s]/.test(walk.currentNode.nodeValue)) {
+                buf += walk.currentNode.nodeValue + "\n";
+            }
         }
+        const t2 = performance.now();
+        if (debug) {
+            console.log("language detection", buf)
+        }
+        return [buf, t2 - t1]
+    })
+    let res = { res: null, fallback : true };
+    if (res.res == null && res.fallback && !force_fallback) {
+        res = await detect_language_with_browser_api(b, lazystr, lang);
     }
-    if (debug) {
-        console.log("language detection", buf)
+    if (res.res == null && res.fallback && !force_fallback) {
+        res = detect_language_with_lang_attr(lang);
     }
-    const t2 = performance.now();
-    const { isReliable, languages } =
-        // safari doesn't provide this interface 
-        !force_fallback && b?.i18n?.detectLanguage
-        ? await b.i18n.detectLanguage(buf)
-        : detect_language_fallback(buf)
-    // I've seen cases where isReliable:false, which was needlessly conservative
-    const t3 = performance.now();
-    console.log(`detected language: DOM traversal: ${t2 - t1}ms, detection: ${t3 - t2}ms, isReliable: ${isReliable}`, languages.map((e) => e.language + '=' + e.percentage).join(' '))
-    if (buf.length == 0) {
-        return null
-    } else {
-        // rewrite even if french is not the main language, because oftentimes there is a
-        // fair amount of english in the doc that distorts even pages that visually
-        // contain mostly french
-        return languages.some((l) => l.language == 'fr' && l.percentage >= 30)
+    if (res.res == null && res.fallback) {
+        res = detect_language_custom(lazystr, lang);
     }
+    if (res.res == null && res.fallback) {
+        res = { res: true, why: ['just guessing'] }
+    }
+    return res.res == null ? null : res
 }
 
-async function plausibly_french(b, root, debug, force_fallback) {
+async function plausibly_lang_once(b, lang, root, debug, force_fallback) {
+    const t1 = performance.now();
+    const res = await plausibly_lang_once_unlogged(b, lang, root, debug, force_fallback);
+    const t2 = performance.now();
+    console.log(`page is ${lang}:${res ? res.res : "-"}, ${t2 - t1}ms,`, ...(res ? res.why : []))
+    return res ? res.res : res
+}
+
+async function plausibly_lang(b, lang, root, debug, force_fallback) {
     let delay = 100;
     while (true) {
-        const res = await plausibly_french_once(b, root, debug, force_fallback)
+        const res = await plausibly_lang_once(b, lang, root, debug, force_fallback)
         if (res !== null) {
             return res;
         }
@@ -356,10 +401,11 @@ async function extension_main() {
     // iterating over <style> nodes even though they contain nothing,
     // and setting their nodeValue messes up pages for some reason
     const root = document.body;
-    if (!(await plausibly_french(b,
-                                 root,
-                                 options.debug_language,
-                                 options.debug_lang_test))) { return }
+    if (!(await plausibly_lang(b, 'fr', root,
+                               options.debug_language,
+                               options.debug_lang_test))) {
+        return
+    }
     const num_changes = await rewrite_under(options, table, root);
     const after_rewrite = performance.now()
     console.log(`rewriting all texts: ${num_changes} changes in ${after_rewrite - after_storage}ms`)
