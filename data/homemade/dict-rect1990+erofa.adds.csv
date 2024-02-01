@@ -1,4 +1,5 @@
 old,new
+aujourd'hui,aujourd'ui
 attendez,atendez
 arrêtez,arêtez
 donnez,donez
@@ -216,6 +217,7 @@ commencera,comencera
 quittera,quitera
 siffle,sifle
 appelaient,apelaient
+accueille,acueille
 pardonnerai,pardonerai
 supporté,suporté
 accouche,acouche
@@ -253,6 +255,7 @@ apparaissent,aparaissent
 recommencé,recomencé
 échappent,échapent
 hésité,ésité
+accueilli,acueilli
 attrapent,atrapent
 déshabillez,désabillez
 pardonnera,pardonera
@@ -293,6 +296,7 @@ connecté,conecté
 démarrez,démarez
 démarré,démaré
 déshonoré,désonoré
+interromps,intéromps
 reprennent,reprènent
 commet,comet
 permettrait,permétrait
@@ -437,6 +441,7 @@ offrirai,ofrirai
 atteindra,ateindra
 rappelons,rapelons
 suppliée,supliée
+accueillons,acueillons
 attaquait,ataquait
 rallume,ralume
 terrifiée,térifiée
@@ -523,6 +528,7 @@ transmettrai,transmétrai
 abandonnera,abandonera
 combattez,combatez
 différencie,diférencie
+espionnait,espionait
 hérite,érite
 raccompagnez,racompagnez
 abattra,abatra
@@ -563,6 +569,7 @@ accrochent,acrochent
 charrie,charie
 supportez,suportez
 arrivèrent,arivèrent
+espionnais,espionais
 chiffonne,chifone
 terrorise,térorise
 ordonna,ordona
@@ -656,10 +663,12 @@ remettrez,remétrez
 reverrait,revérait
 occupiez,ocupiez
 serrant,sérant
+accueillera,acueillera
 battrons,batrons
 déshonorée,désonorée
 effraient,éfraient
 flottent,flotent
+interrompt,intérompt
 abandonnons,abandonons
 beuh,beu
 menotté,menoté
@@ -714,6 +723,7 @@ parviennent,parviènent
 questionné,questioné
 renverrai,renvérai
 étouffent,étoufent
+accueillez,acueillez
 allongent,alongent
 allumerai,alumerai
 approuvent,aprouvent
@@ -760,6 +770,7 @@ permettront,permétront
 rattrapent,ratrapent
 émettent,émètent
 étonnait,étonait
+accueillent,acueillent
 apparais,aparais
 arrachera,arachera
 arrêterons,arêterons
@@ -801,6 +812,7 @@ souffrais,soufrais
 annoncée,anoncée
 approuvez,aprouvez
 barrons,barons
+excelle,excèle
 opposent,oposent
 orchestré,orquestré
 préoccupez,préocupez
@@ -968,6 +980,7 @@ running,runing
 sniffé,snifé
 écoeure,équeure
 accompagnerez,acompagnerez
+accueillie,acueillie
 accusera,acusera
 actionne,actione
 approuvait,aprouvait
@@ -1078,6 +1091,7 @@ occuperez,ocuperez
 ortho,orto
 reconnaitrait,reconaitrait
 remettais,remétais
+summum,sumum
 vanné,vané
 accomplira,acomplira
 accumulé,acumulé
@@ -1116,6 +1130,7 @@ trottait,trotait
 affirmait,afirmait
 allumons,alumons
 apportaient,aportaient
+corrompt,corompt
 dégotté,dégoté
 immobilise,imobilise
 opposait,oposait
@@ -1159,6 +1174,7 @@ hésiterait,ésiterait
 nommait,nomait
 raccompagnera,racompagnera
 visionné,visioné
+accueillit,acueillit
 arracheront,aracheront
 atteignait,ateignait
 atteindrait,ateindrait
@@ -1234,6 +1250,7 @@ rapporterez,raporterez
 recycle,recicle
 regretteront,regrèteront
 réhabilité,réabilité
+accompagniez,acompagniez
 admettra,admétra
 allumeront,alumeront
 approchaient,aprochaient
@@ -1242,6 +1259,7 @@ collaborait,colaborait
 pollue,polue
 rappelleront,rapèleront
 rattaché,rataché
+resserrez,ressérez
 tanna,tana
 trimballé,trimbalé
 acclamé,aclamé
@@ -1272,6 +1290,7 @@ arracherons,aracherons
 arrivât,arivât
 attiraient,atiraient
 collaborent,colaborent
+djihad,djiad
 débarrassait,débarassait
 enterrait,entérait
 rappliqué,rapliqué
@@ -1281,6 +1300,7 @@ terri,téri
 transmettons,transmétons
 échauffé,échaufé
 abattait,abatait
+accueillait,acueillait
 accuserais,acuserais
 allèrent,alèrent
 analysez,analisez
@@ -1440,6 +1460,7 @@ gaffé,gafé
 nourrirait,nourirait
 photographiez,fotografiez
 rembourré,rembouré
+resserrent,ressèrent
 sanctionné,sanctioné
 supprimée,suprimée
 abattit,abatit
@@ -1469,6 +1490,7 @@ nommons,nomons
 offensent,ofensent
 passionnent,passionent
 photographiait,fotografiait
+potpourri,potpouri
 préoccupent,préocupent
 questionnez,questionez
 quitteriez,quiteriez
@@ -1559,6 +1581,7 @@ différée,diférée
 efforcez,éforcez
 emballait,embalait
 empoisonnera,empoisonera
+excellé,excélé
 occuperaient,ocuperaient
 perquisitionné,perquisitioné
 raisonnent,raisonent
@@ -1705,6 +1728,7 @@ correspondrait,corespondrait
 dauphinois,daufinois
 distillée,distilée
 effaçant,éfaçant
+espionnent,espionent
 frapperont,fraperont
 frottant,frotant
 galline,galine
@@ -1733,6 +1757,7 @@ supplions,suplions
 truffée,trufée
 téléphonerez,téléfonerez
 abattrez,abatrez
+accueillais,acueillais
 acquittée,acquitée
 annonçons,anonçons
 annulera,anulera
@@ -1770,12 +1795,14 @@ surnommée,surnomée
 synchronisez,sincronisez
 terrent,tèrent
 tourbillonne,tourbillone
+vénézuélienne,vénézuéliène
 échappons,échapons
 échauffez,échaufez
 étoufferai,étouferai
 acclamez,aclamez
 accompagnerons,acompagnerons
 accoudé,acoudé
+accueillerai,acueillerai
 admettrait,admétrait
 affame,afame
 algérienne,algériène
@@ -1822,6 +1849,7 @@ supporterez,suporterez
 terrifiaient,térifiaient
 triomphons,trionfons
 accordant,acordant
+accueillerez,acueillerez
 accumulant,acumulant
 approchiez,aprochiez
 arrêtèrent,arêtèrent
@@ -1886,6 +1914,7 @@ honorerez,onorerez
 hypothéqué,ipotéqué
 installeront,instaleront
 occasionné,ocasioné
+paraguayenne,paraguayène
 photographiée,fotografiée
 questionnait,questionait
 quittai,quitai
@@ -1965,6 +1994,7 @@ débarrasseront,débarasseront
 décollée,décolée
 déterrez,détérez
 effacerait,éfacerait
+espionnant,espionant
 flippent,flipent
 frissonnait,frissonait
 habituera,abituera
@@ -2136,6 +2166,7 @@ accordaient,acordaient
 accouchait,acouchait
 accrocherez,acrocherez
 accrochiez,acrochiez
+accueilleraient,acueilleraient
 affamant,afamant
 affilé,afilé
 allumaient,alumaient
@@ -2210,6 +2241,7 @@ abandonnèrent,abandonèrent
 accomplissions,acomplissions
 accoucherait,acoucherait
 accourait,acourait
+accueillerait,acueillerait
 accusons,acusons
 acquittez,acquitez
 adonnaient,adonaient
@@ -2509,6 +2541,7 @@ perquisitionne,perquisitione
 phallo,falo
 pourririez,pouririez
 prénomment,prénoment
+présuppose,présupose
 périssodactyle,périssodactile
 querellaient,querélaient
 querellent,querèlent
@@ -2550,6 +2583,7 @@ trotta,trota
 trottinez,trotinez
 téléphoneront,téléfoneront
 unidimensionnel,unidimensionel
+valencienne,valenciène
 vigneronne,vignerone
 véhiculent,véiculent
 ânonnait,ânonait
@@ -2560,6 +2594,7 @@ véhiculent,véiculent
 accommodent,acomodent
 accommodé,acomodé
 accostent,acostent
+accueillerons,acueillerons
 accusiez,acusiez
 additionnent,aditionent
 analyserons,analiserons
@@ -2576,6 +2611,7 @@ bouillonnait,bouillonait
 bourdonnait,bourdonait
 calla,cala
 coiffiez,coifiez
+contorsionne,contorsione
 contractuellement,contractuèlement
 diffame,difame
 différaient,diféraient
@@ -2756,6 +2792,7 @@ communiais,comuniais
 congestionnent,congestionent
 conquerra,conquéra
 corrigerez,corigerez
+corromps,coromps
 crayonne,crayone
 décrypte,décripte
 déshérite,désérite
@@ -2778,6 +2815,7 @@ guetterait,guèterait
 habituèrent,abituèrent
 happent,hapent
 happé,hapé
+haschisch,aschisch
 hermaphrodite,ermafrodite
 hébergeaient,ébergeaient
 hériteront,ériteront
@@ -2788,6 +2826,7 @@ interrogiez,intérogiez
 irrita,irita
 kidnapperaient,kidnaperaient
 lutterai,luterai
+mam'selle,mam'sèle
 marmonnez,marmonez
 mentionnerai,mentionerai
 mentionnons,mentionons
@@ -2842,7 +2881,10 @@ verrouilla,vérouilla
 échauffons,échaufons
 étouffa,étoufa
 accommodèrent,acomodèrent
+accras,acras
+accueilleront,acueilleront
 affale,afale
+aiguillonnent,aiguillonent
 allongiez,alongiez
 allégea,alégea
 almohade,almoade
@@ -2949,6 +2991,7 @@ permettais,permétais
 philosophé,filosofé
 phosphatine,fosfatine
 photographièrent,fotografièrent
+phylloxera,filoxera
 polissonnait,polissonait
 pomponné,pomponé
 raccourcissant,racourcissant
@@ -3012,6 +3055,7 @@ décommandez,décomandez
 démarrant,démarant
 déshabillons,désabillons
 enterrerez,entèrerez
+excellez,excélez
 flipperait,fliperait
 fouettait,fouétait
 hydrochlorique,hidroclorique
@@ -3024,6 +3068,7 @@ interrompra,intérompra
 jetterez,jèterez
 leurrez,leurez
 leurré,leuré
+milliseconde,miliseconde
 méprennent,méprènent
 méthédrine,métédrine
 perfectionne,perfectione
@@ -3065,6 +3110,7 @@ communiquerons,comuniquerons
 contrecarre,contrecare
 corrigeons,corigeons
 corroborera,coroborera
+dhole,dole
 débarrasserons,débarasserons
 débattant,débatant
 décollerons,décolerons
@@ -3072,6 +3118,7 @@ démissionnais,démissionais
 déverrouillé,dévérouillé
 effrayerait,éfrayerait
 engouffré,engoufré
+excellait,excélait
 existentielles,existentièles
 ferrez,férez
 flippais,flipais
@@ -3084,6 +3131,7 @@ illustrant,ilustrant
 illustrent,ilustrent
 irrigué,irigué
 irritez,iritez
+millenium,milenium
 mouffette,moufète
 occultée,ocultée
 officie,oficie
@@ -3122,6 +3170,8 @@ arraisonné,araisoné
 aspergillus,aspergilus
 assommera,assomera
 atténué,aténué
+baht,bat
+banyan,banian
 barricadons,baricadons
 barricadée,baricadée
 cambodgienne,cambodgiène
@@ -3159,7 +3209,6 @@ hériterait,ériterait
 immiscent,imiscent
 immobilisera,imobilisera
 incommodé,incomodé
-iraquienne,iraquiène
 klaxonnent,klaxonent
 luttiez,lutiez
 marmonnant,marmonant
@@ -3222,6 +3271,7 @@ appareillez,apareillez
 appuieront,apuieront
 arachnide,aracnide
 assaisonnée,assaisonée
+atteignions,ateignions
 atterrirai,atérirai
 authentifie,autentifie
 bannissons,banissons
@@ -3625,6 +3675,7 @@ frissonnez,frissonez
 fusionneront,fusioneront
 griffonné,grifoné
 habilite,abilite
+habilliez,abilliez
 habituerait,abituerait
 harmonise,armonise
 harponné,harponé
@@ -3710,6 +3761,7 @@ redonnerait,redonerait
 refrappe,refrape
 remettraient,remétraient
 reprogrammée,reprogramée
+resserrera,ressèrera
 rhizopus,rizopus
 ronronné,ronroné
 réapparurent,réaparurent
@@ -3784,6 +3836,7 @@ accoudée,acoudée
 accoupleront,acoupleront
 accourrai,acourai
 accoutume,acoutume
+accueillirent,acueillirent
 accusai,acusai
 accuseraient,acuseraient
 accuseriez,acuseriez
@@ -3805,6 +3858,7 @@ affligez,afligez
 affronta,afronta
 affuble,afuble
 affublée,afublée
+aiguillonne,aiguillone
 alexithymie,alexitimie
 allongeaient,alongeaient
 allumerait,alumerait
@@ -3979,6 +4033,8 @@ irradiait,iradiait
 irriguée,iriguée
 kidnappiez,kidnapiez
 klaxonna,klaxona
+lithotripsie,litotripsie
+mam'zelle,mam'zèle
 marmonnent,marmonent
 mentionnaient,mentionaient
 mitonne,mitone
@@ -4031,6 +4087,7 @@ prométhéen,prométéen
 prénommais,prénomais
 préoccuperai,préocuperai
 préprogrammée,préprogramée
+présélectionné,présélectioné
 pyréthrine,pirétrine
 pépettes,pépètes
 querellait,querélait
@@ -4134,6 +4191,7 @@ accaparez,acaparez
 acclimatez,aclimatez
 acclimaté,aclimaté
 accommoderez,acomoderez
+accompagnions,acompagnions
 accomplissais,acomplissais
 accomplissiez,acomplissiez
 accoude,acoude
@@ -4144,6 +4202,7 @@ accrochions,acrochions
 accrochèrent,acrochèrent
 accroupissent,acroupissent
 accrut,acrut
+accueilleriez,acueilleriez
 accuserons,acuserons
 actionnant,actionant
 additionnez,aditionez
@@ -4176,6 +4235,7 @@ amerrit,amérit
 amidonnent,amidonent
 amidonnez,amidonez
 amidonnée,amidonée
+amygdalien,amigdalien
 analysaient,analisaient
 anesthésions,anestésions
 annexant,anexant
@@ -4266,6 +4326,7 @@ charriait,chariait
 chiasseux,chiasseus
 chiffrant,chifrant
 chiffrent,chifrent
+cholera,colera
 choppons,chopons
 cohabiteraient,coabiteraient
 cohabitiez,coabitiez
@@ -4417,6 +4478,7 @@ hennissent,hénissent
 hennit,hénit
 herba,erba
 hibernaient,ibernaient
+hister,ister
 hiéroglyphiques,hiéroglifiques
 homogénéisé,omogénéisé
 honoriez,onoriez
@@ -4468,6 +4530,7 @@ narrant,narant
 nettoieraient,nétoieraient
 nettoya,nétoya
 neuropsychologue,neuropsicologue
+nicaraguayenne,nicaraguayène
 nippé,nipé
 nippée,nipée
 nommaient,nomaient
@@ -4512,6 +4575,7 @@ prénommez,prénomez
 préoccupaient,préocupaient
 préoccupiez,préocupiez
 préoccupons,préocupons
+présélectionnée,présélectionée
 pythie,pitie
 querellée,querélée
 questionnaient,questionaient
@@ -4550,6 +4614,10 @@ redémarrons,redémarons
 regrettions,regrétions
 rejetteraient,rejèteraient
 reprogrammera,reprogramera
+resserraient,resséraient
+resserrait,ressérait
+resserrerait,ressèrerait
+resserrons,ressérons
 retransmettez,retransmétez
 retransmettra,retransmétra
 rhabillons,rabillons
@@ -4588,6 +4656,7 @@ supplieraient,suplieraient
 supposa,suposa
 suppurent,supurent
 surnommais,surnomais
+susurrent,susurent
 sympathisait,simpatisait
 sélectionnerai,sélectionerai
 tannait,tanait
@@ -4959,6 +5028,7 @@ chaperonnée,chaperonée
 charriaient,chariaient
 charrieras,charieras
 charrieront,charieront
+charrieurs,charieurs
 charrions,charions
 chatonne,chatone
 chattons,chatons
@@ -5033,6 +5103,8 @@ connectiez,conectiez
 connectons,conectons
 connûmes,conûmes
 consommerait,consomerait
+contorsionnent,contorsionent
+contorsionné,contorsioné
 coordonna,coordona
 coordonnait,coordonait
 coordonnerait,coordonerait
@@ -5153,6 +5225,7 @@ désinhibe,désinibe
 désinstallé,désinstalé
 désintellectualiser,désintélectualiser
 désoxygénation,désoxigénation
+désynchronisé,désincronisé
 détalonner,détaloner
 déterraient,détéraient
 déterrerez,détèrerez
@@ -5224,6 +5297,7 @@ enveloppera,envelopera
 errerons,èrerons
 erreront,èreront
 errèrent,érèrent
+escher,escer
 esclaffant,esclafant
 espionnerions,espionerions
 essoufflais,essouflais
@@ -5276,6 +5350,7 @@ galonnée,galonée
 gapette,gapète
 garrottent,garotent
 garrottée,garotée
+gentilhommières,gentilomières
 gougnottes,gougnotes
 gougoutte,gougoute
 gouttait,goutait
@@ -5312,6 +5387,7 @@ habiterions,abiterions
 habiteront,abiteront
 habituant,abituant
 hacheur,acheur
+hachisch,achisch
 hallucinons,alucinons
 halva,alva
 harmonisant,armonisant
@@ -5348,6 +5424,7 @@ hypothéquant,ipotéquant
 héliporter,éliporter
 hésitai,ésitai
 hésitaient,ésitaient
+idiosyncrasique,idiosincrasique
 illumineront,ilumineront
 illustraient,ilustraient
 illustrera,ilustrera
@@ -5562,6 +5639,8 @@ prénommèrent,prénomèrent
 préoccupa,préocupa
 préoccuperaient,préocuperaient
 préoccupâtes,préocupâtes
+présupposent,présuposent
+psychosexuel,psicosexuel
 pullulaient,pululaient
 pulluleront,pululeront
 pyralène,piralène
@@ -5664,9 +5743,11 @@ renommera,renomera
 renverrions,renvérions
 repositionnez,repositionez
 reprogrammant,reprogramant
+resserrerai,ressèrerai
 retransmettait,retransmétait
 retransmettant,retransmétant
 rhabillait,rabillait
+rhabilliez,rabilliez
 rhô,rô
 rolle,role
 ronchonnent,ronchonent
@@ -5723,6 +5804,8 @@ scanneront,scaneront
 scelleront,scèleront
 scellèrent,scélèrent
 schizophasie,squizofasie
+schnouff,schnouf
+schnouffe,schnoufe
 secourra,secoura
 septaux,septaus
 sermonnerai,sermonerai
@@ -5787,6 +5870,10 @@ surnommera,surnomera
 surnommèrent,surnomèrent
 suroxygéner,suroxigéner
 surréservation,suréservation
+susurrait,susurait
+susurre,susure
+susurrerai,susurerai
+susurré,susuré
 symboliserai,simboliserai
 symboliserait,simboliserait
 sympathisaient,simpatisaient
@@ -5822,6 +5909,8 @@ tranquillisait,tranquilisait
 tranquillisent,tranquilisent
 tranquilliserait,tranquiliserait
 tranquillisez,tranquilisez
+transhumés,transumés
+transillumination,transilumination
 transylvanienne,transilvaniène
 trichlorure,triclorure
 tringlette,tringlète
@@ -5848,6 +5937,7 @@ télépathiquement,télépatiquement
 téléphonai,téléfonai
 téléphoneraient,téléfoneraient
 téléphonée,téléfonée
+uht,ut
 unetelle,unetèle
 unidimensionnelle,unidimensionèle
 visionna,visiona
@@ -5987,6 +6077,8 @@ accréditait,acréditait
 accréditant,acréditant
 accrût,acrût
 accu,acu
+accueillaient,acueillaient
+accueillît,acueillît
 accula,acula
 acculaient,aculaient
 acculais,aculais
@@ -6133,11 +6225,18 @@ ahanante,aanante
 ahanement,aanement
 ahanent,aanent
 ahané,aané
+aiguillonnaient,aiguillonaient
+aiguillonnait,aiguillonait
+aiguillonnant,aiguillonant
+aiguillonnante,aiguillonante
+aiguillonné,aiguilloné
+aiguillonnée,aiguillonée
 ajaccienne,ajacciène
 alençonnais,alençonais
 alençonnaise,alençonaise
 allaiterait,alaiterait
 allassent,alassent
+allegretto,alegréto
 alliât,aliât
 allobarbital,alobarbital
 allobroges,alobroges
@@ -6166,6 +6265,7 @@ alléguaient,aléguaient
 alléguais,aléguais
 alléguait,aléguait
 alléguera,aléguera
+alsacienne,alsaciène
 amarrai,amarai
 amarraient,amaraient
 amarrant,amarant
@@ -6188,6 +6288,7 @@ anaphoriquement,anaforiquement
 anathématisait,anatématisait
 anathématisé,anatématisé
 anatomophysiologique,anatomofisiologique
+anchilops,anquilops
 andorranes,andoranes
 androgynique,androginique
 anesthésia,anestésia
@@ -6240,6 +6341,7 @@ appareillaient,apareillaient
 appareillait,apareillait
 appareillant,apareillant
 appareilleraient,apareilleraient
+appareillions,apareillions
 appariait,apariait
 appariant,apariant
 apparie,aparie
@@ -6368,6 +6470,7 @@ assujettissent,assujétissent
 assujettit,assujétit
 astrophore,astrofore
 asturienne,asturiène
+asymétriquement,asimétriquement
 atrophiait,atrofiait
 attabla,atabla
 attablai,atablai
@@ -6471,6 +6574,8 @@ authentifierait,autentifierait
 authentiquant,autentiquant
 autobiographe,autobiografe
 autolysat,autolisat
+autosuggestionna,autosuggestiona
+auxdits,ausdits
 avignonnais,avignonais
 avignonnaise,avignonaise
 babélienne,babéliène
@@ -6549,6 +6654,8 @@ bicéphalie,bicéfalie
 bidonnaient,bidonaient
 bidonnait,bidonait
 bidonne,bidone
+bienheureusement,bieneureusement
+bienheureuses,bieneureuses
 biffa,bifa
 biffaient,bifaient
 biffais,bifais
@@ -6568,6 +6675,7 @@ blottissement,blotissement
 blottissions,blotissions
 boissonnée,boissonée
 bombinette,bombinète
+bonneter,boneter
 bonnir,bonir
 bonnisse,bonisse
 bonnissent,bonissent
@@ -6867,7 +6975,11 @@ constellait,constélait
 constellant,constélant
 constelle,constèle
 constellent,constèlent
+contorsionna,contorsiona
 contorsionnaient,contorsionaient
+contorsionnait,contorsionait
+contorsionnant,contorsionant
+contorsionnée,contorsionée
 contrecarraient,contrecaraient
 contrecarrais,contrecarais
 contrecollé,contrecolé
@@ -7285,6 +7397,7 @@ entonneraient,entoneraient
 entonnions,entonions
 entonnâmes,entonâmes
 entonnèrent,entonèrent
+entr'appellent,entr'apèlent
 entrebattre,entrebatre
 entremettait,entremétait
 entreverrai,entrevérai
@@ -7302,6 +7415,7 @@ environnée,environée
 erreraient,èreraient
 errerait,èrerait
 errâmes,érâmes
+esche,esce
 esclaffa,esclafa
 esclaffai,esclafai
 esclaffait,esclafait
@@ -7311,6 +7425,7 @@ esclafferaient,esclaferaient
 esclaffèrent,esclafèrent
 esclaffé,esclafé
 esclaffée,esclafée
+espionnât,espionât
 essouffla,essoufla
 essoufflaient,essouflaient
 essoufflant,essouflant
@@ -7322,12 +7437,18 @@ esthétisait,estétisait
 euphorisent,euforisent
 euphorisé,euforisé
 euphorisée,euforisée
+excella,excéla
+excellaient,excélaient
+excellais,excélais
+excellant,excélant
+excelleraient,excèleraient
 excommuniaient,excomuniaient
 excommuniait,excomuniait
 excommuniant,excomuniant
 excommunient,excomunient
 excommuniez,excomuniez
 excursionnaient,excursionaient
+excursionnant,excursionant
 exhalaient,exalaient
 exhalant,exalant
 exhaleraient,exaleraient
@@ -7593,7 +7714,6 @@ harponna,harpona
 harponnent,harponent
 harpyes,harpies
 hassidisme,assidisme
-hellénisé,élénisé
 hennirent,hénirent
 hennissaient,hénissaient
 hennissait,hénissait
@@ -7680,7 +7800,6 @@ héliophanie,éliofanie
 hématocèle,ématocèle
 héritai,éritai
 héritaient,éritaient
-héroïde,éroïde
 hésiterions,ésiterions
 hésitions,ésitions
 hésitât,ésitât
@@ -7785,6 +7904,7 @@ irroration,iroration
 irréalisait,iréalisait
 irréalise,iréalise
 irréellement,iréèlement
+ithos,itos
 ivoirienne,ivoiriène
 jalonnais,jalonais
 jalonnait,jalonait
@@ -7826,10 +7946,12 @@ leurrait,leurait
 lichotter,lichoter
 lithographié,litografié
 livoniennes,livoniènes
+llanos,lanos
 logosphère,logosfère
 logothètes,logotètes
 loquette,loquète
 lotionnés,lotionés
+louchebem,louquebem
 louloutte,louloute
 loupiotte,loupiote
 lunetteux,lunéteus
@@ -7927,6 +8049,8 @@ méconnaissant,méconaissant
 méconnaisse,méconaisse
 méconnaitra,méconaitra
 mélancolieux,mélancolieus
+mésallieras,mésalieras
+mésallies,mésalies
 mésalliés,mésaliés
 métallise,métalise
 métallisent,métalisent
@@ -7949,6 +8073,7 @@ narrée,narée
 nasillonne,nasillone
 natta,nata
 nattée,natée
+nephtys,neftis
 nettoyai,nétoyai
 nettoyât,nétoyât
 nichonnée,nichonée
@@ -8051,6 +8176,7 @@ pelotonne,pelotone
 pelotonnent,pelotonent
 pelotonné,pelotoné
 pensionna,pensiona
+pentasyllabe,pentasilabe
 perchettes,perchètes
 perfectionna,perfectiona
 perfectionnaient,perfectionaient
@@ -8072,7 +8198,6 @@ phalangisme,falangisme
 phallologie,falologie
 phallophore,falofore
 philarète,filarète
-philhellènes,filélènes
 philosophaient,filosofaient
 philosophaillerie,filosofaillerie
 philosophait,filosofait
@@ -8087,6 +8212,7 @@ photographiât,fotografiât
 phrasée,frasée
 phrygien,frigien
 phrénologues,frénologues
+phtiriasis,ftiriasis
 phénique,fénique
 piaffa,piafa
 piaffaient,piafaient
@@ -8156,6 +8282,7 @@ pourrirent,pourirent
 pourrissaient,pourissaient
 pourrisseur,pourisseur
 pradelle,pradèle
+presbyterium,presbiterium
 processionnaient,processionaient
 processionnant,processionant
 procommuniste,procomuniste
@@ -8183,6 +8310,7 @@ préoccupions,préocupions
 préoccupât,préocupât
 préoccupèrent,préocupèrent
 prérévolutionnaire,prérévolutionaire
+présupposant,présuposant
 psychanalyserai,psicanaliserai
 psychologisation,psicologisation
 pucheux,pucheus
@@ -8253,11 +8381,14 @@ ralliai,raliai
 ralliaient,raliaient
 ralliassent,raliassent
 rallieriez,ralieriez
+rallions,ralions
 rallongea,ralongea
 ralluma,raluma
 rallumai,ralumai
 rallumèrent,ralumèrent
 rallège,ralège
+ralléger,raléger
+rallégé,ralégé
 ramarraient,ramaraient
 ramarrer,ramarer
 ramollirent,ramolirent
@@ -8358,12 +8489,17 @@ rembourrant,rembourant
 remettrions,remétrions
 renommait,renomait
 renommez,renomez
+resserra,resséra
+resserrant,ressérant
+resserrions,ressérions
+resserrèrent,ressérèrent
 retroussette,retroussète
 rhabilla,rabilla
 rhabillaient,rabillaient
 rhabillent,rabillent
 rhabillèrent,rabillèrent
 rhingraves,ringraves
+rhodoïd,rodoïd
 rhovyl,rovil
 rhynchites,rinchites
 richomme,richome
@@ -8413,6 +8549,7 @@ réapprises,réaprises
 réapprovisionnerait,réaprovisionerait
 réarrangeait,réarangeait
 réattaquai,réataquai
+réattaquait,réataquait
 réattaqué,réataqué
 réceptionna,réceptiona
 réceptionnant,réceptionant
@@ -8476,6 +8613,7 @@ savonna,savona
 savonnai,savonai
 savonnaient,savonaient
 scellerait,scèlerait
+schproum,scproum
 scialytique,scialitique
 secco,séco
 seccotine,sécotine
@@ -8563,6 +8701,7 @@ stationnaient,stationaient
 stationnait,stationait
 stationnions,stationions
 stationnèrent,stationèrent
+stegomya,stegomia
 stoppai,stopai
 stoppaient,stopaient
 stoppât,stopât
@@ -8579,6 +8718,7 @@ succombaient,sucombaient
 succomberaient,sucomberaient
 succombions,sucombions
 succombèrent,sucombèrent
+sufficit,suficit
 suffoqua,sufoqua
 suffoquai,sufoquai
 suffoquaient,sufoquaient
@@ -8626,6 +8766,10 @@ surgeonnent,surgeonent
 surnommerais,surnomerais
 surnommions,surnomions
 suroxygéné,suroxigéné
+susurra,susura
+susurrai,susurai
+susurraient,susuraient
+susurrée,susurée
 swiftiennes,swiftiènes
 symbolisa,simbolisa
 symbolisât,simbolisât
@@ -8708,7 +8852,9 @@ tousseux,tousseus
 toussoteux,toussoteus
 tranquillisa,tranquilisa
 tranquillisaient,tranquilisaient
+tranquillos,tranquilos
 transhistorique,transistorique
+transhumait,transumait
 transmettions,transmétions
 trappon,trapon
 tricycliste,tricicliste
@@ -8784,14 +8930,17 @@ villégiaturé,vilégiaturé
 virgilienne,virgiliène
 vitrauphanie,vitraufanie
 vitrophanie,vitrofanie
+vosgienne,vosgiène
 véhiculé,véiculé
 vésuviennes,vésuviènes
+vétyver,vétiver
 walkyrie,walkirie
+wattman,watman
 willaya,wilaya
 wisigothe,wisigote
 wisigothique,wisigotique
-wisigoths,wisigots
 xiphidion,xifidion
+yoghourt,yogourt
 zanimaux,zanimaus
 zippa,zipa
 zippait,zipait
@@ -8912,7 +9061,7 @@ accéderaient,accèderaient
 accéderait,accèderait
 accélérera,accélèrera
 accélérerait,accélèrerait
-addendum,addenda
+addendum,adenda
 affréterons,affrèterons
 afféteries,affèteries
 affûta,afuta
@@ -9458,7 +9607,7 @@ faîtage,faitage
 faîte,faite
 faîtes-la-moi,faites-la-moi
 faîtière,faitière
-ferries,féris
+ferries,ferrys
 feuillettement,feuillètement
 feuillettent,feuillètent
 ficellerait,ficèlerait
@@ -9526,7 +9675,7 @@ goûtâmes,goutâmes
 goûtèrent,goutèrent
 goûté,gouté
 goûtée,goutée
-graffito,graffiti
+graffito,grafiti
 grand-maître,grand-maitre
 gri-gri,grigri
 gris-gris,grigris 
@@ -9612,7 +9761,7 @@ libérerez,libèrerez
 libérerons,libèrerons
 libéreront,libèreront
 lieder,lieds
-lobbies,lobbis
+lobbies,lobbys
 léchera,lèchera
 lécherai,lècherai
 lécherait,lècherait
@@ -9772,8 +9921,8 @@ posséderaient,possèderaient
 posséderait,possèderait
 posséderez,possèderez
 posséderont,possèderont
-pot-pourri,potpourri
-pots-pourris,potpourris
+pot-pourri,potpouri
+pots-pourris,potpouris
 pouce-pied,poucepied
 pousse-cailloux,pousse-caillou
 premier-maître,premier-maitre
@@ -9921,7 +10070,6 @@ revolver,révolver
 reître,reitre
 risque-tout,risquetout
 rouspétera,rouspètera
-rugbymen,rugbymans
 ruissellent,ruissèlent
 ruissellerait,ruissèlerait
 rushes,rushs
