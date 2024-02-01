@@ -120,7 +120,7 @@ let from_filesystem root path request =
              String.split_on_char ',' s
              |> List.exists (fun s -> String.trim s = "gzip"))
            (Dream.headers request "Accept-Encoding")
-       then "dict.js.gz", [("Content-Encoding", "gzip")]
+       then "dict.js.gz", [("Content-Encoding", "gzip")] @ Dream.mime_lookup path
        else path, []
     | _ -> path, []
   in
