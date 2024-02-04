@@ -20,11 +20,8 @@ EOF
         | {
         cat
         # missing
-        echo ceux,ceus
         echo hispanophone,hispanofone
         echo sinophone,sinofone
-        echo poux,pous
-        echo choux,chous
         # corrections (last entry takes precedence when the dict is loaded)
         echo coordonner,coordoner
     } \
