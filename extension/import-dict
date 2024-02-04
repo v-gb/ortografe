@@ -30,22 +30,6 @@ EOF
     } \
         | cat > dict.gen.csv
 
-    # add a few conjugated forms, from EROFA as well
-    ssconvert ../data/erofa/Verbes-conjugues-top-2k-Lexique.xlsx /tmp/tmp.csv
-    {
-        sqlite3 <<'EOF'
-.mode csv
-.import /tmp/tmp.csv t
-select "1_ortho", "Grafie érofiène corecte" from t
-union all
-select "grafie alternative", "Grafie érofiène corecte" from t
-where "grafie alternative" != '' and "grafie alternative" != "Grafie érofiène corecte"
-EOF
-    } \
-        | tr -d '"' \
-        | LANG=C sort \
-        | cat >> dict.gen.csv
-
     {
         sqlite3 <<'EOF'
 .mode csv

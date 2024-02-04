@@ -8,7 +8,6 @@
  (deps
    import-dict
    ../data/erofa/DOR-numerique_v1.0.2.csv
-   ../data/erofa/Verbes-conjugues-top-2k-Lexique.xlsx
    ../data/wiktionnaire/1990.csv
    ../data/homemade/dict-rect1990+erofa.adds.csv
    ../data/lexique/1990.csv
