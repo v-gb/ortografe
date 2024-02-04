@@ -2,34 +2,31 @@
 set -e -u -o pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-if false; then
-    :
-else
-    {
-        sqlite3 <<'EOF'
+{
+    sqlite3 <<'EOF'
 .mode csv
 .import ../data/erofa/DOR-numerique_v1.0.2.csv t
 select "Grafie initiale","Grafie modifiée"
 from t
 where "Grafie initiale" != ''
 EOF
-    } \
-        | tr -d '"' \
-        | sed 's/ *([^)]*)//g' \
-        | LANG=C sort -u \
-        | {
-        # The coordonner entry is erroneous. Let our dict generation do the right thing
-        #
-        # Drop héro and héroïne to avoid removing the h for the meaning of héroique.
-        # We then make the error of not removing the h for the drug, but oh well, that
-        # seems like a less confusing error to make.
-        grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq'
-        echo sinophone,sinofone # missing
-    } \
-        | cat > dict.gen.csv
+} \
+    | tr -d '"' \
+    | sed 's/ *([^)]*)//g' \
+    | LANG=C sort -u \
+    | {
+    # The coordonner entry is erroneous. Let our dict generation do the right thing
+    #
+    # Drop héro and héroïne to avoid removing the h for the meaning of héroique.
+    # We then make the error of not removing the h for the drug, but oh well, that
+    # seems like a less confusing error to make.
+    grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq'
+    echo sinophone,sinofone # missing
+} \
+    | cat > dict.gen.csv
 
-    {
-        sqlite3 <<'EOF'
+{
+    sqlite3 <<'EOF'
 .mode csv
 create table t(before,after);
 .import dict.gen.csv t
@@ -37,13 +34,13 @@ select replace(replace(before,"œ","oe"),"æ","ae") as rewritten, after
 from t
 where rewritten != before and rewritten != after
 EOF
-    } \
-        | tr -d '"' \
-        | LANG=C sort \
-        | cat >> dict.gen.csv
+} \
+    | tr -d '"' \
+    | LANG=C sort \
+    | cat >> dict.gen.csv
 
-    {
-        sqlite3 <<'EOF'
+{
+    sqlite3 <<'EOF'
 .mode csv
 create table t(before,after);
 .import dict.gen.csv t
@@ -54,21 +51,20 @@ join t on t.before = t1990.post1990
 where t1990.pre1990 != after -- chariot -> (1990) charriot -> (erofa) chariot
 order by t1990.pre1990
 EOF
-    } \
-        | tr -d '"' \
-        | cat >> dict.gen.csv
+} \
+    | tr -d '"' \
+    | cat >> dict.gen.csv
 
-    cp dict.gen.csv dict.external-sources.gen.csv
+cp dict.gen.csv dict.external-sources.gen.csv
 
-    tail -n +2 ../data/homemade/dict-rect1990+erofa.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
+tail -n +2 ../data/homemade/dict-rect1990+erofa.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
 
-    # Capitalized words in the dict are treated as exceptions, for
-    # cases when the capitalized version of the word is almost never the common
-    # noun, but is instead a proper noun that we don't want to rewrite
-    for w in Pierre Cannes Rennes Vienne Bordeaux Rochelle; do
-        echo $w,bug-if-displayed
-    done >> dict.gen.csv
-fi
+# Capitalized words in the dict are treated as exceptions, for
+# cases when the capitalized version of the word is almost never the common
+# noun, but is instead a proper noun that we don't want to rewrite
+for w in Pierre Cannes Rennes Vienne Bordeaux Rochelle; do
+    echo $w,bug-if-displayed
+done >> dict.gen.csv
 
 {
     # sqlite doesn't support outer joins, so we do two left joins
