@@ -18,8 +18,12 @@ EOF
         | sed 's/ *([^)]*)//g' \
         | LANG=C sort -u \
         | {
-        grep -v coordonner # remove this errorenous entry, our dict generation
-                           # will do the right thing
+        # The coordonner entry is erroneous. Let our dict generation do the right thing
+        #
+        # Drop héro and héroïne to avoid removing the h for the meaning of héroique.
+        # We then make the error of not removing the h for the drug, but oh well, that
+        # seems like a less confusing error to make.
+        grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq'
         echo sinophone,sinofone # missing
     } \
         | cat > dict.gen.csv
@@ -64,11 +68,6 @@ EOF
     for w in Pierre Cannes Rennes Vienne Bordeaux Rochelle; do
         echo $w,bug-if-displayed
     done >> dict.gen.csv
-
-    # Drop héro and héroïne to avoid removing the h for the meaning of héroique.
-    # We then make the error of not removing the h for the drug, but oh well, that
-    # seems like a less confusing error to make.
-    grep -v '^\(héroïne\|héro\),' dict.gen.csv | sponge dict.gen.csv
 fi
 
 {
