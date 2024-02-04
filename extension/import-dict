@@ -85,13 +85,13 @@ where (l.post90 is null
        or l.post90 = w.post1990)
 and l.type = 1
 union all
-select distinct l.ortho,coalesce(l.post90,w.post1990)
+select distinct w.pre1990,w.post1990
 from w
 left join l on l.ortho = w.pre1990
-where (l.post90 is null
-       or w.post1990 is null)
-and l.type = 1
-order by l.ortho
+where l.ortho is null
+and w.pre1990 <> w.post1990
+and w.pre1990 = lower(w.pre1990)
+order by 1
 EOF
 } \
     | tr -d '"' \
