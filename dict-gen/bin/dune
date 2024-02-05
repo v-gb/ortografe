@@ -1,0 +1,3 @@
+(executable
+ (name        dict_gen)
+ (libraries   dict_gen))

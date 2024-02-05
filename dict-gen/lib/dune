@@ -1,0 +1,18 @@
+(library
+ (name dict_gen)
+ (libraries
+   bheap
+   cmdliner
+   core
+   core_unix
+   core_unix.sys_unix
+   csv
+   re
+   eio
+   eio_main
+   uucp
+   uutf
+ )
+ (preprocess (pps ppx_jane
+                  ppx_uchar_literal
+                  ppx_lazy_option_op)))

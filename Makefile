@@ -1,9 +1,9 @@
 .PHONY: install-opam-and-dune all all-w serve build-container run-container fly-deploy
 
 all:
-	dune build ./server_all.exe @runtest
+	dune build ./server_all.exe @default @runtest
 all-w:
-	dune build -w ./server_all.exe @runtest
+	dune build -w ./server_all.exe @default @runtest
 serve:
 	dune exec -w -- ./server_all.exe serve -p 8081
 
