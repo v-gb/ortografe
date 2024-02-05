@@ -1,0 +1,3 @@
+(library
+ (name cmdliner_bindops)
+ (libraries cmdliner))

@@ -2,6 +2,7 @@
  (name server)
  (libraries
    cmdliner
+   cmdliner_bindops
    core
    dream
    hyper

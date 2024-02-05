@@ -1,11 +1,6 @@
 let () =
   let module C = Cmdliner in
-  let return = C.Term.const in
-  let map x f = C.Term.app (return f) x in
-  let both a b = C.Term.app (C.Term.app (return (fun a b -> (a, b))) a) b in
-  let (let+) = map
-  and (and+) = both
-  in
+  let open Cmdliner_bindops in
   let cmd =
     C.Cmd.v
       (C.Cmd.info

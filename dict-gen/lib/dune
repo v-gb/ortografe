@@ -3,6 +3,7 @@
  (libraries
    bheap
    cmdliner
+   cmdliner_bindops
    core
    core_unix
    core_unix.sys_unix
