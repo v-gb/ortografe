@@ -326,7 +326,7 @@ let load_skip () =
     || row.cgram = "ONO"
     || String.mem row.ortho '-'
 
-let erofa_rule_1 () =
+let erofa_rule_1 = lazy (
   let pattern_ph = String.Search_pattern.create "ph" in
   let pattern_mph = String.Search_pattern.create "mph" in
   let pattern_coeu = String.Search_pattern.create "coeu" in
@@ -415,6 +415,7 @@ let erofa_rule_1 () =
      List.iter patterns_double_consonants ~f:(fun (target, repl) ->
          ortho := rewrite env row !ortho ~target ~repl);
      Ok (fst !ortho)
+)
 
 type rule =
   { name : string
@@ -427,20 +428,20 @@ type rule =
 
 let all = ref []
 let new_rule name doc f =
-  all := { name; doc; f = Lazy.from_fun f } :: !all;
+  all := { name; doc; f  } :: !all;
   name
 let new_rule' name doc f =
   new_rule name doc
-    (fun () ->
-      let f' = f () in
+    (lazy (
+      let f' = force f in
       fun rules _wiki (row : Data_src.Lexique.t) ->
         let env = { rules; accept = const true } in
         match Rules.search env.rules row.ortho row.phon with
         | Error _ as e -> e
-        | Ok search_res -> Ok (f' env row search_res))
+        | Ok search_res -> Ok (f' env row search_res)))
 
-let erofa_rule () =
-  let erofa_rule1 = erofa_rule_1 () in
+let erofa_rule = lazy (
+  let erofa_rule1 = force erofa_rule_1 in
   fun rules wiki (row : Data_src.Lexique.t) ->
   match erofa_rule1 { rules; accept = const true } wiki row with
   | Error _ as e -> e
@@ -454,70 +455,71 @@ let erofa_rule () =
              | Ok v -> Ok v)
        else Ok ortho
      else Ok ortho
+)
 let erofa = new_rule "erofa" "Les règles telles que décrites sur erofa.free.fr" erofa_rule
 
 let qu__q =
   new_rule'
     "qu--q"
     "question -> qestion mais aquarium inchangé"
-    (fun () ->
+    (lazy (
       let pattern_qu = String.Search_pattern.create "qu" in
       fun env row search_res ->
         let ortho = ref (row.ortho, search_res) in
         ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"q";
-        fst !ortho)
+        fst !ortho))
 
 let qu__qou =
   new_rule'
     "qu--qou"
     "aquatique -> aqouatique"
-    (fun () ->
+    (lazy (
       let pattern_qu = String.Search_pattern.create "qu" in
       fun env row search_res ->
         let ortho = ref (row.ortho, search_res) in
         ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"qou";
-        fst !ortho)
+        fst !ortho))
 
 let _ : string =
   new_rule'
     "ti--ci"
     "nation -> nacion, patient -> pacient, mais question inchangé"
-    (fun () ->
+    (lazy (
       let pattern_ti = String.Search_pattern.create "ti" in
       fun env row search_res ->
         let ortho = ref (row.ortho, search_res) in
         ortho := rewrite env row !ortho ~target:pattern_ti ~repl:"ci";
-        fst !ortho)
+        fst !ortho))
 
 let emment__ament =
   new_rule'
     "emment--ament"
     "évidemment -> évidament"
-    (fun () ->
+    (lazy (
       let pattern_emment = String.Search_pattern.create "emment" in
       let pattern_cemment = String.Search_pattern.create "cemment" in
       fun env row search_res ->
         let ortho = ref (row.ortho, search_res) in
         ortho := rewrite env row !ortho ~target:pattern_emment ~repl:"ament";
         ortho := rewrite env row !ortho ~target:pattern_cemment ~repl:"çament";
-        fst !ortho)
+        fst !ortho))
 
 let _ : string =
   new_rule'
     "oiement--oiment"
     "aboiement -> aboiment"
-    (fun () ->
+    (lazy (
       let pattern_oiement = String.Search_pattern.create "oiement" in
       fun env row search_res ->
         let ortho = ref (row.ortho, search_res) in
         ortho := rewrite env row !ortho ~target:pattern_oiement ~repl:"oiment";
-        fst !ortho)
+        fst !ortho))
 
 let _ : string =
   new_rule'
     "cq--q"
     "grecque -> grèque"
-    (fun () ->
+    (lazy (
       let pattern_cq = String.Search_pattern.create "cq" in
       let pattern_ecq = String.Search_pattern.create "ecq" in
       fun env row search_res ->
@@ -525,26 +527,26 @@ let _ : string =
         ortho := rewrite env row !ortho ~target:pattern_ecq ~repl:"éq";
         ortho := rewrite env row !ortho ~target:pattern_ecq ~repl:"èq";
         ortho := rewrite env row !ortho ~target:pattern_cq ~repl:"q";
-        fst !ortho)
+        fst !ortho))
 
 let qua_o__ca_o =
   new_rule'
     "qua-o--ca-o"
     "qualité -> calité, quotient -> cotient"
-    (fun () ->
+    (lazy (
       let pattern_qua = String.Search_pattern.create "qua" in
       let pattern_quo = String.Search_pattern.create "quo" in
       fun env row search_res ->
         let ortho = ref (row.ortho, search_res) in
         ortho := rewrite env row !ortho ~target:pattern_qua ~repl:"ca";
         ortho := rewrite env row !ortho ~target:pattern_quo ~repl:"co";
-        fst !ortho)
+        fst !ortho))
 
 let _ : string =
   new_rule'
     "sc-sch--c-ch"
     "science -> cience, fasciste -> fachiste, schéma -> chéma"
-    (fun () ->
+    (lazy (
       let pattern_esc = String.Search_pattern.create "esc" in
       let pattern_sc = String.Search_pattern.create "sc" in
       let pattern_sch = String.Search_pattern.create "sch" in
@@ -558,26 +560,26 @@ let _ : string =
         ortho := rewrite env row !ortho ~target:pattern_sc ~repl:"c";
         ortho := rewrite env row !ortho ~target:pattern_sc ~repl:"ch";
         ortho := rewrite env row !ortho ~target:pattern_sch ~repl:"ch";
-        fst !ortho)
+        fst !ortho))
 
 let aux__als =
   new_rule'
     "aux--als"
     "chevaux -> chevals, travaux -> travails"
-    (fun () ->
+    (lazy (
       fun _env row _search_res ->
         if (String.is_suffix row.ortho ~suffix:"aux"
             || String.is_suffix row.ortho ~suffix:"aus")
          && (String.is_suffix row.lemme ~suffix:"al"
             || String.is_suffix row.lemme ~suffix:"ail")
         then row.lemme ^ "s"
-        else row.ortho)
+        else row.ortho))
 
 let _ : string =
   new_rule'
     "il--y"
      "(pas encore prêt) fille -> fiye, mais ville inchangé"
-     (fun () ->
+     (lazy (
        let pattern_illi = String.Search_pattern.create "illi" in
        let pattern_ill = String.Search_pattern.create "ill" in
        let pattern_il = String.Search_pattern.create "il" in
@@ -589,7 +591,7 @@ let _ : string =
          ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"y";
          ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"y";
          ortho := rewrite env row !ortho ~target:pattern_il ~repl:"y";
-         fst !ortho)
+         fst !ortho))
 
 let doc rule = rule.doc
 let name rule = rule.name
@@ -623,7 +625,7 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
         ~compare:(fun r1 r2 -> Int.compare (rank r1) (rank r2))
     in
     match which_rules with
-    | [] -> erofa_rule ()
+    | [] -> force erofa_rule
     | _ :: _ ->
        fun rules wiki row ->
        let row =
