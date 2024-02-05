@@ -133,23 +133,24 @@ let main () =
                in
                Rules.check lexique ~skip:(Rewrite.load_skip ()))
           ; C.Cmd.v (C.Cmd.info "gen")
-              (let+ qu = C.Arg.value (C.Arg.flag (C.Arg.info ["qu"]))
-               and+ ti = C.Arg.value (C.Arg.flag (C.Arg.info ["ti"]))
-               and+ il = C.Arg.value (C.Arg.flag (C.Arg.info ["il"]))
-               and+ erofa = C.Arg.value (C.Arg.flag (C.Arg.info ["erofa"]))
+              (let+ rules =
+                 List.fold_right
+                   ~init:(return [])
+                   (force Rewrite.all)
+                   ~f:(fun rule acc ->
+                     let+ present = C.Arg.value (C.Arg.flag (C.Arg.info
+                                                               ~doc:(Rewrite.doc rule)
+                                                               [Rewrite.name rule]))
+                     and+ acc in
+                     if present then rule :: acc else acc)
                in
                let root = root ~from:(Eio.Stdenv.fs env) in
-               let rules =
-                 List.concat
-                   [ if ti then [ `Ti ] else []
-                   ; if qu then [ `Qu ] else []
-                   ; if il then [ `Il ] else []
-                   ; if erofa then [ `Erofa ] else []
-                   ]
-               in
-               Rewrite.gen ~root ~rules (fun old new_ ->
-                   if String.(<>) old new_
-                   then print_endline [%string "%{old},%{new_}"]))
+               try
+                 Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) (fun buf ->
+                     Rewrite.gen ~root ~rules (fun old new_ ->
+                         if String.(<>) old new_
+                         then Eio.Buf_write.string buf [%string "%{old},%{new_}\n"]))
+               with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) -> ())
           ; C.Cmd.v (C.Cmd.info "erofa-ext")
               (let+ () = return () in
                let root = root ~from:(Eio.Stdenv.fs env) in

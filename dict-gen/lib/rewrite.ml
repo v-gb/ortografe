@@ -416,6 +416,22 @@ let erofa_rule_1 () =
          ortho := rewrite env row !ortho ~target ~repl);
      Ok (fst !ortho)
 
+type rule =
+  { name : string
+  ; doc : string
+  ; f : (Rules.t ->
+         (string, bool) Base.Hashtbl.t Lazy.t ->
+         Data_src.Lexique.t
+         -> (string, Sexp.t) result) Lazy.t
+  }
+
+let all = ref []
+let new_rule name doc f =
+  all := { name; doc; f = Lazy.from_fun f } :: !all;
+  name
+let new_rule' name doc f =
+  ignore (new_rule name doc f)
+
 let erofa_rule () =
   let erofa_rule1 = erofa_rule_1 () in
   fun rules wiki (row : Data_src.Lexique.t) ->
@@ -431,47 +447,112 @@ let erofa_rule () =
              | Ok v -> Ok v)
        else Ok ortho
      else Ok ortho
+let erofa = new_rule "erofa" "Les règles telles que décrites sur erofa.free.fr" erofa_rule
 
-let qu_rule () =
-  let pattern_qu = String.Search_pattern.create "qu" in
-  fun rules _wiki (row : Data_src.Lexique.t) ->
-    let env = { rules; accept = const true } in
-    match Rules.search env.rules row.ortho row.phon with
-    | Error _ as e -> e
-    | Ok search_res ->
-       let ortho = ref (row.ortho, search_res) in
-       ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"q";
-       Ok (fst !ortho)
+let qu__q =
+  new_rule
+    "qu--q"
+    "question -> qestion mais aquarium inchangé"
+    (fun () ->
+      let pattern_qu = String.Search_pattern.create "qu" in
+      fun rules _wiki (row : Data_src.Lexique.t) ->
+        let env = { rules; accept = const true } in
+        match Rules.search env.rules row.ortho row.phon with
+        | Error _ as e -> e
+        | Ok search_res ->
+           let ortho = ref (row.ortho, search_res) in
+           ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"q";
+           Ok (fst !ortho))
 
-let ti_rule () =
-  let pattern_ti = String.Search_pattern.create "ti" in
-  fun rules _wiki (row : Data_src.Lexique.t) ->
-    let env = { rules; accept = const true } in
-    match Rules.search env.rules row.ortho row.phon with
-    | Error _ as e -> e
-    | Ok search_res ->
-       let ortho = ref (row.ortho, search_res) in
-       ortho := rewrite env row !ortho ~target:pattern_ti ~repl:"ci";
-       Ok (fst !ortho)
+let () =
+  new_rule'
+    "ti--ci"
+    "nation -> nacion, mais question inchangé"
+    (fun () ->
+      let pattern_ti = String.Search_pattern.create "ti" in
+      fun rules _wiki (row : Data_src.Lexique.t) ->
+        let env = { rules; accept = const true } in
+        match Rules.search env.rules row.ortho row.phon with
+        | Error _ as e -> e
+        | Ok search_res ->
+           let ortho = ref (row.ortho, search_res) in
+           ortho := rewrite env row !ortho ~target:pattern_ti ~repl:"ci";
+           Ok (fst !ortho))
 
-let il_rule () =
-  let pattern_illi = String.Search_pattern.create "illi" in
-  let pattern_ill = String.Search_pattern.create "ill" in
-  let pattern_il = String.Search_pattern.create "il" in
-  fun rules _wiki (row : Data_src.Lexique.t) ->
-    let env = { rules; accept = const true } in
-    match Rules.search env.rules row.ortho row.phon with
-    | Error _ as e -> e
-    | Ok search_res ->
-       (* bon ça c'est pas prêt *)
-       let ortho = ref (row.ortho, search_res) in
-       ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"iy";
-       ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"iy";
-       ortho := rewrite env row !ortho ~target:pattern_il ~repl:"iy";
-       ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"y";
-       ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"y";
-       ortho := rewrite env row !ortho ~target:pattern_il ~repl:"y";
-       Ok (fst !ortho)
+let () =
+  new_rule'
+    "emment--ament"
+    "évidemment -> évidament"
+    (fun () ->
+      let pattern_emment = String.Search_pattern.create "emment" in
+      let pattern_cemment = String.Search_pattern.create "cemment" in
+      fun rules _wiki (row : Data_src.Lexique.t) ->
+        let env = { rules; accept = const true } in
+        match Rules.search env.rules row.ortho row.phon with
+        | Error _ as e -> e
+        | Ok search_res ->
+           let ortho = ref (row.ortho, search_res) in
+           ortho := rewrite env row !ortho ~target:pattern_emment ~repl:"ament";
+           ortho := rewrite env row !ortho ~target:pattern_cemment ~repl:"çament";
+           Ok (fst !ortho))
+
+let () =
+  new_rule'
+    "oiement--oiment"
+    "aboiement -> aboiment"
+    (fun () ->
+      let pattern_oiement = String.Search_pattern.create "oiement" in
+      fun rules _wiki (row : Data_src.Lexique.t) ->
+        let env = { rules; accept = const true } in
+        match Rules.search env.rules row.ortho row.phon with
+        | Error _ as e -> e
+        | Ok search_res ->
+           let ortho = ref (row.ortho, search_res) in
+           ortho := rewrite env row !ortho ~target:pattern_oiement ~repl:"oiment";
+           Ok (fst !ortho))
+
+let qua_o__ca_o =
+  new_rule
+    "qua-o--ca-o"
+    "qualité -> calité, quotient -> cotient"
+    (fun () ->
+      let pattern_qua = String.Search_pattern.create "qua" in
+      let pattern_quo = String.Search_pattern.create "quo" in
+      fun rules _wiki (row : Data_src.Lexique.t) ->
+        let env = { rules; accept = const true } in
+        match Rules.search env.rules row.ortho row.phon with
+        | Error _ as e -> e
+        | Ok search_res ->
+           let ortho = ref (row.ortho, search_res) in
+           ortho := rewrite env row !ortho ~target:pattern_qua ~repl:"ca";
+           ortho := rewrite env row !ortho ~target:pattern_quo ~repl:"co";
+           Ok (fst !ortho))
+
+let () =
+  new_rule'
+    "il--y"
+     "(pas encore prêt) fille -> fiye, mais ville inchangé"
+     (fun () ->
+       let pattern_illi = String.Search_pattern.create "illi" in
+       let pattern_ill = String.Search_pattern.create "ill" in
+       let pattern_il = String.Search_pattern.create "il" in
+       fun rules _wiki (row : Data_src.Lexique.t) ->
+         let env = { rules; accept = const true } in
+         match Rules.search env.rules row.ortho row.phon with
+         | Error _ as e -> e
+         | Ok search_res ->
+            let ortho = ref (row.ortho, search_res) in
+            ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"iy";
+            ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"iy";
+            ortho := rewrite env row !ortho ~target:pattern_il ~repl:"iy";
+            ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"y";
+            ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"y";
+            ortho := rewrite env row !ortho ~target:pattern_il ~repl:"y";
+            Ok (fst !ortho))
+
+let doc rule = rule.doc
+let name rule = rule.name
+let all = lazy (List.rev !all)
 
 let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f =
   Sexp_with_utf8.linkme;
@@ -483,21 +564,28 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
       (List.map l ~f:(fun r -> r.word, r.h_aspire)))
   in
   let rule =
+    let which_rules =
+      let rank rule =
+        if rule.name = qua_o__ca_o
+        then -2
+        else if rule.name = qu__q
+        then -1
+        else if rule.name = erofa
+        then
+          (* erofa should be the last one, because it changes the phonetics *)
+          1
+        else 0
+      in
+      List.stable_sort which_rules
+        ~compare:(fun r1 r2 -> Int.compare (rank r1) (rank r2))
+    in
     match which_rules with
     | [] -> erofa_rule ()
     | _ :: _ ->
-       let which_rules =
-         (* erofa should be the last one, because it changes the phonetics *)
-         List.map which_rules ~f:(function
-             | `Erofa -> erofa_rule ()
-             | `Qu -> qu_rule ()
-             | `Ti -> ti_rule ()
-             | `Il -> il_rule ())
-       in
        fun rules wiki row ->
        let row =
          List.fold_left which_rules ~init:row ~f:(fun row rule ->
-             match rule rules wiki row with
+             match (Lazy.force rule.f) rules wiki row with
              | Error s ->
                 if skip_not_understood
                 then raise_s s
