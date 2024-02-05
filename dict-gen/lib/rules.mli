@@ -31,5 +31,6 @@ val accent_aigu : string -> bool
 
 val (#:) : string -> (int * int) -> string
 val (#::) : string -> (int * int) -> Uchar.t
+val in_ortho_weak_vowels : Uchar.t -> bool
 val in_ortho_vowels : Uchar.t -> bool
 val str_of_uchar : Uchar.t -> string

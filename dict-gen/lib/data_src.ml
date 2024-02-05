@@ -404,7 +404,9 @@ module Lexique = struct
         "shamisen"; "atabeg"; "kierkegaardienne"; "schbeb"; "open"; "maelstrom";
         "retsina"; "tell"; "blockhaus"; "hot"; "menhir"; "requiem"; "whiskey";
         "straight"; "thug"; "bulldozer"; "clergyman"; "handball"; "carry"; "penny";
-        "pennies";
+        "pennies"; "pennys"; "mess"; "bluffes"; "bluffés"; "bluffées"; "westphaliennes";
+        "flirtes"; "shootes"; "nietzschéennes"; "magyares"; "surfes"; "drums"; "quintuplés";
+        "dominions"; "surfeuses"; "sen";
         (* not real words for this purpose *)
         "min"; "com"; "zzz"; "ah"; "oh"; "eh"; "ha";
          (* la phonetique est fausse pour ces mots (ou parfois
@@ -434,32 +436,6 @@ module Lexique = struct
         "cuiller"; "cafeteria"; "cafeteria"; "artefact"; "bonneterie";
         "crematorium"; "acupuncture";
     ]
-
-  let exceptions () =
-    let h = not_usable_words () in
-    List.iter ~f:(Hash_set.add h)
-      [
-        (* prononce é *)
-        "es"; "les"; "des"; "ces"; "mes"; "ses"; "tes";
-        (* pas un e caduc; parce quon peut pas dire c'enfant *)
-        "ce";
-        (* cas pathologique *)
-        "femme"; "monsieur"; "messieurs"; "fils"; "gars";
-        "cul"; "faisait"; "faisais"; "corps"; "temps"; "longtemps"; "dix"; "six";
-        "est"; "seconde"; "sept"; "huit"; "mesdames";
-        "deuxième"; "sixième"; "dixième";
-         (* mer (R); manger (pas R); dernier (pas R); hier (R). Pas sur
-            que y'ait une regle *)
-        "hier";
-        (* normalement; le t est pas prononce *)
-        "cet"; "tous";
-        (* abbrviatino *)
-        "com"; 
-        (* mots etrangers; *)
-        "stop"; "in"
-      ];
-    h
-
 end
 
 module Wiki = struct

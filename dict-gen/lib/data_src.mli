@@ -12,7 +12,6 @@ module Lexique : sig
   val load : root:[> Eio.Fs.dir_ty ] Eio.Path.t -> ?filename:string -> unit -> t list
 
   val not_usable_words : unit -> string Hash_set.t
-  val exceptions : unit -> string Hash_set.t
 end
 
 module Wiki : sig

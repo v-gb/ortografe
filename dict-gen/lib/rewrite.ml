@@ -337,12 +337,10 @@ let erofa_preserve =
   || Re.execp (force re) old_ortho
 
 let load_skip () =
-  let skip = Data_src.Lexique.exceptions () in
+  let skip = Data_src.Lexique.not_usable_words () in
   fun (row : Data_src.Lexique.t) ->
     Hash_set.mem skip row.ortho
-    || (match String.chop_suffix row.ortho ~suffix:"s" with
-        | None -> false
-        | Some rest -> Hash_set.mem skip rest)
+    || ((row.lemme ^ "s") = row.ortho && Hash_set.mem skip row.lemme)
     || String.length row.ortho =$ 1
     || row.cgram = "ONO"
     || String.mem row.ortho '-'
@@ -705,6 +703,18 @@ let _ : string =
     "ortograf.net"
     "(pas super testé) les règles de http://www.ortograf.net/"
     (lazy (
+       (* problème :
+          - on créé plusieurs entrées pour le même mot, donc il vaut mieux
+            ajouter un tac avant de produire le csv pour que le premier prenne
+            précédenee
+          - on rate les mots post-90 comme apparaitre sans accent circonflexe.
+          - la transformation n'est pas idempotente. Par exemple, sens
+            -> sen -> sène. Pour les changements radicaux d'ortografe comme ça,
+            il faudrait peut-être automatiquement désactiver la gestion des pages
+            dynamiques. À moins qu'on puisse remarquer les changements et éviter de
+            les réappliquer. Ou à moins qu'on puisse jarter les entrées qui rendent
+            la transformation non-idempotente (sen en haut).
+        *)
        let graphem_by_phonem =
          Hashtbl.of_alist_exn (module Uchar)
            [ !!"a", "a"
@@ -754,7 +764,7 @@ let _ : string =
          let graphems =
            try
              match row.ortho with
-             | "eût" -> [| "u" |]
+             | "eût" -> [| "u" |] (* il doit manquer un graphème eû -> /u/, Surprising *)
              | "eûmes" -> [| "um" |]
              | "eûtes" -> [| "ut" |]
              | _ ->
@@ -764,8 +774,15 @@ let _ : string =
                    | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
                    | "q", _ -> [ "q" ]
                    | "qu", _ -> [ "q" ]
-                   | ("en" | "ent"), "@" -> [ "en" ]
-                   | "c", _ -> [ "c" ]
+                   | ("en" | "ent" | "ent$" | "em"), "@" -> [ "en" ]
+                   | "en", "@n" -> [ "enn" ]
+                   | "enn", "@n" -> [ "en" ]
+                   | "sc", "sk" -> [ p.graphem ]
+                   | "cc", "k" -> [ "c" ]
+                   | "cc", "ks" -> [ "cç" ]
+                   | "ch", "k" -> [ "c" ] (* la phase d'après déterminera si un k est nécessaire *)
+                   | "c", "k" -> [ "c" ]
+                   | "c", "s" -> [ "ç" ]
                    | "x", ("gz" | "ks") -> [ "x" ]
                    | "e", "" -> [ "e" ]
                    | _ ->
@@ -781,7 +798,11 @@ let _ : string =
            let last_uchar str = Rules.(#::) str (String.length str, -1) in
            let first_uchar str = Rules.(#::) str (0, 0) in
            Array.mapi graphems ~f:(fun i g ->
-               if i =$ 0
+               if g = "c"
+                  && i + 1 <$ Array.length graphems
+                  && Rules.in_ortho_weak_vowels (first_uchar graphems.(i + 1))
+               then "k" (* africain deviendrai afrincin sinon *)
+               else if i =$ 0
                then g
                else
                  if g = "n"
@@ -823,7 +844,7 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
   let rule =
     let which_rules =
       let rank rule =
-        if rule.name = emment__ament (* avant quo--co car on crée des quo *)
+        if rule.name = emment__ament (* avant qua--ca car on crée des qua *)
         then -3
         else if rule.name = qua_o__ca_o (* avant qu__q sinon les qua ont été tranformés en qa *)
         then -2
