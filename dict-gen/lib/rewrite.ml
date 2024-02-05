@@ -243,6 +243,56 @@ let erofa_preserve =
              ; str "montpelli"
              ; str "hertz"
              ; str "brahman"
+             ; str "afghan"
+             ; str "ottoman"
+             ; str "munich"
+             ; str "navarr"
+             ; str "hassid"
+             ; str "maccarthy"
+             ; str "hitchcock"
+             ; str "élisabéth"
+             ; str "chaldé"
+             ; str "hambourg"
+             ; str "kénya"
+             ; str "thessali"
+             ; str "hondur"
+             ; str "machiavél"
+             ; str "érythré"
+             ; str "wallon"
+             ; str "bellevill"
+             ; str "berrich"
+             ; str "cinghal"
+             ; str "dahomé"
+             ; str "diepp"
+             ; str "haïti"
+             ; str "helvèt"
+             ; str "helvét"
+             ; str "himalay"
+             ; str "hippocrat"
+             ; str "lorrain"
+             ; str "mahomét"
+             ; str "mallarmé"
+             ; str "mulhous"
+             ; str "panathén"
+             ; str "pythagor"
+             ; str "quichott"
+             ; str "thatchér"
+             ; str "thatchèr"
+             ; str "wilhelm"
+             ; str "zurich"
+             ; str "stéphan"
+             ; str "trotsky"
+             ; str "brecht"
+             ; str "héraclit"
+             ; prefix "letton"
+             ; prefix "mycén"
+             ; prefix "mycèn"
+             ; prefix "lycien"
+             ; prefix "lycièn"
+             ; prefix "tyrien"
+             ; prefix "tyrièn"
+             ; prefix "palladien"
+             ; prefix "palladièn"
              ; seq [rep any; str "flux"] (* reflux, influx comme flux *)
              (* pour préserver le t dans wisigoth et quelques autres mots. Je
                 ne comprends pas ce que fait le dico érofa d'ailleurs. ostrogoth
@@ -251,62 +301,33 @@ let erofa_preserve =
       ]))
   in
   let set = lazy (Hash_set.of_list (module String) [
-    "sexy"; "jury"; "gay"; "papy"; "thomas"; "manhattan";
-    "ecstasy"; "croyiez"; "antihéros"; "brandy"; "off"; "dandy";
-    "bodhi"; "maharadjah"; "jockey"; "monopoly"; "zlotys"; "body";
-    "sophie"; "crucifix"; "party"; "fanny";
-    "gruyère"; "mylord"; "rotary"; "rochelle"; "lloyd";
-    "vichy"; "afghan"; "mamy"; "pennies"; "carry"; "mary";
-    "city"; "payiez"; "appuyiez"; "essuyions"; "hadji"; "yéyé"; "afghane"; "phi";
-    "derby"; "till"; "nippon"; "cheikh"; "husky"; "anya"; "dharma";
-    "oye"; "hodja";"mickeys";
-    "bighorn"; "ottoman"; "kalachnikovs"; "roy"; "charybde"; "henry";
-    "boukha"; "envoyiez"; "fuyions"; "grizzly"; "grizzlys"; "haggadah";
-    "angleterre"; "tramway"; "tramways"; "bobsleigh"; "lobby"; "bobby";
-    "ennuyiez"; "ennuyions"; "hickory"; "scottish"; "sikh"; "sikhs";
-    "sulky"; "théo"; "cockney"; "sammy";
-    "thrace"; "cosy"; "tommy"; "munichois"; "munichoise";
-    "munichoises"; "navarrais"; "bytes"; "byte"; "hassidique"; "regency";
-    "william"; "mach"; "thrill"; "dolby"; "fifty"; "graff"; "hun"; "huns";
-    "maccarthysme"; "panty"; "bacchanal"; "chouya"; "moly";
-    "gipsy"; "hitchcockien"; "élisabéthaine";
-    "chaldéens"; "dey"; "goth"; "hambourgeois";
-    "machmètre";"kényan"; "ohms";
-    "thessalien"; "tyrienne"; "chaldéen"; "cypriotes"; "finnois";
-    "fy"; "harpagon"; "harpagon"; "hertziens"; "hondurien";
-    "hurrah"; "kabyle"; "lyonnaise"; "machiavélisme";
-    "mahométan"; "moghol"; "nay"; "palladiennes"; "mycénien"; "perrier";
-    "play"; "pouilly"; "royalty"; "thug"; "wallon"; "érythréenne";
-    "érythréen"; "abkhaze"; "alhambra"; "antiallemands"; "bachaghas"; "banyuls";
-    "bellevillois"; "bellevilloise"; "berrichon"; "bertha"; "bithynien";
-    "bouzy";
-    "béhémoth"; "cattleyas"; "chaboisseaux"; "chaix"; "chypre"; "chnord";
-    "cinghalais"; "cinghalaises"; "cypriote"; "cécidomyies";
-    "dahoméenne"; "dandysme"; "dieppoise"; "donquichottesque"; "galathée";
-    "ganymèdes"; "gaulle"; "gaullisme"; "gaulliste"; "gengiskhanide";
-    "ghât"; "golgotha"; "hambourgeoises"; "havanais"; "hawaïen"; "haïtienne";
-    "helléniser"; "hellénisme"; "hèlénisme"; "helvète"; "helvétique"; "himalayens";
-    "hippocratique"; "hittite"; "hosannah"; "jeannot"; "jerseys";
-    "khazar"; "landwehr"; "lillois"; "lilloise"; "lorrain"; "lorraine";
-    "lycien"; "lyciennes"; "lyonnais"; "mahométane"; "malherbe";
-    "mallarméen"; "marennes"; "margay"; "mathurins"; "mercurey"; "mithriaque";
-    "mithridatisé"; "mulhousien"; "munich"; "mycéniennes"; "ouighour"; 
-    "panathénaïque"; "panathénées"; "parthique"; "phynances"; "proudhonisme";
-    "préraphaélite"; "puy"; "ptyx"; "pyrrhonien"; "pythagoricien"; "quichotte";
-    "pyrrhonisme"; "railway"; "raphaélesque"; "rennais"; "rennaises"; 
-    "rhodanien"; "rhodia"; "rhénan"; "rhénane"; "rébecca"; "smyrniote";
-    "sopha"; "sylvie"; "syriaque"; "sévillan"; "sévillane"; "taylorisme";
-    "taylorisé"; "thatchériennes"; "thomisme"; "thomiste"; "tilbury";
-    "tokay"; "tokharien"; "transylvain"; "varenne"; "vouvray"; "wilhelmien";
-    "youyou"; "zurichois"; "zurichoise"; "wallace"; "chantilly"; "machiavélique";
-    "berrichonne"; "marianne"; "stéphanois"; "stéphanoise"; "ardennais"; "joseph";
-    "hégélienne"; "tommies"; "allemagne"; "apollon"; "letton"; "margaux"; "lettone";
-    "nippo"; "crécy"; "élisabéthain"; "arthurien"; "cary"; "cayenne"; "chypriote";
-    "nippone"; "ottomane"; "pythagoriques"; "trotskystes"; "antigaullistes";
-    "ardennaise"; "brechtienne"; "chaldaïques"; "garrick"; "hébertisme";
-    "hégélianisme"; "hégélien"; "héraclitienne"; "héraclitéen"; "héraclitéenne";
-    "lettonne"; "narbonnais"; "ottomane"; "sarrois"; "sarroise"; "siennois";
-    "siennoise"; "sorbonne"; "sorbonnarde"; "ferry"; "rallye"; "haseki";
+    "croyiez"; "payiez"; "appuyiez"; "essuyions"; "envoyiez"; "fuyions";
+    "ennuyiez"; "ennuyions";
+
+    "sexy"; "jury"; "papy"; "mamy"; "thomas"; "manhattan"; "ecstasy"; "antihéros"; "brandy";
+    "off"; "dandy"; "bodhi"; "maharadjah"; "monopoly"; "zloty"; "body"; "sophie"; "crucifix";
+    "party"; "fanny"; "gruyère"; "mylord"; "rotary"; "rochelle"; "lloyd"; "pennies"; "carry";
+    "mary"; "city"; "hadji"; "yéyé"; "derby"; "till"; "nippon"; "cheikh"; "husky"; "anya";
+    "dharma"; "oye"; "hodja"; "mickey"; "bighorn"; "kalachnikov"; "roy"; "charybde"; "henry";
+    "boukha"; "grizzly"; "haggadah"; "angleterre"; "bobsleigh"; "lobby"; "bobby"; "hickory";
+    "scottish"; "sikh"; "sulky"; "théo"; "sammy"; "thrace"; "cosy"; "tommy"; "byte"; "regency";
+    "william"; "mach"; "thrill"; "dolby"; "fifty"; "graff"; "hun"; "panty"; "bacchanal"; "chouya";
+    "moly"; "gipsy"; "dey"; "goth"; "machmètre"; "ohm"; "cypriote"; "chypriote"; "finnois"; "fy";
+    "harpagon"; "hurrah"; "kabyle"; "lyonnais"; "lyonnaise"; "moghol"; "nay"; "perrier"; "pouilly";
+    "royalty"; "abkhaze"; "alhambra"; "antiallemand"; "bachaghas"; "banyuls"; "bertha"; "bithynien";
+    "bouzy"; "béhémoth"; "cattleyas"; "chaboisseaux"; "chaix"; "chypre"; "chnord"; "cécidomyies";
+    "dandysme"; "galathée"; "ganymèdes"; "gaulle"; "gaullisme"; "gaulliste"; "gengiskhanide";
+    "ghât"; "golgotha"; "havanais"; "hawaïen"; "hittite"; "hosannah"; "jeannot"; "jerseys";
+    "khazar"; "landwehr"; "lillois"; "lilloise"; "malherbe"; "marennes"; "margay"; "mathurins";
+    "mercurey"; "mithriaque"; "mithridatisé"; "ouighour"; "parthique"; "phynances"; "proudhonisme";
+    "préraphaélite"; "puy"; "ptyx"; "pyrrhonien"; "pyrrhonisme"; "raphaélesque"; "rennais";
+    "rennaise"; "rhodanien"; "rhodia"; "rhénan"; "rhénane"; "rébecca"; "smyrniote"; "sopha";
+    "sylvie"; "syriaque"; "sévillan"; "sévillane"; "taylorisme"; "taylorisé"; "thomisme";
+    "thomiste"; "tilbury"; "tokharien"; "transylvain"; "varenne"; "vouvray"; "youyou"; "wallace";
+    "chantilly"; "marianne"; "ardennais"; "joseph"; "hégélienne"; "tommies"; "allemagne"; "apollon";
+    "margaux"; "nippo"; "nippone"; "crécy"; "cary"; "cayenne"; "antigaulliste"; "ardennaise";
+    "chaldaïque"; "garrick"; "hébertisme"; "hégélianisme"; "hégélien"; "narbonnais"; "sarrois";
+    "sarroise"; "siennois"; "siennoise"; "sorbonne"; "sorbonnarde"; "ferry"; "rallye"; "haseki";
   ]) in
   fun old_ortho ->
   Hash_set.mem (force set) old_ortho
