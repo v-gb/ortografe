@@ -131,14 +131,22 @@ let gen ?doc name =
                                                      [Rewrite.name rule]))
            and+ acc in
            if present then rule :: acc else acc)
+     and+ all = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"inclure les mots inchangés" ["all"]))
      in
      Eio_main.run (fun env ->
          let root = root ~from:(Eio.Stdenv.fs env) in
          try
            Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) (fun buf ->
-               Rewrite.gen ~root ~rules (fun old new_ ->
-                   if String.(<>) old new_
-                   then Eio.Buf_write.string buf [%string "%{old},%{new_}\n"]))
+             let print =
+               if all
+               then (fun old new_ ->
+                 let mod_ = if String.(=) old new_ then "=" else "M" in
+                 Eio.Buf_write.string buf [%string "%{old},%{new_},%{mod_}\n"])
+               else (fun old new_ ->
+                 if String.(<>) old new_
+                 then Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])
+             in
+             Rewrite.gen ~root ~rules print)
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
 

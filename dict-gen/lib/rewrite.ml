@@ -565,6 +565,67 @@ let _ : string =
 
 let _ : string =
   new_rule'
+    "en--an"
+    "enfant -> anfant"
+    (lazy (
+      let pattern_en = String.Search_pattern.create "en" in
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_en ~repl:"an";
+        { row with ortho = fst !ortho }))
+
+let _ : string =
+  new_rule'
+    "gu--gh"
+    "guerre -> gherre (et aigüe -> aigue en principe, mais pas fait)"
+    (lazy (
+      let pattern_gu = String.Search_pattern.create "gu" in
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_gu ~repl:"gh";
+        { row with ortho = fst !ortho }))
+
+let _ : string =
+  new_rule'
+    "g--j"
+    "mange -> manje"
+    (lazy (
+      let pattern_g = String.Search_pattern.create "g" in
+      let pattern_gea = String.Search_pattern.create "gea" in
+      let pattern_geo = String.Search_pattern.create "geo" in
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_gea ~repl:"ja";
+        ortho := rewrite env row !ortho ~target:pattern_geo ~repl:"jo";
+        ortho := rewrite env row !ortho ~target:pattern_g ~repl:"j";
+        { row with ortho = fst !ortho }))
+
+let _ : string =
+  new_rule'
+    "ez--es"
+    "mangez -> mangés"
+    (lazy (
+      let pattern_ez = String.Search_pattern.create "ez" in
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_ez ~repl:"és";
+        { row with ortho = fst !ortho }))
+
+let _ : string =
+  new_rule'
+    "ent--es"
+    "mangent -> manges"
+    (lazy (
+      let pattern_ient = String.Search_pattern.create "ient" in
+      let pattern_ent = String.Search_pattern.create "ent" in
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_ient ~repl:"is";
+        ortho := rewrite env row !ortho ~target:pattern_ent ~repl:"es";
+        { row with ortho = fst !ortho }))
+
+let _ : string =
+  new_rule'
     "aux--als"
     "chevaux -> chevals, travaux -> travails"
     (lazy (
