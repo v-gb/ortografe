@@ -430,7 +430,14 @@ let new_rule name doc f =
   all := { name; doc; f = Lazy.from_fun f } :: !all;
   name
 let new_rule' name doc f =
-  ignore (new_rule name doc f)
+  new_rule name doc
+    (fun () ->
+      let f' = f () in
+      fun rules _wiki (row : Data_src.Lexique.t) ->
+        let env = { rules; accept = const true } in
+        match Rules.search env.rules row.ortho row.phon with
+        | Error _ as e -> e
+        | Ok search_res -> Ok (f' env row search_res))
 
 let erofa_rule () =
   let erofa_rule1 = erofa_rule_1 () in
@@ -450,85 +457,65 @@ let erofa_rule () =
 let erofa = new_rule "erofa" "Les règles telles que décrites sur erofa.free.fr" erofa_rule
 
 let qu__q =
-  new_rule
+  new_rule'
     "qu--q"
     "question -> qestion mais aquarium inchangé"
     (fun () ->
       let pattern_qu = String.Search_pattern.create "qu" in
-      fun rules _wiki (row : Data_src.Lexique.t) ->
-        let env = { rules; accept = const true } in
-        match Rules.search env.rules row.ortho row.phon with
-        | Error _ as e -> e
-        | Ok search_res ->
-           let ortho = ref (row.ortho, search_res) in
-           ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"q";
-           Ok (fst !ortho))
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"q";
+        fst !ortho)
 
-let () =
+let _ : string =
   new_rule'
     "ti--ci"
     "nation -> nacion, mais question inchangé"
     (fun () ->
       let pattern_ti = String.Search_pattern.create "ti" in
-      fun rules _wiki (row : Data_src.Lexique.t) ->
-        let env = { rules; accept = const true } in
-        match Rules.search env.rules row.ortho row.phon with
-        | Error _ as e -> e
-        | Ok search_res ->
-           let ortho = ref (row.ortho, search_res) in
-           ortho := rewrite env row !ortho ~target:pattern_ti ~repl:"ci";
-           Ok (fst !ortho))
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_ti ~repl:"ci";
+        fst !ortho)
 
-let () =
+let _ : string =
   new_rule'
     "emment--ament"
     "évidemment -> évidament"
     (fun () ->
       let pattern_emment = String.Search_pattern.create "emment" in
       let pattern_cemment = String.Search_pattern.create "cemment" in
-      fun rules _wiki (row : Data_src.Lexique.t) ->
-        let env = { rules; accept = const true } in
-        match Rules.search env.rules row.ortho row.phon with
-        | Error _ as e -> e
-        | Ok search_res ->
-           let ortho = ref (row.ortho, search_res) in
-           ortho := rewrite env row !ortho ~target:pattern_emment ~repl:"ament";
-           ortho := rewrite env row !ortho ~target:pattern_cemment ~repl:"çament";
-           Ok (fst !ortho))
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_emment ~repl:"ament";
+        ortho := rewrite env row !ortho ~target:pattern_cemment ~repl:"çament";
+        fst !ortho)
 
-let () =
+let _ : string =
   new_rule'
     "oiement--oiment"
     "aboiement -> aboiment"
     (fun () ->
       let pattern_oiement = String.Search_pattern.create "oiement" in
-      fun rules _wiki (row : Data_src.Lexique.t) ->
-        let env = { rules; accept = const true } in
-        match Rules.search env.rules row.ortho row.phon with
-        | Error _ as e -> e
-        | Ok search_res ->
-           let ortho = ref (row.ortho, search_res) in
-           ortho := rewrite env row !ortho ~target:pattern_oiement ~repl:"oiment";
-           Ok (fst !ortho))
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_oiement ~repl:"oiment";
+        fst !ortho)
 
 let qua_o__ca_o =
-  new_rule
+  new_rule'
     "qua-o--ca-o"
     "qualité -> calité, quotient -> cotient"
     (fun () ->
       let pattern_qua = String.Search_pattern.create "qua" in
       let pattern_quo = String.Search_pattern.create "quo" in
-      fun rules _wiki (row : Data_src.Lexique.t) ->
-        let env = { rules; accept = const true } in
-        match Rules.search env.rules row.ortho row.phon with
-        | Error _ as e -> e
-        | Ok search_res ->
-           let ortho = ref (row.ortho, search_res) in
-           ortho := rewrite env row !ortho ~target:pattern_qua ~repl:"ca";
-           ortho := rewrite env row !ortho ~target:pattern_quo ~repl:"co";
-           Ok (fst !ortho))
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_qua ~repl:"ca";
+        ortho := rewrite env row !ortho ~target:pattern_quo ~repl:"co";
+        fst !ortho)
 
-let () =
+let _ : string =
   new_rule'
     "il--y"
      "(pas encore prêt) fille -> fiye, mais ville inchangé"
@@ -536,19 +523,15 @@ let () =
        let pattern_illi = String.Search_pattern.create "illi" in
        let pattern_ill = String.Search_pattern.create "ill" in
        let pattern_il = String.Search_pattern.create "il" in
-       fun rules _wiki (row : Data_src.Lexique.t) ->
-         let env = { rules; accept = const true } in
-         match Rules.search env.rules row.ortho row.phon with
-         | Error _ as e -> e
-         | Ok search_res ->
-            let ortho = ref (row.ortho, search_res) in
-            ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"iy";
-            ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"iy";
-            ortho := rewrite env row !ortho ~target:pattern_il ~repl:"iy";
-            ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"y";
-            ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"y";
-            ortho := rewrite env row !ortho ~target:pattern_il ~repl:"y";
-            Ok (fst !ortho))
+       fun env row search_res ->
+         let ortho = ref (row.ortho, search_res) in
+         ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"iy";
+         ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"iy";
+         ortho := rewrite env row !ortho ~target:pattern_il ~repl:"iy";
+         ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"y";
+         ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"y";
+         ortho := rewrite env row !ortho ~target:pattern_il ~repl:"y";
+         fst !ortho)
 
 let doc rule = rule.doc
 let name rule = rule.name
