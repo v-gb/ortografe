@@ -467,6 +467,17 @@ let qu__q =
         ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"q";
         fst !ortho)
 
+let qu__qou =
+  new_rule'
+    "qu--qou"
+    "aquatique -> aqouatique"
+    (fun () ->
+      let pattern_qu = String.Search_pattern.create "qu" in
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"qou";
+        fst !ortho)
+
 let _ : string =
   new_rule'
     "ti--ci"
@@ -502,6 +513,20 @@ let _ : string =
         ortho := rewrite env row !ortho ~target:pattern_oiement ~repl:"oiment";
         fst !ortho)
 
+let _ : string =
+  new_rule'
+    "cq--q"
+    "grecque -> grèque"
+    (fun () ->
+      let pattern_cq = String.Search_pattern.create "cq" in
+      let pattern_ecq = String.Search_pattern.create "ecq" in
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_ecq ~repl:"éq";
+        ortho := rewrite env row !ortho ~target:pattern_ecq ~repl:"èq";
+        ortho := rewrite env row !ortho ~target:pattern_cq ~repl:"q";
+        fst !ortho)
+
 let qua_o__ca_o =
   new_rule'
     "qua-o--ca-o"
@@ -514,6 +539,39 @@ let qua_o__ca_o =
         ortho := rewrite env row !ortho ~target:pattern_qua ~repl:"ca";
         ortho := rewrite env row !ortho ~target:pattern_quo ~repl:"co";
         fst !ortho)
+
+let _ : string =
+  new_rule'
+    "sc-sch--c-ch"
+    "science -> cience, fasciste -> fachiste, schéma -> chéma"
+    (fun () ->
+      let pattern_esc = String.Search_pattern.create "esc" in
+      let pattern_sc = String.Search_pattern.create "sc" in
+      let pattern_sch = String.Search_pattern.create "sch" in
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        (* problème : on autorise descend->decend. À investiguer. Peut-être
+           que le découpage se fait de-sc-en-d au lieu de d-es-c-en-d et donc
+           le e est déjà surprenant. *)
+        ortho := rewrite env row !ortho ~target:pattern_esc ~repl:"éc";
+        ortho := rewrite env row !ortho ~target:pattern_esc ~repl:"èc";
+        ortho := rewrite env row !ortho ~target:pattern_sc ~repl:"c";
+        ortho := rewrite env row !ortho ~target:pattern_sc ~repl:"ch";
+        ortho := rewrite env row !ortho ~target:pattern_sch ~repl:"ch";
+        fst !ortho)
+
+let aux__als =
+  new_rule'
+    "aux--als"
+    "chevaux -> chevals, travaux -> travails"
+    (fun () ->
+      fun _env row _search_res ->
+        if (String.is_suffix row.ortho ~suffix:"aux"
+            || String.is_suffix row.ortho ~suffix:"aus")
+         && (String.is_suffix row.lemme ~suffix:"al"
+            || String.is_suffix row.lemme ~suffix:"ail")
+        then row.lemme ^ "s"
+        else row.ortho)
 
 let _ : string =
   new_rule'
@@ -551,12 +609,12 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
       let rank rule =
         if rule.name = qua_o__ca_o
         then -2
-        else if rule.name = qu__q
+        else if rule.name = qu__q || rule.name = qu__qou
         then -1
         else if rule.name = erofa
-        then
-          (* erofa should be the last one, because it changes the phonetics *)
-          1
+        then 1 (* erofa should be the last one, because it changes the phonetics *)
+        else if rule.name = aux__als
+        then 2 (* well actually, this rule is perhaps worse *)
         else 0
       in
       List.stable_sort which_rules
