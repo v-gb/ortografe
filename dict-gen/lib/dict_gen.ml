@@ -114,14 +114,39 @@ let build_erofa_ext ~root =
   List.iter combined_erofa ~f:(fun (old, new_) ->
       print_endline [%string "%{old},%{new_}"])
 
+let gen ?doc name =
+  let module C = Cmdliner in
+  let open Cmdliner_bindops in
+  C.Cmd.v (C.Cmd.info ?doc name)
+    (let+ rules =
+       List.fold_right
+         ~init:(return [])
+         (force Rewrite.all)
+         ~f:(fun rule acc ->
+           let+ present = C.Arg.value (C.Arg.flag (C.Arg.info
+                                                     ~doc:(Rewrite.doc rule)
+                                                     [Rewrite.name rule]))
+           and+ acc in
+           if present then rule :: acc else acc)
+     in
+     Eio_main.run (fun env ->
+         let root = root ~from:(Eio.Stdenv.fs env) in
+         try
+           Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) (fun buf ->
+               Rewrite.gen ~root ~rules (fun old new_ ->
+                   if String.(<>) old new_
+                   then Eio.Buf_write.string buf [%string "%{old},%{new_}\n"]))
+         with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
+           ()))
+
 let main () =
-  Eio_main.run (fun env ->
-      let module C = Cmdliner in
-      let open Cmdliner_bindops in
-      let cmd =
-        C.Cmd.group (C.Cmd.info "dict-gen")
-          [ C.Cmd.v (C.Cmd.info "check-rules")
-              (let+ post90 = C.Arg.value (C.Arg.flag (C.Arg.info ["90"])) in
+  let module C = Cmdliner in
+  let open Cmdliner_bindops in
+  let cmd =
+    C.Cmd.group (C.Cmd.info "dict-gen")
+      [ C.Cmd.v (C.Cmd.info "check-rules")
+          (let+ post90 = C.Arg.value (C.Arg.flag (C.Arg.info ["90"])) in
+           Eio_main.run (fun env ->
                let root = root ~from:(Eio.Stdenv.fs env) in
                let lexique = Data_src.Lexique.load ~root () in
                let lexique =
@@ -131,32 +156,14 @@ let main () =
                    build_lexique_post90 lexique post90
                  else lexique
                in
-               Rules.check lexique ~skip:(Rewrite.load_skip ()))
-          ; C.Cmd.v (C.Cmd.info "gen")
-              (let+ rules =
-                 List.fold_right
-                   ~init:(return [])
-                   (force Rewrite.all)
-                   ~f:(fun rule acc ->
-                     let+ present = C.Arg.value (C.Arg.flag (C.Arg.info
-                                                               ~doc:(Rewrite.doc rule)
-                                                               [Rewrite.name rule]))
-                     and+ acc in
-                     if present then rule :: acc else acc)
-               in
+               Rules.check lexique ~skip:(Rewrite.load_skip ())))
+      ; gen "gen"
+      ; C.Cmd.v (C.Cmd.info "erofa-ext")
+          (let+ () = return () in
+           Eio_main.run (fun env ->
                let root = root ~from:(Eio.Stdenv.fs env) in
-               try
-                 Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) (fun buf ->
-                     Rewrite.gen ~root ~rules (fun old new_ ->
-                         if String.(<>) old new_
-                         then Eio.Buf_write.string buf [%string "%{old},%{new_}\n"]))
-               with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) -> ())
-          ; C.Cmd.v (C.Cmd.info "erofa-ext")
-              (let+ () = return () in
-               let root = root ~from:(Eio.Stdenv.fs env) in
-               build_erofa_ext ~root)
-          ]
-      in
-      C.Cmd.eval cmd)
-  |> exit
+               build_erofa_ext ~root))
+      ]
+  in
+  C.Cmd.eval cmd |> exit
 

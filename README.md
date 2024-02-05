@@ -17,6 +17,11 @@ interactively without installing anything. [Source](site/).
 - a [CLI tool](doc-conversion/) that transcribes text and documents in various formats
   (pure text, .html, .xhtml, .htmlz, .doc, .docx, .odt, .epub).
 
+    Instead of the default spelling change, the tool can also create dictionaries for
+    other customized spelling changes, and use those when converting documents. These
+    dictionnaries can also be plugged into the browser extension above, for interactive
+    use.
+
 - [data](data/) for this work (it is surprisingly difficult to find structured data)
 
 We may add more tools in the future.

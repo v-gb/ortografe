@@ -1,3 +1,3 @@
 (executable
  (name ortografe_cli)
- (libraries cmdliner cmdliner_bindops ortografe))
+ (libraries cmdliner cmdliner_bindops ortografe dict_gen))
