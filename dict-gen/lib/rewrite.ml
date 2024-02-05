@@ -481,7 +481,7 @@ let qu__qou =
 let _ : string =
   new_rule'
     "ti--ci"
-    "nation -> nacion, mais question inchangé"
+    "nation -> nacion, patient -> pacient, mais question inchangé"
     (fun () ->
       let pattern_ti = String.Search_pattern.create "ti" in
       fun env row search_res ->
@@ -489,7 +489,7 @@ let _ : string =
         ortho := rewrite env row !ortho ~target:pattern_ti ~repl:"ci";
         fst !ortho)
 
-let _ : string =
+let emment__ament =
   new_rule'
     "emment--ament"
     "évidemment -> évidament"
@@ -607,7 +607,9 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
   let rule =
     let which_rules =
       let rank rule =
-        if rule.name = qua_o__ca_o
+        if rule.name = emment__ament (* avant quo--co car on crée des quo *)
+        then -3
+        else if rule.name = qua_o__ca_o
         then -2
         else if rule.name = qu__q || rule.name = qu__qou
         then -1

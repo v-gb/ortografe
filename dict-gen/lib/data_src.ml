@@ -471,7 +471,7 @@ module Wiki = struct
   [@@deriving sexp_of]
 
   let load ~root =
-    Eio.Path.load (root ^/ "../ortografe/data/wiktionnaire/min.gen.csv")
+    Eio.Path.load (root ^/ "data/wiktionnaire/min.gen.csv")
     |> Csv_header.parse_string
       ~header:`In_string
       ~separator:','
