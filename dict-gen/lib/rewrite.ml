@@ -441,10 +441,11 @@ let erofa_rule1 = lazy (
 type rule =
   { name : string
   ; doc : string
-  ; f : (Rules.t ->
-         (string, bool) Base.Hashtbl.t Lazy.t ->
-         Data_src.Lexique.t
-         -> (Data_src.Lexique.t, Sexp.t) result) Lazy.t
+  ; f : (Rules.t
+         -> (string, bool) Base.Hashtbl.t Lazy.t
+         -> Data_src.Lexique.t
+         -> (Data_src.Lexique.t, Sexp.t) result
+        ) Lazy.t
   }
 
 let all = ref []
@@ -647,6 +648,21 @@ let _ : string =
 
 let _ : string =
   new_rule'
+    "m-mbp--n-mbp"
+    "compte -> conpte"
+    (lazy (
+      let pattern_mp = String.Search_pattern.create "mp" in
+      let pattern_mb = String.Search_pattern.create "mb" in
+      let pattern_mm = String.Search_pattern.create "mm" in
+      fun env row search_res ->
+        let ortho = ref (row.ortho, search_res) in
+        ortho := rewrite env row !ortho ~target:pattern_mp ~repl:"np";
+        ortho := rewrite env row !ortho ~target:pattern_mb ~repl:"nb";
+        ortho := rewrite env row !ortho ~target:pattern_mm ~repl:"nm";
+        { row with ortho = fst !ortho }))
+
+let _ : string =
+  new_rule'
     "aux--als"
     "chevaux -> chevals, travaux -> travails"
     (lazy (
@@ -683,6 +699,113 @@ let _ : string =
          ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"y";
          ortho := rewrite env row !ortho ~target:pattern_il ~repl:"y";
          { row with ortho = fst !ortho }))
+
+let _ : string =
+  new_rule'
+    "ortograf.net"
+    "(pas super testé) les règles de http://www.ortograf.net/"
+    (lazy (
+       let graphem_by_phonem =
+         Hashtbl.of_alist_exn (module Uchar)
+           [ !!"a", "a"
+           ; !!"e", "é"
+           ; !!"E", "è"
+           ; !!"2", "eu"
+           ; !!"9", "eu"
+           ; !!"°", "e"
+           ; !!"@", "an"
+           ; !!"5", "in"
+           ; !!"§", "on"
+           ; !!"1", "un"
+           ; !!"i", "i"
+           ; !!"y", "u"
+           ; !!"8", "u"
+           ; !!"u", "ou"
+           ; !!"o", "o"
+           ; !!"O", "o"
+           ; !!"b", "b"
+           ; !!"S", "ch"
+           ; !!"d", "d"
+           ; !!"f", "f"
+           ; !!"g", "g"
+           ; !!"N", "gn"
+           ; !!"G", "ng"
+           ; !!"Z", "j"
+           ; !!"k", "k"
+           ; !!"l", "l"
+           ; !!"m", "m"
+           ; !!"n", "n"
+           ; !!"p", "p"
+           ; !!"R", "r"
+           ; !!"s", "s"
+           ; !!"t", "t"
+           ; !!"v", "v"
+           ; !!"w", "ou"
+           ; !!"j", "y"
+           ; !!"z", "z"
+           ]
+       in
+       let reverse_mapping =
+         Hashtbl.to_alist graphem_by_phonem
+         |> List.map ~f:Tuple.T2.swap
+         |> Hashtbl.of_alist_multi (module String)
+       in
+       fun _env row search_res ->
+         let graphems =
+           try
+             match row.ortho with
+             | "eût" -> [| "u" |]
+             | "eûmes" -> [| "um" |]
+             | "eûtes" -> [| "ut" |]
+             | _ ->
+               List.concat_map (fst search_res) ~f:(fun p ->
+                   match p.graphem, p.phonem with
+                   | "b", "p" -> [ "b" ]
+                   | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
+                   | "q", _ -> [ "q" ]
+                   | "qu", _ -> [ "q" ]
+                   | ("en" | "ent"), "@" -> [ "en" ]
+                   | "c", _ -> [ "c" ]
+                   | "x", ("gz" | "ks") -> [ "x" ]
+                   | "e", "" -> [ "e" ]
+                   | _ ->
+                      Uutf.String.fold_utf_8 (fun acc _ -> function
+                          | `Malformed s -> s :: acc
+                          | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
+                        [] p.phonem
+                      |> List.rev)
+               |> Array.of_list
+           with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
+         in
+         let ortho =
+           let last_uchar str = Rules.(#::) str (String.length str, -1) in
+           let first_uchar str = Rules.(#::) str (0, 0) in
+           Array.mapi graphems ~f:(fun i g ->
+               if i =$ 0
+               then g
+               else
+                 if g = "n"
+                 && Rules.in_ortho_vowels (last_uchar graphems.(i-1))
+                 then
+                   if i + 1 <$ Array.length graphems
+                   && Rules.in_ortho_vowels (first_uchar graphems.(i+1))
+                   then g
+                   else
+                     if i + 1 =$ Array.length graphems
+                     then g ^ "e"
+                     else "·" ^ g
+                 else
+                   (* prend le grapheme complet d'avant parce que dans «langue», le n est déjà un
+                      graphème avec le «a», et donc il ne fait pas de graphème avec le g *)
+                   let digraph = graphems.(i-1) ^ Rules.str_of_uchar (first_uchar g) in
+                   if Hashtbl.mem reverse_mapping digraph
+                   then "·" ^ g
+                   else g
+             )
+           |> Array.to_list
+           |> String.concat
+         in
+         { row with ortho }))
 
 let doc rule = rule.doc
 let name rule = rule.name
