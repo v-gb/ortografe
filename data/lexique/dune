@@ -1,0 +1,11 @@
+(rule
+ (target Lexique383.zip)
+ (action  (run curl -o %{target} -sS "http://www.lexique.org/databases/Lexique383/Lexique383.zip")))
+
+(rule
+ (target Lexique383.gen.tsv)
+ (deps (sandbox always))
+ (mode promote)
+ (action
+  (with-stdout-to %{target}
+   (run unzip -p %{dep:Lexique383.zip} Lexique383.tsv))))
