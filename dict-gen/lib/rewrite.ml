@@ -731,12 +731,9 @@ let _ : string =
 let _ : string =
   new_rule'
     "ortograf.net"
-    "(pas super testé) les règles de http://www.ortograf.net/ (pas de consonnes de liaisons)"
+    "les règles de http://www.ortograf.net/"
     (lazy (
        (* problème :
-          - on créé plusieurs entrées pour le même mot, donc il vaut mieux
-            ajouter un tac avant de produire le csv pour que le premier prenne
-            précédenee
           - on rate les mots post-90 comme apparaitre sans accent circonflexe.
           - la transformation n'est pas idempotente. Par exemple, sens
             -> sen -> sène. Pour les changements radicaux d'ortografe comme ça,
@@ -744,8 +741,8 @@ let _ : string =
             dynamiques. À moins qu'on puisse remarquer les changements et éviter de
             les réappliquer. Ou à moins qu'on puisse jarter les entrées qui rendent
             la transformation non-idempotente (sen en haut)
-          - peut-être inclure un -z dans les articles, peut-être avec une marque pour
-            dire optionnel?
+          - trop d'accent grave sur les e en général. On pourrait au moins appliquer
+            la même idée que les règles érofa pour améliorer ça.
         *)
        let graphem_by_phonem =
          Hashtbl.of_alist_exn (module Uchar)
@@ -857,6 +854,16 @@ let _ : string =
              )
            |> Array.to_list
            |> String.concat
+         in
+         let ortho =
+           (* On ne peut pas gérer les liaisons avec une réécriture mot à mot comme on
+              fait. Comme les principales (ou seules ?) qui sont obligatoires sont avec
+              les articles, on écrit un z en exposant après les articles, pour indiquer "z
+              optionnel". *)
+           match row.ortho with
+           | "ces" | "des" | "les" | "mes" | "ses" | "tes"
+           | "ils" | "elles" -> ortho ^ "\u{1DBB}"
+           | _ -> ortho
          in
          { row with ortho }))
 
