@@ -55,7 +55,7 @@ let () =
                            | _ | exception Not_found -> true)
              }
              arg1 arg2)
-      ; Dict_gen.gen "dict"
+      ; Dict_gen.gen_cmd "dict"
           ~doc:"génération de dictionnaires de réécriture personnalisés pour la conversion \
                 de document, ou pour l'extension de navigateur internet"
       ]

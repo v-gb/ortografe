@@ -117,7 +117,50 @@ let build_erofa_ext ~root =
   List.iter combined_erofa ~f:(fun (old, new_) ->
       print_endline [%string "%{old},%{new_}"])
 
-let gen ?doc name =
+let with_flow ~env ~write ~diff ~f =
+  match write, diff with
+  | Some _, Some _ -> failwith "can't specify both --write and --diff"
+  | Some fname, None ->
+     Eio.Path.with_open_out (Eio.Path.(/) (Eio.Stdenv.fs env) fname)
+       ~create:(`Or_truncate 0o666)
+       (fun flow -> Eio.Buf_write.with_flow flow f);
+     None
+  | None, Some fname ->
+     let tmp_fname = fname ^ ".tmp" in
+     Eio.Path.with_open_out (Eio.Path.(/) (Eio.Stdenv.fs env) tmp_fname)
+       ~create:(`Or_truncate 0o666)
+       (fun flow -> Eio.Buf_write.with_flow flow f);
+     Some (`Diff (fname, tmp_fname))
+  | None, None ->
+     Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
+     None
+
+let gen ~env ~rules ~all ~write ~diff =
+  let root = root ~from:(Eio.Stdenv.fs env) in
+  match
+    with_flow ~env ~write ~diff ~f:(fun buf ->
+        let print =
+          if all
+          then (fun old new_ ->
+                let mod_ = if String.(=) old new_ then "=" else "M" in
+                Eio.Buf_write.string buf [%string "%{old},%{new_},%{mod_}\n"])
+          else (
+            let seen = Hash_set.create (module String) in
+            fun old new_ ->
+            match Hash_set.strict_add seen old with
+            | Error _ -> ()
+            | Ok () ->
+               if String.(<>) old new_
+               then Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])
+        in
+        Rewrite.gen ~root ~rules print)
+  with
+  | None -> ()
+  | Some (`Diff (a, b)) ->
+     Eio.Process.run (Eio.Stdenv.process_mgr env) [ "patdiff"; a; b ]
+       ~is_success:(function 0 | 1 -> true | _ -> false)
+
+let gen_cmd ?doc name =
   let module C = Cmdliner in
   let open Cmdliner_bindops in
   C.Cmd.v (C.Cmd.info ?doc name)
@@ -132,21 +175,15 @@ let gen ?doc name =
            and+ acc in
            if present then rule :: acc else acc)
      and+ all = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"inclure les mots inchangés" ["all"]))
+     and+ write =
+       C.Arg.value (C.Arg.opt (C.Arg.some C.Arg.string) None
+                      (C.Arg.info ~doc:"écrire le dictionnaire dans le fichier spéficié" ["write"]))
+     and+ diff =
+       C.Arg.value (C.Arg.opt (C.Arg.some C.Arg.string) None
+                      (C.Arg.info ~doc:"diff le dictionnaire avec le fichier spéficié" ["diff"]))
      in
      Eio_main.run (fun env ->
-         let root = root ~from:(Eio.Stdenv.fs env) in
-         try
-           Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) (fun buf ->
-             let print =
-               if all
-               then (fun old new_ ->
-                 let mod_ = if String.(=) old new_ then "=" else "M" in
-                 Eio.Buf_write.string buf [%string "%{old},%{new_},%{mod_}\n"])
-               else (fun old new_ ->
-                 if String.(<>) old new_
-                 then Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])
-             in
-             Rewrite.gen ~root ~rules print)
+         try gen ~env ~rules ~all ~write ~diff
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
 
@@ -168,7 +205,7 @@ let main () =
                  else lexique
                in
                Rules.check lexique ~skip:(Rewrite.load_skip ())))
-      ; gen "gen"
+      ; gen_cmd "gen"
       ; C.Cmd.v (C.Cmd.info "erofa-ext")
           (let+ () = return () in
            Eio_main.run (fun env ->
