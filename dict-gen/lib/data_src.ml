@@ -425,7 +425,7 @@ module Lexique = struct
         "violent"; "prévalent"; "oseraient"; "réutilisation";
         "fielleuses"; "englander"; "râleux"; "remerciâmes";
         "palle"; "surdimensionné"; "mamma"; "pub"; "bluff"; "nurse";
-        "drugstore"; "muffin"; "oscillographe"; "by"; "antiémeute";
+        "drugstore"; "muffin"; "oscillographe"; "oscillation"; "by"; "antiémeute";
         "hyperespace"; "intussusception"; "transsubstantiation";
         "antirusse"; "équin"; "transsudat"; "quintuplé"; "transsudait";
         "quinquennat"; "transsudant"; "pueblo"; "chelem"; "corpsard";

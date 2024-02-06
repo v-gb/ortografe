@@ -683,20 +683,50 @@ let _ : string =
 let _ : string =
   new_rule'
     "il--y"
-     "(pas encore prêt) fille -> fiye, mais ville inchangé"
+     "fille -> fiye, mais ville inchangé"
      (lazy (
-       let pattern_illi = String.Search_pattern.create "illi" in
-       let pattern_ill = String.Search_pattern.create "ill" in
-       let pattern_il = String.Search_pattern.create "il" in
+          let graphem_by_phonem =
+            let module Uchar = struct
+                include Uchar
+                let sexp_of_t t =
+                  if Stdlib.Uchar.is_char t
+                  then sexp_of_char (Stdlib.Uchar.to_char t)
+                  else sexp_of_t t
+            end in
+         Hashtbl.of_alist_exn (module Uchar)
+           [ !!"i", "i"
+           ; !!"j", "y"
+           ; !!"E", "è"
+           ; !!"e", "é"
+           ]
+       in
        fun env row search_res ->
-         let ortho = ref (row.ortho, search_res) in
-         ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"iy";
-         ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"iy";
-         ortho := rewrite env row !ortho ~target:pattern_il ~repl:"iy";
-         ortho := rewrite env row !ortho ~target:pattern_illi ~repl:"y";
-         ortho := rewrite env row !ortho ~target:pattern_ill ~repl:"y";
-         ortho := rewrite env row !ortho ~target:pattern_il ~repl:"y";
-         { row with ortho = fst !ortho }))
+       let ortho = ref (row.ortho, search_res) in
+       let new_ortho =
+         List.map (fst (snd !ortho)) ~f:(fun p ->
+           match p.graphem with
+           | "il$" | "ils$" | "ill" | "illi" | "eil$" | "eils$" | "eill" | "eilli"
+                when not (String.mem p.phonem 'l')
+             ->
+              let suffix1 =
+                match p.graphem with
+                | "il$" | "ils$"  -> "e"
+                | _ -> ""
+              in
+              let suffix2 = if String.is_suffix p.graphem ~suffix:"s$" then "s" else "" in
+              Uutf.String.fold_utf_8 (fun acc _ -> function
+                  | `Malformed s -> s :: acc
+                  | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
+                [] p.phonem
+              |> List.rev
+              |> String.concat
+              |> (fun s -> s ^ suffix1 ^ suffix2)
+           | _ -> p.graphem)
+         |> String.concat
+         |> String.chop_suffix_if_exists ~suffix:"$"
+       in
+       ortho := keep_if_plausible env row !ortho new_ortho;
+       { row with ortho = fst !ortho }))
 
 let _ : string =
   new_rule'
