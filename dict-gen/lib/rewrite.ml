@@ -731,7 +731,7 @@ let _ : string =
 let _ : string =
   new_rule'
     "ortograf.net"
-    "(pas super testé) les règles de http://www.ortograf.net/"
+    "(pas super testé) les règles de http://www.ortograf.net/ (pas de consonnes de liaisons)"
     (lazy (
        (* problème :
           - on créé plusieurs entrées pour le même mot, donc il vaut mieux
@@ -743,7 +743,9 @@ let _ : string =
             il faudrait peut-être automatiquement désactiver la gestion des pages
             dynamiques. À moins qu'on puisse remarquer les changements et éviter de
             les réappliquer. Ou à moins qu'on puisse jarter les entrées qui rendent
-            la transformation non-idempotente (sen en haut).
+            la transformation non-idempotente (sen en haut)
+          - peut-être inclure un -z dans les articles, peut-être avec une marque pour
+            dire optionnel?
         *)
        let graphem_by_phonem =
          Hashtbl.of_alist_exn (module Uchar)
@@ -855,6 +857,82 @@ let _ : string =
              )
            |> Array.to_list
            |> String.concat
+         in
+         { row with ortho }))
+
+let _ : string =
+  new_rule'
+    "alfonic"
+    "(pas super testé) les règles de https://alfonic.org/"
+    (lazy (
+       (* problème :
+          - la règles des pluriels dans l'extension cause problème car on a
+            cuisse->cuis, et donc on infère cuisses->cui. Il faut étendre le
+            csv pour permettre de configurer les autres aspects du système.
+          - la réécriture aussi un problème d'idempotence. Qui->ci->si. Il faut
+            désactiver la réécriture dynamique, là
+          - je ne vois de mention des liaisons dans les règles
+        *)
+       let graphem_by_phonem =
+         Hashtbl.of_alist_exn (module Uchar)
+           [ !!"a", "a" (* pas de â dans lexique *)
+           ; !!"e", "é"
+           ; !!"E", "è"
+           ; !!"2", "œ\u{302}"
+           ; !!"9", "œ"
+           ; !!"°", "œ\u{302}"
+           ; !!"@", "ä"
+           ; !!"5", "ï"
+           ; !!"§", "ö"
+           ; !!"1", "ü"
+           ; !!"i", "i"
+           ; !!"y", "u"
+           ; !!"8", "u"
+           ; !!"u", "w"
+           ; !!"o", "ô"
+           ; !!"O", "o"
+           ; !!"b", "b"
+           ; !!"S", "h"
+           ; !!"d", "d"
+           ; !!"f", "f"
+           ; !!"g", "g"
+           ; !!"N", "ñ"
+           ; !!"G", "¨g"
+           ; !!"Z", "j"
+           ; !!"k", "c"
+           ; !!"l", "l"
+           ; !!"m", "m"
+           ; !!"n", "n"
+           ; !!"p", "p"
+           ; !!"R", "r"
+           ; !!"s", "s"
+           ; !!"t", "t"
+           ; !!"v", "v"
+           ; !!"w", "w"
+           ; !!"j", "y"
+           ; !!"z", "z"
+           ]
+       in
+       fun _env row search_res ->
+         let ortho =
+           try
+             match row.ortho with
+             | "eût" -> "u" (* il doit manquer un graphème eû -> /u/, Surprising *)
+             | "eûmes" -> "um"
+             | "eûtes" -> "ut"
+             | _ ->
+               List.concat_map (fst search_res) ~f:(fun p ->
+                   match p.graphem, p.phonem with
+                   | "b", "p" -> [ "b" ]
+                   | ("i" | "'" | "-" | " "), _ -> [ p.graphem ]
+                   | _ ->
+                      Uutf.String.fold_utf_8 (fun acc _ -> function
+                          | `Malformed s -> s :: acc
+                          | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
+                        [] p.phonem
+                      |> List.rev)
+               |> String.concat
+           with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
          in
          { row with ortho }))
 
