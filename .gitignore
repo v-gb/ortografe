@@ -6,3 +6,4 @@ Emblem_of_La_Francophonie*png
 *.gen
 *.bz2
 _build
+perf.data*
