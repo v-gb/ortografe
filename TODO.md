@@ -15,7 +15,9 @@ Tàches possibles :
   faire les pluriels.
 
   Concrètement, ça devrait être un changement dans le sql vers la fin de
-  extension/import-dict, pour récupérer les mots.
+  extension/import-dict, pour garder convertir un mot `M` en `M.replace('-', '')`,
+  pourvu que `M.replace('-', '')` soit une des orthographes possibles après 90. Les
+  mots qui deviennent variable ont `type=2`.
   
   Puis lancer `import-dict`, constater si extension/dict1990.gen.csv change comme on l'attend.
 
