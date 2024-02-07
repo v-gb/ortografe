@@ -1,0 +1,21 @@
+;; It's slow and takes a big machine to create this file, so just make it available for
+;; other devs to use.
+(rule
+ (target min.gen.csv)
+ (mode promote)
+ (deps    (glob_files min-computed.gen.csv) (sandbox always))
+ (action  (bash "
+set -e -u -o pipefail
+if [ -f min-computed.gen.csv ]; then
+  cp min-computed.gen.csv min.gen.csv
+else
+  server=https://ortografe-server.fly.dev
+  # server=http://localhost:8081
+  curl -sS \"$server/static/min.gen.csv.zst\" | unzstd > %{target}
+fi
+")))
+
+(rule
+ (target min.gen.csv.zst)
+ (deps (sandbox always preserve_file_kind))
+ (action (run zstd %{dep:min.gen.csv})))

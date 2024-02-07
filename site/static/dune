@@ -34,6 +34,8 @@
    (with-stdout-to dict-arpetani.csv
     (run %{project_root}/dict-gen/bin/dict_gen.exe gen --cq--q --emment--ament --erofa --oiement--oiment --qua-o--ca-o --sc-sch--c-ch --ti--ci))))
 
+(copy_files (files %{project_root}/data/wiktionnaire/min.gen.csv.zst))
+
 (copy_files
  (files %{project_root}/extension/store-page/screenshot-1280-800.jpg))
 

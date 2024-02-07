@@ -12,7 +12,7 @@ def or_key_error(f):
     except KeyError:
         return None
 
-min_gen_csv = []
+min_computed_gen_csv = []
 seen_words = set()
 seen_words_with_tags = set()
 pre1990 = []
@@ -60,7 +60,7 @@ for line in open(extracted_files[-1]):
         if j.get("word") in debug:
             print({'word':word, 'rect':rect, 'trad':trad, 'h_aspire':h_aspire, 'fi': first_instance, 'fi_tags':first_instance_with_tags, 'ipa':ipa})
         if first_instance:
-            min_gen_csv.append((word, ipa, str(h_aspire).lower()))
+            min_computed_gen_csv.append((word, ipa, str(h_aspire).lower()))
         if trad or rect:
             key = (ipa, word.endswith("s"), word.endswith("x"),)
             if trad:
@@ -79,11 +79,11 @@ def csv_writer(fd):
     return csv.writer(fd, delimiter=",", quotechar="\"", quoting=csv.QUOTE_MINIMAL,
                       lineterminator='\n')
 
-min_gen_csv_writer = csv_writer(open('min.gen.csv', 'w'))
-min_gen_csv.sort(key=lambda j: j[0])
-min_gen_csv_writer.writerow(('word','ipa','h_aspire'))
-for row in min_gen_csv:
-    min_gen_csv_writer.writerow(row)
+min_computed_gen_csv_writer = csv_writer(open('min-computed.gen.csv', 'w'))
+min_computed_gen_csv.sort(key=lambda j: j[0])
+min_computed_gen_csv_writer.writerow(('word','ipa','h_aspire'))
+for row in min_computed_gen_csv:
+    min_computed_gen_csv_writer.writerow(row)
 
 def closest_word(trad_word, rect_words):
     if len(rect_words) == 1:

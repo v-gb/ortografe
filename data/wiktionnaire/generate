@@ -27,7 +27,7 @@ if ! [ -f extracted-$date.gen.json ]; then
 fi
 
 
-if ! [ -f min.gen.csv ] || ! [ -f 1990.gen.csv ] ; then
+if ! [ -f min-computed.gen.csv ] || ! [ -f 1990.gen.csv ] ; then
     (echo "date:$date"; echo "url:$url") > source.gen
     ./generate.py
 fi
