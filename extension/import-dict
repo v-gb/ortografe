@@ -39,16 +39,6 @@ EOF
     | LANG=C sort \
     | cat >> dict.external-sources.gen.csv
 
-cp dict.external-sources.gen.csv dict.gen.csv
-tail -n +2 ../data/homemade/dict-rect1990+erofa.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
-
-# Capitalized words in the dict are treated as exceptions, for
-# cases when the capitalized version of the word is almost never the common
-# noun, but is instead a proper noun that we don't want to rewrite
-for w in Pierre Cannes Rennes Vienne Bordeaux; do
-    echo $w,bug-if-displayed
-done >> dict.gen.csv
-
 {
     # sqlite doesn't support outer joins, so we do two left joins
     # to combine the wiktionary and lexique+recto/verso data.
@@ -80,6 +70,16 @@ EOF
     | tr -d '"' \
     | LANG=C sort \
     | cat >> dict1990.gen.csv
+
+cp --no-preserve=all dict.external-sources.gen.csv dict.gen.csv
+tail -n +2 ../data/homemade/dict-rect1990+erofa.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
+
+# Capitalized words in the dict are treated as exceptions, for
+# cases when the capitalized version of the word is almost never the common
+# noun, but is instead a proper noun that we don't want to rewrite
+for w in Pierre Cannes Rennes Vienne Bordeaux; do
+    echo $w,bug-if-displayed
+done >> dict.gen.csv
 
 if [ "${DUNEROOT-}" ]; then
     target=dict.js
