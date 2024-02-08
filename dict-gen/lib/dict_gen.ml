@@ -110,7 +110,7 @@ let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 =
       | None -> r
       | Some new_ortho -> { r with ortho = new_ortho })
 
-let build_erofa_ext ~root =
+let build_erofa_ext ~root ~header =
   let erofa = load_erofa ~root in
   let post90 = load_post90 ~root in
   let lexique = Data_src.Lexique.load ~root () in
@@ -126,6 +126,7 @@ let build_erofa_ext ~root =
   in
   if false then print_s [%sexp (lexiquepost90_to_erofa : (string * string) list)];
   let combined_erofa = combined_erofa erofa lexiquepost90_to_erofa post90 in
+  if header then print_endline [%string "old,new"];
   List.iter combined_erofa ~f:(fun (old, new_) ->
       print_endline [%string "%{old},%{new_}"])
 
@@ -222,10 +223,10 @@ let main () =
                Rules.check lexique ~skip:(Rewrite.load_skip ())))
       ; gen_cmd "gen"
       ; C.Cmd.v (C.Cmd.info "erofa-ext")
-          (let+ () = return () in
+          (let+ header = C.Arg.value (C.Arg.flag (C.Arg.info ["header"])) in
            Eio_main.run (fun env ->
                let root = root ~from:(Eio.Stdenv.fs env) in
-               build_erofa_ext ~root))
+               build_erofa_ext ~root ~header))
       ]
   in
   C.Cmd.eval cmd |> exit
