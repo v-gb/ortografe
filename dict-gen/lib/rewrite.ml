@@ -168,7 +168,7 @@ let rewrite_graphem ?(start = 0) env row ortho ~from:(from_g, from_p) ~to_ =
       ()
     done;
     !ortho
-  ) 
+  )
 
 let erofa_preserve =
   let re =
@@ -361,18 +361,33 @@ type rule =
          -> (Data_src.Lexique.t * Rules.search_res)
          -> Data_src.Lexique.t * Rules.search_res
         ) Lazy.t
+  ; prefilter : unit -> [ `Re of Re.t | `All ]
   }
 
 let all = ref []
-let new_rule name doc f =
-  all := { name; doc; f  } :: !all;
+let new_rule name doc ~prefilter f =
+  all := { name; doc; f; prefilter  } :: !all;
   name
-let new_rule' name doc f =
+let new_rule' name doc ~prefilter f =
   new_rule name doc
+    ~prefilter
     (lazy (
       let f' = force f in
       fun rules _wiki row_and_search_res ->
         f' { rules; accept = const true } row_and_search_res))
+
+let erofa_prefilter' = lazy (
+  let open Re in
+  alt ([ str "oe"
+       ; seq [ str "x"; eos ]
+       ; str "auxq"
+       ; str "auxd"
+       ; str "deux"
+       ; seq [any; str "y"]
+       ; str "h"
+       ] @ List.map [ "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s -> str (s ^ s))
+))
+let erofa_prefilter = lazy (Re.compile (force erofa_prefilter'))
 
 let erofa_rule = lazy (
   let pattern_ph = String.Search_pattern.create "ph" in
@@ -399,75 +414,84 @@ let erofa_rule = lazy (
         String.Search_pattern.create (s ^ s), s)
   in
   fun rules (lazy wiki) ((row : Data_src.Lexique.t), search_res) ->
-  let env = { rules; accept = if erofa_preserve row.ortho then erofa_preserve else const true } in
-  let h_aspire =
-    String.is_prefix row.ortho ~prefix:"h"
-    && (String.is_prefix row.ortho ~prefix:"haï"
-        || String.is_prefix row.ortho ~prefix:"hai"
-        || match Hashtbl.find wiki row.lemme with
-           | None -> Option.value (Hashtbl.find wiki row.ortho) ~default:true
-           | Some h_aspire -> h_aspire)
-  in
-   let ortho = ref (row.ortho, search_res) in
-   List.iter patterns_ch ~f:(fun (target, repl) ->
-       ortho := rewrite env row !ortho ~target ~repl);
-   ortho := rewrite env row !ortho ~target:pattern_coeu ~repl:"queu";
-   ortho := rewrite env row !ortho ~target:pattern_oeu ~repl:"eu";
-   ortho := rewrite env row !ortho ~target:pattern_oe ~repl:"eu";
-   ortho := rewrite env row !ortho ~target:pattern_oe ~repl:"é";
-   ortho := rewrite env row !ortho ~target:pattern_mph ~repl:"nf";
-   ortho := rewrite env row !ortho ~target:pattern_ph ~repl:"f";
-   (match String.chop_suffix (fst !ortho) ~suffix:"x" with
-    | Some rest ->
-       (* on vérifie que x est bien silencieux, pas remplaceable par s, comme
-          dans coccyx *)
-       if fst (keep_if_plausible env row !ortho rest) = rest
-       then ortho := keep_if_plausible env row !ortho (rest ^ "s");
-    | None -> ());
-   List.iter [ pattern_auxq, "ausq"; pattern_auxd, "ausd" ]
-     ~f:(fun (pattern, with_) ->
-       (* les règles ont un cas particulier pour aux mais pas aus, et donc je crois
-          que le changement est considéré comme surprenant par [keep_if_plausible]. *)
-       ortho := keep_regardless env row !ortho
-                  (String.Search_pattern.replace_all pattern ~in_:(fst !ortho) ~with_));
-   (match String.chop_prefix (fst !ortho) ~prefix:"deuxi" with
-    | None -> ()
-    | Some rest -> ortho := keep_if_plausible env row !ortho ("deusi" ^ rest));
-   (
-     (* exclut des trucs du genre tramway -> tramwai *)
-     ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "i") ~to_:"i" ~start:1;
-     ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "j") ~to_:"i"
-                ~start:(Bool.to_int (fst !ortho <> "yeus"));
-     ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "ij") ~to_:"i" ~start:1;
-     ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "in") ~to_:"in";
-     ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "5") ~to_:"in";
-     ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "im") ~to_:"im";
-     ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "5") ~to_:"im";
-   );
-   ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"é";
-   ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"è";
-   ortho := rewrite env row !ortho ~target:pattern_th ~repl:""; (* asthme *)
-   let h_start =
-     if String.is_prefix (fst !ortho) ~prefix:"déh"
-     then String.length "déh" (* déhancher serait déshancher si le h n'était pas aspiré *)
-     else Bool.to_int h_aspire
-   in
-   ortho := rewrite env row !ortho ~target:pattern_h ~repl:"" ~start:h_start;
-   let row =
-     let ortho2, search_res2, phon2 = rewrite_e_double_consonants env row !ortho in
-     ortho := (ortho2, search_res2);
-     { row with phon = phon2 }
-   in
-   List.iter patterns_double_consonants ~f:(fun (target, repl) ->
-       ortho := rewrite env row !ortho ~target ~repl);
-   { row with ortho = fst !ortho }, snd !ortho
+  if not (Re.execp (force erofa_prefilter) row.ortho)
+  then (row, search_res)
+  else
+    let env = { rules; accept = if erofa_preserve row.ortho then erofa_preserve else const true } in
+    let h_aspire =
+      String.is_prefix row.ortho ~prefix:"h"
+      && (String.is_prefix row.ortho ~prefix:"haï"
+          || String.is_prefix row.ortho ~prefix:"hai"
+          || match Hashtbl.find wiki row.lemme with
+             | None -> Option.value (Hashtbl.find wiki row.ortho) ~default:true
+             | Some h_aspire -> h_aspire)
+    in
+     let ortho = ref (row.ortho, search_res) in
+     List.iter patterns_ch ~f:(fun (target, repl) ->
+         ortho := rewrite env row !ortho ~target ~repl);
+     ortho := rewrite env row !ortho ~target:pattern_coeu ~repl:"queu";
+     ortho := rewrite env row !ortho ~target:pattern_oeu ~repl:"eu";
+     ortho := rewrite env row !ortho ~target:pattern_oe ~repl:"eu";
+     ortho := rewrite env row !ortho ~target:pattern_oe ~repl:"é";
+     ortho := rewrite env row !ortho ~target:pattern_mph ~repl:"nf";
+     ortho := rewrite env row !ortho ~target:pattern_ph ~repl:"f";
+     (match String.chop_suffix (fst !ortho) ~suffix:"x" with
+      | Some rest ->
+         (* on vérifie que x est bien silencieux, pas remplaceable par s, comme
+            dans coccyx *)
+         if fst (keep_if_plausible env row !ortho rest) = rest
+         then ortho := keep_if_plausible env row !ortho (rest ^ "s");
+      | None -> ());
+     List.iter [ pattern_auxq, "ausq"; pattern_auxd, "ausd" ]
+       ~f:(fun (pattern, with_) ->
+         (* les règles ont un cas particulier pour aux mais pas aus, et donc je crois
+            que le changement est considéré comme surprenant par [keep_if_plausible]. *)
+         ortho := keep_regardless env row !ortho
+                    (String.Search_pattern.replace_all pattern ~in_:(fst !ortho) ~with_));
+     (match String.chop_prefix (fst !ortho) ~prefix:"deuxi" with
+      | None -> ()
+      | Some rest -> ortho := keep_if_plausible env row !ortho ("deusi" ^ rest));
+     (
+       (* exclut des trucs du genre tramway -> tramwai *)
+       ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "i") ~to_:"i" ~start:1;
+       ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "j") ~to_:"i"
+                  ~start:(Bool.to_int (fst !ortho <> "yeus"));
+       ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "ij") ~to_:"i" ~start:1;
+       ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "in") ~to_:"in";
+       ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "5") ~to_:"in";
+       ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "im") ~to_:"im";
+       ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "5") ~to_:"im";
+     );
+     ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"é";
+     ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"è";
+     ortho := rewrite env row !ortho ~target:pattern_th ~repl:""; (* asthme *)
+     let h_start =
+       if String.is_prefix (fst !ortho) ~prefix:"déh"
+       then String.length "déh" (* déhancher serait déshancher si le h n'était pas aspiré *)
+       else Bool.to_int h_aspire
+     in
+     ortho := rewrite env row !ortho ~target:pattern_h ~repl:"" ~start:h_start;
+     let row =
+       let ortho2, search_res2, phon2 = rewrite_e_double_consonants env row !ortho in
+       ortho := (ortho2, search_res2);
+       { row with phon = phon2 }
+     in
+     List.iter patterns_double_consonants ~f:(fun (target, repl) ->
+         ortho := rewrite env row !ortho ~target ~repl);
+     { row with ortho = fst !ortho }, snd !ortho
 )
-let _ : string = new_rule "erofa" "Les règles telles que décrites sur erofa.free.fr" erofa_rule
+let _ : string =
+  new_rule
+    "erofa"
+    "Les règles telles que décrites sur erofa.free.fr"
+    ~prefilter:(fun () -> `Re (force erofa_prefilter'))
+    erofa_rule
 
 let qu__q =
   new_rule'
     "qu--q"
     "question -> qestion mais aquarium inchangé"
+    ~prefilter:(fun () -> `Re (Re.str "qu"))
     (lazy (
       let pattern_qu = String.Search_pattern.create "qu" in
       fun env (row, search_res) ->
@@ -479,6 +503,7 @@ let qu__qou =
   new_rule'
     "qu--qou"
     "aquatique -> aqouatique"
+    ~prefilter:(fun () -> `Re (Re.str "qu"))
     (lazy (
       let pattern_qu = String.Search_pattern.create "qu" in
       fun env (row, search_res) ->
@@ -490,6 +515,7 @@ let _ : string =
   new_rule'
     "ti--ci"
     "nation -> nacion, patient -> pacient, mais question inchangé"
+    ~prefilter:(fun () -> `Re (Re.str "ti"))
     (lazy (
       let pattern_ti = String.Search_pattern.create "ti" in
       fun env (row, search_res) ->
@@ -501,6 +527,7 @@ let emment__ament =
   new_rule'
     "emment--ament"
     "évidemment -> évidament"
+    ~prefilter:(fun () -> `Re (Re.str "emment"))
     (lazy (
       let pattern_emment = String.Search_pattern.create "emment" in
       let pattern_cemment = String.Search_pattern.create "cemment" in
@@ -514,6 +541,7 @@ let _ : string =
   new_rule'
     "oiement--oiment"
     "aboiement -> aboiment"
+    ~prefilter:(fun () -> `Re (Re.str "oiement"))
     (lazy (
       let pattern_oiement = String.Search_pattern.create "oiement" in
       fun env (row, search_res) ->
@@ -525,6 +553,7 @@ let _ : string =
   new_rule'
     "cq--q"
     "grecque -> grèque"
+    ~prefilter:(fun () -> `Re (Re.str "cq"))
     (lazy (
       let pattern_cq = String.Search_pattern.create "cq" in
       let pattern_ecq = String.Search_pattern.create "ecq" in
@@ -539,6 +568,7 @@ let qua_o__ca_o =
   new_rule'
     "qua-o--ca-o"
     "qualité -> calité, quotient -> cotient"
+    ~prefilter:(fun () -> `Re (Re.alt [ Re.str "qua"; Re.str "quo" ]))
     (lazy (
       let pattern_qua = String.Search_pattern.create "qua" in
       let pattern_quo = String.Search_pattern.create "quo" in
@@ -552,6 +582,7 @@ let _ : string =
   new_rule'
     "sc-sch--c-ch"
     "science -> cience, fasciste -> fachiste, schéma -> chéma"
+    ~prefilter:(fun () -> `Re (Re.str "sc"))
     (lazy (
       let pattern_esc = String.Search_pattern.create "esc" in
       let pattern_sc = String.Search_pattern.create "sc" in
@@ -572,6 +603,7 @@ let _ : string =
   new_rule'
     "en--an"
     "enfant -> anfant"
+    ~prefilter:(fun () -> `Re (Re.str "en"))
     (lazy (
       let pattern_en = String.Search_pattern.create "en" in
       fun env (row, search_res) ->
@@ -583,6 +615,7 @@ let _ : string =
   new_rule'
     "gu--gh"
     "guerre -> gherre (et aigüe -> aigue en principe, mais pas fait)"
+    ~prefilter:(fun () -> `Re (Re.str "gu"))
     (lazy (
       let pattern_gu = String.Search_pattern.create "gu" in
       fun env (row, search_res) ->
@@ -594,6 +627,7 @@ let _ : string =
   new_rule'
     "g--j"
     "mange -> manje"
+    ~prefilter:(fun () -> `Re (Re.str "g"))
     (lazy (
       let pattern_g = String.Search_pattern.create "g" in
       let pattern_gea = String.Search_pattern.create "gea" in
@@ -609,6 +643,7 @@ let _ : string =
   new_rule'
     "ez--es"
     "mangez -> mangés"
+    ~prefilter:(fun () -> `Re (Re.str "ez"))
     (lazy (
       let pattern_ez = String.Search_pattern.create "ez" in
       fun env (row, search_res) ->
@@ -620,6 +655,7 @@ let _ : string =
   new_rule'
     "ent--es"
     "mangent -> manges"
+    ~prefilter:(fun () -> `Re (Re.str "ent"))
     (lazy (
       let pattern_ient = String.Search_pattern.create "ient" in
       let pattern_ent = String.Search_pattern.create "ent" in
@@ -633,6 +669,7 @@ let _ : string =
   new_rule'
     "m-mbp--n-mbp"
     "compte -> conpte"
+    ~prefilter:(fun () -> `Re (Re.seq [ Re.str "m"; Re.set "mbp" ]))
     (lazy (
       let pattern_mp = String.Search_pattern.create "mp" in
       let pattern_mb = String.Search_pattern.create "mb" in
@@ -648,6 +685,7 @@ let _ : string =
   new_rule'
     "aux--als"
     "chevaux -> chevals, travaux -> travails"
+    ~prefilter:(fun () -> `Re (Re.alt [ Re.str "aux"; Re.set "aus" ]))
     (lazy (
       fun env (row, _ as row_search_res) ->
         if (String.is_suffix row.ortho ~suffix:"aux"
@@ -672,6 +710,7 @@ let _ : string =
   new_rule'
     "il--y"
      "fille -> fiye, mais ville inchangé"
+     ~prefilter:(fun () -> `Re (Re.str "il"))
      (lazy (
           let graphem_by_phonem =
             let module Uchar = struct
@@ -721,6 +760,7 @@ let _ : string =
   new_rule'
     "ortograf.net"
     "les règles de http://www.ortograf.net/"
+    ~prefilter:(fun () -> `All)
     (lazy (
        (* problème :
           - on rate les mots post-90 comme apparaitre sans accent circonflexe.
@@ -860,6 +900,7 @@ let _ : string =
   new_rule'
     "alfonic"
     "(pas super testé) les règles de https://alfonic.org/"
+    ~prefilter:(fun () -> `All)
     (lazy (
        (* problème :
           - la règles des pluriels dans l'extension cause problème car on a
@@ -936,6 +977,14 @@ let doc rule = rule.doc
 let name rule = rule.name
 let all = lazy (List.rev !all)
 
+type stats =
+  { total : int
+  ; considered : int
+  ; prefiltered_out : int
+  ; failed : int
+  }
+[@@deriving sexp_of]
+
 let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f =
   Sexp_with_utf8.linkme;
   let rules = Rules.create () in
@@ -945,7 +994,7 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
     Hashtbl.of_alist_exn (module String)
       (List.map l ~f:(fun r -> r.word, r.h_aspire)))
   in
-  let rule =
+  let rule, prefilter =
     let which_rules =
       let rank rule =
         if rule.name = emment__ament (* avant qua--ca car on crée des qua *)
@@ -960,21 +1009,51 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
         ~compare:(fun r1 r2 -> Int.compare (rank r1) (rank r2))
     in
     match which_rules with
-    | [] -> force erofa_rule
+    | [] -> force erofa_rule, const true
     | _ :: _ ->
-       fun rules wiki row_search_res ->
-       List.fold_left which_rules ~init:row_search_res ~f:(fun row_search_res rule ->
-           (Lazy.force rule.f) rules wiki row_search_res)
+       let rule =
+         fun rules wiki row_search_res ->
+         List.fold_left which_rules ~init:row_search_res ~f:(fun row_search_res rule ->
+             (Lazy.force rule.f) rules wiki row_search_res)
+       in
+       let prefilter =
+         match
+           List.map which_rules ~f:(fun r ->
+               match r.prefilter () with
+               | `All -> raise Exit
+               | `Re re -> re)
+         with
+         | exception Exit -> const true
+         | res -> Re.execp (Re.compile (Re.alt res))
+       in
+       rule, prefilter
   in
+  let total = ref 0 in
+  let considered = ref 0 in
+  let prefiltered_out = ref 0 in
+  let failed = ref 0 in
   List.iter (lexique ||? Data_src.Lexique.load ~root ())
     ~f:(fun row ->
+      total := !total + 1;
       if not (skip row) then (
-        match Rules.search rules row.ortho row.phon with
-        | Error s ->
-           if not skip_not_understood
-           then raise_s s;
-           f row.ortho row.ortho
-        | Ok search_res ->
-           let row', _ = rule rules wiki (row, search_res) in
-           f row.ortho row'.ortho
-      ))
+        considered := !considered + 1;
+        (* The filtering phase makes the creation of dict-arpetani go from 1.95 to 1.725s
+           or so.  But for smaller changes like cq--q + ti--ci, it goes from 1.25s to
+           0.85s. Considering that the fixed cost is 0.58s (i.e. the cost of generation if
+           the skip function returns true immediately), that's a fairly substantial
+           decrease. *)
+        if not (prefilter row.ortho)
+        then (prefiltered_out := !prefiltered_out + 1; f row.ortho row.ortho)
+        else
+          match Rules.search rules row.ortho row.phon with
+          | Error s ->
+             failed := !failed + 1;
+             if not skip_not_understood
+             then raise_s s;
+             f row.ortho row.ortho
+          | Ok search_res ->
+             let row', _ = rule rules wiki (row, search_res) in
+             f row.ortho row'.ortho
+    ));
+  { total = !total; considered = !considered; prefiltered_out = !prefiltered_out; failed = !failed }
+

@@ -115,9 +115,11 @@ let build_erofa_ext ~root =
   let lexique_post90 = build_lexique_post90 lexique post90 in
   let lexiquepost90_to_erofa =
     let r = ref [] in
-    Rewrite.gen ~root ~lexique:lexique_post90
-      ~skip_not_understood:true
-      (fun old new_ -> r := (old, new_) :: !r);
+    let _ : Rewrite.stats =
+      Rewrite.gen ~root ~lexique:lexique_post90
+        ~skip_not_understood:true
+        (fun old new_ -> r := (old, new_) :: !r)
+    in
     List.rev !r
   in
   if false then print_s [%sexp (lexiquepost90_to_erofa : (string * string) list)];
@@ -161,7 +163,10 @@ let gen ~env ~rules ~all ~write ~diff =
                if String.(<>) old new_
                then Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])
         in
-        Rewrite.gen ~root ~rules print)
+        let stats = Rewrite.gen ~root ~rules print in
+        if Unix.isatty Unix.stderr then
+          eprint_s [%sexp ~~(stats : Rewrite.stats)];
+      )
   with
   | None -> ()
   | Some (`Diff (a, b)) ->

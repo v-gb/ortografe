@@ -11,10 +11,11 @@ val doc : rule -> string
 val name : rule -> string
 val all : rule list Lazy.t
 
+type stats [@@deriving sexp_of]
 val gen
     : root:[> Eio.Fs.dir_ty ] Eio.Path.t
     -> ?skip_not_understood:bool
     -> ?lexique:Data_src.Lexique.t list
     -> ?rules: rule list
     -> (string -> string -> unit)
-    -> unit
+    -> stats
