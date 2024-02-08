@@ -23,13 +23,13 @@ EOF
     grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq'
     echo sinophone,sinofone # missing
 } \
-    | cat > dict.gen.csv
+    | cat > dict.external-sources.gen.csv
 
 {
     sqlite3 <<'EOF'
 .mode csv
 create table t(before,after);
-.import dict.gen.csv t
+.import dict.external-sources.gen.csv t
 select replace(replace(before,"œ","oe"),"æ","ae") as rewritten, after
 from t
 where rewritten != before and rewritten != after
@@ -37,10 +37,9 @@ EOF
 } \
     | tr -d '"' \
     | LANG=C sort \
-    | cat >> dict.gen.csv
+    | cat >> dict.external-sources.gen.csv
 
-cp dict.gen.csv dict.external-sources.gen.csv
-
+cp dict.external-sources.gen.csv dict.gen.csv
 tail -n +2 ../data/homemade/dict-rect1990+erofa.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
 
 # Capitalized words in the dict are treated as exceptions, for
