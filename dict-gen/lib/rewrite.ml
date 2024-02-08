@@ -353,6 +353,27 @@ let load_skip () =
     || row.cgram = "ONO"
     || String.mem row.ortho '-'
 
+type rule =
+  { name : string
+  ; doc : string
+  ; f : (Rules.t
+         -> (string, bool) Base.Hashtbl.t Lazy.t
+         -> (Data_src.Lexique.t * Rules.search_res)
+         -> Data_src.Lexique.t * Rules.search_res
+        ) Lazy.t
+  }
+
+let all = ref []
+let new_rule name doc f =
+  all := { name; doc; f  } :: !all;
+  name
+let new_rule' name doc f =
+  new_rule name doc
+    (lazy (
+      let f' = force f in
+      fun rules _wiki row_and_search_res ->
+        f' { rules; accept = const true } row_and_search_res))
+
 let erofa_rule = lazy (
   let pattern_ph = String.Search_pattern.create "ph" in
   let pattern_mph = String.Search_pattern.create "mph" in
@@ -441,28 +462,6 @@ let erofa_rule = lazy (
        ortho := rewrite env row !ortho ~target ~repl);
    { row with ortho = fst !ortho }, snd !ortho
 )
-
-type rule =
-  { name : string
-  ; doc : string
-  ; f : (Rules.t
-         -> (string, bool) Base.Hashtbl.t Lazy.t
-         -> (Data_src.Lexique.t * Rules.search_res)
-         -> Data_src.Lexique.t * Rules.search_res
-        ) Lazy.t
-  }
-
-let all = ref []
-let new_rule name doc f =
-  all := { name; doc; f  } :: !all;
-  name
-let new_rule' name doc f =
-  new_rule name doc
-    (lazy (
-      let f' = force f in
-      fun rules _wiki row_and_search_res ->
-        f' { rules; accept = const true } row_and_search_res))
-
 let _ : string = new_rule "erofa" "Les règles telles que décrites sur erofa.free.fr" erofa_rule
 
 let qu__q =
