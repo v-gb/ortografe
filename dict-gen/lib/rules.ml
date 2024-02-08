@@ -491,6 +491,7 @@ type path_elt =
   ; importance : importance
   }
 let __ p = p.i, p.j, p.this_surprise, p.importance
+type search_res = path_elt list * int
 
 module Heap =
   Binary_heap.Make(struct

@@ -18,8 +18,9 @@ type path_elt =
   ; this_surprise : int
   ; importance : importance
   }
+type search_res = path_elt list * int
 
-val search : t -> string -> string -> (path_elt list * int, Sexplib.Sexp.t) Result.t
+val search : t -> string -> string -> (search_res, Sexplib.Sexp.t) Result.t
 val check : Data_src.Lexique.t list -> skip:(Data_src.Lexique.t -> bool) -> unit
 
 (** A few utility functions *)
