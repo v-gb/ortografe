@@ -47,9 +47,12 @@ let keep_if_plausible env (row : Data_src.Lexique.t) (ortho, search_res) ortho2 
   | _ -> ortho, search_res
 
 let keep_regardless env (row : Data_src.Lexique.t) ortho1 ortho2 =
-  match Rules.search env.rules ortho2 row.phon with
-  | Ok search_res2 when env.accept ortho2 -> ortho2, search_res2
-  | _ -> ortho1
+  if phys_equal (fst ortho1) ortho2
+  then ortho1
+  else
+    match Rules.search env.rules ortho2 row.phon with
+    | Ok search_res2 when env.accept ortho2 -> ortho2, search_res2
+    | _ -> ortho1
 
 let keep_regardless_exn rules (row : Data_src.Lexique.t) =
   match Rules.search rules row.ortho row.phon with
