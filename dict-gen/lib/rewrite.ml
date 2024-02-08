@@ -395,14 +395,14 @@ let erofa_rule1 = lazy (
    (match String.chop_suffix (fst !ortho) ~suffix:"x" with
     | Some rest ->
        (* on vérifie que x est bien silencieux, pas remplaceable par s, comme
-                 dans coccyx *)
+          dans coccyx *)
        if fst (keep_if_plausible env row !ortho rest) = rest
        then ortho := keep_if_plausible env row !ortho (rest ^ "s");
     | None -> ());
    List.iter [ pattern_auxq, "ausq"; pattern_auxd, "ausd" ]
      ~f:(fun (pattern, with_) ->
        (* les règles ont un cas particulier pour aux mais pas aus, et donc je crois
-                 que le changement est considéré comme surprenant par [keep_if_plausible]. *)
+          que le changement est considéré comme surprenant par [keep_if_plausible]. *)
        ortho := keep_regardless env row !ortho
                   (String.Search_pattern.replace_all pattern ~in_:(fst !ortho) ~with_));
    (match String.chop_prefix (fst !ortho) ~prefix:"deuxi" with

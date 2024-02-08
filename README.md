@@ -34,7 +34,7 @@ should work for other spelling changes or other languages, with the following co
 - the language has space-separated words
 - the spelling change can be expressed as a word->word dictionary mapping old spelling to
   new spelling, without analysis of the context. For instance, it would be possible to
-  british-ify american spellings, with a mapping theater->theatre,
+  British-ify American spellings, with a mapping theater->theatre,
   finalize->finalise, etc.
 
 The browser extension can already load a custom directory, although it currently hardcodes
