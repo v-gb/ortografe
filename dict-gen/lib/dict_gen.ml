@@ -4,12 +4,14 @@ let (^/) = Eio.Path.(/)
 
 let root ~from =
   let (/) = Eio.Path.(/) in
-  match Sys.getenv "INSIDE_DUNE" with
+  match Sys.getenv "DUNEROOT" with
   | Some v -> from / v
   | None ->
      let from = ref from in
      let i = ref 0 in
      while not (Eio.Path.is_file (!from / "dune-project")) do
+       if Eio.Path.is_file (!from ^/ ".digest-db")
+       then raise_s [%sexp "escaping from dune dir", (Stdlib.Sys.getcwd () : string)];
        from := !from / "..";
        i := !i + 1;
        if !i > 1000 then failwith ("can't find repo root " ^ Eio.Path.native_exn !from)

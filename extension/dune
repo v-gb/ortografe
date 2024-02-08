@@ -12,7 +12,9 @@
    ../data/homemade/dict-rect1990+erofa.adds.csv
    ../data/lexique/1990.csv
  )
- (action  (run ./import-dict)))
+ (action
+  (setenv DUNEROOT %{project_root}
+   (run ./import-dict))))
 
 (rule
  (targets extension.zip extension2.zip (dir src2))

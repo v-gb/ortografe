@@ -221,7 +221,7 @@ let main () =
            Book_import.download_all ~root:(repo_root ()))
       ; C.Cmd.v (C.Cmd.info "convert-all")
           (let+ () = return () in
-           Book_import.convert_all ~root:(Sys.getenv "INSIDE_DUNE"))
+           Book_import.convert_all ~root:(Sys.getenv "DUNEROOT"))
       ; C.Cmd.v (C.Cmd.info "rewrite-index")
           (let+ arg1 =
              C.Arg.required (C.Arg.pos 0 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"index.html" []))

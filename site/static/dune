@@ -16,8 +16,10 @@
 
 (rule
  (targets (dir books) books.html)
- (deps    (glob_files %{project_root}/dl.gen/*))
- (action  (run ../server/server.exe convert-all)))
+ (deps    (glob_files %{project_root}/dl.gen/*) (sandbox always))
+ (action
+  (setenv DUNEROOT %{project_root}
+   (run ../server/server.exe convert-all))))
 
 (rule
  (targets erofa-texte.pdf)
@@ -31,8 +33,9 @@
    %{project_root}/data/lexique/Lexique383.gen.tsv
    %{project_root}/data/wiktionnaire/min-h.gen.csv)
  (action
-   (with-stdout-to dict-arpetani.csv
-    (run %{project_root}/dict-gen/bin/dict_gen.exe gen --cq--q --emment--ament --erofa --oiement--oiment --qua-o--ca-o --sc-sch--c-ch --ti--ci))))
+  (with-stdout-to dict-arpetani.csv
+   (setenv DUNEROOT %{project_root}
+    (run %{project_root}/dict-gen/bin/dict_gen.exe gen --cq--q --emment--ament --erofa --oiement--oiment --qua-o--ca-o --sc-sch--c-ch --ti--ci)))))
 
 (copy_files (files %{project_root}/data/wiktionnaire/min.gen.csv.zst))
 
