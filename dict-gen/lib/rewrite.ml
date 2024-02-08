@@ -830,8 +830,8 @@ let _ : string =
                    match p.graphem, p.phonem with
                    | "b", "p" -> [ "b" ]
                    | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
-                   | "q", _ -> [ "q" ]
-                   | "qu", _ -> [ "q" ]
+                   | ("q" | "qu"), "k" -> [ "q" ]
+                   | "qu", ("ku" | "kw") -> [ "qou" ]
                    | ("en" | "ent" | "ent$" | "em"), "@" -> [ "en" ]
                    | "en", "@n" -> [ "enn" ]
                    | "enn", "@n" -> [ "en" ]
