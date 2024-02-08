@@ -952,7 +952,7 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
   let rules = Rules.create () in
   let skip = load_skip () in
   let wiki = lazy (
-    let l = Data_src.Wiki.load ~root in
+    let l = Data_src.Wiki_h.load ~root in
     Hashtbl.of_alist_exn (module String)
       (List.map l ~f:(fun r -> r.word, r.h_aspire)))
   in

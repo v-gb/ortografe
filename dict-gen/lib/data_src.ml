@@ -460,3 +460,22 @@ module Wiki = struct
       in
       { word; phon; h_aspire })
 end
+
+module Wiki_h = struct
+  type t =
+    { word : string
+    ; h_aspire : bool
+    }
+  [@@deriving sexp_of]
+
+  let load ~root =
+    Eio.Path.load (root ^/ "data/wiktionnaire/min-h.gen.csv")
+    |> Csv_header.parse_string
+      ~header:`In_string
+      ~separator:','
+      Csv_header.(
+      let+ word = field "word" Fn.id
+      and+ h_aspire = field "h_aspire" Bool.of_string
+      in
+      { word; h_aspire  })
+end

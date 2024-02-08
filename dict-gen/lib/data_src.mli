@@ -24,3 +24,13 @@ module Wiki : sig
 
   val load : root:[> Eio.Fs.dir_ty ] Eio.Path.t -> t list
 end
+
+module Wiki_h : sig
+  type t =
+    { word : string
+    ; h_aspire : bool
+    }
+      [@@deriving sexp_of]
+
+  val load : root:[> Eio.Fs.dir_ty ] Eio.Path.t -> t list
+end

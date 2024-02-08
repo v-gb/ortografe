@@ -16,6 +16,17 @@ fi
 ")))
 
 (rule
+ ;; since we only care about h-aspiré, just drop the bulk of the file to make
+ ;; it faster to load (50MB -> 1MB)
+ (target min-h.gen.csv)
+ (mode promote)
+ (deps    (sandbox always))
+ (action  (with-stdout-to %{target}
+           (progn
+            (run head -n 1 %{dep:min.gen.csv})
+            (run grep ^h %{dep:min.gen.csv})))))
+
+(rule
  (target min.gen.csv.zst)
  (deps (sandbox always preserve_file_kind))
  (action (run zstd %{dep:min.gen.csv})))
