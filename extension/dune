@@ -1,20 +1,26 @@
 (rule
  (targets
    dict.external-sources.gen.csv
-   dict.gen.csv
-   dict1990.gen.csv
-   dict.js)
+   dict1990.gen.csv)
  (mode promote)
- (deps
+ (deps (sandbox always)
    import-dict
    ../data/erofa/DOR-numerique_v1.0.2.csv
    ../data/wiktionnaire/1990.csv
+   ../data/lexique/1990.csv)
+ (action (run ./import-dict part1)))
+
+(rule
+ (targets dict.gen.csv dict.js)
+ (mode promote)
+ (deps (sandbox always)
+   import-dict
    ../data/homemade/dict-rect1990+erofa.adds.csv
-   ../data/lexique/1990.csv
- )
+   dict.external-sources.gen.csv
+   dict1990.gen.csv)
  (action
   (setenv DUNEROOT %{project_root}
-   (run ./import-dict))))
+   (run ./import-dict part2))))
 
 (rule
  (targets extension.zip extension2.zip (dir src2))

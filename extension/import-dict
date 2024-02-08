@@ -2,31 +2,32 @@
 set -e -u -o pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-{
-    sqlite3 <<'EOF'
+if [ "${1-part1}" = part1 ]; then
+    {
+        sqlite3 <<'EOF'
 .mode csv
 .import ../data/erofa/DOR-numerique_v1.0.2.csv t
 select "Grafie initiale","Grafie modifiée"
 from t
 where "Grafie initiale" != ''
 EOF
-} \
-    | tr -d '"' \
-    | sed 's/ *([^)]*)//g' \
-    | LANG=C sort -u \
-    | {
-    # The coordonner entry is erroneous. Let our dict generation do the right thing
-    #
-    # Drop héro and héroïne to avoid removing the h for the meaning of héroique.
-    # We then make the error of not removing the h for the drug, but oh well, that
-    # seems like a less confusing error to make.
-    grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq'
-    echo sinophone,sinofone # missing
-} \
-    | cat > dict.external-sources.gen.csv
+    } \
+        | tr -d '"' \
+        | sed 's/ *([^)]*)//g' \
+        | LANG=C sort -u \
+        | {
+        # The coordonner entry is erroneous. Let our dict generation do the right thing
+        #
+        # Drop héro and héroïne to avoid removing the h for the meaning of héroique.
+        # We then make the error of not removing the h for the drug, but oh well, that
+        # seems like a less confusing error to make.
+        grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq'
+        echo sinophone,sinofone # missing
+    } \
+        | cat > dict.external-sources.gen.csv
 
-{
-    sqlite3 <<'EOF'
+    {
+        sqlite3 <<'EOF'
 .mode csv
 create table t(before,after);
 .import dict.external-sources.gen.csv t
@@ -34,19 +35,19 @@ select replace(replace(before,"œ","oe"),"æ","ae") as rewritten, after
 from t
 where rewritten != before and rewritten != after
 EOF
-} \
-    | tr -d '"' \
-    | LANG=C sort \
-    | cat >> dict.external-sources.gen.csv
+    } \
+        | tr -d '"' \
+        | LANG=C sort \
+        | cat >> dict.external-sources.gen.csv
 
-{
-    # sqlite doesn't support outer joins, so we do two left joins
-    # to combine the wiktionary and lexique+recto/verso data.
-    # In a couple of cases, the two dbs don't agree ("absous"
-    # is one case), so we just drop these cases.
-    # The resulting table includes regular plurals that we could
-    # drop, but the table is small so whatever.
-    sqlite3 <<'EOF'
+    {
+        # sqlite doesn't support outer joins, so we do two left joins
+        # to combine the wiktionary and lexique+recto/verso data.
+        # In a couple of cases, the two dbs don't agree ("absous"
+        # is one case), so we just drop these cases.
+        # The resulting table includes regular plurals that we could
+        # drop, but the table is small so whatever.
+        sqlite3 <<'EOF'
 .mode csv
 .import ../data/lexique/1990.csv l
 .import ../data/wiktionnaire/1990.csv w
@@ -66,27 +67,30 @@ and w.pre1990 <> w.post1990
 and w.pre1990 = lower(w.pre1990)
 order by 1
 EOF
-} \
-    | tr -d '"' \
-    | LANG=C sort \
-    | cat >> dict1990.gen.csv
-
-cp --no-preserve=all dict.external-sources.gen.csv dict.gen.csv
-tail -n +2 ../data/homemade/dict-rect1990+erofa.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
-
-# Capitalized words in the dict are treated as exceptions, for
-# cases when the capitalized version of the word is almost never the common
-# noun, but is instead a proper noun that we don't want to rewrite
-for w in Pierre Cannes Rennes Vienne Bordeaux; do
-    echo $w,bug-if-displayed
-done >> dict.gen.csv
-
-if [ "${DUNEROOT-}" ]; then
-    target=dict.js
-else
-    target=src/dict.js
+    } \
+        | tr -d '"' \
+        | LANG=C sort \
+        | cat >> dict1990.gen.csv
 fi
-{
-    echo -n 'const dict_erofa = "'; tr '\n' '/' < dict.gen.csv; echo '"';
-    echo -n 'const dict_rect1990 = "'; tr '\n' '/' < dict1990.gen.csv; echo '"';
-} > $target
+
+if [ "${1-part2}" = part2 ]; then
+    cp --no-preserve=all dict.external-sources.gen.csv dict.gen.csv
+    tail -n +2 ../data/homemade/dict-rect1990+erofa.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
+
+    # Capitalized words in the dict are treated as exceptions, for
+    # cases when the capitalized version of the word is almost never the common
+    # noun, but is instead a proper noun that we don't want to rewrite
+    for w in Pierre Cannes Rennes Vienne Bordeaux; do
+        echo $w,bug-if-displayed
+    done >> dict.gen.csv
+
+    if [ "${DUNEROOT-}" ]; then
+        target=dict.js
+    else
+        target=src/dict.js
+    fi
+    {
+        echo -n 'const dict_erofa = "'; tr '\n' '/' < dict.gen.csv; echo '"';
+        echo -n 'const dict_rect1990 = "'; tr '\n' '/' < dict1990.gen.csv; echo '"';
+    } > $target
+fi

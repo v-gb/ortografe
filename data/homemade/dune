@@ -1,0 +1,19 @@
+;; dict-rect1990+erofa.adds.csv is an extension of the erofa csv.
+;;
+;; Specifically, it contains new entries that apply the erofa rules to derived words like
+;; verbs conjugations (the erofa dictionary usually only lists the infinitives), or some
+;; feminine inflections. It also ensures that the overall rewrite applies a decent fraction
+;; of the 1990 rectifications.
+(rule
+ (deps
+  (sandbox always)
+   %{project_root}/data/lexique/Lexique383.gen.tsv
+   %{project_root}/data/wiktionnaire/min-h.gen.csv
+   %{project_root}/extension/dict.external-sources.gen.csv
+   %{project_root}/extension/dict1990.gen.csv
+ )
+ (mode promote)
+ (action
+  (with-stdout-to dict-rect1990+erofa.adds.csv
+   (setenv DUNEROOT %{project_root}
+    (run %{project_root}/dict-gen/bin/dict_gen.exe erofa-ext --header)))))
