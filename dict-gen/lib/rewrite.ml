@@ -353,7 +353,7 @@ let load_skip () =
     || row.cgram = "ONO"
     || String.mem row.ortho '-'
 
-let erofa_rule1 = lazy (
+let erofa_rule = lazy (
   let pattern_ph = String.Search_pattern.create "ph" in
   let pattern_mph = String.Search_pattern.create "mph" in
   let pattern_coeu = String.Search_pattern.create "coeu" in
@@ -377,7 +377,8 @@ let erofa_rule1 = lazy (
     List.map [ "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s ->
         String.Search_pattern.create (s ^ s), s)
   in
-  fun env (lazy wiki) ((row : Data_src.Lexique.t), search_res) ->
+  fun rules (lazy wiki) ((row : Data_src.Lexique.t), search_res) ->
+  let env = { rules; accept = if erofa_preserve row.ortho then erofa_preserve else const true } in
   let h_aspire =
     String.is_prefix row.ortho ~prefix:"h"
     && (String.is_prefix row.ortho ~prefix:"haï"
@@ -462,21 +463,6 @@ let new_rule' name doc f =
       fun rules _wiki row_and_search_res ->
         f' { rules; accept = const true } row_and_search_res))
 
-let erofa_rule = lazy (
-  let erofa_rule1 = force erofa_rule1 in
-  fun rules wiki ((row : Data_src.Lexique.t), _ as row_and_search_res) ->
-  let (row', _ as row_and_search_res') =
-    erofa_rule1 { rules; accept = const true } wiki row_and_search_res
-  in
-  (* Le fait de ne passer le vrai accept que si le mot est réécrit est censé être
-     une optimisation, mais je n'ai pas vérifié si ça aide ou pas. *)
-  if row.ortho = row'.ortho
-  then row_and_search_res (* doesn't really matter which one we choose *)
-  else
-    if erofa_preserve row.ortho
-    then erofa_rule1 { rules; accept = erofa_preserve } wiki row_and_search_res
-    else row_and_search_res'
-)
 let _ : string = new_rule "erofa" "Les règles telles que décrites sur erofa.free.fr" erofa_rule
 
 let qu__q =
