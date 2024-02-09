@@ -17,10 +17,9 @@ interactively without installing anything. [Source](site/).
 - a [CLI tool](doc-conversion/) that transcribes text and documents in various formats
   (pure text, .html, .xhtml, .htmlz, .doc, .docx, .odt, .epub).
 
-    Instead of the default spelling change, the tool can also create dictionaries for
-    other customized spelling changes, and use those when converting documents. These
-    dictionaries can also be plugged into the browser extension above, for interactive
-    use.
+    The tool can also create dictionaries for other spelling changes, and use those when
+    converting documents. These dictionaries can also be plugged into the browser
+    extension above, for interactive use.
 
 - [data](data/) for this work (it is surprisingly difficult to find structured data)
 
@@ -37,14 +36,15 @@ should work for other spelling changes or other languages, with the following co
   British-ify American spellings, with a mapping theater->theatre,
   finalize->finalise, etc.
 
-The browser extension can already load a custom directory, although it currently hardcodes
+The browser extension can already load a custom dictionary, although it currently hardcodes
 that only pages in French should be rewritten.
 
 # Building locally
 
 The commands below should:
 
-- build the whole repository (extension, website and CLI converter)
+- build the whole repository (extension, website, CLI converter and dictionary creation)
+- run the tests
 - rebuild everything as you make changes
 
 ```console
