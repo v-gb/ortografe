@@ -2,10 +2,4 @@
 set -e -u -o pipefail
 cd "$(dirname "$0")"
 
-sqlite3 \
-    -cmd '.mode tabs' \
-    -cmd '.import Lexique383.gen.tsv tmp' \
-    -cmd '.mode markdown' \
-    -cmd 'create table t as select ortho,phon,lemme,cgram,genre,nombre,freqlemfilms2,freqlemlivres,freqlemlivres,freqlemlivres,infover from tmp;' \
-    -cmd 'drop table tmp;' \
-    "$@"
+sqlite3 -cmd '.mode tabs' -cmd '.import Lexique383.gen.tsv t' -cmd '.mode markdown' "$@"

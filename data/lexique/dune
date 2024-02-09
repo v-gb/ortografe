@@ -3,9 +3,26 @@
  (action  (run curl -o %{target} -sS "http://www.lexique.org/databases/Lexique383/Lexique383.zip")))
 
 (rule
- (target Lexique383.gen.tsv)
+ (target Lexique383-full.gen.tsv)
  (deps (sandbox always))
- (mode promote)
  (action
   (with-stdout-to %{target}
    (run unzip -p %{dep:Lexique383.zip} Lexique383.tsv))))
+
+;; Narrowing down this file saves 300ms when loading the file, but also makes it easier to
+;; grep through the file, as we don't have a ton of columns that cause all the lines to
+;; wrap all the time, which is difficult to read. If we want to embed data in the
+;; extension in the future, that'd also cut down the size of that data by 3.5x.
+(rule
+ (target Lexique383.gen.tsv)
+ (deps (sandbox always) Lexique383-full.gen.tsv)
+ (mode promote)
+ (action
+  (with-stdout-to %{target}
+   (run sqlite3
+        -cmd ".bail on"
+        -cmd ".mode tab"
+        -cmd ".import Lexique383-full.gen.tsv tmp"
+        -cmd "create table t as select ortho,phon,lemme,cgram,genre,nombre,freqfilms2,freqlivres,infover from tmp;"
+        -cmd ".header on"
+        -cmd "select * from t"))))
