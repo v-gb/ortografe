@@ -19,7 +19,7 @@ interactively without installing anything. [Source](site/).
 
     Instead of the default spelling change, the tool can also create dictionaries for
     other customized spelling changes, and use those when converting documents. These
-    dictionnaries can also be plugged into the browser extension above, for interactive
+    dictionaries can also be plugged into the browser extension above, for interactive
     use.
 
 - [data](data/) for this work (it is surprisingly difficult to find structured data)

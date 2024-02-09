@@ -196,10 +196,10 @@ let gen_cmd ?doc name =
      and+ all = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"inclure les mots inchangés" ["all"]))
      and+ write =
        C.Arg.value (C.Arg.opt (C.Arg.some C.Arg.string) None
-                      (C.Arg.info ~doc:"écrire le dictionnaire dans le fichier spéficié" ["write"]))
+                      (C.Arg.info ~doc:"écrire le dictionnaire dans le fichier spécifié" ["write"]))
      and+ diff =
        C.Arg.value (C.Arg.opt (C.Arg.some C.Arg.string) None
-                      (C.Arg.info ~doc:"diff le dictionnaire avec le fichier spéficié" ["diff"]))
+                      (C.Arg.info ~doc:"diff le dictionnaire avec le fichier spécifié" ["diff"]))
      in
      Eio_main.run (fun env ->
          try gen ~env ~rules ~all ~write ~diff
