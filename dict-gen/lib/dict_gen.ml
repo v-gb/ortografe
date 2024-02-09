@@ -173,7 +173,10 @@ let gen ~env ~rules ~all ~write ~diff =
   with
   | None -> ()
   | Some (`Diff (a, b)) ->
-     Eio.Process.run (Eio.Stdenv.process_mgr env) [ "patdiff"; "-context"; "1"; a; b ]
+     Eio.Process.run (Eio.Stdenv.process_mgr env)
+       [ "bash"; "-e"; "-u"; "-o"; "pipefail"; "-c"
+       ; Sys.concat_quoted [ "patdiff"; "-context"; "1"; a; b ] ^ " | less -R"
+       ]
        ~is_success:(function 0 | 1 -> true | _ -> false)
 
 let gen_cmd ?doc name =
