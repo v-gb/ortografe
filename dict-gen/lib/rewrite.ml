@@ -756,13 +756,16 @@ let _ : string =
        { row with ortho = fst !ortho }, snd !ortho))
 
 let dummy_search_res = [], 0
-let _ : string =
-  new_rule'
-    "ortograf.net"
-    "les règles de http://www.ortograf.net/"
-    ~prefilter:(fun () -> `All)
-    (lazy (
-       (* problème :
+let _ : string list =
+  List.map [ true; false ] ~f:(fun accent_plat ->
+      new_rule'
+        ("ortograf.net"
+         ^ if accent_plat then "-plat" else "")
+        ("les règles de http://www.ortograf.net/"
+         ^ if accent_plat then ", mais sans distinction entre é et è" else "")
+        ~prefilter:(fun () -> `All)
+        (lazy (
+             (* problème :
           - on rate les mots post-90 comme apparaitre sans accent circonflexe.
           - la transformation n'est pas idempotente. Par exemple, sens
             -> sen -> sène. Pour les changements radicaux d'ortografe comme ça,
@@ -772,129 +775,129 @@ let _ : string =
             la transformation non-idempotente (sen en haut)
           - trop d'accent grave sur les e en général. On pourrait au moins appliquer
             la même idée que les règles érofa pour améliorer ça.
-        *)
-       let graphem_by_phonem =
-         Hashtbl.of_alist_exn (module Uchar)
-           [ !!"a", "a"
-           ; !!"e", "é"
-           ; !!"E", "è"
-           ; !!"2", "eu"
-           ; !!"9", "eu"
-           ; !!"°", "e"
-           ; !!"@", "an"
-           ; !!"5", "in"
-           ; !!"§", "on"
-           ; !!"1", "un"
-           ; !!"i", "i"
-           ; !!"y", "u"
-           ; !!"8", "u"
-           ; !!"u", "ou"
-           ; !!"o", "o"
-           ; !!"O", "o"
-           ; !!"b", "b"
-           ; !!"S", "ch"
-           ; !!"d", "d"
-           ; !!"f", "f"
-           ; !!"g", "g"
-           ; !!"N", "gn"
-           ; !!"G", "ng"
-           ; !!"Z", "j"
-           ; !!"k", "k"
-           ; !!"l", "l"
-           ; !!"m", "m"
-           ; !!"n", "n"
-           ; !!"p", "p"
-           ; !!"R", "r"
-           ; !!"s", "s"
-           ; !!"t", "t"
-           ; !!"v", "v"
-           ; !!"w", "ou"
-           ; !!"j", "y"
-           ; !!"z", "z"
-           ]
-       in
-       let reverse_mapping =
-         Hashtbl.to_alist graphem_by_phonem
-         |> List.map ~f:Tuple.T2.swap
-         |> Hashtbl.of_alist_multi (module String)
-       in
-       fun _env (row, search_res) ->
-         let graphems =
-           try
-             match row.ortho with
-             | "eût" -> [| "u" |] (* il doit manquer un graphème eû -> /u/, Surprising *)
-             | "eûmes" -> [| "um" |]
-             | "eûtes" -> [| "ut" |]
-             | _ ->
-               List.concat_map (fst search_res) ~f:(fun p ->
-                   match p.graphem, p.phonem with
-                   | "b", "p" -> [ "b" ]
-                   | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
-                   | ("q" | "qu"), "k" -> [ "q" ]
-                   | "qu", ("ku" | "kw") -> [ "qou" ]
-                   | ("en" | "ent" | "ent$" | "em"), "@" -> [ "en" ]
-                   | "en", "@n" -> [ "enn" ]
-                   | "enn", "@n" -> [ "en" ]
-                   | "sc", "sk" -> [ p.graphem ]
-                   | "cc", "k" -> [ "c" ]
-                   | "cc", "ks" -> [ "cç" ]
-                   | "ch", "k" -> [ "c" ] (* la phase d'après déterminera si un k est nécessaire *)
-                   | "c", "k" -> [ "c" ]
-                   | "c", "s" -> [ "ç" ]
-                   | "x", ("gz" | "ks") -> [ "x" ]
-                   | "e", "" -> [ "e" ]
-                   | _ ->
-                      Uutf.String.fold_utf_8 (fun acc _ -> function
-                          | `Malformed s -> s :: acc
-                          | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
-                        [] p.phonem
-                      |> List.rev)
-               |> Array.of_list
-           with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
-         in
-         let ortho =
-           let last_uchar str = Rules.(#::) str (String.length str, -1) in
-           let first_uchar str = Rules.(#::) str (0, 0) in
-           Array.mapi graphems ~f:(fun i g ->
-               if g = "c"
-                  && i + 1 <$ Array.length graphems
-                  && Rules.in_ortho_weak_vowels (first_uchar graphems.(i + 1))
-               then "k" (* africain deviendrai afrincin sinon *)
-               else if i =$ 0
-               then g
-               else
-                 if g = "n"
-                 && Rules.in_ortho_vowels (last_uchar graphems.(i-1))
-                 then
-                   if i + 1 <$ Array.length graphems
-                   && Rules.in_ortho_vowels (first_uchar graphems.(i+1))
+              *)
+             let graphem_by_phonem =
+               Hashtbl.of_alist_exn (module Uchar)
+                 [ !!"a", "a"
+                 ; !!"e", (if accent_plat then "e\u{0304}" else "é")
+                 ; !!"E", (if accent_plat then "e\u{0304}" else "è")
+                 ; !!"2", "eu"
+                 ; !!"9", "eu"
+                 ; !!"°", "e"
+                 ; !!"@", "an"
+                 ; !!"5", "in"
+                 ; !!"§", "on"
+                 ; !!"1", "un"
+                 ; !!"i", "i"
+                 ; !!"y", "u"
+                 ; !!"8", "u"
+                 ; !!"u", "ou"
+                 ; !!"o", "o"
+                 ; !!"O", "o"
+                 ; !!"b", "b"
+                 ; !!"S", "ch"
+                 ; !!"d", "d"
+                 ; !!"f", "f"
+                 ; !!"g", "g"
+                 ; !!"N", "gn"
+                 ; !!"G", "ng"
+                 ; !!"Z", "j"
+                 ; !!"k", "k"
+                 ; !!"l", "l"
+                 ; !!"m", "m"
+                 ; !!"n", "n"
+                 ; !!"p", "p"
+                 ; !!"R", "r"
+                 ; !!"s", "s"
+                 ; !!"t", "t"
+                 ; !!"v", "v"
+                 ; !!"w", "ou"
+                 ; !!"j", "y"
+                 ; !!"z", "z"
+                 ]
+             in
+             let reverse_mapping =
+               Hashtbl.to_alist graphem_by_phonem
+               |> List.map ~f:Tuple.T2.swap
+               |> Hashtbl.of_alist_multi (module String)
+             in
+             fun _env (row, search_res) ->
+             let graphems =
+               try
+                 match row.ortho with
+                 | "eût" -> [| "u" |] (* il doit manquer un graphème eû -> /u/, Surprising *)
+                 | "eûmes" -> [| "um" |]
+                 | "eûtes" -> [| "ut" |]
+                 | _ ->
+                    List.concat_map (fst search_res) ~f:(fun p ->
+                        match p.graphem, p.phonem with
+                        | "b", "p" -> [ "b" ]
+                        | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
+                        | ("q" | "qu"), "k" -> [ "q" ]
+                        | "qu", ("ku" | "kw") -> [ "qou" ]
+                        | ("en" | "ent" | "ent$" | "em"), "@" -> [ "en" ]
+                        | "en", "@n" -> [ "enn" ]
+                        | "enn", "@n" -> [ "en" ]
+                        | "sc", "sk" -> [ p.graphem ]
+                        | "cc", "k" -> [ "c" ]
+                        | "cc", "ks" -> [ "cç" ]
+                        | "ch", "k" -> [ "c" ] (* la phase d'après déterminera si un k est nécessaire *)
+                        | "c", "k" -> [ "c" ]
+                        | "c", "s" -> [ "ç" ]
+                        | "x", ("gz" | "ks") -> [ "x" ]
+                        | "e", "" -> [ "e" ]
+                        | _ ->
+                           Uutf.String.fold_utf_8 (fun acc _ -> function
+                               | `Malformed s -> s :: acc
+                               | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
+                             [] p.phonem
+                           |> List.rev)
+                    |> Array.of_list
+               with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
+             in
+             let ortho =
+               let last_uchar str = Rules.(#::) str (String.length str, -1) in
+               let first_uchar str = Rules.(#::) str (0, 0) in
+               Array.mapi graphems ~f:(fun i g ->
+                   if g = "c"
+                      && i + 1 <$ Array.length graphems
+                      && Rules.in_ortho_weak_vowels (first_uchar graphems.(i + 1))
+                   then "k" (* africain deviendrai afrincin sinon *)
+                   else if i =$ 0
                    then g
                    else
-                     if i + 1 =$ Array.length graphems
-                     then g ^ "e"
-                     else "·" ^ g
-                 else
-                   (* prend le grapheme complet d'avant parce que dans «langue», le n est déjà un
+                     if g = "n"
+                        && Rules.in_ortho_vowels (last_uchar graphems.(i-1))
+                     then
+                       if i + 1 <$ Array.length graphems
+                          && Rules.in_ortho_vowels (first_uchar graphems.(i+1))
+                       then g
+                       else
+                         if i + 1 =$ Array.length graphems
+                         then g ^ "e"
+                         else "·" ^ g
+                     else
+                       (* prend le grapheme complet d'avant parce que dans «langue», le n est déjà un
                       graphème avec le «a», et donc il ne fait pas de graphème avec le g *)
-                   let digraph = graphems.(i-1) ^ Rules.str_of_uchar (first_uchar g) in
-                   if Hashtbl.mem reverse_mapping digraph
-                   then "·" ^ g
-                   else g
-             )
-           |> Array.to_list
-           |> String.concat
-         in
-         let ortho =
-           (* On ne peut pas gérer les liaisons avec une réécriture mot à mot comme on
+                       let digraph = graphems.(i-1) ^ Rules.str_of_uchar (first_uchar g) in
+                       if Hashtbl.mem reverse_mapping digraph
+                       then "·" ^ g
+                       else g
+                 )
+               |> Array.to_list
+               |> String.concat
+             in
+             let ortho =
+               (* On ne peut pas gérer les liaisons avec une réécriture mot à mot comme on
               fait. Comme les principales (ou seules ?) qui sont obligatoires sont avec
               les articles, on écrit un z en exposant après les articles, pour indiquer "z
               optionnel". *)
-           match row.ortho with
-           | "ces" | "des" | "les" | "mes" | "ses" | "tes"
-           | "ils" | "elles" -> ortho ^ "\u{1DBB}"
-           | _ -> ortho
-         in
-         { row with ortho }, dummy_search_res))
+               match row.ortho with
+               | "ces" | "des" | "les" | "mes" | "ses" | "tes"
+                 | "ils" | "elles" | "aux" -> ortho ^ "\u{1DBB}"
+               | _ -> ortho
+             in
+             { row with ortho }, dummy_search_res)))
 
 let _ : string =
   new_rule'
