@@ -1,28 +1,5 @@
 Tàches possibles :
 
-- (introduction) plus de support des rectifications de 90
-
-  Les réécritures que l'on fait sont censées s'appliquer à la fois aux textes écrits en
-  orthographe pré 90, et en orthographe post 90. Pour ça, on utilise entre autre
-  data/lexique/1990.csv pour créer des dictionnaires qui ont en entrées à la fois
-  l'ancienne et la nouvelle orthographe.
-  
-  Une faille actuelle est qu'on ne comprend pas que (par exemple) tsé-tsé devient tsétsé,
-  alors qu'on comprend que auto-stop devient autostop. La raison est que tsé-tsé est
-  invariable avant 90, mais devient tsétsé au singulier et tsétsés au pluriel après 90. On
-  ne sais pas différencier si le mot est censé être pluriel ou singulier, donc on ne fait
-  rien. Il serait plus utile d'au moins réécrire tsé-tsé en tsétsé, même si on ne sait pas
-  faire les pluriels.
-
-  Concrètement, ça devrait être un changement dans le sql vers la fin de
-  extension/import-dict, pour garder convertir un mot `M` en `M.replace('-', '')`,
-  pourvu que `M.replace('-', '')` soit une des orthographes possibles après 90. Les
-  mots qui deviennent variable ont `type=2`.
-  
-  Puis lancer `import-dict`, constater si extension/dict1990.gen.csv change comme on l'attend.
-
-  Si oui, alors tu peux lancer `(echo old,new; _build/default/dict-gen/bin/dict_gen.exe erofa-ext) > data/homemade/dict-rect1990+erofa.adds.csv` pour mettre à jour l'extension du ditionnaire érofa, relancer `import-dict` pour incorporer ces changements dans l'extension, et puis vérifier dans un navigateur que les choses marchent (voir `extension/README.md` pour comment charger l'extension).
-
 - (introduction) petite simplification
 
   Dans dict-gen/lib/rewrite.ml, les règles pour ortograf.net ont un cas particulier pour

@@ -51,13 +51,21 @@ EOF
 .mode csv
 .import ../data/lexique/1990.csv l
 .import ../data/wiktionnaire/1990.csv w
-select distinct l.ortho,coalesce(l.post90,w.post1990)
+select distinct l.ortho,
+       case
+       when l.type = 1
+       then l.post90
+       else
+         case
+         when l.ortho like '%s' or l.ortho like '%x'
+         then substring(l.post90,instr(l.post90,'/')+1)
+         else substring(l.post90,1,instr(l.post90,'/')-1)
+         end
+       end as suggested_new
 from l
 left join w on l.ortho = w.pre1990
-where (l.post90 is null
-       or w.post1990 is null
-       or l.post90 = w.post1990)
-and l.type = 1
+where (w.post1990 is null or l.post90 = w.post1990)
+and suggested_new <> l.ortho
 union all
 select distinct w.pre1990,w.post1990
 from w
