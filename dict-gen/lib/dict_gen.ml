@@ -44,56 +44,53 @@ let load_post90 ~root =
   read_key_value_comma_sep_file
     (root ^/ "extension/dict1990.gen.csv")
 
-let simplify_mapping old_new_list =
+let simplify_mapping tbl =
   (* remove identity mappings and trivial plurals *)
-  let new_by_old = Hashtbl.of_alist_exn (module String) old_new_list in
-  List.filter old_new_list ~f:(fun (old, new_) ->
+  Hashtbl.filteri_inplace tbl ~f:(fun ~key:old ~data:(new_, _) ->
       String.(<>) old new_
       && (match String.chop_suffix old ~suffix:"s", String.chop_suffix new_ ~suffix:"s" with
          | Some old_no_s, Some new_no_s ->
-            (match Hashtbl.find new_by_old old_no_s with
-             | Some new' when String.(=) new' new_no_s -> false
+            (match Hashtbl.find tbl old_no_s with
+             | Some (new', _) when String.(=) new' new_no_s -> false
              | _ -> true)
          | _ -> true))
 
+let add_post90_entries base post90 =
+  (* we created fixed ranks to generated the same ordering as previous code *)
+  Hashtbl.iteri post90 ~f:(fun ~key:pre90 ~data:post90 ->
+      match Hashtbl.find base pre90 with
+      | Some _ -> () (* erofa dictionary contains pre-1990 spellings, like frisotter rather than
+                        frisoter *)
+      | None ->
+         match Hashtbl.find base post90 with
+         | Some (new_ortho, _) ->
+            Hashtbl.add_exn base ~key:pre90 ~data:(new_ortho, 100000000)
+         | None ->
+            (* filter out changes such as chariotage->charriotage *)
+            if String.is_prefix post90 ~prefix:"charr"
+               || String.is_prefix post90 ~prefix:"combatt"
+               || String.is_prefix post90 ~prefix:"hindou" (* don't understand if the h is really
+                                                              dropped here? *)
+               || String.(=) post90 "reboursouffler"
+            then ()
+            else Hashtbl.add_exn base ~key:pre90 ~data:(post90, 100000000))
+
+let add_ranked tbl ~key ~data =
+  ignore (Hashtbl.add tbl ~key ~data:(data, Hashtbl.length tbl) : [ `Ok | `Duplicate ])
+let ranked tbl =
+  Hashtbl.to_alist tbl
+  |> List.map ~f:(fun (o, (n, rank)) -> (rank, (o, n)))
+  |> List.sort ~compare:[%compare: int * (string * _)]
+  |> List.map ~f:snd  
+
 let combined_erofa erofa lexiquepost90_to_erofa post90 =
-  let erofa_by_post90 =
-    hashtbl_of_alist_multi (module String) lexiquepost90_to_erofa
-    |> Hashtbl.map ~f:List.hd_exn
-  in
-  let post90_entries =
-    Hashtbl.filter_mapi post90 ~f:(fun ~key:pre90 ~data:post90 ->
-        match Hashtbl.find erofa_by_post90 pre90 with
-        | Some erofa -> raise_s [%sexp ~~(pre90 : string),
-                                 ~~(post90 : string),
-                                 ~~(erofa : string)]
-        | None ->
-           match Option.first_some
-                   (Hashtbl.find erofa post90)
-                   (Hashtbl.find erofa_by_post90 post90)
-           with
-           | Some _ as o -> o
-           | None ->
-              (* filter out changes such as chariotage->charriotage *)
-              if String.is_prefix post90 ~prefix:"charr"
-              || String.is_prefix post90 ~prefix:"combatt"
-              || String.is_prefix post90 ~prefix:"hindou" (* don't understand if the h is really
-                                                             dropped here? *)
-              || String.(=) post90 "reboursouffler"
-              then None
-              else Some post90)
-    |> Hashtbl.to_alist
-    |> List.sort ~compare:[%compare: string * string]
-  in
-  let all_entries =
-    (Hashtbl.to_alist erofa (* so [simplify_mapping] considers singular in the erofa csv *)
-     @ lexiquepost90_to_erofa
-     @ post90_entries
-    ) |> Staged.unstage (List.stable_dedup_staged ~compare:[%compare: string * _])
-  in
-  let all_entries = simplify_mapping all_entries in
-  let all_entries = List.filter all_entries ~f:(fun (old, _) -> not (Hashtbl.mem erofa old)) in
-  all_entries
+  (* start with whole erofa db, so [simplify_mapping] considers singular in the erofa csv *)
+  let base = Hashtbl.map erofa ~f:(fun data -> data, -1) in
+  List.iter lexiquepost90_to_erofa ~f:(fun (key, data) -> add_ranked base ~key ~data);
+  add_post90_entries base post90;
+  simplify_mapping base;
+  Hashtbl.filter_keys_inplace base ~f:(fun old -> not (Hashtbl.mem erofa old));
+  ranked base
 
 let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 =
   (* this causes a few regressions like
@@ -148,8 +145,17 @@ let with_flow ~env ~write ~diff ~f =
      Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
      None
 
-let gen ~env ~rules ~all ~write ~diff ~drop =
+let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
+  let rect90 = rect90 || List.is_empty rules in
   let root = root ~from:(Eio.Stdenv.fs env) in
+  let lexique = Data_src.Lexique.load ~root () in
+  let post90, lexique =
+    if rect90
+    then
+      let post90 = load_post90 ~root in
+      post90, build_lexique_post90 lexique post90
+    else Hashtbl.create (module String), lexique
+  in
   match
     with_flow ~env ~write ~diff ~f:(fun buf ->
         let print, after =
@@ -157,22 +163,22 @@ let gen ~env ~rules ~all ~write ~diff ~drop =
           then (fun _ _ -> ()), ignore
           else if all
           then (fun old new_ ->
+                (* doesn't contain rect1990 mappings currently *)
                 let mod_ = if String.(=) old new_ then "=" else "M" in
                 Eio.Buf_write.string buf [%string "%{old},%{new_},%{mod_}\n"]),
                ignore
           else (
-            let all = ref [] in
-            let seen = Hash_set.create (module String) in
-            (fun old new_ ->
-              match Hash_set.strict_add seen old with
-              | Error _ -> ()
-              | Ok () -> if String.(<>) old new_ then all := (old, new_) :: !all),
+            let all = Hashtbl.create (module String) ~size:(List.length lexique) in
+            (fun old new_ -> add_ranked all ~key:old ~data:new_),
             (fun () ->
-              let all = simplify_mapping (List.rev !all) in
-              List.iter all ~f:(fun (old, new_) ->
+              add_post90_entries all post90;
+              simplify_mapping all;
+              List.iter (ranked all) ~f:(fun (old, new_) ->
                   Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])))
         in
-        let stats = Rewrite.gen ~root ~rules print in
+        let stats =
+          Rewrite.gen ~skip_not_understood:rect90
+            ~lexique ~root ~rules print in
         after ();
         if Unix.isatty Unix.stderr then
           eprint_s [%sexp ~~(stats : Rewrite.stats)];
@@ -200,6 +206,9 @@ let gen_cmd ?doc name =
                                                      [Rewrite.name rule]))
            and+ acc in
            if present then rule :: acc else acc)
+     and+ rect90 = 
+       C.Arg.value (C.Arg.flag
+                      (C.Arg.info ~doc:"appliquer les rectifications de 1990" ["90"]))
      and+ all = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"inclure les mots inchangés" ["all"]))
      and+ write =
        C.Arg.value (C.Arg.opt (C.Arg.some C.Arg.string) None
@@ -212,7 +221,7 @@ let gen_cmd ?doc name =
                       (C.Arg.info ~doc:"(pour profiler) jeter le dictionnaire calculé" ["drop"]))
      in
      Eio_main.run (fun env ->
-         try gen ~env ~rules ~all ~write ~diff ~drop
+         try gen ~env ~rules ~rect90 ~all ~write ~diff ~drop
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
 
