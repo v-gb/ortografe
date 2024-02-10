@@ -91,7 +91,7 @@ let rewrite_e_double_consonants =
       let (ortho, (path, _), phon) = !ortho_phon in
       let rec loop k : Rules.path_elt list -> _ = function
         | ({ graphem = "e"; phonem = ("e" | "E"); _ } as p1)
-          :: ({ graphem = ("nn" | "mm" | "ll" | "tt" | "pp" | "ff" | "rr" | "cc" | "dd")
+          :: ({ graphem = ("bb" | "nn" | "mm" | "ll" | "tt" | "pp" | "ff" | "rr" | "cc" | "dd")
               ; phonem
               ; _ } as p2)
           :: rest
@@ -226,7 +226,7 @@ let erofa_preserve =
              ; str "hercul"
              ; str "sahar"
              ; str "luthér"
-             ; str "phénic"
+             ; prefix "phénic"
              ; str "syri" (* syrien *)
              ; str "athén"
              ; prefix "héro"
@@ -302,6 +302,10 @@ let erofa_preserve =
              ; prefix "palladien"
              ; prefix "palladièn"
              ; str "œdip"
+             ; prefix "phocé"
+             ; prefix "hawaï"
+             ; prefix "nippo"
+             ; str "prométhé"
              ; seq [rep any; str "flux"] (* reflux, influx comme flux *)
              (* pour préserver le t dans wisigoth et quelques autres mots. Je
                 ne comprends pas ce que fait le dico érofa d'ailleurs. ostrogoth
@@ -316,7 +320,7 @@ let erofa_preserve =
     "sexy"; "jury"; "papy"; "mamy"; "thomas"; "manhattan"; "ecstasy"; "antihéros"; "brandy";
     "off"; "dandy"; "bodhi"; "maharadjah"; "monopoly"; "zloty"; "body"; "sophie"; "crucifix";
     "party"; "fanny"; "gruyère"; "mylord"; "rotary"; "rochelle"; "lloyd"; "pennies"; "carry";
-    "mary"; "city"; "hadji"; "yéyé"; "derby"; "till"; "nippon"; "cheikh"; "husky"; "anya";
+    "mary"; "city"; "hadji"; "yéyé"; "derby"; "till"; "cheikh"; "husky"; "anya";
     "dharma"; "oye"; "hodja"; "mickey"; "bighorn"; "kalachnikov"; "roy"; "charybde"; "henry";
     "boukha"; "grizzly"; "haggadah"; "angleterre"; "bobsleigh"; "lobby"; "bobby"; "hickory";
     "scottish"; "sikh"; "sulky"; "théo"; "sammy"; "thrace"; "cosy"; "tommy"; "byte"; "regency";
@@ -326,7 +330,7 @@ let erofa_preserve =
     "royalty"; "abkhaze"; "alhambra"; "antiallemand"; "bachaghas"; "banyuls"; "bertha"; "bithynien";
     "bouzy"; "béhémoth"; "cattleyas"; "chaboisseaux"; "chaix"; "chypre"; "chnord"; "cécidomyies";
     "dandysme"; "galathée"; "ganymèdes"; "gaulle"; "gaullisme"; "gaulliste"; "gengiskhanide";
-    "ghât"; "golgotha"; "havanais"; "hawaïen"; "hittite"; "hosannah"; "jeannot"; "jerseys";
+    "ghât"; "golgotha"; "havanais"; "hittite"; "hosannah"; "jeannot"; "jerseys";
     "khazar"; "landwehr"; "lillois"; "lilloise"; "malherbe"; "marennes"; "margay"; "mathurins";
     "mercurey"; "mithriaque"; "mithridatisé"; "ouighour"; "parthique"; "phynances"; "proudhonisme";
     "préraphaélite"; "puy"; "ptyx"; "pyrrhonien"; "pyrrhonisme"; "raphaélesque"; "rennais";
@@ -334,9 +338,11 @@ let erofa_preserve =
     "sylvie"; "syriaque"; "sévillan"; "sévillane"; "taylorisme"; "taylorisé"; "thomisme";
     "thomiste"; "tilbury"; "tokharien"; "transylvain"; "varenne"; "vouvray"; "youyou"; "wallace";
     "chantilly"; "marianne"; "ardennais"; "joseph"; "hégélienne"; "tommies"; "allemagne"; "apollon";
-    "margaux"; "nippo"; "nippone"; "crécy"; "cary"; "cayenne"; "antigaulliste"; "ardennaise";
+    "margaux"; "crécy"; "cary"; "cayenne"; "antigaulliste"; "ardennaise";
     "chaldaïque"; "garrick"; "hébertisme"; "hégélianisme"; "hégélien"; "narbonnais"; "sarrois";
     "sarroise"; "siennois"; "siennoise"; "sorbonne"; "sorbonnarde"; "ferry"; "rallye"; "haseki";
+    "hobby"; "curry"; "paddy"; "caddy"; "guppy"; "hippy"; "cherry"; "wallaby"; "jenny"; "shimmy";
+    "bobbies"; "scrabble"; "sherry";
   ]) in
   fun old_ortho ->
   Hash_set.mem (force set) old_ortho
@@ -386,7 +392,7 @@ let erofa_prefilter' = lazy (
        ; str "deux"
        ; seq [any; str "y"]
        ; str "h"
-       ] @ List.map [ "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s -> str (s ^ s))
+       ] @ List.map [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s -> str (s ^ s))
 ))
 let erofa_prefilter = lazy (Re.compile (force erofa_prefilter'))
 
@@ -411,7 +417,7 @@ let erofa_rule = lazy (
         ])
   in
   let patterns_double_consonants =
-    List.map [ "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s ->
+    List.map [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s ->
         String.Search_pattern.create (s ^ s), s)
   in
   fun rules (lazy wiki) ((row : Data_src.Lexique.t), search_res) ->
@@ -983,7 +989,8 @@ let respell_oe ((row : Data_src.Lexique.t), (search_res : Rules.search_res)) =
   if List.exists (fst search_res) ~f:(fun p ->
          match p.graphem, p.phonem with
          | "oe", ("e" | "E" | "2" | "9")
-         | "oeu", ("2" | "9") -> true
+         | "oeu", ("2" | "9")
+         | "coe", "se" -> true
          | _ -> false)
   then
     let search_res =
@@ -991,6 +998,7 @@ let respell_oe ((row : Data_src.Lexique.t), (search_res : Rules.search_res)) =
           match p.graphem, p.phonem with
           | "oe", ("e" | "E" | "2" | "9") -> { p with graphem = "œ" }
           | "oeu", ("2" | "9") -> { p with graphem = "œu" }
+          | "coe", "se" -> { p with graphem = "cœ" }
           | _ -> p),
       snd search_res
     in
