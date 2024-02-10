@@ -152,21 +152,26 @@ let gen ~env ~rules ~all ~write ~diff =
   let root = root ~from:(Eio.Stdenv.fs env) in
   match
     with_flow ~env ~write ~diff ~f:(fun buf ->
-        let print =
+        let print, after =
           if all
           then (fun old new_ ->
                 let mod_ = if String.(=) old new_ then "=" else "M" in
-                Eio.Buf_write.string buf [%string "%{old},%{new_},%{mod_}\n"])
+                Eio.Buf_write.string buf [%string "%{old},%{new_},%{mod_}\n"]),
+               ignore
           else (
+            let all = ref [] in
             let seen = Hash_set.create (module String) in
-            fun old new_ ->
-            match Hash_set.strict_add seen old with
-            | Error _ -> ()
-            | Ok () ->
-               if String.(<>) old new_
-               then Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])
+            (fun old new_ ->
+              match Hash_set.strict_add seen old with
+              | Error _ -> ()
+              | Ok () -> if String.(<>) old new_ then all := (old, new_) :: !all),
+            (fun () ->
+              let all = simplify_mapping (List.rev !all) in
+              List.iter all ~f:(fun (old, new_) ->
+                  Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])))
         in
         let stats = Rewrite.gen ~root ~rules print in
+        after ();
         if Unix.isatty Unix.stderr then
           eprint_s [%sexp ~~(stats : Rewrite.stats)];
       )
