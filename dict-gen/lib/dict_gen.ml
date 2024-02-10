@@ -81,20 +81,12 @@ let add_post90_entries base post90 =
 
 let add_ranked tbl ~key ~data =
   ignore (Hashtbl.add tbl ~key ~data:(data, Hashtbl.length tbl) : [ `Ok | `Duplicate ])
+
 let ranked tbl =
   Hashtbl.to_alist tbl
   |> List.map ~f:(fun (o, (n, rank)) -> (rank, (o, n)))
   |> List.sort ~compare:[%compare: int * (string * _)]
   |> List.map ~f:snd  
-
-let combined_erofa erofa lexiquepost90_to_erofa post90 =
-  (* start with whole erofa db, so [simplify_mapping] considers singular in the erofa csv *)
-  let base = Hashtbl.map erofa ~f:(fun data -> data, -1) in
-  List.iter lexiquepost90_to_erofa ~f:(fun (key, data) -> add_ranked base ~key ~data);
-  add_post90_entries base post90;
-  simplify_mapping base;
-  Hashtbl.filter_inplace base ~f:(fun (_, rank) -> rank >= 0 (* i.e. "not from erofa" *));
-  ranked base
 
 let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 =
   (* this causes a few regressions like
@@ -112,21 +104,22 @@ let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 =
       | Some new_ortho -> { r with ortho = new_ortho })
 
 let build_erofa_ext ~root ~header =
-  let erofa = load_erofa ~root in
-  let post90 = load_post90 ~root in
-  let lexique = Data_src.Lexique.load ~root () in
-  let lexique_post90 = build_lexique_post90 lexique post90 in
-  let lexiquepost90_to_erofa =
-    let r = ref [] in
-    let _ : Rewrite.stats =
-      Rewrite.gen ~root ~lexique:lexique_post90
-        ~skip_not_understood:true
-        (fun old new_ -> r := (old, new_) :: !r)
-    in
-    List.rev !r
+  let combined_erofa =
+    (* start with whole erofa db, so [simplify_mapping] considers singular in the erofa csv *)
+    let base = Hashtbl.map (load_erofa ~root) ~f:(fun data -> data, -1) in
+    let post90 = load_post90 ~root in
+    ignore (
+        let lexique = Data_src.Lexique.load ~root () in
+        let lexique_post90 = build_lexique_post90 lexique post90 in
+        Rewrite.gen ~root ~lexique:lexique_post90
+          ~skip_not_understood:true
+          (fun old new_ -> add_ranked base ~key:old ~data:new_)
+        : Rewrite.stats);
+    add_post90_entries base post90;
+    simplify_mapping base;
+    Hashtbl.filter_inplace base ~f:(fun (_, rank) -> rank >= 0 (* i.e. "not from erofa" *));
+    ranked base
   in
-  if false then print_s [%sexp (lexiquepost90_to_erofa : (string * string) list)];
-  let combined_erofa = combined_erofa erofa lexiquepost90_to_erofa post90 in
   if header then print_endline [%string "old,new"];
   List.iter combined_erofa ~f:(fun (old, new_) ->
       print_endline [%string "%{old},%{new_}"])
