@@ -377,11 +377,14 @@ let create () =
           then [ "u", Core; "w", Core ]
           else [ "u", Core ]));
   new_fixed "oux$" [ "u", Core ];
-  new_fixed "oeu" [ "9", Core; "2", Core ];
+  List.iter [ "oeu"; "œu" ] ~f:(fun oeu ->
+      new_fixed oeu [ "9", Core; "2", Core ]);
   new_fixed "oell" [ "wal", Core ]; (* moelleux et compagnie *)
-  new_fixed "oe" [ "e", Core (* foetus *)
-                 ; "2", Core (* oedeme *)
-                 ; "9", Core (* oeil *) ]; 
+  List.iter [ "oe"; "œ" ] ~f:(fun oe ->
+      new_fixed oe [ "e", Core (* foetus *)
+                   ; "2", Core (* oedeme *)
+                   ; "9", Core (* oeil *) ]
+  );
   new_fixed "oê" [ "wa", Surprising ]; (* poêle *)
 
   (* U *)

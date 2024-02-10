@@ -301,6 +301,7 @@ let erofa_preserve =
              ; prefix "tyrièn"
              ; prefix "palladien"
              ; prefix "palladièn"
+             ; str "œdip"
              ; seq [rep any; str "flux"] (* reflux, influx comme flux *)
              (* pour préserver le t dans wisigoth et quelques autres mots. Je
                 ne comprends pas ce que fait le dico érofa d'ailleurs. ostrogoth
@@ -378,7 +379,7 @@ let new_rule' name doc ~prefilter f =
 
 let erofa_prefilter' = lazy (
   let open Re in
-  alt ([ str "oe"
+  alt ([ str "œ"
        ; seq [ str "x"; eos ]
        ; str "auxq"
        ; str "auxd"
@@ -392,9 +393,9 @@ let erofa_prefilter = lazy (Re.compile (force erofa_prefilter'))
 let erofa_rule = lazy (
   let pattern_ph = String.Search_pattern.create "ph" in
   let pattern_mph = String.Search_pattern.create "mph" in
-  let pattern_coeu = String.Search_pattern.create "coeu" in
-  let pattern_oeu = String.Search_pattern.create "oeu" in
-  let pattern_oe = String.Search_pattern.create "oe" in
+  let pattern_coeu = String.Search_pattern.create "cœu" in
+  let pattern_oeu = String.Search_pattern.create "œu" in
+  let pattern_oe = String.Search_pattern.create "œ" in
   let pattern_auxq = String.Search_pattern.create "auxq" in
   let pattern_auxd = String.Search_pattern.create "auxd" in
   let pattern_y = String.Search_pattern.create "y" in
@@ -976,6 +977,31 @@ let _ : string =
          in
          { row with ortho }, dummy_search_res))
 
+let respell_oe ((row : Data_src.Lexique.t), (search_res : Rules.search_res)) =
+  (* Lexique contient toujours œ écrit oe. On recolle les lettres, pour qu'on puisse
+     réécrire à la fois cœur et coeur, par exemple. *)
+  if List.exists (fst search_res) ~f:(fun p ->
+         match p.graphem, p.phonem with
+         | "oe", ("e" | "E" | "2" | "9")
+         | "oeu", ("2" | "9") -> true
+         | _ -> false)
+  then
+    let search_res =
+      List.map (fst search_res) ~f:(fun p ->
+          match p.graphem, p.phonem with
+          | "oe", ("e" | "E" | "2" | "9") -> { p with graphem = "œ" }
+          | "oeu", ("2" | "9") -> { p with graphem = "œu" }
+          | _ -> p),
+      snd search_res
+    in
+    let ortho =
+      List.map (fst search_res) ~f:(fun p -> p.graphem)
+      |> String.concat
+      |> String.chop_suffix_if_exists ~suffix:"$"
+    in
+    { row with ortho }, search_res
+  else row, search_res
+
 let doc rule = rule.doc
 let name rule = rule.name
 let all = lazy (List.rev !all)
@@ -993,9 +1019,9 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
   let rules = Rules.create () in
   let skip = load_skip () in
   let wiki = lazy (
-    let l = Data_src.Wiki_h.load ~root in
-    Hashtbl.of_alist_exn (module String)
-      (List.map l ~f:(fun r -> r.word, r.h_aspire)))
+                 let l = Data_src.Wiki_h.load ~root in
+                 Hashtbl.of_alist_exn (module String)
+                   (List.map l ~f:(fun r -> r.word, r.h_aspire)))
   in
   let rule, prefilter =
     let which_rules =
@@ -1027,7 +1053,7 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
                | `Re re -> re)
          with
          | exception Exit -> const true
-         | res -> Re.execp (Re.compile (Re.alt res))
+         | res -> Re.execp (Re.compile (Re.alt (Re.str "oe" :: res)))
        in
        rule, prefilter
   in
@@ -1055,8 +1081,13 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
              then raise_s s;
              f row.ortho row.ortho
           | Ok search_res ->
-             let row', _ = rule rules wiki (row, search_res) in
-             f row.ortho row'.ortho
+             (* Le oe est une correction du lexique, il s'applique donc à l'orthographe de
+                départ, pas l'orthographe d'arrivée comme les calculs de changements
+                d'orthographe. *)
+             let row_oe, search_res = respell_oe (row, search_res) in
+             let row', _ = rule rules wiki (row_oe, search_res) in
+             if row.ortho <> row_oe.ortho then f row.ortho row'.ortho;
+             f row_oe.ortho row'.ortho
     ));
   { total = !total; considered = !considered; prefiltered_out = !prefiltered_out; failed = !failed }
 
