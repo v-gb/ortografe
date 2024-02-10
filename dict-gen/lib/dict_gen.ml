@@ -93,7 +93,7 @@ let combined_erofa erofa lexiquepost90_to_erofa post90 =
   List.iter lexiquepost90_to_erofa ~f:(fun (key, data) -> add_ranked base ~key ~data);
   add_post90_entries base post90;
   simplify_mapping base;
-  Hashtbl.filter_keys_inplace base ~f:(fun old -> not (Hashtbl.mem erofa old));
+  Hashtbl.filter_inplace base ~f:(fun (_, rank) -> rank >= 0 (* i.e. "not from erofa" *));
   ranked base
 
 let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 =
