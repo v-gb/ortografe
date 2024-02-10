@@ -56,15 +56,17 @@ let simplify_mapping tbl =
          | _ -> true))
 
 let add_post90_entries base post90 =
-  (* we created fixed ranks to generated the same ordering as previous code *)
   Hashtbl.iteri post90 ~f:(fun ~key:pre90 ~data:post90 ->
       match Hashtbl.find base pre90 with
       | Some _ -> () (* erofa dictionary contains pre-1990 spellings, like frisotter rather than
                         frisoter *)
       | None ->
          match Hashtbl.find base post90 with
-         | Some (new_ortho, _) ->
-            Hashtbl.add_exn base ~key:pre90 ~data:(new_ortho, 100000000)
+         | Some (new_ortho, rank) ->
+            (* keep rank so related words together. When rank < 0, the word comes from the erofa
+               dictionary and is going to be filtered out, so don't keep that. *)
+            Hashtbl.add_exn base ~key:pre90
+              ~data:(new_ortho, if rank >= 0 then rank else 100000000)
          | None ->
             (* filter out changes such as chariotage->charriotage *)
             if String.is_prefix post90 ~prefix:"charr"
@@ -73,7 +75,9 @@ let add_post90_entries base post90 =
                                                               dropped here? *)
                || String.(=) post90 "reboursouffler"
             then ()
-            else Hashtbl.add_exn base ~key:pre90 ~data:(post90, 100000000))
+            else
+              (* we created fixed ranks to generated the same ordering as previous code *)
+              Hashtbl.add_exn base ~key:pre90 ~data:(post90, 100000000))
 
 let add_ranked tbl ~key ~data =
   ignore (Hashtbl.add tbl ~key ~data:(data, Hashtbl.length tbl) : [ `Ok | `Duplicate ])
