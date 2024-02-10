@@ -148,12 +148,14 @@ let with_flow ~env ~write ~diff ~f =
      Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
      None
 
-let gen ~env ~rules ~all ~write ~diff =
+let gen ~env ~rules ~all ~write ~diff ~drop =
   let root = root ~from:(Eio.Stdenv.fs env) in
   match
     with_flow ~env ~write ~diff ~f:(fun buf ->
         let print, after =
-          if all
+          if drop
+          then (fun _ _ -> ()), ignore
+          else if all
           then (fun old new_ ->
                 let mod_ = if String.(=) old new_ then "=" else "M" in
                 Eio.Buf_write.string buf [%string "%{old},%{new_},%{mod_}\n"]),
@@ -205,9 +207,12 @@ let gen_cmd ?doc name =
      and+ diff =
        C.Arg.value (C.Arg.opt (C.Arg.some C.Arg.string) None
                       (C.Arg.info ~doc:"diff le dictionnaire avec le fichier spécifié" ["diff"]))
+     and+ drop =
+       C.Arg.value (C.Arg.flag
+                      (C.Arg.info ~doc:"(pour profiler) jeter le dictionnaire calculé" ["drop"]))
      in
      Eio_main.run (fun env ->
-         try gen ~env ~rules ~all ~write ~diff
+         try gen ~env ~rules ~all ~write ~diff ~drop
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
 
