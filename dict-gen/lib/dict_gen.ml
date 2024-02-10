@@ -147,6 +147,10 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
   let root = root ~from:(Eio.Stdenv.fs env) in
   let lexique = Data_src.Lexique.load ~root () in
   let post90, lexique =
+    (* One problem that complicate enabling this by default is the resulting lexique
+       has spelling that are out of sync with the pronunciation, thus preventing them
+       from being rewritten. Annoying for ortograf.net or alfonic, where everything
+       is supposed to be rewritten. *)
     if rect90
     then
       let post90 = load_post90 ~root in
