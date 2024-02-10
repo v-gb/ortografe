@@ -510,57 +510,58 @@ let search rules word phon =
   let word_dollar = word ^ "$" in
   let furthest = ref (0, 0) in
   let rec loop () =
-    match Heap.pop_minimum pqueue with
-    | exception Binary_heap.Empty ->
+    if Heap.is_empty pqueue
+    then
        Error [%sexp "can't express", (word : string), (phon : string),
               (String.drop_prefix word (fst !furthest) : string),
               (String.drop_prefix phon (snd !furthest) : string)]
-    | (i, j, surprise, path) ->
-       if false then
-         print_s [%sexp
-                     (String.prefix word i : string),
-                  (String.prefix phon j : string),
-                  (String.drop_prefix word i : string),
-                  (String.drop_prefix phon j : string)];
-       if i >=$ String.length word
-       then
-         if j =$ String.length phon
-         then Ok (List.rev path, surprise)
-         else loop ()
-       else (
-         if [%compare: int * int] (j, i) (snd !furthest, fst !furthest) >$ 0 then
-           furthest := (i, j);
-         let longest_matching_core_graphem = ref None in
-         List.iter (Hashtbl.find_exn rules word.[i]) ~f:(fun (graphem, f) ->
-             if String.is_substring_at word_dollar ~pos:i ~substring:graphem
-             then (
-               let phonems = f word i (i + String.length graphem) in
-               List.iter phonems ~f:(fun (phonem, importance) ->
-                   if Option.is_none !longest_matching_core_graphem
-                      && (match importance with
-                          | Core -> true
-                          | Surprising | Core_optional -> false)
-                        (* should probably count code points instead of String.length *)
-                   then longest_matching_core_graphem := Some (String.length graphem);
-                   if String.is_substring_at phon ~pos:j ~substring:phonem
-                   then
-                     let this_surprise = 
-                       (match importance with
-                        | Core | Core_optional ->
-                           (match !longest_matching_core_graphem with
-                            | None -> 0
-                            | Some longest -> Bool.to_int (String.length graphem <$ longest))
-                        | Surprising -> 1)
-                     in
-                     Heap.add pqueue (i + String.length graphem,
-                                      j + String.length phonem,
-                                      surprise + this_surprise,
-                                      { graphem; phonem; i; j; this_surprise; importance } :: path)
-                 )
-             )
-           );
-         loop ()
-       )
+    else
+      let (i, j, surprise, path) = Heap.pop_minimum pqueue in
+      if false then
+        print_s [%sexp
+                    (String.prefix word i : string),
+                 (String.prefix phon j : string),
+                 (String.drop_prefix word i : string),
+                 (String.drop_prefix phon j : string)];
+      if i >=$ String.length word
+      then
+        if j =$ String.length phon
+        then Ok (List.rev path, surprise)
+        else loop ()
+      else (
+        if [%compare: int * int] (j, i) (snd !furthest, fst !furthest) >$ 0 then
+          furthest := (i, j);
+        let longest_matching_core_graphem = ref None in
+        List.iter (Hashtbl.find_exn rules word.[i]) ~f:(fun (graphem, f) ->
+            if String.is_substring_at word_dollar ~pos:i ~substring:graphem
+            then (
+              let phonems = f word i (i + String.length graphem) in
+              List.iter phonems ~f:(fun (phonem, importance) ->
+                  if Option.is_none !longest_matching_core_graphem
+                     && (match importance with
+                         | Core -> true
+                         | Surprising | Core_optional -> false)
+                       (* should probably count code points instead of String.length *)
+                  then longest_matching_core_graphem := Some (String.length graphem);
+                  if String.is_substring_at phon ~pos:j ~substring:phonem
+                  then
+                    let this_surprise = 
+                      (match importance with
+                       | Core | Core_optional ->
+                          (match !longest_matching_core_graphem with
+                           | None -> 0
+                           | Some longest -> Bool.to_int (String.length graphem <$ longest))
+                       | Surprising -> 1)
+                    in
+                    Heap.add pqueue (i + String.length graphem,
+                                     j + String.length phonem,
+                                     surprise + this_surprise,
+                                     { graphem; phonem; i; j; this_surprise; importance } :: path)
+                )
+            )
+          );
+        loop ()
+      )
   in
   loop ()
 
