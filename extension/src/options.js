@@ -46,7 +46,18 @@ async function saveOptions(e) {
                 document.getElementById("file_error").innerText = "error importing file " + e.toString();
             }
         }
-    } else {
+    } else if (e.target.id.startsWith("load-")) {
+        try {
+            const dict_name = e.target.id.substring("load-".length);
+            const dict = dicts[dict_name];
+            await b.storage.local.set({'custom_dict': dict});
+            document.getElementById("load_error").innerText = "";
+            await display_dict_preview()
+        } catch (e) {
+            document.getElementById("load_error").innerText = "error loading dict " + e.toString();
+        }
+    }
+    else {
         const options = {}
         for (f of fields) {
             if (f == 'rewrite') {
@@ -100,7 +111,7 @@ async function restoreOptions() {
 document.addEventListener('DOMContentLoaded', restoreOptions);
 document.querySelector("form").addEventListener("change", saveOptions);
 const open_options_page_elt = document.getElementById("open-options-page")
-const load_dict = document.getElementById("load-dict")
+const load_dict = document.getElementById("load-dict-section")
 if (location.hash === '#popup') {
     open_options_page_elt.addEventListener("click", () => b.runtime.openOptionsPage());
     load_dict.style["display"] = "none"

@@ -17,3 +17,34 @@
   (with-stdout-to dict-rect1990+erofa.adds.csv
    (setenv DUNEROOT %{project_root}
     (run %{project_root}/dict-gen/bin/dict_gen.exe erofa-ext)))))
+
+(rule
+ (target dict-ortograf.net-plat.csv)
+ (deps
+  (sandbox always)
+   %{project_root}/data/lexique/Lexique383.gen.tsv
+   %{project_root}/data/wiktionnaire/min-h.gen.csv)
+ (action
+  (setenv DUNEROOT %{project_root}
+   (run %{project_root}/dict-gen/bin/dict_gen.exe gen --ortograf.net-plat --write %{target}))))
+
+(rule
+ (target dict-alfonic.csv)
+ (deps
+  (sandbox always)
+   %{project_root}/data/lexique/Lexique383.gen.tsv
+   %{project_root}/data/wiktionnaire/min-h.gen.csv)
+ (action
+  (setenv DUNEROOT %{project_root}
+   (run %{project_root}/dict-gen/bin/dict_gen.exe gen --alfonic --write %{target}))))
+
+(rule
+ (target dict-qu.csv)
+ (deps
+  (sandbox always)
+   %{project_root}/data/lexique/Lexique383.gen.tsv
+   %{project_root}/data/wiktionnaire/min-h.gen.csv
+   %{project_root}/extension/dict1990.gen.csv)
+ (action
+  (setenv DUNEROOT %{project_root}
+   (run %{project_root}/dict-gen/bin/dict_gen.exe gen --90 --qu--q --qu--qou --write %{target}))))

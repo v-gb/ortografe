@@ -61,13 +61,37 @@
         </button>
       </div>
 
-      <form>
-        <div>
-          <label for="load-dict-input" class="btn" id="load-dict">charger un dictionnaire</label>
-          <input style="display:none" type="file" id="load-dict-input">
-        </div>
-        <div id='file_error'></div>
-      </form>
+      <div id="load-dict-section">
+        <form>
+          <div>
+            <label for="load-dict-input" class="btn">charger un dictionnaire depuis un fichier</label>
+            <input style="display:none" type="file" id="load-dict-input">
+          </div>
+          <div id='file_error'></div>
+        </form>
+        
+        <form>
+          <details>
+            <summary>Ou charger des règles déjà construites</summary>
+            <div>
+              <input style="display:none" type="radio" id="load-ortograf_net_plat"
+                     name="load-radio" value="ortograf_net_plat">
+              <span><label class="btn" for="load-ortograf_net_plat">ortograf.net
+                     </label> (mais sans distinction entre é et è)</span>
+            </div>
+            <div>
+              <input style="display:none" type="radio" id="load-alfonic"
+                     name="load-radio" value="alfonic">
+              <label class="btn" for="load-alfonic">alfonic.org</label>
+            </div>
+            <div>
+              <input style="display:none" type="radio" id="load-qu" name="load-radio" value="qu">
+              <label class="btn" for="load-qu">«qu» devient soit «q» soit «qou» </label>
+            </div>
+          </details>
+          <div id='load_error'></div>
+        </form>
+      </div>
 
       <br>
 
@@ -102,5 +126,6 @@
     </form>
 
     <script src="options.js"></script>
+    <script src="dict_extra.js"></script>
   </body>
 </html>

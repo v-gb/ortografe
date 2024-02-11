@@ -92,8 +92,26 @@ if [ "${1-part2}" = part2 ]; then
         echo $w,bug-if-displayed
     done >> dict.gen.csv
 
+    function embed {
+        echo -n "const dict_$1 = \""; tr '\n' '/' < $2; echo '"';
+    }
+    { embed erofa dict.gen.csv; embed rect1990 dict1990.gen.csv; } > dict.js
+
     {
-        echo -n 'const dict_erofa = "'; tr '\n' '/' < dict.gen.csv; echo '"';
-        echo -n 'const dict_rect1990 = "'; tr '\n' '/' < dict1990.gen.csv; echo '"';
-    } > dict.js
+        keys=()
+        for f in $DUNEROOT/data/homemade/dict-*.csv; do
+            case "$f" in
+                *rect1990+erofa*) continue
+            esac
+            base=$(basename "$f" .csv | sed 's/dict-//' | tr .- __)
+            embed "$base" "$f"
+            keys+=("$base")
+        done
+
+        echo -n "const dicts = { "
+        for key in "${keys[@]}"; do
+            echo -n "$key: dict_$key, "
+        done
+        echo "}"
+    } > dict_extra.js
 fi

@@ -11,11 +11,11 @@
  (action (run ./import-dict part1)))
 
 (rule
- (targets dict.gen.csv dict.js)
+ (targets dict.gen.csv dict.js dict_extra.js)
  (mode promote)
  (deps (sandbox always)
    import-dict
-   ../data/homemade/dict-rect1990+erofa.adds.csv
+   (glob_files ../data/homemade/*.csv)
    dict.external-sources.gen.csv
    dict1990.gen.csv)
  (action
