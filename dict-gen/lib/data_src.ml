@@ -99,7 +99,6 @@ module Lexique = struct
   type t =
     { ortho : string
     ; phon : string
-    ; freqfilms2 : float
     ; cgram : string
     ; lemme : string
     }
@@ -113,16 +112,13 @@ module Lexique = struct
       Csv_header.(
       let+ ortho = field "ortho" Fn.id
       and+ phon = field "phon" Fn.id
-      and+ freqfilms2 = field "freqfilms2" float_of_string
       and+ cgram = field "cgram" Fn.id
       and+ lemme = field "lemme" Fn.id
       in
-      { ortho; phon; freqfilms2; cgram; lemme })
+      { ortho; phon; cgram; lemme })
     |> List.filter ~f:(fun t ->
            not (List.exists [ " "; "ñ"; "."; "ã" ]
                   ~f:(fun substring -> String.is_substring ~substring t.ortho)))
-    |> List.sort ~compare:(fun t1 t2 ->
-           [%compare: float Comparable.reversed] t1.freqfilms2 t2.freqfilms2)
 
   let not_usable_words () =
     Hash_set.of_list (module String) [

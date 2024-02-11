@@ -4,7 +4,6 @@ module Lexique : sig
   type t =
     { ortho : string
     ; phon : string
-    ; freqfilms2 : float
     ; cgram : string
     ; lemme : string
     }

@@ -23,6 +23,6 @@
         -cmd ".bail on"
         -cmd ".mode tab"
         -cmd ".import Lexique383-full.gen.tsv tmp"
-        -cmd "create table t as select ortho,phon,lemme,cgram,genre,nombre,freqfilms2,freqlivres,infover from tmp;"
+        -cmd "create table t as select ortho,phon,lemme,cgram,genre,nombre,infover from tmp order by cast (freqfilms2 as real) desc;"
         -cmd ".header on"
         -cmd "select * from t"))))
