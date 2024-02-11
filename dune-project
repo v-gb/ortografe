@@ -8,7 +8,6 @@
  (name ortografe)
  (allow_empty)
  (depends ocaml dune
-          ;; jj files | grep dune | xargs cat | sexp query 'each (variant libraries) each'  | cut -d . -f 1 | sort -u | grep -E -v '^(libraries|cmdliner_bindops|dict_gen|ortografe)$' | xargs echo
-          bheap cmdliner core core_unix csv dream eio eio_main hyper markup patience_diff ppxlib re uri uucp uunf uuseg uutf zipc
+          bheap cmdliner core core_unix csv dream eio eio_main hyper lwt_ppx markup patience_diff ppx_jane ppxlib re uri uucp uunf uuseg uutf zipc ;; MARKER
 
  ))

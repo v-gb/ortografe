@@ -18,8 +18,13 @@ run-container: build-container
 fly-deploy: build-container
 	fly deploy
 
+update-opam:
+	@ # it's a mystery why you have to run dune describe external-lib-deps
+	@ # and tell dune to put that in the opam file, rather than have dune just do it
+	./update-opam-file
+
 install-opam-and-dune:
 	@ # instructions from https://opam.ocaml.org/doc/Install.html
-	bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"
-	opam install dune sexp
-	opam install $(dune describe external-lib-deps | sexp select external_deps | sexp query 'each (index 0)' | sort -u | grep -v [.])
+	if ! which opam > /dev/null; then bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"; fi
+	@ echo "[32mignore complaints about missing fields below, opam is being silly, and it doesn't prevent the command from working[39m"
+	opam install --deps-only ./ortografe.opam
