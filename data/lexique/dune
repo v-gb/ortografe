@@ -15,13 +15,42 @@
 ;; extension in the future, that'd also cut down the size of that data by 3.5x.
 (rule
  (target Lexique383.gen.tsv)
- (deps (sandbox always) Lexique383-full.gen.tsv)
+ (deps (sandbox always)
+   Lexique383-full.gen.tsv
+   ../wiktionnaire/min-h.gen.csv
+   1990.csv
+ )
  (action
   (with-stdout-to %{target}
    (run sqlite3
         -cmd ".bail on"
+        -cmd ".mode csv"
+        -cmd ".import ../wiktionnaire/min-h.gen.csv w"
+        -cmd ".import 1990.csv r"
+        -cmd "create index w_word on w(word)"
+        ;; min-h.gen.csv has an entry harakiri, but lexique has an entry for hari-kiri, so
+        ;; we miss this h_aspire. We use 1990.csv to add to w an entry for hari-kiri based
+        ;; on the entry for harakiri.
+        -cmd "insert into w(word,h_aspire)
+              select r.ortho,w.h_aspire from w 
+              inner join r on r.post90 = w.word
+              where not exists (select 1 from w where r.ortho = w.word)
+              "
         -cmd ".mode tab"
         -cmd ".import Lexique383-full.gen.tsv tmp"
-        -cmd "create table t as select ortho,phon,lemme,cgram,genre,nombre,infover from tmp order by cast (freqfilms2 as real) desc;"
         -cmd ".header on"
-        -cmd "select * from t"))))
+        -cmd "select ortho,phon,lemme,cgram,genre,nombre,infover,
+                     (case
+                      when ortho like 'h%'
+                      then
+                        case
+                        when ortho like 'hai%' or ortho like 'haï%' then 't'
+                        when coalesce(w_lemme.h_aspire, w.h_aspire, 'true') = 'true' then 't'
+                        else 'f'
+                        end
+                      else 'f'
+                      end) as h_aspire
+              from tmp
+              left join w on tmp.ortho = w.word
+              left join w as w_lemme on tmp.lemme = w_lemme.word
+              order by cast (freqfilms2 as real) desc"))))

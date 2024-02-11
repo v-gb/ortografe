@@ -32,7 +32,7 @@
   (sandbox always)
    %{project_root}/data/lexique/Lexique383.gen.tsv
    %{project_root}/extension/dict1990.gen.csv
-   %{project_root}/data/wiktionnaire/min-h.gen.csv)
+ )
  (action
   (with-stdout-to dict-arpetani.csv
    (setenv DUNEROOT %{project_root}

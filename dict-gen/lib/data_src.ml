@@ -58,43 +58,6 @@ module Csv_header = struct
       |> List.rev
 end
 
-module More_re = struct
-  let replace_many l =
-    let re = Re.compile (Re.alt (List.map l ~f:(fun (a, _) -> Re.str a))) in
-    let table = Hashtbl.of_alist_exn (module String) l in
-    fun str ->
-    Re.replace re str ~f:(fun group ->
-        Hashtbl.find_exn table (Re.Group.get group 0))
-end
-
-module Sampa = struct
-  (* https://fr.wikipedia.org/wiki/Symboles_SAMPA_fran%C3%A7ais *)
-  let de_sampa_map = [
-      "2", "ø";
-      "9", "œ";
-      "°", "ə";
-      "E", "ɛ";
-      "@", "ɑ̃";
-      "5", "ɛ̃";
-      "§", "ɔ̃";
-      "1", "œ̃";
-      "Z", "ʒ";
-      "R", "ʁ";
-      "S", "ʃ";
-      "O", "ɔ";
-      "8", "ɥ";
-      "N", "ɲ";
-      "5", "Ẽ";
-      "§", "Õ";
-      "a", "ɑ";
-      "1", "9̃";
-      "g", "ɡ";
-    ]
-  let of_ipa =
-    let f = lazy (More_re.replace_many (List.map de_sampa_map ~f:Tuple.T2.swap)) in
-    fun str -> (force f) str
-end
-
 let in_build_dir ~root filename =
   if Eio.Path.is_file (root ^/ filename)
   then root ^/ filename
@@ -106,6 +69,7 @@ module Lexique = struct
     ; phon : string
     ; cgram : string
     ; lemme : string
+    ; h_aspire : bool
     }
   [@@deriving sexp_of]
 
@@ -119,8 +83,13 @@ module Lexique = struct
       and+ phon = field "phon" Fn.id
       and+ cgram = field "cgram" Fn.id
       and+ lemme = field "lemme" Fn.id
+      and+ h_aspire =
+        field "h_aspire"
+          (function "t" -> true
+                  | "f" -> false
+                  | s -> failwith ("unknown value of h_aspire: " ^ s))
       in
-      { ortho; phon; cgram; lemme })
+      { ortho; phon; cgram; lemme; h_aspire })
     |> List.filter ~f:(fun t ->
            not (List.exists [ " "; "ñ"; "."; "ã" ]
                   ~f:(fun substring -> String.is_substring ~substring t.ortho)))
@@ -438,48 +407,6 @@ module Lexique = struct
         "cuiller"; "cafeteria"; "cafeteria"; "artefact"; "bonneterie";
         "crematorium"; "acupuncture";
     ]
-end
-
-module Wiki = struct
-  type t =
-    { word : string
-    ; phon : string
-    ; h_aspire : bool
-    }
-  [@@deriving sexp_of]
-
-  let load ~root =
-    Eio.Path.load (in_build_dir ~root "data/wiktionnaire/min.gen.csv")
-    |> Csv_header.parse_string
-      ~header:`In_string
-      ~separator:','
-      Csv_header.(
-      let+ word = field "word" Fn.id
-      and+ phon =
-        let remove_noise = More_re.replace_many [ "\\", ""; ".", ""; "‿", ""; " ", "" ] in
-        field "ipa" (fun ipa -> Sampa.of_ipa (remove_noise ipa))
-      and+ h_aspire = field "h_aspire" Bool.of_string
-      in
-      { word; phon; h_aspire })
-end
-
-module Wiki_h = struct
-  type t =
-    { word : string
-    ; h_aspire : bool
-    }
-  [@@deriving sexp_of]
-
-  let load ~root =
-    Eio.Path.load (in_build_dir ~root "data/wiktionnaire/min-h.gen.csv")
-    |> Csv_header.parse_string
-      ~header:`In_string
-      ~separator:','
-      Csv_header.(
-      let+ word = field "word" Fn.id
-      and+ h_aspire = field "h_aspire" Bool.of_string
-      in
-      { word; h_aspire  })
 end
 
 let read_key_value_comma_sep_file f =

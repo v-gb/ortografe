@@ -8,7 +8,6 @@
  (deps
   (sandbox always)
    %{project_root}/data/lexique/Lexique383.gen.tsv
-   %{project_root}/data/wiktionnaire/min-h.gen.csv
    %{project_root}/extension/dict.external-sources.gen.csv
    %{project_root}/extension/dict1990.gen.csv
  )
@@ -23,7 +22,6 @@
  (deps
   (sandbox always)
    %{project_root}/data/lexique/Lexique383.gen.tsv
-   %{project_root}/data/wiktionnaire/min-h.gen.csv
    %{project_root}/extension/dict1990.gen.csv)
  (action
   (setenv DUNEROOT %{project_root}
@@ -34,7 +32,6 @@
  (deps
   (sandbox always)
    %{project_root}/data/lexique/Lexique383.gen.tsv
-   %{project_root}/data/wiktionnaire/min-h.gen.csv
    %{project_root}/extension/dict1990.gen.csv)
  (action
   (setenv DUNEROOT %{project_root}
@@ -45,7 +42,6 @@
  (deps
   (sandbox always)
    %{project_root}/data/lexique/Lexique383.gen.tsv
-   %{project_root}/data/wiktionnaire/min-h.gen.csv
    %{project_root}/extension/dict1990.gen.csv)
  (action
   (setenv DUNEROOT %{project_root}

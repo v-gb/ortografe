@@ -365,7 +365,6 @@ type rule =
   { name : string
   ; doc : string
   ; f : (Rules.t
-         -> (string, bool) Base.Hashtbl.t Lazy.t
          -> (Data_src.Lexique.t * Rules.search_res)
          -> Data_src.Lexique.t * Rules.search_res
         ) Lazy.t
@@ -386,7 +385,7 @@ let new_rule' ?supports_repeated_rewrites name ?plurals_in_s doc ~prefilter f =
     ~prefilter
     (lazy (
       let f' = force f in
-      fun rules _wiki row_and_search_res ->
+      fun rules row_and_search_res ->
         f' { rules; accept = const true } row_and_search_res))
 
 let erofa_prefilter' = lazy (
@@ -437,19 +436,11 @@ let erofa_rule = lazy (
     List.map [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s ->
         String.Search_pattern.create (s ^ s), s)
   in
-  fun rules (lazy wiki) ((row : Data_src.Lexique.t), search_res) ->
+  fun rules ((row : Data_src.Lexique.t), search_res) ->
   if not (Re.execp (force erofa_prefilter) row.ortho)
   then (row, search_res)
   else
     let env = { rules; accept = if erofa_preserve row.ortho then erofa_preserve else const true } in
-    let h_aspire =
-      String.is_prefix row.ortho ~prefix:"h"
-      && (String.is_prefix row.ortho ~prefix:"haï"
-          || String.is_prefix row.ortho ~prefix:"hai"
-          || match Hashtbl.find wiki row.lemme with
-             | None -> Option.value (Hashtbl.find wiki row.ortho) ~default:true
-             | Some h_aspire -> h_aspire)
-    in
      let ortho = ref (row.ortho, search_res) in
      List.iter patterns_ch ~f:(fun (target, repl) ->
          ortho := rewrite env row !ortho ~target ~repl);
@@ -490,7 +481,7 @@ let erofa_rule = lazy (
      let h_start =
        if String.is_prefix (fst !ortho) ~prefix:"déh"
        then String.length "déh" (* déhancher serait déshancher si le h n'était pas aspiré *)
-       else Bool.to_int h_aspire
+       else Bool.to_int row.h_aspire
      in
      ortho := rewrite env row !ortho ~target:pattern_h ~repl:"" ~start:h_start;
      let row =
@@ -1047,11 +1038,6 @@ let gen ~root ?(fix_oe = false) ?(not_understood = `Ignore) ?lexique ?rules:(whi
   Sexp_with_utf8.linkme;
   let rules = Rules.create () in
   let skip = load_skip () in
-  let wiki = lazy (
-                 let l = Data_src.Wiki_h.load ~root in
-                 Hashtbl.of_alist_exn (module String)
-                   (List.map l ~f:(fun r -> r.word, r.h_aspire)))
-  in
   let rule, prefilter =
     let which_rules =
       let rank rule =
@@ -1070,9 +1056,9 @@ let gen ~root ?(fix_oe = false) ?(not_understood = `Ignore) ?lexique ?rules:(whi
     | [] -> force erofa_rule, const true
     | _ :: _ ->
        let rule =
-         fun rules wiki row_search_res ->
+         fun rules row_search_res ->
          List.fold_left which_rules ~init:row_search_res ~f:(fun row_search_res rule ->
-             (Lazy.force rule.f) rules wiki row_search_res)
+             (Lazy.force rule.f) rules row_search_res)
        in
        let prefilter =
          match
@@ -1116,7 +1102,7 @@ let gen ~root ?(fix_oe = false) ?(not_understood = `Ignore) ?lexique ?rules:(whi
                 départ, pas l'orthographe d'arrivée comme les calculs de changements
                 d'orthographe. *)
              let row_oe, search_res_oe = respell_oe (row, search_res) in
-             let row_oe', _ = rule rules wiki (row_oe, search_res_oe) in
+             let row_oe', _ = rule rules (row_oe, search_res_oe) in
              if row.ortho <> row_oe.ortho then (
                let row' =
                  if fix_oe (* Quand fix_oe, on réécrit tous les oe qui survive à la transformation
@@ -1128,7 +1114,7 @@ let gen ~root ?(fix_oe = false) ?(not_understood = `Ignore) ?lexique ?rules:(whi
                               - fix_oe=false : cœur -> kœur, coeur -> koeur
                             *)
                  then row_oe'
-                 else fst (rule rules wiki (row, search_res))
+                 else fst (rule rules (row, search_res))
                in
                f row.ortho row'.ortho
              );
