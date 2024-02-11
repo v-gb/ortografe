@@ -103,7 +103,7 @@ let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 =
       | None -> r
       | Some new_ortho -> { r with ortho = new_ortho })
 
-let build_erofa_ext ~root ~header =
+let build_erofa_ext ~root =
   let combined_erofa =
     (* start with whole erofa db, so [simplify_mapping] considers singular in the erofa csv *)
     let base = Hashtbl.map (load_erofa ~root) ~f:(fun data -> data, -1) in
@@ -120,7 +120,6 @@ let build_erofa_ext ~root ~header =
     Hashtbl.filter_inplace base ~f:(fun (_, rank) -> rank >= 0 (* i.e. "not from erofa" *));
     ranked base
   in
-  if header then print_endline [%string "old,new"];
   List.iter combined_erofa ~f:(fun (old, new_) ->
       print_endline [%string "%{old},%{new_}"])
 
@@ -246,10 +245,10 @@ let main () =
                Rules.check lexique ~skip:(Rewrite.load_skip ())))
       ; gen_cmd "gen"
       ; C.Cmd.v (C.Cmd.info "erofa-ext")
-          (let+ header = C.Arg.value (C.Arg.flag (C.Arg.info ["header"])) in
+          (let+ () = return () in
            Eio_main.run (fun env ->
                let root = root ~from:(Eio.Stdenv.fs env) in
-               build_erofa_ext ~root ~header))
+               build_erofa_ext ~root))
       ]
   in
   C.Cmd.eval cmd |> exit

@@ -83,7 +83,7 @@ fi
 
 if [ "${1-part2}" = part2 ]; then
     cp --no-preserve=all dict.external-sources.gen.csv dict.gen.csv
-    tail -n +2 ../data/homemade/dict-rect1990+erofa.adds.csv | cut -d , -f 1,2 >> dict.gen.csv
+    cat ../data/homemade/dict-rect1990+erofa.adds.csv >> dict.gen.csv
 
     # Capitalized words in the dict are treated as exceptions, for
     # cases when the capitalized version of the word is almost never the common
