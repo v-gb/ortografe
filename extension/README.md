@@ -1,17 +1,8 @@
 # How to tweak and try locally
 
-Run:
-
-```bash
-./import-dict
-./make-icon
-```
-
-Or, alternatively with `dune`:
-
 ```bash
 # (cd ../; make install-opam-and-dune)
-# dune build
+# make all
 ```
 
 For firefox: the first time, go to `about:debugging` -> `this firefox`

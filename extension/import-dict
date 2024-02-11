@@ -92,13 +92,8 @@ if [ "${1-part2}" = part2 ]; then
         echo $w,bug-if-displayed
     done >> dict.gen.csv
 
-    if [ "${DUNEROOT-}" ]; then
-        target=dict.js
-    else
-        target=src/dict.js
-    fi
     {
         echo -n 'const dict_erofa = "'; tr '\n' '/' < dict.gen.csv; echo '"';
         echo -n 'const dict_rect1990 = "'; tr '\n' '/' < dict1990.gen.csv; echo '"';
-    } > $target
+    } > dict.js
 fi
