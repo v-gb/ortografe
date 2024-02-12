@@ -11,7 +11,10 @@
  (action (run ./import-dict part1)))
 
 (rule
- (targets dict.gen.csv dict.js dict_extra.js)
+ (targets dict.gen.csv dict.js
+          alfonic.dict
+          ortograf_net_plat.dict
+          qu.dict)
  (mode promote)
  (deps (sandbox always)
    import-dict

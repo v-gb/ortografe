@@ -1,8 +1,5 @@
-(rule
- (action
-  (progn
-   (copy ../dict.js dict.js)
-   (copy ../dict_extra.js dict_extra.js)))
+(copy_files
+ (files ../{dict.js,*.dict})
  (mode promote))
 
 (rule

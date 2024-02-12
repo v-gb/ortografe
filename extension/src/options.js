@@ -4,6 +4,14 @@ const is_manifest_v2 = false
 const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language', 'debug_lang_test'];
 const all_fields = ['disable'].concat(fields)
 
+async function grab_dict(name) {
+    // firefox linter is not happy with javascript files over 4MB, and also not happy with
+    // json files over 4MB. So we use make one dictionary per file, and it's not even
+    // json.
+    const response = await fetch("./" + name + ".dict");
+    return (await response.text()).replaceAll('\n', '/');
+}
+
 async function display_dict_preview() {
     const custom_dict = (await storage_get('custom_dict')).custom_dict
     const elt = document.getElementById("dict")
@@ -49,7 +57,7 @@ async function saveOptions(e) {
     } else if (e.target.id.startsWith("load-")) {
         try {
             const dict_name = e.target.id.substring("load-".length);
-            const dict = dicts[dict_name];
+            const dict = await grab_dict(dict_name);
             await b.storage.local.set({'custom_dict': dict});
             document.getElementById("load_error").innerText = "";
             await display_dict_preview()
