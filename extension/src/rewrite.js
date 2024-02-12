@@ -351,11 +351,11 @@ function load_dict(options) {
     let table = new Map()
     if (!options.trivial) {
         const t1 = performance.now();
-        const dict =
-              options.rewrite == 'rect1990' ? dict_rect1990 :
-              options.rewrite == 'custom' ? (options.custom_dict || '') :
-              dict_erofa;
-        for (line of dict.split("/")) {
+        const [ dict, separator ] =
+              options.rewrite == 'rect1990' ? [ dict_rect1990, '/' ] :
+              options.rewrite == 'custom' ? [ (options.custom_dict || ''), '\n' ] :
+              [ dict_erofa, '/' ];
+        for (line of dict.split(separator)) {
             const [a,b] = line.split(",")
             if (a && b && a != b) {
                 table.set(a, b)

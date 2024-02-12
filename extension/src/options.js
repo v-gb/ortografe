@@ -9,15 +9,20 @@ async function grab_dict(name) {
     // json files over 4MB. So we use make one dictionary per file, and it's not even
     // json.
     const response = await fetch("./" + name + ".dict");
-    return (await response.text()).replaceAll('\n', '/');
+    return (await response.text());
 }
 
 async function display_dict_preview() {
     const custom_dict = (await storage_get('custom_dict')).custom_dict
     const elt = document.getElementById("dict")
     if (custom_dict) {
-        const l = custom_dict.trim().split('/')
-        elt.innerText = `"${l[0]}" + ${l.length-1} lignes`
+        const l = custom_dict.trim().split('\n')
+        if (l[0].length > 20000) {
+            // assuming it's the old '/' separated format, instead of newline separated
+            elt.innerText = "vide"
+        } else {
+            elt.innerText = `"${l[0]}" + ${l.length-1} lignes`
+        }
     } else {
         elt.innerText = "vide"
     }
@@ -39,7 +44,7 @@ async function saveOptions(e) {
                               throw("expected two comma separated column, got: " + line)
                           }
                           return columns[0].trim() + "," + columns[1].trim()
-                      }).join("/")
+                      }).join("\n")
                 console.log(`storing dict of size ${internal_text.length}`)
                 // maybe we should provide a better way to clear the storage, but also who
                 // cares. Just deinstall/reinstall the extension works.
