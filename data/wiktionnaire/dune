@@ -2,7 +2,6 @@
 ;; other devs to use.
 (rule
  (target min.gen.csv)
- (mode promote)
  (deps    (glob_files min-computed.gen.csv) (sandbox always))
  (action  (bash "
 set -e -u -o pipefail
@@ -19,7 +18,6 @@ fi
  ;; since we only care about h-aspiré, just drop the bulk of the file to make
  ;; it faster to load (50MB -> 1MB)
  (target min-h.gen.csv)
- (mode promote)
  (deps    (sandbox always))
  (action  (with-stdout-to %{target}
            (progn
@@ -29,4 +27,4 @@ fi
 (rule
  (target min.gen.csv.zst)
  (deps (sandbox always preserve_file_kind))
- (action (run zstd %{dep:min.gen.csv})))
+ (action (run zstd -q %{dep:min.gen.csv})))

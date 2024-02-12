@@ -95,6 +95,11 @@ module Sampa = struct
     fun str -> (force f) str
 end
 
+let in_build_dir ~root filename =
+  if Eio.Path.is_file (root ^/ filename)
+  then root ^/ filename
+  else (root ^/ "_build/default") ^/ filename
+
 module Lexique = struct
   type t =
     { ortho : string
@@ -105,7 +110,7 @@ module Lexique = struct
   [@@deriving sexp_of]
 
   let load ~root ?(filename = "data/lexique/Lexique383.gen.tsv") () =
-    Eio.Path.load (root ^/ filename)
+    Eio.Path.load (in_build_dir ~root filename)
     |> Csv_header.parse_string
       ~header:`In_string
       ~separator:'\t'
@@ -443,7 +448,7 @@ module Wiki = struct
   [@@deriving sexp_of]
 
   let load ~root =
-    Eio.Path.load (root ^/ "data/wiktionnaire/min.gen.csv")
+    Eio.Path.load (in_build_dir ~root "data/wiktionnaire/min.gen.csv")
     |> Csv_header.parse_string
       ~header:`In_string
       ~separator:','
@@ -465,7 +470,7 @@ module Wiki_h = struct
   [@@deriving sexp_of]
 
   let load ~root =
-    Eio.Path.load (root ^/ "data/wiktionnaire/min-h.gen.csv")
+    Eio.Path.load (in_build_dir ~root "data/wiktionnaire/min-h.gen.csv")
     |> Csv_header.parse_string
       ~header:`In_string
       ~separator:','
@@ -475,3 +480,20 @@ module Wiki_h = struct
       in
       { word; h_aspire  })
 end
+
+let read_key_value_comma_sep_file f =
+  let lines = Eio.Path.load f |> String.split_lines in
+  let h = Hashtbl.create (module String) ~size:(List.length lines) in
+  List.iter lines ~f:(fun line ->
+      match String.split line ~on:',' with
+      | [key; data] -> ignore (Hashtbl.add h ~key ~data : [ `Ok | `Duplicate ])
+      | _ -> raise_s [%sexp "bad line", (line : string)]);
+  h
+
+let load_erofa ~root =
+  read_key_value_comma_sep_file
+    (in_build_dir ~root "extension/dict.external-sources.gen.csv")
+
+let load_post90 ~root =
+  read_key_value_comma_sep_file
+    (in_build_dir ~root "extension/dict1990.gen.csv")

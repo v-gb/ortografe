@@ -1,6 +1,5 @@
 (copy_files
- (files ../{dict.js,*.dict})
- (mode promote))
+ (files ../{dict.js,*.dict}))
 
 (rule
  (targets
@@ -8,6 +7,5 @@
    Emblem_of_La_Francophonie.128.png
    Emblem_of_La_Francophonie.64.png
  )
- (mode promote)
  (deps    Emblem_of_La_Francophonie.svg)
  (action  (run ../make-icon)))

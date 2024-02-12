@@ -2,7 +2,6 @@
  (targets
    dict.external-sources.gen.csv
    dict1990.gen.csv)
- (mode promote)
  (deps (sandbox always)
    import-dict
    ../data/erofa/DOR-numerique_v1.0.2.csv
@@ -15,7 +14,6 @@
           alfonic.dict
           ortograf_net_plat.dict
           qu.dict)
- (mode promote)
  (deps (sandbox always)
    import-dict
    (glob_files ../data/homemade/*.csv)
@@ -27,6 +25,5 @@
 
 (rule
  (targets extension.zip extension2.zip (dir src2))
- (mode promote)
  (deps    (glob_files src/*.{html,js,png,json,svg}))
  (action  (run ./make-extension)))

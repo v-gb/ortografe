@@ -16,7 +16,6 @@
 (rule
  (target Lexique383.gen.tsv)
  (deps (sandbox always) Lexique383-full.gen.tsv)
- (mode promote)
  (action
   (with-stdout-to %{target}
    (run sqlite3

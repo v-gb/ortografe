@@ -18,32 +18,6 @@ let root ~from =
      done;
      !from
 
-let hashtbl_of_alist_multi m l =
-  (* Map.of_alist_exn guarantees that the inner list have the same order as the
-     initial list, but hashtbl reverses the lists ! Argh. *)
-  let h = Hashtbl.create m ~size:(List.length l) in
-  List.iter (List.rev l) ~f:(fun (key, data) ->
-      Hashtbl.add_multi h ~key ~data);
-  h
-
-let read_key_value_comma_sep_file f =
-  Eio.Path.load f
-  |> String.split_lines
-  |> List.map ~f:(fun line ->
-         match String.split line ~on:',' with
-         | [a; b] -> (a, b)
-         | _ -> raise_s [%sexp "bad line", (line : string)])
-  |> hashtbl_of_alist_multi (module String)
-  |> Hashtbl.map ~f:(fun l -> List.hd_exn l)
-
-let load_erofa ~root =
-  read_key_value_comma_sep_file
-    (root ^/ "extension/dict.external-sources.gen.csv")
-
-let load_post90 ~root =
-  read_key_value_comma_sep_file
-    (root ^/ "extension/dict1990.gen.csv")
-
 let simplify_mapping tbl =
   (* remove identity mappings and trivial plurals *)
   Hashtbl.filteri_inplace tbl ~f:(fun ~key:old ~data:(new_, _) ->
@@ -106,8 +80,8 @@ let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 =
 let build_erofa_ext ~root =
   let combined_erofa =
     (* start with whole erofa db, so [simplify_mapping] considers singular in the erofa csv *)
-    let base = Hashtbl.map (load_erofa ~root) ~f:(fun data -> data, -1) in
-    let post90 = load_post90 ~root in
+    let base = Hashtbl.map (Data_src.load_erofa ~root) ~f:(fun data -> data, -1) in
+    let post90 = Data_src.load_post90 ~root in
     ignore (
         let lexique = Data_src.Lexique.load ~root () in
         let lexique_post90 = build_lexique_post90 lexique post90 in
@@ -152,7 +126,7 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
        is supposed to be rewritten. *)
     if rect90
     then
-      let post90 = load_post90 ~root in
+      let post90 = Data_src.load_post90 ~root in
       post90, build_lexique_post90 lexique post90
     else Hashtbl.create (module String), lexique
   in
@@ -238,7 +212,7 @@ let main () =
                let lexique =
                  if post90
                  then
-                   let post90 = load_post90 ~root in
+                   let post90 = Data_src.load_post90 ~root in
                    build_lexique_post90 lexique post90
                  else lexique
                in
