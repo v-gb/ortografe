@@ -25,5 +25,5 @@
 
 (rule
  (targets extension.zip extension2.zip (dir src2))
- (deps    (glob_files src/*.{html,js,png,json,svg}))
+ (deps    (glob_files src/*.{html,js,png,dict,json,svg}) (sandbox always preserve_file_kind))
  (action  (run ./make-extension)))
