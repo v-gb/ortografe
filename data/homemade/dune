@@ -14,7 +14,7 @@
  )
  (mode promote)
  (action
-  (with-stdout-to dict-rect1990+erofa.adds.csv
+  (with-stdout-to dict-erofa-ext.csv
    (setenv DUNEROOT %{project_root}
     (run %{project_root}/dict-gen/bin/dict_gen.exe erofa-ext)))))
 

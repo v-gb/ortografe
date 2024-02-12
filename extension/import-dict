@@ -83,7 +83,7 @@ fi
 
 if [ "${1-part2}" = part2 ]; then
     cp --no-preserve=all dict.external-sources.gen.csv dict.gen.csv
-    cat ../data/homemade/dict-rect1990+erofa.adds.csv >> dict.gen.csv
+    cat ../data/homemade/dict-erofa-ext.csv >> dict.gen.csv
 
     # Capitalized words in the dict are treated as exceptions, for
     # cases when the capitalized version of the word is almost never the common
@@ -102,9 +102,6 @@ if [ "${1-part2}" = part2 ]; then
     } > dict.js
 
     for f in $DUNEROOT/data/homemade/dict-*.csv; do
-        case "$f" in
-            *rect1990+erofa*) continue
-        esac
         cat "$f" > $(basename "$f" .csv | sed 's/dict-//' | tr .- __).dict
     done
 fi
