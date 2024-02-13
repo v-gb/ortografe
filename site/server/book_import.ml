@@ -196,7 +196,7 @@ let guess_main_file ~url ~data =
                   ~~(files : string list)]
 
 let html_li ~url ~author ~title ~main_file =
-  let rel_url = "/static/books" ^/ title ^/ main_file in
+  let rel_url = Dream.to_path ([ "static"; "books"; title ] @ String.split main_file ~on:'/') in
   [%string {|<li><cite><a href="%{rel_url}">%{title}</a></cite> %{author} (voir le <a href="%{url}">texte initial</a>)</li>|}]
   ^ "\n"
 
