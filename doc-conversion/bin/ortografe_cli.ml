@@ -37,13 +37,21 @@ let () =
              | Some `Empty, None -> Hashtbl.create 1
              | None, Some file ->
                 let h = Hashtbl.create 10000 in
-                Core.String.split_lines
-                  (Core.In_channel.read_all file)
-                |> List.iter (fun l ->
-                       match String.split_on_char ',' l with
-                       | [ a; b ] -> Hashtbl.replace h a b
-                       | _ -> failwith (Printf.sprintf
-                                          "didn't get exactly 2 items in line %S" l));
+                let lines =
+                  Core.String.split_lines
+                    (Core.In_channel.read_all file)
+                in
+                let lines =
+                  match lines with
+                  | first :: lines when String.starts_with first ~prefix:"{" -> lines
+                  | _ -> lines
+                in
+                List.iter (fun l ->
+                    match String.split_on_char ',' l with
+                    | [ a; b ] -> Hashtbl.replace h a b
+                    | _ -> failwith (Printf.sprintf
+                                       "didn't get exactly 2 items in line %S" l))
+                  lines;
                 h
            in
            Ortografe.convert_files
