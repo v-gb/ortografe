@@ -32,12 +32,18 @@ should work for other spelling changes or other languages, with the following co
 
 - the language has space-separated words
 - the spelling change can be expressed as a word->word dictionary mapping old spelling to
-  new spelling, without analysis of the context. For instance, it would be possible to
-  British-ify American spellings, with a mapping theater->theatre,
-  finalize->finalise, etc.
+  new spelling, without analysis of the context.
 
-The browser extension can already load a custom dictionary, although it currently hardcodes
-that only pages in French should be rewritten.
+For instance, by loading a dictionary containing:
+
+```
+{ "lang": "en" }
+theater,theatre
+finalize,finalise
+learned,learnt
+```
+
+you would British-ify American spellings.
 
 # Building locally
 

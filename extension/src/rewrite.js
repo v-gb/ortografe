@@ -388,7 +388,8 @@ async function extension_main() {
     const halfway_storage = performance.now();
     if (options.rewrite === 'custom') {
         const more_options = await b.storage.local.get(['custom_dict']);
-        options.custom_dict = more_options.custom_dict;
+        options.custom_dict = more_options.custom_dict?.data;
+        options.lang = more_options.custom_dict?.lang;
     }
     normalize_options(options)
     const after_storage = performance.now();
@@ -401,7 +402,7 @@ async function extension_main() {
     // iterating over <style> nodes even though they contain nothing,
     // and setting their nodeValue messes up pages for some reason
     const root = document.body;
-    if (!(await plausibly_lang(b, 'fr', root,
+    if (!(await plausibly_lang(b, (options.lang || 'fr'), root,
                                options.debug_language,
                                options.debug_lang_test))) {
         return

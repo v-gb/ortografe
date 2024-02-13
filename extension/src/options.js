@@ -15,13 +15,15 @@ async function grab_dict(name) {
 async function display_dict_preview() {
     const custom_dict = (await storage_get('custom_dict')).custom_dict
     const elt = document.getElementById("dict")
-    if (custom_dict) {
-        const l = custom_dict.trim().split('\n')
-        if (l[0].length > 20000) {
+    if (custom_dict?.data) {
+        const lines = custom_dict.data.trim().split('\n');
+        if (lines.length > 0 && lines[0].length > 20000) {
             // assuming it's the old '/' separated format, instead of newline separated
             elt.innerText = "vide"
+        } else if (custom_dict?.meta?.desc) {
+            elt.innerText = custom_dict.meta.desc
         } else {
-            elt.innerText = `"${l[0]}" + ${l.length-1} lignes`
+            elt.innerText = `"${lines[0]}" + ${lines.length-1} lignes`
         }
     } else {
         elt.innerText = "vide"
@@ -35,10 +37,20 @@ async function saveOptions(e) {
         if (e.target.files.length > 0) {
             try {
                 const file = e.target.files.item(0)
-                const text = await file.text();
+                let lines = (await file.text()).trim().split("\n");
+                let meta = {};
+                if (lines.length > 0 && lines[0].startsWith("{")) {
+                    const meta_json = JSON.parse(lines.shift())
+                    if (typeof meta_json?.desc == "string") {
+                        meta.desc = meta_json.desc;
+                    }
+                    if (typeof meta_json?.lang == "string") {
+                        meta.lang = meta_json.lang;
+                    }
+                }
                 const internal_text =
-                      (text == "") ? "" :
-                      text.trim().split('\n').map((line) => {
+                      (lines.length <= 1 && lines.join("") == "") ? "" :
+                      lines.map((line) => {
                           const columns = line.split(',')
                           if (columns.length != 2) {
                               throw("expected two comma separated column, got: " + line)
@@ -49,7 +61,8 @@ async function saveOptions(e) {
                 // maybe we should provide a better way to clear the storage, but also who
                 // cares. Just deinstall/reinstall the extension works.
                 if (internal_text !== "") {
-                    await b.storage.local.set({'custom_dict': internal_text});
+                    await b.storage.local.set(
+                        {'custom_dict': { 'meta': meta, 'data': internal_text }});
                 } else {
                     await b.storage.local.remove('custom_dict');
                 }
@@ -62,8 +75,9 @@ async function saveOptions(e) {
     } else if (e.target.id.startsWith("load-")) {
         try {
             const dict_name = e.target.id.substring("load-".length);
-            const dict = await grab_dict(dict_name);
-            await b.storage.local.set({'custom_dict': dict});
+            let lines = (await grab_dict(dict_name)).trim().split("\n");
+            const meta = JSON.parse(lines.shift());
+            await b.storage.local.set({'custom_dict': { 'meta': meta, 'data': lines.join("\n") }});
             document.getElementById("load_error").innerText = "";
             await display_dict_preview()
         } catch (e) {

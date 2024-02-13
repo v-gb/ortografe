@@ -147,6 +147,20 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
             (fun () ->
               add_post90_entries all post90;
               simplify_mapping all;
+              (let name =
+                 ((if rect90 then ["1990"] else [])
+                  @ if List.is_empty rules
+                    then ["érofa" ]
+                    else List.map rules ~f:Rewrite.name)
+                 |> List.sort ~compare:String.compare
+                 |> String.concat ~sep:" "
+               in
+               [ "desc", name; "lang", "fr" ]
+               |> List.map ~f:(fun (k, v) -> sprintf "%S: %S" k v)
+               |> String.concat ~sep:", "
+               |> sprintf "{%s}\n"
+               |> Eio.Buf_write.string buf
+              );
               List.iter (ranked all) ~f:(fun (old, new_) ->
                   Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])))
         in
