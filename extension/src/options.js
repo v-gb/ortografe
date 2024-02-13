@@ -30,6 +30,31 @@ async function display_dict_preview() {
     }
 }
 
+function parse_dict(str) {
+    let lines = str.trim().split("\n");
+    let meta = {};
+    if (lines.length > 0 && lines[0].startsWith("{")) {
+        const meta_json = JSON.parse(lines.shift())
+        if (typeof meta_json?.desc == "string") {
+            meta.desc = meta_json.desc;
+        }
+        if (typeof meta_json?.lang == "string") {
+            meta.lang = meta_json.lang;
+        }
+    }
+    const data = lines.join("\n")
+    return data ? { 'meta': meta, 'data': data } : null;
+}
+
+async function set_dict(dict) {
+    console.log(`storing dict of size ${dict?.data?.length}`)
+    if (dict?.data) {
+        await b.storage.local.set({'custom_dict': dict});
+    } else {
+        await b.storage.local.remove('custom_dict');
+    }
+}
+
 async function saveOptions(e) {
     e.preventDefault();
     // console.log("target", e.target)
@@ -37,35 +62,7 @@ async function saveOptions(e) {
         if (e.target.files.length > 0) {
             try {
                 const file = e.target.files.item(0)
-                let lines = (await file.text()).trim().split("\n");
-                let meta = {};
-                if (lines.length > 0 && lines[0].startsWith("{")) {
-                    const meta_json = JSON.parse(lines.shift())
-                    if (typeof meta_json?.desc == "string") {
-                        meta.desc = meta_json.desc;
-                    }
-                    if (typeof meta_json?.lang == "string") {
-                        meta.lang = meta_json.lang;
-                    }
-                }
-                const internal_text =
-                      (lines.length <= 1 && lines.join("") == "") ? "" :
-                      lines.map((line) => {
-                          const columns = line.split(',')
-                          if (columns.length != 2) {
-                              throw("expected two comma separated column, got: " + line)
-                          }
-                          return columns[0].trim() + "," + columns[1].trim()
-                      }).join("\n")
-                console.log(`storing dict of size ${internal_text.length}`)
-                // maybe we should provide a better way to clear the storage, but also who
-                // cares. Just deinstall/reinstall the extension works.
-                if (internal_text !== "") {
-                    await b.storage.local.set(
-                        {'custom_dict': { 'meta': meta, 'data': internal_text }});
-                } else {
-                    await b.storage.local.remove('custom_dict');
-                }
+                set_dict(parse_dict(await file.text()));
                 document.getElementById("file_error").innerText = "";
                 await display_dict_preview()
             } catch (e) {
@@ -75,9 +72,7 @@ async function saveOptions(e) {
     } else if (e.target.id.startsWith("load-")) {
         try {
             const dict_name = e.target.id.substring("load-".length);
-            let lines = (await grab_dict(dict_name)).trim().split("\n");
-            const meta = JSON.parse(lines.shift());
-            await b.storage.local.set({'custom_dict': { 'meta': meta, 'data': lines.join("\n") }});
+            set_dict(parse_dict(await grab_dict(dict_name)));
             document.getElementById("load_error").innerText = "";
             await display_dict_preview()
         } catch (e) {

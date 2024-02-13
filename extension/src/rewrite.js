@@ -348,6 +348,7 @@ function watch_for_changes(options, table, root) {
 }
 
 function load_dict(options) {
+    // should try have a json object and turning it into a map, in case that's faster
     let table = new Map()
     if (!options.trivial) {
         const t1 = performance.now();
