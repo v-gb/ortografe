@@ -41,10 +41,10 @@ function parse_dict(str) {
         if (typeof meta_json?.lang == "string") {
             meta.lang = meta_json.lang;
         }
-        if (typeof meta_json?.supports_repeated_rewrites == "bool") {
+        if (typeof meta_json?.supports_repeated_rewrites == "boolean") {
             meta.supports_repeated_rewrites = meta_json.supports_repeated_rewrites;
         }
-        if (typeof meta_json?.plurals_in_s == "bool") {
+        if (typeof meta_json?.plurals_in_s == "boolean") {
             meta.plurals_in_s = meta_json.plurals_in_s;
         }
     }

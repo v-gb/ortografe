@@ -206,7 +206,7 @@ function rewrite_under(options, table, root){
     let count = 0
     let to_remove = []
     const backgroundColor = options.background_color || '#b9f4b9'
-    const plurals_in_s = !!options.plurals_in_s;
+    const plurals_in_s = options.plurals_in_s != false;
     const walk = make_walk(root);
     while(n=walk.nextNode()) {
         let regular_text = ""
@@ -349,9 +349,12 @@ function watch_for_changes(options, table, root) {
 }
 
 function load_dict(options) {
-    // should try have a json object and turning it into a map, in case that's faster
     let table = new Map()
     if (!options.trivial) {
+        // I tried storing a json object into the storage, but that's slower than
+        // doing by hand here (currently, for the ortograf.net dictionary, it's
+        // 50ms for retrieval + 100ms to build the map. If the storage contains an
+        // objects, it's 175ms for retrieval and 30ms or more to build the map.
         const t1 = performance.now();
         const [ dict, separator ] =
               options.rewrite == 'rect1990' ? [ dict_rect1990, '/' ] :
@@ -378,9 +381,6 @@ function normalize_options(options) {
     if (!options.rewrite) {
         options.rewrite = options.disable ? 'disable' : 'erofa';
     }
-    if (options?.plurals_in_s != false) {
-        options.plurals_in_s = true;
-    }
 }
 
 async function extension_main() {
@@ -392,13 +392,13 @@ async function extension_main() {
     )
     const halfway_storage = performance.now();
     if (options.rewrite === 'custom') {
-        const more_options = await b.storage.local.get(['custom_dict']);
-        options.custom_dict = more_options.custom_dict?.data;
-        options.lang = more_options.custom_dict?.lang;
-        if (more_options.custom_dict?.supports_repeated_rewrites == false) {
+        const { meta, data } = (await b.storage.local.get(['custom_dict'])).custom_dict;
+        options.custom_dict = data;
+        options.lang = meta?.lang;
+        if (meta?.supports_repeated_rewrites == false) {
             options.disable_watch = true
         }
-        if (more_options.custom_dict?.plurals_in_s == false) {
+        if (meta?.plurals_in_s == false) {
             options.plurals_in_s = false
         }
     }
