@@ -369,14 +369,17 @@ type rule =
          -> Data_src.Lexique.t * Rules.search_res
         ) Lazy.t
   ; prefilter : unit -> [ `Re of Re.t | `All ]
+  ; supports_repeated_rewrites : bool
   }
 
 let all = ref []
-let new_rule name doc ~prefilter f =
-  all := { name; doc; f; prefilter  } :: !all;
+let new_rule ?(supports_repeated_rewrites = true) name doc ~prefilter f =
+  all := { name; doc; f; prefilter; supports_repeated_rewrites } :: !all;
   name
-let new_rule' name doc ~prefilter f =
-  new_rule name doc
+let new_rule' ?supports_repeated_rewrites name doc ~prefilter f =
+  new_rule name
+    ?supports_repeated_rewrites
+    doc
     ~prefilter
     (lazy (
       let f' = force f in
@@ -766,6 +769,7 @@ let dummy_search_res = [], 0
 let _ : string list =
   List.map [ true; false ] ~f:(fun accent_plat ->
       new_rule'
+        ~supports_repeated_rewrites:false
         ("ortograf.net"
          ^ if accent_plat then "-plat" else "")
         ("les règles de http://www.ortograf.net/"
@@ -908,6 +912,7 @@ let _ : string list =
 
 let _ : string =
   new_rule'
+    ~supports_repeated_rewrites:false
     "alfonic"
     "(pas super testé) les règles de https://alfonic.org/"
     ~prefilter:(fun () -> `All)
@@ -1012,6 +1017,7 @@ let respell_oe ((row : Data_src.Lexique.t), (search_res : Rules.search_res)) =
 
 let doc rule = rule.doc
 let name rule = rule.name
+let supports_repeated_rewrites rule = rule.supports_repeated_rewrites
 let all = lazy (List.rev !all)
 
 type stats =

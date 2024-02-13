@@ -391,6 +391,9 @@ async function extension_main() {
         const more_options = await b.storage.local.get(['custom_dict']);
         options.custom_dict = more_options.custom_dict?.data;
         options.lang = more_options.custom_dict?.lang;
+        if (more_options.custom_dict?.supports_repeated_rewrites == false) {
+            options.disable_watch = true
+        }
     }
     normalize_options(options)
     const after_storage = performance.now();

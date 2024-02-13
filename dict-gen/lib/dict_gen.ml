@@ -155,8 +155,16 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
                  |> List.sort ~compare:String.compare
                  |> String.concat ~sep:" "
                in
-               [ "desc", name; "lang", "fr" ]
-               |> List.map ~f:(fun (k, v) -> sprintf "%S: %S" k v)
+               [ "desc", `String name
+               ; "lang", `String "fr"
+               ; "supports_repeated_rewrites",
+                 `Bool (List.for_all rules ~f:Rewrite.supports_repeated_rewrites)
+               ]
+               |> List.map ~f:(fun (k, v) ->
+                      sprintf "%S: %s" k
+                        (match v with
+                         | `String s -> sprintf "%S" s
+                         | `Bool b -> Bool.to_string b))
                |> String.concat ~sep:", "
                |> sprintf "{%s}\n"
                |> Eio.Buf_write.string buf
