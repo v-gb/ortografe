@@ -370,15 +370,17 @@ type rule =
         ) Lazy.t
   ; prefilter : unit -> [ `Re of Re.t | `All ]
   ; supports_repeated_rewrites : bool
+  ; plurals_in_s : bool
   }
 
 let all = ref []
-let new_rule ?(supports_repeated_rewrites = true) name doc ~prefilter f =
-  all := { name; doc; f; prefilter; supports_repeated_rewrites } :: !all;
+let new_rule ?(supports_repeated_rewrites = true) ?(plurals_in_s = true) name doc ~prefilter f =
+  all := { name; doc; f; prefilter; supports_repeated_rewrites; plurals_in_s } :: !all;
   name
-let new_rule' ?supports_repeated_rewrites name doc ~prefilter f =
+let new_rule' ?supports_repeated_rewrites name ?plurals_in_s doc ~prefilter f =
   new_rule name
     ?supports_repeated_rewrites
+    ?plurals_in_s
     doc
     ~prefilter
     (lazy (
@@ -770,6 +772,7 @@ let _ : string list =
   List.map [ true; false ] ~f:(fun accent_plat ->
       new_rule'
         ~supports_repeated_rewrites:false
+        ~plurals_in_s:false
         ("ortograf.net"
          ^ if accent_plat then "-plat" else "")
         ("les règles de http://www.ortograf.net/"
@@ -913,6 +916,7 @@ let _ : string list =
 let _ : string =
   new_rule'
     ~supports_repeated_rewrites:false
+    ~plurals_in_s:false
     "alfonic"
     "(pas super testé) les règles de https://alfonic.org/"
     ~prefilter:(fun () -> `All)
@@ -1018,6 +1022,7 @@ let respell_oe ((row : Data_src.Lexique.t), (search_res : Rules.search_res)) =
 let doc rule = rule.doc
 let name rule = rule.name
 let supports_repeated_rewrites rule = rule.supports_repeated_rewrites
+let plurals_in_s rule = rule.plurals_in_s
 let all = lazy (List.rev !all)
 
 type stats =

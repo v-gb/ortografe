@@ -44,6 +44,9 @@ function parse_dict(str) {
         if (typeof meta_json?.supports_repeated_rewrites == "bool") {
             meta.supports_repeated_rewrites = meta_json.supports_repeated_rewrites;
         }
+        if (typeof meta_json?.plurals_in_s == "bool") {
+            meta.plurals_in_s = meta_json.plurals_in_s;
+        }
     }
     const data = lines.join("\n")
     return data ? { 'meta': meta, 'data': data } : null;

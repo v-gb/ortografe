@@ -26,7 +26,7 @@ function pluralize(s) {
     return s ? s + "s" : s
 }
 
-function rewrite_word(table, s) {
+function rewrite_word(table, plurals_in_s, s) {
     // unsure if the browser gives any guarantee about NFC vs NFD,
     // because currently we assume diacritics are represented the same
     // in the dict and in the page
@@ -46,7 +46,7 @@ function rewrite_word(table, s) {
                  : [ uncapitalize(word), capitalize ])
               : [ word, (x) => x ]
         let repl = postprocess(table.get(processed_word))
-        if (!repl && is_plural(processed_word)) {
+        if (!repl && is_plural(processed_word) && plurals_in_s) {
             repl = postprocess(pluralize(table.get(depluralize(processed_word))))
         }
         return repl
@@ -206,6 +206,7 @@ function rewrite_under(options, table, root){
     let count = 0
     let to_remove = []
     const backgroundColor = options.background_color || '#b9f4b9'
+    const plurals_in_s = !!options.plurals_in_s;
     const walk = make_walk(root);
     while(n=walk.nextNode()) {
         let regular_text = ""
@@ -228,7 +229,7 @@ function rewrite_under(options, table, root){
                      : word1.split(/(-)/))
                   : [ word1 ]
             for (word of words2) {
-                const repl = rewrite_word(table, word)
+                const repl = rewrite_word(table, plurals_in_s, word)
                 if (!options.color) {
                     regular_text = regular_text + (repl ? repl : word)
                     continue
@@ -377,6 +378,9 @@ function normalize_options(options) {
     if (!options.rewrite) {
         options.rewrite = options.disable ? 'disable' : 'erofa';
     }
+    if (options?.plurals_in_s != false) {
+        options.plurals_in_s = true;
+    }
 }
 
 async function extension_main() {
@@ -393,6 +397,9 @@ async function extension_main() {
         options.lang = more_options.custom_dict?.lang;
         if (more_options.custom_dict?.supports_repeated_rewrites == false) {
             options.disable_watch = true
+        }
+        if (more_options.custom_dict?.plurals_in_s == false) {
+            options.plurals_in_s = false
         }
     }
     normalize_options(options)

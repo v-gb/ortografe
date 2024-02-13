@@ -18,16 +18,17 @@ let root ~from =
      done;
      !from
 
-let simplify_mapping tbl =
+let simplify_mapping tbl ~plurals_in_s =
   (* remove identity mappings and trivial plurals *)
   Hashtbl.filteri_inplace tbl ~f:(fun ~key:old ~data:(new_, _) ->
       String.(<>) old new_
-      && (match String.chop_suffix old ~suffix:"s", String.chop_suffix new_ ~suffix:"s" with
-         | Some old_no_s, Some new_no_s ->
-            (match Hashtbl.find tbl old_no_s with
-             | Some (new', _) when String.(=) new' new_no_s -> false
-             | _ -> true)
-         | _ -> true))
+      && (not plurals_in_s
+          || match String.chop_suffix old ~suffix:"s", String.chop_suffix new_ ~suffix:"s" with
+             | Some old_no_s, Some new_no_s ->
+                (match Hashtbl.find tbl old_no_s with
+                 | Some (new', _) when String.(=) new' new_no_s -> false
+                 | _ -> true)
+             | _ -> true))
 
 let add_post90_entries base post90 =
   Hashtbl.iteri post90 ~f:(fun ~key:pre90 ~data:post90 ->
@@ -90,7 +91,7 @@ let build_erofa_ext ~root =
           (fun old new_ -> add_ranked base ~key:old ~data:new_)
         : Rewrite.stats);
     add_post90_entries base post90;
-    simplify_mapping base;
+    simplify_mapping base ~plurals_in_s:true;
     Hashtbl.filter_inplace base ~f:(fun (_, rank) -> rank >= 0 (* i.e. "not from erofa" *));
     ranked base
   in
@@ -146,7 +147,8 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
             (fun old new_ -> add_ranked all ~key:old ~data:new_),
             (fun () ->
               add_post90_entries all post90;
-              simplify_mapping all;
+              let plurals_in_s = List.for_all rules ~f:Rewrite.plurals_in_s in
+              simplify_mapping all ~plurals_in_s;
               (let name =
                  ((if rect90 then ["1990"] else [])
                   @ if List.is_empty rules
@@ -159,6 +161,7 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
                ; "lang", `String "fr"
                ; "supports_repeated_rewrites",
                  `Bool (List.for_all rules ~f:Rewrite.supports_repeated_rewrites)
+               ; "plurals_in_s", `Bool plurals_in_s
                ]
                |> List.map ~f:(fun (k, v) ->
                       sprintf "%S: %s" k
