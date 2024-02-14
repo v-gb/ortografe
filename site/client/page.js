@@ -15,4 +15,10 @@ const converted_text = document.getElementById('converted-text')
 rewrite(user_text.value, converted_text)
 user_text.oninput = function() {
     rewrite(this.value, converted_text)
+    if (user_text.height < converted_text.height) {
+        // autogrow the textarea, so if you paste a large text, you end up with
+        // two long texts side by side, instead the textarea with a scrollbar
+        // and the other text with a long paragraph.
+        user_text.height = converted_text.height
+    }
 }
