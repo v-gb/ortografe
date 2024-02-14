@@ -23,7 +23,8 @@
  (deps
   (sandbox always)
    %{project_root}/data/lexique/Lexique383.gen.tsv
-   %{project_root}/data/wiktionnaire/min-h.gen.csv)
+   %{project_root}/data/wiktionnaire/min-h.gen.csv
+   %{project_root}/extension/dict1990.gen.csv)
  (action
   (setenv DUNEROOT %{project_root}
    (run %{project_root}/dict-gen/bin/dict_gen.exe gen --ortograf.net-plat --write %{target}))))
@@ -33,7 +34,8 @@
  (deps
   (sandbox always)
    %{project_root}/data/lexique/Lexique383.gen.tsv
-   %{project_root}/data/wiktionnaire/min-h.gen.csv)
+   %{project_root}/data/wiktionnaire/min-h.gen.csv
+   %{project_root}/extension/dict1990.gen.csv)
  (action
   (setenv DUNEROOT %{project_root}
    (run %{project_root}/dict-gen/bin/dict_gen.exe gen --alfonic --write %{target}))))

@@ -63,7 +63,7 @@ let ranked tbl =
   |> List.sort ~compare:[%compare: int * (string * _)]
   |> List.map ~f:snd  
 
-let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 =
+let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 ~fix_90 =
   (* this causes a few regressions like
      allécherait,alécherait
      becomes
@@ -73,10 +73,17 @@ let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 =
 
      Or even graffito -> grafito becoming graffito -> graffiti.         
    *)
-  List.map lexique ~f:(fun r ->
+  if fix_90
+  then
+    List.map lexique ~f:(fun r ->
       match Hashtbl.find post90 r.ortho with
       | None -> r
       | Some new_ortho -> { r with ortho = new_ortho })
+  else    
+    List.concat_map lexique ~f:(fun r ->
+        match Hashtbl.find post90 r.ortho with
+        | None -> [ r ]
+        | Some new_ortho -> [ r; { r with ortho = new_ortho } ])
 
 let build_erofa_ext ~root =
   let combined_erofa =
@@ -85,7 +92,7 @@ let build_erofa_ext ~root =
     let post90 = Data_src.load_post90 ~root in
     ignore (
         let lexique = Data_src.Lexique.load ~root () in
-        let lexique_post90 = build_lexique_post90 lexique post90 in
+        let lexique_post90 = build_lexique_post90 lexique post90 ~fix_90:true in
         Rewrite.gen ~root ~lexique:lexique_post90
           ~not_understood:`Ignore
           ~fix_oe:true (* really only matters for proper nouns like Œdipe, since all other
@@ -118,20 +125,18 @@ let with_flow ~env ~write ~diff ~f =
      Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
      None
 
-let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~fix_oe =
-  let rect90 = rect90 || List.is_empty rules in
+let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe =
+  let rect90 =
+    rect90
+    || List.is_empty rules
+    || List.exists rules ~f:(fun r -> String.(=) (Rewrite.name r) "erofa")
+  in
   let root = root ~from:(Eio.Stdenv.fs env) in
   let lexique = Data_src.Lexique.load ~root () in
   let post90, lexique =
-    (* One problem that complicate enabling this by default is the resulting lexique
-       has spelling that are out of sync with the pronunciation, thus preventing them
-       from being rewritten. Annoying for ortograf.net or alfonic, where everything
-       is supposed to be rewritten. *)
-    if rect90
-    then
-      let post90 = Data_src.load_post90 ~root in
-      post90, build_lexique_post90 lexique post90
-    else Hashtbl.create (module String), lexique
+    let post90 = Data_src.load_post90 ~root in
+    (if rect90 then post90 else Hashtbl.create (module String)),
+    build_lexique_post90 lexique post90 ~fix_90:rect90
   in
   match
     with_flow ~env ~write ~diff ~f:(fun buf ->
@@ -140,7 +145,6 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~fix_oe =
           then (fun _ _ -> ()), ignore
           else if all
           then (fun old new_ ->
-                (* doesn't contain rect1990 mappings currently *)
                 let mod_ = if String.(=) old new_ then "=" else "M" in
                 Eio.Buf_write.string buf [%string "%{old},%{new_},%{mod_}\n"]),
                ignore
@@ -179,8 +183,8 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~fix_oe =
         in
         let stats =
           Rewrite.gen
-            ~not_understood:(if rect90 then `Ignore else `Raise)
-            ~fix_oe
+            ~not_understood:`Ignore
+            ~fix_oe:oe
             ~lexique ~root ~rules print in
         after ();
         if Unix.isatty Unix.stderr then
@@ -222,12 +226,12 @@ let gen_cmd ?doc name =
      and+ drop =
        C.Arg.value (C.Arg.flag
                       (C.Arg.info ~doc:"(pour profiler) jeter le dictionnaire calculé" ["drop"]))
-     and+ fix_oe =
+     and+ oe =
        C.Arg.value (C.Arg.flag
-                      (C.Arg.info ~doc:"réécrire oe en œ quand c'est possible" ["fix-oe"]))
+                      (C.Arg.info ~doc:"réécrire oe en œ quand c'est possible" ["oe"]))
      in
      Eio_main.run (fun env ->
-         try gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~fix_oe
+         try gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
 
@@ -245,7 +249,7 @@ let main () =
                  if post90
                  then
                    let post90 = Data_src.load_post90 ~root in
-                   build_lexique_post90 lexique post90
+                   build_lexique_post90 lexique post90 ~fix_90:false (* to check both versions *)
                  else lexique
                in
                Rules.check lexique ~skip:(Rewrite.load_skip ())))
