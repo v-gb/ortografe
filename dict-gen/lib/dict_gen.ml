@@ -87,7 +87,7 @@ let build_erofa_ext ~root =
         let lexique = Data_src.Lexique.load ~root () in
         let lexique_post90 = build_lexique_post90 lexique post90 in
         Rewrite.gen ~root ~lexique:lexique_post90
-          ~skip_not_understood:true
+          ~not_understood:`Ignore
           (fun old new_ -> add_ranked base ~key:old ~data:new_)
         : Rewrite.stats);
     add_post90_entries base post90;
@@ -176,7 +176,7 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
                   Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])))
         in
         let stats =
-          Rewrite.gen ~skip_not_understood:rect90
+          Rewrite.gen ~not_understood:(if rect90 then `Ignore else `Raise)
             ~lexique ~root ~rules print in
         after ();
         if Unix.isatty Unix.stderr then

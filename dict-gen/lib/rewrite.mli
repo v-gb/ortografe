@@ -16,7 +16,7 @@ val plurals_in_s : rule -> bool
 type stats [@@deriving sexp_of]
 val gen
     : root:[> Eio.Fs.dir_ty ] Eio.Path.t
-    -> ?skip_not_understood:bool
+    -> ?not_understood:[ `Raise | `Print | `Ignore ]
     -> ?lexique:Data_src.Lexique.t list
     -> ?rules: rule list
     -> (string -> string -> unit)

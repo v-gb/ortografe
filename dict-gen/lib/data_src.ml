@@ -407,7 +407,8 @@ module Lexique = struct
         "straight"; "thug"; "bulldozer"; "clergyman"; "handball"; "carry"; "penny";
         "pennies"; "pennys"; "mess"; "bluffes"; "bluffés"; "bluffées"; "westphaliennes";
         "flirtes"; "shootes"; "nietzschéennes"; "magyares"; "surfes"; "drums"; "quintuplés";
-        "dominions"; "surfeuses"; "sen";
+        "dominions"; "surfeuses"; "sen"; "basketball"; "callgirl"; "ladys"; "volleyball";
+        "callgirls"; "ranchs"; "tennismans"; "cowboy"; "cowboys"; "rugbymans";
         (* not real words for this purpose *)
         "min"; "com"; "zzz"; "ah"; "oh"; "eh"; "ha";
          (* la phonetique est fausse pour ces mots (ou parfois

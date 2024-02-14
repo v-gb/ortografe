@@ -1033,7 +1033,7 @@ type stats =
   }
 [@@deriving sexp_of]
 
-let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f =
+let gen ~root ?(not_understood = `Ignore) ?lexique ?rules:(which_rules=[]) f =
   Sexp_with_utf8.linkme;
   let rules = Rules.create () in
   let skip = load_skip () in
@@ -1096,8 +1096,10 @@ let gen ~root ?(skip_not_understood = false) ?lexique ?rules:(which_rules=[]) f 
           match Rules.search rules row.ortho row.phon with
           | Error s ->
              failed := !failed + 1;
-             if not skip_not_understood
-             then raise_s s;
+             (match not_understood with
+              | `Raise -> raise_s s
+              | `Print -> prerr_endline (Sexp_with_utf8.to_string_hum s)
+              | `Ignore -> ());
              f row.ortho row.ortho
           | Ok search_res ->
              (* Le oe est une correction du lexique, il s'applique donc à l'orthographe de
