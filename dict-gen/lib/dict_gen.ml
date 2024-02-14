@@ -88,6 +88,8 @@ let build_erofa_ext ~root =
         let lexique_post90 = build_lexique_post90 lexique post90 in
         Rewrite.gen ~root ~lexique:lexique_post90
           ~not_understood:`Ignore
+          ~fix_oe:true (* really only matters for proper nouns like Œdipe, since all other
+                          œ get removed *)
           (fun old new_ -> add_ranked base ~key:old ~data:new_)
         : Rewrite.stats);
     add_post90_entries base post90;
@@ -116,7 +118,7 @@ let with_flow ~env ~write ~diff ~f =
      Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
      None
 
-let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
+let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~fix_oe =
   let rect90 = rect90 || List.is_empty rules in
   let root = root ~from:(Eio.Stdenv.fs env) in
   let lexique = Data_src.Lexique.load ~root () in
@@ -176,7 +178,9 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop =
                   Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])))
         in
         let stats =
-          Rewrite.gen ~not_understood:(if rect90 then `Ignore else `Raise)
+          Rewrite.gen
+            ~not_understood:(if rect90 then `Ignore else `Raise)
+            ~fix_oe
             ~lexique ~root ~rules print in
         after ();
         if Unix.isatty Unix.stderr then
@@ -218,9 +222,12 @@ let gen_cmd ?doc name =
      and+ drop =
        C.Arg.value (C.Arg.flag
                       (C.Arg.info ~doc:"(pour profiler) jeter le dictionnaire calculé" ["drop"]))
+     and+ fix_oe =
+       C.Arg.value (C.Arg.flag
+                      (C.Arg.info ~doc:"réécrire oe en œ quand c'est possible" ["fix-oe"]))
      in
      Eio_main.run (fun env ->
-         try gen ~env ~rules ~rect90 ~all ~write ~diff ~drop
+         try gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~fix_oe
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
 

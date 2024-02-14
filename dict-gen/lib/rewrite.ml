@@ -302,6 +302,7 @@ let erofa_preserve =
              ; prefix "palladien"
              ; prefix "palladièn"
              ; str "œdip"
+             ; str "oedip"
              ; prefix "phocé"
              ; prefix "hawaï"
              ; prefix "nippo"
@@ -391,6 +392,7 @@ let new_rule' ?supports_repeated_rewrites name ?plurals_in_s doc ~prefilter f =
 let erofa_prefilter' = lazy (
   let open Re in
   alt ([ str "œ"
+       ; str "oe"
        ; seq [ str "x"; eos ]
        ; str "auxq"
        ; str "auxd"
@@ -404,9 +406,19 @@ let erofa_prefilter = lazy (Re.compile (force erofa_prefilter'))
 let erofa_rule = lazy (
   let pattern_ph = String.Search_pattern.create "ph" in
   let pattern_mph = String.Search_pattern.create "mph" in
-  let pattern_coeu = String.Search_pattern.create "cœu" in
-  let pattern_oeu = String.Search_pattern.create "œu" in
-  let pattern_oe = String.Search_pattern.create "œ" in
+  let patterns_oe =
+    List.map ~f:(fun (pattern, repl) ->
+        String.Search_pattern.create pattern, repl)
+    [ "cœu", "queu"
+    ; "coeu", "queu"
+    ; "œu", "eu"
+    ; "oeu", "eu"
+    ; "œ", "eu"
+    ; "oe", "eu"
+    ; "œ", "é"
+    ; "oe", "é"
+    ]
+  in
   let pattern_auxq = String.Search_pattern.create "auxq" in
   let pattern_auxd = String.Search_pattern.create "auxd" in
   let pattern_y = String.Search_pattern.create "y" in
@@ -441,10 +453,8 @@ let erofa_rule = lazy (
      let ortho = ref (row.ortho, search_res) in
      List.iter patterns_ch ~f:(fun (target, repl) ->
          ortho := rewrite env row !ortho ~target ~repl);
-     ortho := rewrite env row !ortho ~target:pattern_coeu ~repl:"queu";
-     ortho := rewrite env row !ortho ~target:pattern_oeu ~repl:"eu";
-     ortho := rewrite env row !ortho ~target:pattern_oe ~repl:"eu";
-     ortho := rewrite env row !ortho ~target:pattern_oe ~repl:"é";
+     List.iter patterns_oe ~f:(fun (target, repl) ->
+         ortho := rewrite env row !ortho ~target ~repl);
      ortho := rewrite env row !ortho ~target:pattern_mph ~repl:"nf";
      ortho := rewrite env row !ortho ~target:pattern_ph ~repl:"f";
      (match String.chop_suffix (fst !ortho) ~suffix:"x" with
@@ -1033,7 +1043,7 @@ type stats =
   }
 [@@deriving sexp_of]
 
-let gen ~root ?(not_understood = `Ignore) ?lexique ?rules:(which_rules=[]) f =
+let gen ~root ?(fix_oe = false) ?(not_understood = `Ignore) ?lexique ?rules:(which_rules=[]) f =
   Sexp_with_utf8.linkme;
   let rules = Rules.create () in
   let skip = load_skip () in
@@ -1105,10 +1115,23 @@ let gen ~root ?(not_understood = `Ignore) ?lexique ?rules:(which_rules=[]) f =
              (* Le oe est une correction du lexique, il s'applique donc à l'orthographe de
                 départ, pas l'orthographe d'arrivée comme les calculs de changements
                 d'orthographe. *)
-             let row_oe, search_res = respell_oe (row, search_res) in
-             let row', _ = rule rules wiki (row_oe, search_res) in
-             if row.ortho <> row_oe.ortho then f row.ortho row'.ortho;
-             f row_oe.ortho row'.ortho
+             let row_oe, search_res_oe = respell_oe (row, search_res) in
+             let row_oe', _ = rule rules wiki (row_oe, search_res_oe) in
+             if row.ortho <> row_oe.ortho then (
+               let row' =
+                 if fix_oe (* Quand fix_oe, on réécrit tous les oe qui survive à la transformation
+                              en œ, sinon, on s'assure simplement qu'on réécrit les deux formes
+                              soient reconnues.
+                              Si on réécrit tous les /k/ en lettre «k», et si le lexique contient
+                              seulement «coeur» mais pas «cœur», on aura en sortie :
+                              - fix_oe=true : cœur -> kœur, coeur -> kœur
+                              - fix_oe=false : cœur -> kœur, coeur -> koeur
+                            *)
+                 then row_oe'
+                 else fst (rule rules wiki (row, search_res))
+               in
+               f row.ortho row'.ortho
+             );
+             f row_oe.ortho row_oe'.ortho
     ));
   { total = !total; considered = !considered; prefiltered_out = !prefiltered_out; failed = !failed }
-
