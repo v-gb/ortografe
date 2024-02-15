@@ -454,7 +454,7 @@ coupe-gorge,2,coupe-gorge/coupe-gorges,NOM,m,,,coupe-gorge
 coupe-ongles,2,coupe-ongle/coupe-ongles,NOM,m,,,coupe-ongles
 coupe-papier,2,coupe-papier/coupe-papiers,NOM,m,,,coupe-papier
 couvre-pied,1,couvrepied,NOM,m,s,,couvre-pied
-couvre-pieds,2,couvre-pied/couvrepieds,NOM,m,,,couvre-pieds
+couvre-pieds,2,couvrepied/couvrepieds,NOM,m,,,couvre-pieds
 cover-girl,1,covergirl,NOM,f,s,,cover-girl
 cover-girls,1,covergirls,NOM,f,p,,cover-girl
 cow-boy,1,cowboy,NOM,m,s,,cow-boy
@@ -1276,7 +1276,7 @@ mi-août,1,mi-aout,NOM,f,s,,mi-août
 mi-cloître,1,mi-cloitre,NOM,m,s,,mi-cloître
 mille-feuille,1,millefeuille,NOM,m,s,,mille-feuille
 mille-feuilles,1,millefeuilles,NOM,m,p,,mille-feuille
-mille-pattes,2,mille-pattes/millepattes,NOM,m,,,mille-pattes
+mille-pattes,2,millepatte/millepattes,NOM,m,,,mille-pattes
 mini-chaîne,1,mini-chaine,NOM,f,s,,mini-chaîne
 minima,1,minimums,NOM,m,p,,minimum
 modéreras,1,modèreras,VER,,,ind:fut:2s;,modérer
@@ -1455,7 +1455,7 @@ porte-chapeaux,2,porte-chapeau/porte-chapeaux,NOM,m,,,porte-chapeaux
 porte-cigarettes,2,porte-cigarette/porte-cigarettes,NOM,m,,,porte-cigarettes
 porte-clefs,2,porte-clef/porte-clefs,NOM,m,,,porte-clefs
 porte-clé,1,porteclé,NOM,m,s,,porte-clé
-porte-clés,2,porte-clé/porteclés,NOM,m,,,porte-clés
+porte-clés,2,porteclé/porteclés,NOM,m,,,porte-clés
 porte-conteneurs,2,porte-conteneur/porte-conteneurs,NOM,m,,,porte-conteneurs
 porte-crayon,1,portecrayon,NOM,m,s,,porte-crayon
 porte-documents,2,porte-document/porte-documents,NOM,m,,,porte-documents
@@ -1534,7 +1534,7 @@ préférerez,1,préfèrerez,VER,,,ind:fut:2p;,préférer
 préféreriez,1,préfèreriez,VER,,,cnd:pre:2p;,préférer
 préférerions,1,préfèrerions,VER,,,cnd:pre:1p;,préférer
 préféreront,1,préfèreront,VER,,,ind:fut:3p;,préférer
-prêchi-prêcha,2,prêchiprêcha/prêchi-prêcha,NOM,m,,,prêchi-prêcha
+prêchi-prêcha,2,prêchiprêcha/prêchiprêchas,NOM,m,,,prêchi-prêcha
 puîné,1,puiné,NOM,m,s,,puîné
 puînée,1,puinée,ADJ,f,s,,puîné
 puînés,1,puinés,NOM,m,p,,puîné
