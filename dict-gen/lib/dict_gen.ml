@@ -107,7 +107,7 @@ let build_erofa_ext ~root =
   List.iter combined_erofa ~f:(fun (old, new_) ->
       print_endline [%string "%{old},%{new_}"])
 
-let with_flow ~env ~write ~diff ~f =
+let with_flow ~env ~write ~diff ~drop ~f =
   match write, diff with
   | Some _, Some _ -> failwith "can't specify both --write and --diff"
   | Some fname, None ->
@@ -122,7 +122,7 @@ let with_flow ~env ~write ~diff ~f =
        (fun flow -> Eio.Buf_write.with_flow flow f);
      Some (`Diff (fname, tmp_fname))
   | None, None ->
-     if Unix.isatty Unix.stdout then
+     if not drop && Unix.isatty Unix.stdout then
        Eio.Switch.run (fun sw_pr ->
            let process =
              Eio.Switch.run (fun sw_fd ->
@@ -152,11 +152,9 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe =
     build_lexique_post90 lexique post90 ~fix_90:rect90
   in
   match
-    with_flow ~env ~write ~diff ~f:(fun buf ->
+    with_flow ~env ~write ~diff ~drop ~f:(fun buf ->
         let print, after =
-          if drop
-          then (fun _ _ -> ()), ignore
-          else if all
+          if all
           then (fun old new_ ->
                 let mod_ = if String.(=) old new_ then "=" else "M" in
                 Eio.Buf_write.string buf [%string "%{old},%{new_},%{mod_}\n"]),
@@ -168,6 +166,7 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe =
               add_post90_entries all post90;
               let plurals_in_s = List.for_all rules ~f:Rewrite.plurals_in_s in
               simplify_mapping all ~plurals_in_s;
+              let write = if drop then ignore else (fun str -> Eio.Buf_write.string buf str) in
               (let name =
                  ((if rect90 then ["1990"] else [])
                   @ if List.is_empty rules
@@ -189,10 +188,10 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe =
                          | `Bool b -> Bool.to_string b))
                |> String.concat ~sep:", "
                |> sprintf "{%s}\n"
-               |> Eio.Buf_write.string buf
+               |> write
               );
               List.iter (ranked all) ~f:(fun (old, new_) ->
-                  Eio.Buf_write.string buf [%string "%{old},%{new_}\n"])))
+                  write [%string "%{old},%{new_}\n"])))
         in
         let stats =
           Rewrite.gen
