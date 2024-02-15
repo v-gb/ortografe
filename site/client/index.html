@@ -15,6 +15,8 @@
     <style>
       body {
           margin: 0;
+          font-size: 1.1rem;
+          line-height: 1.3;
       }
       .main-with-margin {
           margin: 0 8px 8px 8px;
@@ -22,9 +24,6 @@
       main {
           max-width: 55em;
           margin: auto;
-      }
-      main * {
-          font-size: 1.05rem;
       }
       h1 {
           font-size: 3rem;
@@ -51,6 +50,7 @@
       }
       /* https://css-tricks.com/snippets/css/a-guide-to-flexbox/ */
       #user-text {
+          font-size: 1.1rem; /* not inherited for some reason otherwise */
           background-color: #FAF9F6;
           flex: 1 1 0px;
           min-width: 15em;
@@ -98,7 +98,6 @@
           cursor: pointer;
           font-family: Graphik,-apple-system,system-ui,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
           font-size: 1.10rem;
-          line-height: 1.15;
           padding: 6px 8px;
           text-align: center;
           text-transform: none;
@@ -120,13 +119,11 @@
           list-style-type: none;
       }
 
-      a:link {
-          color: #1db81d;
+      a:link, a:visited {
+          color: #026b45;
+          text-underline-offset: 1.5px;
       }
 
-      a:visited {
-          color: darkgreen;
-      }
       footer {
           margin-top: 5em;
           font-size: 0.8em;
