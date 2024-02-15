@@ -114,9 +114,19 @@ async function storage_get(fields) {
             : b.storage.local.get(fields))
 }
 
+function debug_information() {
+    const json = {
+        manifest_version: is_manifest_v2 ? "2" : "3",
+        "window.screen.width": window.screen.width,
+        "window.innerWidth": window.innerWidth,
+        "location.hash": location.hash,
+    }
+    document.getElementById('debug-info').innerText = JSON.stringify(json, null, 2)
+}
+
 async function restoreOptions() {
     try {
-        document.getElementById('manifest-version').innerText = is_manifest_v2 ? "2" : "3"
+        debug_information();
         const options = await storage_get(all_fields)
         console.log('loaded', options)
         normalize_options(options)
@@ -140,7 +150,12 @@ document.addEventListener('DOMContentLoaded', restoreOptions);
 document.querySelector("form").addEventListener("change", saveOptions);
 const open_options_page_elt = document.getElementById("open-options-page")
 const load_dict = document.getElementById("load-dict-section")
-if (location.hash === '#popup') {
+// On firefox on computer, the "#popup" is all we need, to distinguish between the popup
+// window and full blow options page. On firefox on android though, the popup page is
+// already full screen and trying to open the openOptionsPage does something like opening
+// a new tab but doesn't make you navigate to it, which is not convenient. We detect
+// firefox-on-android with the window size check.
+if (location.hash === '#popup' && window.screen.width != window.innerWidth) {
     open_options_page_elt.addEventListener("click", () => b.runtime.openOptionsPage());
     load_dict.style["display"] = "none"
 } else {
