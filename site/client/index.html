@@ -13,6 +13,10 @@
     <script src="/static/rewrite.js" defer></script>
     <script src="/static/page.js" defer></script>
     <style>
+       /* https://www.joshwcomeau.com/css/custom-css-reset/ */
+      input, button, textarea, select {
+          font: inherit;
+      }
       body {
           margin: 0;
           font-size: 1.1rem;
@@ -46,11 +50,9 @@
           background-color: #e5fbe5;
           padding: 3px;
           border-radius: 6px;
-          font-family: monospace;
       }
       /* https://css-tricks.com/snippets/css/a-guide-to-flexbox/ */
       #user-text {
-          font-size: 1.1rem; /* not inherited for some reason otherwise */
           background-color: #FAF9F6;
           flex: 1 1 0px;
           min-width: 15em;
@@ -120,7 +122,7 @@
       }
 
       a:link, a:visited {
-          color: #026b45;
+          color: #106410;
           text-underline-offset: 1.5px;
       }
 
