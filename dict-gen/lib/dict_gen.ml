@@ -122,7 +122,20 @@ let with_flow ~env ~write ~diff ~f =
        (fun flow -> Eio.Buf_write.with_flow flow f);
      Some (`Diff (fname, tmp_fname))
   | None, None ->
-     Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
+     if Unix.isatty Unix.stdout then
+       Eio.Switch.run (fun sw_pr ->
+           let process =
+             Eio.Switch.run (fun sw_fd ->
+                 let r, w = Eio.Process.pipe ~sw:sw_fd (Eio.Stdenv.process_mgr env) in
+                 let process =
+                   Eio.Process.spawn ~sw:sw_pr
+                     (Eio.Stdenv.process_mgr env) ~stdin:r [ "less" ] in
+                 Eio.Flow.close r;
+                 Eio.Buf_write.with_flow w f;
+                 process)
+           in
+           Eio.Process.await_exn process)
+     else Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
      None
 
 let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe =
