@@ -13,6 +13,7 @@
    eio_main
    uucp
    uutf
+   yojson
  )
  (preprocess (pps ppx_jane
                   ppx_uchar_literal

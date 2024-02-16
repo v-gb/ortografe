@@ -176,19 +176,15 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe =
                  |> List.sort ~compare:String.compare
                  |> String.concat ~sep:" "
                in
-               [ "desc", `String name
-               ; "lang", `String "fr"
-               ; "supports_repeated_rewrites",
-                 `Bool (List.for_all rules ~f:Rewrite.supports_repeated_rewrites)
-               ; "plurals_in_s", `Bool plurals_in_s
-               ]
-               |> List.map ~f:(fun (k, v) ->
-                      sprintf "%S: %s" k
-                        (match v with
-                         | `String s -> sprintf "%S" s
-                         | `Bool b -> Bool.to_string b))
-               |> String.concat ~sep:", "
-               |> sprintf "{%s}\n"
+               `Assoc
+                 [ "desc", `String name
+                 ; "lang", `String "fr"
+                 ; "supports_repeated_rewrites",
+                   `Bool (List.for_all rules ~f:Rewrite.supports_repeated_rewrites)
+                 ; "plurals_in_s", `Bool plurals_in_s
+                 ]
+               |> Yojson.to_string
+               |> (fun s -> s ^ "\n")
                |> write
               );
               List.iter (ranked all) ~f:(fun (old, new_) ->
