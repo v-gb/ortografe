@@ -322,10 +322,9 @@ let create () =
   new_fixed "ey" [ "e", Core; "E", Core
                  ; "ej", Core; "Ej", Core
                  ; "ei", Core; "Ei", Core ];
-  List.iter [ "eu"; "eux" ] ~f:(fun g ->
+  List.iter [ "eu"; "eû"; "eux" ] ~f:(fun g ->
       new_fixed g [ "2", Core; "9", Core
                   ; "y", Surprising (* avoir *) ]);
-  new_fixed "eû" [ "2", Core; "9", Core ];
   List.iter [ "er$"; "ers$" ] ~f:(fun digraph ->
       new_fixed digraph [ "e", Core; "Er", Core ]);
   new_fixed "ez$" [ "e", Core; "E", Core ]; (* avez *)

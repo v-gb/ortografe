@@ -839,35 +839,30 @@ let _ : string list =
              fun _env (row, search_res) ->
              let graphems =
                try
-                 match row.ortho with
-                 | "eût" -> [| "u" |] (* il doit manquer un graphème eû -> /u/, Surprising *)
-                 | "eûmes" -> [| "um" |]
-                 | "eûtes" -> [| "ut" |]
-                 | _ ->
-                    List.concat_map (fst search_res) ~f:(fun p ->
-                        match p.graphem, p.phonem with
-                        | "b", "p" -> [ "b" ]
-                        | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
-                        | ("q" | "qu"), "k" -> [ "q" ]
-                        | "qu", ("ku" | "kw") -> [ "qou" ]
-                        | ("en" | "ent" | "ent$" | "em"), "@" -> [ "en" ]
-                        | "en", "@n" -> [ "enn" ]
-                        | "enn", "@n" -> [ "en" ]
-                        | "sc", "sk" -> [ p.graphem ]
-                        | "cc", "k" -> [ "c" ]
-                        | "cc", "ks" -> [ "cç" ]
-                        | "ch", "k" -> [ "c" ] (* la phase d'après déterminera si un k est nécessaire *)
-                        | "c", "k" -> [ "c" ]
-                        | "c", "s" -> [ "ç" ]
-                        | "x", ("gz" | "ks") -> [ "x" ]
-                        | "e", "" -> [ "e" ]
-                        | _ ->
-                           Uutf.String.fold_utf_8 (fun acc _ -> function
-                               | `Malformed s -> s :: acc
-                               | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
-                             [] p.phonem
-                           |> List.rev)
-                    |> Array.of_list
+                 List.concat_map (fst search_res) ~f:(fun p ->
+                     match p.graphem, p.phonem with
+                     | "b", "p" -> [ "b" ]
+                     | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
+                     | ("q" | "qu"), "k" -> [ "q" ]
+                     | "qu", ("ku" | "kw") -> [ "qou" ]
+                     | ("en" | "ent" | "ent$" | "em"), "@" -> [ "en" ]
+                     | "en", "@n" -> [ "enn" ]
+                     | "enn", "@n" -> [ "en" ]
+                     | "sc", "sk" -> [ p.graphem ]
+                     | "cc", "k" -> [ "c" ]
+                     | "cc", "ks" -> [ "cç" ]
+                     | "ch", "k" -> [ "c" ] (* la phase d'après déterminera si un k est nécessaire *)
+                     | "c", "k" -> [ "c" ]
+                     | "c", "s" -> [ "ç" ]
+                     | "x", ("gz" | "ks") -> [ "x" ]
+                     | "e", "" -> [ "e" ]
+                     | _ ->
+                        Uutf.String.fold_utf_8 (fun acc _ -> function
+                            | `Malformed s -> s :: acc
+                            | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
+                          [] p.phonem
+                        |> List.rev)
+                 |> Array.of_list
                with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
              in
              let ortho =
@@ -981,22 +976,17 @@ let _ : string =
        fun _env (row, search_res) ->
          let ortho =
            try
-             match row.ortho with
-             | "eût" -> "u" (* il doit manquer un graphème eû -> /u/, Surprising *)
-             | "eûmes" -> "um"
-             | "eûtes" -> "ut"
-             | _ ->
-               List.concat_map (fst search_res) ~f:(fun p ->
-                   match p.graphem, p.phonem with
-                   | "b", "p" -> [ "b" ]
-                   | ("i" | "'" | "-" | " "), _ -> [ p.graphem ]
-                   | _ ->
-                      Uutf.String.fold_utf_8 (fun acc _ -> function
-                          | `Malformed s -> s :: acc
-                          | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
-                        [] p.phonem
-                      |> List.rev)
-               |> String.concat
+             List.concat_map (fst search_res) ~f:(fun p ->
+                 match p.graphem, p.phonem with
+                 | "b", "p" -> [ "b" ]
+                 | ("i" | "'" | "-" | " "), _ -> [ p.graphem ]
+                 | _ ->
+                    Uutf.String.fold_utf_8 (fun acc _ -> function
+                        | `Malformed s -> s :: acc
+                        | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
+                      [] p.phonem
+                    |> List.rev)
+             |> String.concat
            with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
          in
          { row with ortho }, dummy_search_res))
