@@ -93,10 +93,11 @@ let build_erofa_ext ~root =
     ignore (
         let lexique = Data_src.Lexique.load ~root () in
         let lexique_post90 = build_lexique_post90 lexique post90 ~fix_90:true in
-        Rewrite.gen ~root ~lexique:lexique_post90
+        Rewrite.gen
           ~not_understood:`Ignore
           ~fix_oe:true (* really only matters for proper nouns like Œdipe, since all other
                           œ get removed *)
+          lexique_post90
           (fun old new_ -> add_ranked base ~key:old ~data:new_)
         : Rewrite.stats);
     add_post90_entries base post90;
@@ -197,7 +198,8 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe =
           Rewrite.gen
             ~not_understood:`Ignore
             ~fix_oe:oe
-            ~lexique ~root ~rules print in
+            ~rules
+            lexique print in
         after ();
         if Unix.isatty Unix.stderr then
           eprint_s [%sexp ~~(stats : Rewrite.stats)];

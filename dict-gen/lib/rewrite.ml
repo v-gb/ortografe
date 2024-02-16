@@ -1034,7 +1034,7 @@ type stats =
   }
 [@@deriving sexp_of]
 
-let gen ~root ?(fix_oe = false) ?(not_understood = `Ignore) ?lexique ?rules:(which_rules=[]) f =
+let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) lexique f =
   Sexp_with_utf8.linkme;
   let rules = Rules.create () in
   let skip = load_skip () in
@@ -1076,7 +1076,7 @@ let gen ~root ?(fix_oe = false) ?(not_understood = `Ignore) ?lexique ?rules:(whi
   let considered = ref 0 in
   let prefiltered_out = ref 0 in
   let failed = ref 0 in
-  List.iter (lexique ||? Data_src.Lexique.load ~root ())
+  List.iter lexique
     ~f:(fun row ->
       total := !total + 1;
       if not (skip row) then (
