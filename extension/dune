@@ -12,7 +12,7 @@
 (rule
  (targets dict.gen.csv dict.js
           alfonic.dict
-          ortograf_net_plat.dict
+          ortograf_net_e_unique.dict
           qu.dict)
  (deps (sandbox always)
    import-dict

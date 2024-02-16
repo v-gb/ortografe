@@ -770,32 +770,32 @@ let _ : string =
 
 let dummy_search_res = [], 0
 let _ : string list =
-  List.map [ true; false ] ~f:(fun accent_plat ->
+  let pluriel_en_plus = true in
+  let e_accente_unique =
+    match `A with
+    | `A -> "e\u{0304}"
+    | `B -> "é"
+    | `C -> "ê"
+  in
+  List.map [ true; false ] ~f:(fun e_unique ->
       new_rule'
         ~supports_repeated_rewrites:false
         ~plurals_in_s:false
         ("ortograf.net"
-         ^ if accent_plat then "-plat" else "")
+         ^ if e_unique then "-e-unique" else "")
         ("les règles de http://www.ortograf.net/"
-         ^ if accent_plat then ", mais sans distinction entre é et è" else "")
+         ^ if e_unique then ", mais sans distinction entre é et è" else "")
         ~prefilter:(fun () -> `All)
         (lazy (
              (* problème :
-          - on rate les mots post-90 comme apparaitre sans accent circonflexe.
-          - la transformation n'est pas idempotente. Par exemple, sens
-            -> sen -> sène. Pour les changements radicaux d'ortografe comme ça,
-            il faudrait peut-être automatiquement désactiver la gestion des pages
-            dynamiques. À moins qu'on puisse remarquer les changements et éviter de
-            les réappliquer. Ou à moins qu'on puisse jarter les entrées qui rendent
-            la transformation non-idempotente (sen en haut)
-          - trop d'accent grave sur les e en général. On pourrait au moins appliquer
-            la même idée que les règles érofa pour améliorer ça.
+                - trop d'accent grave sur les e en général. On pourrait au moins appliquer
+                la même idée que les règles érofa pour améliorer ça.
               *)
              let graphem_by_phonem =
                Hashtbl.of_alist_exn (module Uchar)
                  [ !!"a", "a"
-                 ; !!"e", (if accent_plat then "e\u{0304}" else "é")
-                 ; !!"E", (if accent_plat then "e\u{0304}" else "è")
+                 ; !!"e", (if e_unique then e_accente_unique else "é")
+                 ; !!"E", (if e_unique then e_accente_unique else "è")
                  ; !!"2", "eu"
                  ; !!"9", "eu"
                  ; !!"°", "e"
@@ -892,8 +892,9 @@ let _ : string list =
                          then g ^ "e"
                          else "·" ^ g
                      else
-                       (* prend le grapheme complet d'avant parce que dans «langue», le n est déjà un
-                      graphème avec le «a», et donc il ne fait pas de graphème avec le g *)
+                       (* prend le grapheme complet d'avant parce que dans «langue», le n
+                          est déjà un graphème avec le «a», et donc il ne fait pas de
+                          graphème avec le g *)
                        let digraph = graphems.(i-1) ^ Rules.str_of_uchar (first_uchar g) in
                        if Hashtbl.mem reverse_mapping digraph
                        then "·" ^ g
@@ -903,14 +904,26 @@ let _ : string list =
                |> String.concat
              in
              let ortho =
-               (* On ne peut pas gérer les liaisons avec une réécriture mot à mot comme on
-              fait. Comme les principales (ou seules ?) qui sont obligatoires sont avec
-              les articles, on écrit un z en exposant après les articles, pour indiquer "z
-              optionnel". *)
-               match row.ortho with
-               | "ces" | "des" | "les" | "mes" | "ses" | "tes"
-                 | "ils" | "elles" | "aux" -> ortho ^ "\u{1DBB}"
-               | _ -> ortho
+               if pluriel_en_plus
+               then
+                 if String.is_suffix row.ortho ~suffix:"s"
+                    && row.ortho = row.lemme ^ "s"
+                 then ortho ^ "+"
+                 else
+                   (* le lemme de "les" est "les" et pas "le" ? Bizarre. *)
+                   match row.ortho with
+                   | "ces" | "des" | "les" | "mes" | "ses" | "tes"
+                   | "nous" | "vous" | "ils" | "elles" | "aux" -> ortho ^ "+"
+                   | _ -> ortho
+               else
+                 (* On ne peut pas gérer les liaisons avec une réécriture mot à mot comme on
+                    fait. Comme les principales (ou seules ?) qui sont obligatoires sont
+                    avec les articles, on écrit un z en exposant après les articles, pour
+                    indiquer "z optionnel". *)
+                 match row.ortho with
+                 | "ces" | "des" | "les" | "mes" | "ses" | "tes"
+                 | "nous" | "vous" | "ils" | "elles" | "aux" -> ortho ^ "\u{1DBB}"
+                 | _ -> ortho
              in
              { row with ortho }, dummy_search_res)))
 
@@ -923,11 +936,6 @@ let _ : string =
     ~prefilter:(fun () -> `All)
     (lazy (
        (* problème :
-          - la règles des pluriels dans l'extension cause problème car on a
-            cuisse->cuis, et donc on infère cuisses->cui. Il faut étendre le
-            csv pour permettre de configurer les autres aspects du système.
-          - la réécriture aussi un problème d'idempotence. Qui->ci->si. Il faut
-            désactiver la réécriture dynamique, là
           - je ne vois de mention des liaisons dans les règles
         *)
        let graphem_by_phonem =
