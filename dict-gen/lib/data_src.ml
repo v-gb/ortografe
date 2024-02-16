@@ -1,5 +1,19 @@
 open Core
+
+type 'a src =
+  [ `Str of string | `Root of ([> Eio.Fs.dir_ty ] as 'a) Eio.Path.t ]
+
 let (^/) = Eio.Path.(/)
+
+let in_build_dir ~root filename =
+  if Eio.Path.is_file (root ^/ filename)
+  then root ^/ filename
+  else (root ^/ "_build/default") ^/ filename
+
+let read src filename =
+  match src with
+  | `Str str -> str
+  | `Root root -> Eio.Path.load (in_build_dir ~root filename)
 
 module Csv_header = struct
   type 'a t = (string, int) Hashtbl.t -> (string array -> 'a)
@@ -58,11 +72,6 @@ module Csv_header = struct
       |> List.rev
 end
 
-let in_build_dir ~root filename =
-  if Eio.Path.is_file (root ^/ filename)
-  then root ^/ filename
-  else (root ^/ "_build/default") ^/ filename
-
 module Lexique = struct
   type t =
     { ortho : string
@@ -73,8 +82,8 @@ module Lexique = struct
     }
   [@@deriving sexp_of]
 
-  let load ~root ?(filename = "data/lexique/Lexique383.gen.tsv") () =
-    Eio.Path.load (in_build_dir ~root filename)
+  let load src =
+    read src "data/lexique/Lexique383.gen.tsv"
     |> Csv_header.parse_string
       ~header:`In_string
       ~separator:'\t'
@@ -409,8 +418,8 @@ module Lexique = struct
     ]
 end
 
-let read_key_value_comma_sep_file f =
-  let lines = Eio.Path.load f |> String.split_lines in
+let read_key_value_comma_sep_file str =
+  let lines = String.split_lines str in
   let h = Hashtbl.create (module String) ~size:(List.length lines) in
   List.iter lines ~f:(fun line ->
       match String.split line ~on:',' with
@@ -418,10 +427,10 @@ let read_key_value_comma_sep_file f =
       | _ -> raise_s [%sexp "bad line", (line : string)]);
   h
 
-let load_erofa ~root =
+let load_erofa src =
   read_key_value_comma_sep_file
-    (in_build_dir ~root "extension/dict.external-sources.gen.csv")
+    (read src "extension/dict.external-sources.gen.csv")
 
-let load_post90 ~root =
+let load_post90 src =
   read_key_value_comma_sep_file
-    (in_build_dir ~root "extension/dict1990.gen.csv")
+    (read src "extension/dict1990.gen.csv")

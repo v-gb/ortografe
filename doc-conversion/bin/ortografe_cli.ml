@@ -64,6 +64,8 @@ let () =
              }
              arg1 arg2)
       ; Dict_gen.gen_cmd "dict"
+          ~static:{ data_lexique_Lexique383_gen_tsv = Dict.data_lexique_Lexique383_gen_tsv
+                  ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv }
           ~doc:"génération de dictionnaires de réécriture personnalisés pour la conversion \
                 de document, ou pour l'extension de navigateur internet"
       ]

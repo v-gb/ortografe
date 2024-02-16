@@ -51,8 +51,8 @@ let load_dict str =
       | _ -> failwith ("wtf " ^ str)) l;
   h
 
-let erofa = lazy (load_dict Dict.erofa)
-let rect1990 = lazy (load_dict Dict.rect1990)
+let erofa = lazy (load_dict Dict.extension_dict_gen_csv)
+let rect1990 = lazy (load_dict Dict.extension_dict1990_gen_csv)
 let pure_text = Text.convert
 let html = Html.convert
 let xhtml = Html.convert_xhtml
@@ -145,6 +145,7 @@ let convert_files ~options src dst =
 let max_size = Zip.max_size
 let map_zip = Zip.map
 
+let extension_dict1990_gen_csv = Dict.extension_dict1990_gen_csv
 module Private = struct
   let grab_from_zip src name =
     let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in

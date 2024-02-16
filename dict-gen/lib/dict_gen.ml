@@ -88,10 +88,10 @@ let build_lexique_post90 (lexique : Data_src.Lexique.t list) post90 ~fix_90 =
 let build_erofa_ext ~root =
   let combined_erofa =
     (* start with whole erofa db, so [simplify_mapping] considers singular in the erofa csv *)
-    let base = Hashtbl.map (Data_src.load_erofa ~root) ~f:(fun data -> data, -1) in
-    let post90 = Data_src.load_post90 ~root in
+    let base = Hashtbl.map (Data_src.load_erofa (`Root root)) ~f:(fun data -> data, -1) in
+    let post90 = Data_src.load_post90 (`Root root) in
     ignore (
-        let lexique = Data_src.Lexique.load ~root () in
+        let lexique = Data_src.Lexique.load (`Root root) in
         let lexique_post90 = build_lexique_post90 lexique post90 ~fix_90:true in
         Rewrite.gen
           ~not_understood:`Ignore
@@ -139,16 +139,27 @@ let with_flow ~env ~write ~diff ~drop ~f =
      else Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
      None
 
-let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe =
+type static =
+  { data_lexique_Lexique383_gen_tsv : string
+  ; extension_dict1990_gen_csv : string }
+let gen ~env ?static ~rules ~rect90 ~all ~write ~diff ~drop ~oe () =
   let rect90 =
     rect90
     || List.is_empty rules
     || List.exists rules ~f:(fun r -> String.(=) (Rewrite.name r) "erofa")
   in
-  let root = root ~from:(Eio.Stdenv.fs env) in
-  let lexique = Data_src.Lexique.load ~root () in
+  let root = lazy (root ~from:(Eio.Stdenv.fs env)) in
+  let lexique =
+    Data_src.Lexique.load (match static with
+                           | None -> `Root (force root)
+                           | Some r -> `Str r.data_lexique_Lexique383_gen_tsv)
+  in
   let post90, lexique =
-    let post90 = Data_src.load_post90 ~root in
+    let post90 =
+      Data_src.load_post90 (match static with
+                            | None -> `Root (force root)
+                            | Some r -> `Str r.extension_dict1990_gen_csv)
+    in
     (if rect90 then post90 else Hashtbl.create (module String)),
     build_lexique_post90 lexique post90 ~fix_90:rect90
   in
@@ -209,7 +220,7 @@ let gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe =
        ]
        ~is_success:(function 0 | 1 -> true | _ -> false)
 
-let gen_cmd ?doc name =
+let gen_cmd ?static ?doc name =
   let module C = Cmdliner in
   let open Cmdliner_bindops in
   C.Cmd.v (C.Cmd.info ?doc name)
@@ -241,7 +252,7 @@ let gen_cmd ?doc name =
                       (C.Arg.info ~doc:"réécrire oe en œ quand c'est possible" ["oe"]))
      in
      Eio_main.run (fun env ->
-         try gen ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe
+         try gen ?static ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe ()
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
 
@@ -254,11 +265,11 @@ let main () =
           (let+ post90 = C.Arg.value (C.Arg.flag (C.Arg.info ["90"])) in
            Eio_main.run (fun env ->
                let root = root ~from:(Eio.Stdenv.fs env) in
-               let lexique = Data_src.Lexique.load ~root () in
+               let lexique = Data_src.Lexique.load (`Root root) in
                let lexique =
                  if post90
                  then
-                   let post90 = Data_src.load_post90 ~root in
+                   let post90 = Data_src.load_post90 (`Root root) in
                    build_lexique_post90 lexique post90 ~fix_90:false (* to check both versions *)
                  else lexique
                in

@@ -31,6 +31,7 @@ val map_zip
 module More_markup = More_markup
   
 (**/**)
+val extension_dict1990_gen_csv : string
 module Private : sig
   val grab_from_zip : string -> string -> string
   val convert_docx_xml : _ convert
