@@ -12,7 +12,7 @@
 ;; Narrowing down this file saves 300ms when loading the file, but also makes it easier to
 ;; grep through the file, as we don't have a ton of columns that cause all the lines to
 ;; wrap all the time, which is difficult to read. If we want to embed data in the
-;; extension in the future, that'd also cut down the size of that data by 3.5x.
+;; extension in the future, that'd also cut down the size of that data by 6.3x.
 (rule
  (target Lexique383.gen.tsv)
  (deps (sandbox always)
@@ -39,7 +39,7 @@
         -cmd ".mode tab"
         -cmd ".import Lexique383-full.gen.tsv tmp"
         -cmd ".header on"
-        -cmd "select ortho,phon,lemme,cgram,genre,nombre,infover,
+        -cmd "select ortho,phon,lemme,
                      (case
                       when ortho like 'h%'
                       then
