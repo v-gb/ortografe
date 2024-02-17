@@ -76,7 +76,6 @@ module Lexique = struct
   type t =
     { ortho : string
     ; phon : string
-    ; cgram : string
     ; lemme : string
     ; h_aspire : bool
     }
@@ -90,7 +89,6 @@ module Lexique = struct
       Csv_header.(
       let+ ortho = field "ortho" Fn.id
       and+ phon = field "phon" Fn.id
-      and+ cgram = field "cgram" Fn.id
       and+ lemme = field "lemme" Fn.id
       and+ h_aspire =
         field "h_aspire"
@@ -98,7 +96,7 @@ module Lexique = struct
                   | "f" -> false
                   | s -> failwith ("unknown value of h_aspire: " ^ s))
       in
-      { ortho; phon; cgram; lemme; h_aspire })
+      { ortho; phon; lemme; h_aspire })
     |> List.filter ~f:(fun t ->
            not (List.exists [ " "; "ñ"; "."; "ã" ]
                   ~f:(fun substring -> String.is_substring ~substring t.ortho)))
@@ -386,9 +384,11 @@ module Lexique = struct
         "pennies"; "pennys"; "mess"; "bluffes"; "bluffés"; "bluffées"; "westphaliennes";
         "flirtes"; "shootes"; "nietzschéennes"; "magyares"; "surfes"; "drums"; "quintuplés";
         "dominions"; "surfeuses"; "sen"; "basketball"; "callgirl"; "ladys"; "volleyball";
-        "callgirls"; "ranchs"; "tennismans"; "cowboy"; "cowboys"; "rugbymans";
+        "callgirls"; "ranchs"; "tennismans"; "cowboy"; "cowboys"; "rugbymans"; "hugh";
         (* not real words for this purpose *)
-        "min"; "com"; "zzz"; "ah"; "oh"; "eh"; "ha";
+        "min"; "com"; "zzz"; "ah"; "oh"; "eh"; "ha"; "peuh"; "pouh"; "houhou"; "hare";
+        "hon"; "haha"; "meuh"; "pouah"; "pfft"; "pff"; "hi"; "ohé"; "ouh"; "ouah"; "ho";
+        "bah"; "euh"; "hein"; "hep";
          (* la phonetique est fausse pour ces mots (ou parfois
             la categories grammaticale) *)
         "télétexte"; "quadruple"; "hermès"; "pacsés"; "succion";

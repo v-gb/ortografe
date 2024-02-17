@@ -7,7 +7,6 @@ module Lexique : sig
   type t =
     { ortho : string
     ; phon : string
-    ; cgram : string
     ; lemme : string
     ; h_aspire : bool
     }

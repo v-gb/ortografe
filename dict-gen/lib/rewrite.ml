@@ -358,7 +358,6 @@ let load_skip () =
     Hash_set.mem skip row.ortho
     || ((row.lemme ^ "s") = row.ortho && Hash_set.mem skip row.lemme)
     || String.length row.ortho =$ 1
-    || row.cgram = "ONO"
     || String.mem row.ortho '-'
 
 type rule =
