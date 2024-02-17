@@ -105,10 +105,9 @@ let create () : t =
 
   (* consonnes simples *)
   new_ "b" (fun word _ j ->
-      ["b", Core]
-      @ match word#:(j,j+1) with
-        | "s" | "t" | "c" -> ["p", Core ]
-        | _ -> []);
+      match word#:(j,j+1) with
+      | "s" | "t" | "c" -> [ "b", Core; "p", Core ]
+      | _ -> ["b", Core]);
   new_fixed "bb" [ "b", Core ];
   (* c n'est pas simple, mais ç est simple *)
   new_fixed "ç" [ "s", Core ];
@@ -218,7 +217,9 @@ let create () : t =
 
   (* T *)
   new_ "t" (fun word _ j ->
-      (if word#:(j,j+1) = "i" then ["s", Core ] else []) @ ["t", Core]);
+      if word#:(j,j+1) = "i"
+      then [ "s", Core; "t", Core ]
+      else [ "t", Core ]);
   List.iter [ "t$"; "ts$" ] ~f:(fun digraph ->
       new_ digraph (fun word i _ ->
           (* Le cas surprising nous permet de dire que mamout avec un t prononcé est
@@ -443,11 +444,14 @@ let create () : t =
 
   (
     let rule_xm x alone nasal =
-      new_fixed (x ^ "mm") (List.map alone ~f:(fun a -> a ^ "m", Core));
+      let r_non_nasal = List.map alone ~f:(fun a -> a ^ "m", Core) in
+      let r_nasal = [ nasal, Core ] in
+      let r_non_nasal_preferred = r_non_nasal @ [ nasal, Surprising ] in
+      new_fixed (x ^ "mm") r_non_nasal;
       new_ (x ^ "m") (fun word _ j ->
           match word#:(j,j+1) with
-          | "b" | "p" -> [ nasal, Core ]
-          | _ -> List.map alone ~f:(fun a -> a ^ "m", Core) @ [ nasal, Surprising ])
+          | "b" | "p" -> r_nasal
+          | _ -> r_non_nasal_preferred)
     in
     rule_xm "a" ["a"] "@";
     rule_xm "ai" ["e"; "E"] "5";
@@ -459,11 +463,13 @@ let create () : t =
 
   (
     let rule_xn ?(importance = Core) graphem without_n with_n =
-      new_fixed (graphem ^ "nn") (List.map without_n ~f:(fun w -> w ^ "n", importance));
+      let r_non_nasal = List.map without_n ~f:(fun w -> w ^ "n", importance) in
+      let r_nasal = [ with_n, importance ] in
+      new_fixed (graphem ^ "nn") r_non_nasal;
       new_ (graphem ^ "n") (fun word _ j ->
           if in_ortho_vowels word#::(j,0)
-          then List.map without_n ~f:(fun w -> w ^ "n", importance)
-          else [ with_n, importance ]);
+          then r_non_nasal
+          else r_nasal);
     in
     rule_xn "a" ["a"] "@";
     rule_xn "ai" ["e"; "E"] "5";
