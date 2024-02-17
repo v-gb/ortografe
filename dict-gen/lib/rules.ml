@@ -90,9 +90,11 @@ type importance =
   | Surprising (* Surprising veut dire : on peut exprimer des mots avec ces règles mais
                   on ne veut pas introduire de nouveaus usages dans les réécritures. *)
 
-type t = (char, (string * (string -> int -> int -> (string * importance) list)) list) Hashtbl.t
-let create () =
-  let r = ref [] in
+type rule_fun = string -> int -> int -> (string * importance) list
+type rule = string * rule_fun
+type t = (char, rule array) Hashtbl.t
+let create () : t =
+  let r : rule list ref = ref [] in
   let new_ a f = r := (a, f) :: !r in
   let new_fixed graphem l = new_ graphem (fun _ _ _ -> l) in
 
@@ -480,9 +482,11 @@ let create () =
   List.iter !r ~f:(fun (graphem, f) ->
       Hashtbl.add_multi h ~key:graphem.[0] ~data:(graphem, f));
   Hashtbl.map h ~f:(fun l ->
-      List.stable_sort l
+      let a = Array.of_list l in
+      Array.stable_sort a
         ~compare:(fun (g1, _) (g2, _) ->
-          Comparable.reverse Int.compare (String.length g1) (String.length g2)))
+          Comparable.reverse Int.compare (String.length g1) (String.length g2));
+      a)
 
 type path_elt =
   { graphem : string
@@ -502,7 +506,7 @@ module Heap =
         Comparable.reverse [%compare: int * int] (j1, i1) (j2, i2)
   end)
 
-let search rules word phon =
+let search (rules : t) word phon =
   let first_value = (0, 0, 0, []) in
   let pqueue = Heap.create ~dummy:first_value 5 in
   Heap.add pqueue first_value;
@@ -531,7 +535,7 @@ let search rules word phon =
         if [%compare: int * int] (j, i) (snd !furthest, fst !furthest) >$ 0 then
           furthest := (i, j);
         let longest_matching_core_graphem = ref None in
-        List.iter (Hashtbl.find_exn rules word.[i]) ~f:(fun (graphem, f) ->
+        Array.iter (Hashtbl.find_exn rules word.[i]) ~f:(fun (graphem, f) ->
             if String.is_substring_at word_dollar ~pos:i ~substring:graphem
             then (
               let phonems = f word i (i + String.length graphem) in
