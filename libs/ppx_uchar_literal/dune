@@ -1,5 +1,5 @@
 (library
  (name ppx_uchar_literal)
  (kind ppx_deriver)
- (libraries ppxlib ppxlib.metaquot)
+ (libraries ppxlib)
  (preprocess (pps ppxlib.metaquot)))
