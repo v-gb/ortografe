@@ -1,5 +1,34 @@
 open Core
 
+let string_search_pattern_replace_first_opt ?pos t ~in_:s ~with_ =
+  (* String.Search_pattern.replace_first, modified to return an option so we can tell
+     whether something changed or not. Otherwise we need to use phys_equal (which may not
+     work well in javascript on strings), or run String.Search_pattern.index twice. *)
+  match String.Search_pattern.index ?pos t ~in_:s with
+  | None -> None
+  | Some i ->
+     let len_s = String.length s in
+     let len_t = String.length (String.Search_pattern.pattern t) in
+     let len_with = String.length with_ in
+     let dst = Bytes.create (len_s + len_with - len_t) in
+     Bytes.From_string.blit ~src:s ~src_pos:0 ~dst ~dst_pos:0 ~len:i;
+     Bytes.From_string.blit ~src:with_ ~src_pos:0 ~dst ~dst_pos:i ~len:len_with;
+     Bytes.From_string.blit
+       ~src:s
+       ~src_pos:(i + len_t)
+       ~dst
+       ~dst_pos:(i + len_with)
+       ~len:(len_s - i - len_t);
+     Some (Bytes.unsafe_to_string ~no_mutation_while_string_reachable:dst)
+;;
+
+let string_search_pattern_replace_all_opt t ~in_ ~with_ =
+  (* String.Search_pattern.replace_all, modified to return an option so we can
+     tell whether something changed or not *)
+  match String.Search_pattern.index t ~in_ with
+  | None -> None
+  | Some _ -> Some (String.Search_pattern.replace_all t ~in_ ~with_)
+
 let (>$) = (>)
 let (<$) = (<)
 let (=$) = (=)
@@ -27,18 +56,22 @@ let rewrite ?(start = 0) env (row : Data_src.Lexique.t)
   let ortho = ref (ortho, search_res) in
   while !pos <$ String.length (fst !ortho); do
     let ortho1, search_res1 = !ortho in
-    let ortho2 = String.Search_pattern.replace_first target ~in_:ortho1 ~with_:repl ~pos:!pos in
-    if phys_equal ortho2 ortho1
-    then pos := String.length ortho1
-    else (
+    match string_search_pattern_replace_first_opt target ~in_:ortho1 ~with_:repl ~pos:!pos with
+    | None -> pos := String.length ortho1
+    | Some ortho2 ->
        (match Rules.search env.rules ortho2 row.phon with
         | Ok search_res2 when snd search_res2 <=$ snd search_res1 && env.accept ortho2 ->
            ortho := (ortho2, search_res2)
-       | _ -> ());
+        | _ -> ());
        pos := !pos + 1
-    )
   done;
   !ortho
+
+let keep_if_plausible_opt env (row : Data_src.Lexique.t) (_ortho, search_res) ortho2 =
+  match Rules.search env.rules ortho2 row.phon with
+  | Ok search_res2 when snd search_res2 <=$ snd search_res && env.accept ortho2 ->
+     Some (ortho2, search_res2)
+  | _ -> None
 
 let keep_if_plausible env (row : Data_src.Lexique.t) (ortho, search_res) ortho2 =
   match Rules.search env.rules ortho2 row.phon with
@@ -47,12 +80,9 @@ let keep_if_plausible env (row : Data_src.Lexique.t) (ortho, search_res) ortho2 
   | _ -> ortho, search_res
 
 let keep_regardless env (row : Data_src.Lexique.t) ortho1 ortho2 =
-  if phys_equal (fst ortho1) ortho2
-  then ortho1
-  else
-    match Rules.search env.rules ortho2 row.phon with
-    | Ok search_res2 when env.accept ortho2 -> ortho2, search_res2
-    | _ -> ortho1
+  match Rules.search env.rules ortho2 row.phon with
+  | Ok search_res2 when env.accept ortho2 -> ortho2, search_res2
+  | _ -> ortho1
 
 let keep_regardless_exn rules (row : Data_src.Lexique.t) =
   match Rules.search rules row.ortho row.phon with
@@ -159,10 +189,9 @@ let rewrite_graphem ?(start = 0) env row ortho ~from:(from_g, from_p) ~to_ =
                 |> String.concat
                 |> String.chop_suffix_if_exists ~suffix:"$"
               in
-              let res = keep_if_plausible env row (ortho1, search_res1) ortho2 in
-              if phys_equal (fst res) ortho2
-              then (keep_going := true; ortho := res; Some ())
-              else None
+              match keep_if_plausible_opt env row (ortho1, search_res1) ortho2 with
+              | Some res -> (keep_going := true; ortho := res; Some ())
+              | None -> None
             else None)
       in
       ()
@@ -458,8 +487,9 @@ let erofa_rule = lazy (
        ~f:(fun (pattern, with_) ->
          (* les règles ont un cas particulier pour aux mais pas aus, et donc je crois
             que le changement est considéré comme surprenant par [keep_if_plausible]. *)
-         ortho := keep_regardless env row !ortho
-                    (String.Search_pattern.replace_all pattern ~in_:(fst !ortho) ~with_));
+         (match string_search_pattern_replace_all_opt pattern ~in_:(fst !ortho) ~with_ with
+          | None -> ()
+          | Some res -> ortho := keep_regardless env row !ortho res));
      (match String.chop_prefix (fst !ortho) ~prefix:"deuxi" with
       | None -> ()
       | Some rest -> ortho := keep_if_plausible env row !ortho ("deusi" ^ rest));
