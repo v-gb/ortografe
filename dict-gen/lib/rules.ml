@@ -509,7 +509,13 @@ module Heap =
   Binary_heap.Make(struct
       type t = int * int * int * path_elt list
       let compare (i1, j1, _, _) (i2, j2, _, _) =
-        Comparable.reverse [%compare: int * int] (j1, i1) (j2, i2)
+        (* reverse the operands, as Binary_heap is a min-heap but we want a max heap.  We
+           compare by decreasing j, so we try paths that match the most of the phonetics,
+           which favors graphems where letters are pronounced, instead of being
+           mute. Maybe a more principled search would be A* with an order by surprise. *)
+        (match Int.compare j2 j1 with
+        | 0 -> Int.compare i2 i1
+        | c -> c)
   end)
 
 let search (rules : t) word phon =
