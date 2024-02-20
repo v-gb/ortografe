@@ -166,38 +166,45 @@ let rewrite_e_double_consonants =
     done;
     !ortho_phon
 
-let rewrite_graphem ?(start = 0) env row ortho ~from:(from_g, from_p) ~to_ =
+let rewrite_graphem' ?(start = 0) env row ortho ~filter =
+  let keep_going = ref true in
+  let ortho = ref ortho in
+  while !keep_going do
+    keep_going := false;
+    let (ortho1, search_res1) = !ortho in
+    let (None | Some ()) =
+      List.find_mapi (fst search_res1) ~f:(fun k (path_elt : Rules.path_elt) ->
+          if path_elt.i <$ start
+          then None
+          else
+            match filter path_elt with
+            | None -> None
+            | Some to_ ->
+               let ortho2 =
+                 List.mapi (fst search_res1) ~f:(fun k' elt ->
+                     if k =$ k'
+                     then to_
+                     else elt.graphem)
+                 |> String.concat
+                 |> String.chop_suffix_if_exists ~suffix:"$"
+               in
+               match keep_if_plausible_opt env row (ortho1, search_res1) ortho2 with
+               | Some res -> (keep_going := true; ortho := res; Some ())
+               | None -> None)
+    in
+    ()
+  done;
+  !ortho
+
+let rewrite_graphem ?start env row ortho ~from:(from_g, from_p) ~to_ =
   if not (String.Search_pattern.matches from_g (fst ortho))
   then ortho
-  else (
-    let keep_going = ref true in
-    let ortho = ref ortho in
-    while !keep_going do
-      keep_going := false;
-      let (ortho1, search_res1) = !ortho in
-      let (None | Some ()) =
-        List.find_mapi (fst search_res1) ~f:(fun k (path_elt : Rules.path_elt) ->
-            if path_elt.graphem = String.Search_pattern.pattern from_g
-            && path_elt.phonem = from_p
-            && path_elt.i >=$ start
-            then
-              let ortho2 =
-                List.mapi (fst search_res1) ~f:(fun k' elt ->
-                    if k =$ k'
-                    then to_
-                    else elt.graphem)
-                |> String.concat
-                |> String.chop_suffix_if_exists ~suffix:"$"
-              in
-              match keep_if_plausible_opt env row (ortho1, search_res1) ortho2 with
-              | Some res -> (keep_going := true; ortho := res; Some ())
-              | None -> None
-            else None)
-      in
-      ()
-    done;
-    !ortho
-  )
+  else rewrite_graphem' ?start env row ortho
+         ~filter:(fun path_elt ->
+           if path_elt.graphem = String.Search_pattern.pattern from_g
+              && path_elt.phonem = from_p
+           then Some to_
+           else None)
 
 let erofa_preserve =
   let re =
@@ -518,9 +525,7 @@ let erofa_rule = lazy (
   let pattern_y = String.Search_pattern.create "y" in
   let pattern_yn = String.Search_pattern.create "yn" in
   let pattern_ym = String.Search_pattern.create "ym" in
-  let pattern_h = String.Search_pattern.create "h" in
   let pattern_eh = String.Search_pattern.create "eh" in
-  let pattern_th = String.Search_pattern.create "th" in
   let patterns_ch =
     List.concat_map [ "ec", "é"; "ec", "è"; "c", ""; "", "" ] ~f:(fun (p1, p2) ->
         [ String.Search_pattern.create (p1 ^ "ch"), p2 ^ "c"
@@ -581,13 +586,25 @@ let erofa_rule = lazy (
     if bits land (1 lsl bit_h) <>$ 0 then (
       ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"é";
       ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"è";
-      ortho := rewrite env row !ortho ~target:pattern_th ~repl:""; (* asthme *)
+      ortho := rewrite_graphem' env row !ortho ~filter:(fun path_elt ->
+                   (* asthme. Pas sûr qu'il soit nécessaire de matcher les graphèmes ici,
+                      plutôt que d'utiliser rewrite. *)
+                   match path_elt.graphem, path_elt.phonem with
+                   | "th", "" -> Some ""
+                   | _ -> None);
       let h_start =
         if String.is_prefix (fst !ortho) ~prefix:"déh"
         then String.length "déh" (* déhancher serait déshancher si le h n'était pas aspiré *)
         else Bool.to_int row.h_aspire
       in
-      ortho := rewrite env row !ortho ~target:pattern_h ~repl:"" ~start:h_start;
+      (* On sélectionne les graphèmes directement car la plupart des ch en particulier sont
+         prononcés, ce qui crée beaucoup d'erreurs. *)
+      ortho := rewrite_graphem' ~start:h_start env row !ortho ~filter:(fun path_elt ->
+                   match path_elt.graphem, path_elt.phonem with
+                   | "h", "" -> Some ""
+                   | "th", ("" | "t") -> Some "t"
+                   | "désh", "dez" -> Some "dés"
+                   | _ -> None)
     );
     let row =
       if bits land bit_pattern_all_double_consonants =$ 0
