@@ -51,6 +51,9 @@ EOF
 .mode csv
 .import ../data/lexique/1990.csv l
 .import ../data/wiktionnaire/1990.csv w
+-- fix errors in wiktionnaire, or in the extraction maybe
+update w set post1990 = 'cloitreraient' where pre1990 = 'cloîtreraient';
+update w set post1990 = 'surs' where pre1990 = 'sûrs';
 select distinct l.ortho,
        case
        when l.type = 1

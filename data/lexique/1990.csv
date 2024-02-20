@@ -980,7 +980,7 @@ fraîchissant,1,fraichissant,VER,,,par:pre;,fraîchir
 fraîchissent,1,fraichissent,VER,,,ind:pre:3p;,fraîchir
 fraîchit,1,fraichit,VER,,,ind:pre:3s;ind:pas:3s;,fraîchir
 frou-frou,1,froufrou,NOM,m,s,,frou-frou
-frous-frous,1,froufrous ,NOM,m,p,,frou-frou
+frous-frous,1,froufrous,NOM,m,p,,frou-frou
 fumerolles,1,fumeroles,NOM,f,p,,fumerolle
 fénelonienne,1,fènelonienne,ADJ,f,s,,fénelonien
 féveroles,1,fèveroles,NOM,f,p,,féverole
@@ -1061,7 +1061,7 @@ gratte-pieds,2,gratte-pied/gratte-pieds,NOM,m,,,gratte-pieds
 grenelle,1,grenèle,VER,,,imp:pre:2s;,greneler
 gri-gri,1,grigri,NOM,m,s,,gri-gri
 grille-pain,2,grille-pain/grille-pains,NOM,m,,,grille-pain
-gris-gris,1,grigris ,NOM,m,,,gris-gris
+gris-gris,1,grigris,NOM,m,,,gris-gris
 grivelle,1,grivèle,VER,,,ind:pre:3s;,griveler
 grolle,1,grole,NOM,f,s,,grolle
 grolles,1,groles,NOM,f,p,,grolle
@@ -1296,7 +1296,7 @@ muserolle,1,muserole,NOM,f,s,,muserolle
 méconnaîtra,1,méconnaitra,VER,,,ind:fut:3s;,méconnaître
 méconnaître,1,méconnaitre,VER,,,inf;,méconnaître
 méli-mélo,1,mélimélo,NOM,m,s,,méli-mélo
-mélis-mélos,1,mélimélos ,NOM,m,p,,méli-mélo
+mélis-mélos,1,mélimélos,NOM,m,p,,méli-mélo
 méprenais,1,mèprenais,VER,,,ind:imp:1s;,méprendre
 méprenait,1,mèprenait,VER,,,ind:imp:3s;,méprendre
 méprenant,1,mèprenant,VER,,,par:pre;,méprendre
@@ -1918,7 +1918,7 @@ sûreté,1,sureté,NOM,f,s,,sûreté
 sûretés,1,suretés,NOM,f,p,,sûreté
 tailles-douces,1,taille-douces,NOM,f,p,,taille-douce
 tam-tam,1,tamtam,NOM,m,s,,tam-tam
-tam-tams,1,tamtams ,NOM,m,p,,tam-tam
+tam-tams,1,tamtams,NOM,m,p,,tam-tam
 tape-cul,1,tapecul,NOM,m,s,,tape-cul
 taste-vin,2,taste-vin/taste-vins,NOM,m,,,taste-vin
 tempéreraient,1,tempèreraient,VER,,,cnd:pre:3p;,tempérer

@@ -119,7 +119,7 @@ def main():
                 if len(buf) != len(results):
                     print('ERROR', buf, results, file=sys.stderr)
                 for ((ortho, sentence, ref), res) in zip(buf, results):
-                    rewrite = ' '.join(res.split(' ')[1:-2])
+                    rewrite = ' '.join(res.split(' ')[1:-2]).trim()
                     if encoded(ortho) != res.split(' ')[-1]:
                         print("ERROR", ((ortho, sentence, ref), res), file=sys.stderr)
                     ref.append(rewrite)
