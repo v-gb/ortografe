@@ -76,22 +76,16 @@
         </form>
         
         <form>
-          <details>
-            <summary>Ou charger des dictionnaires pour des orthographes parfois plus radicales</summary>
+          <details id="load-dict-details">
+            <summary>Ou explorer d'autres orthographes</summary>
+            <span> Notez que ces orthographes ne sont pas des recommendations (ni des
+                   futures recommendations), simplement des possibilités d'expérimentation.
+            </span>
             <div>
-              <input style="display:none" type="radio" id="load-ortograf_net_e_unique"
-                     name="load-radio" value="ortograf_net_e_unique">
-              <span><label class="btn" for="load-ortograf_net_e_unique">ortograf.net
-                     </label> (mais sans distinction entre é et è)</span>
-            </div>
-            <div>
-              <input style="display:none" type="radio" id="load-alfonic"
-                     name="load-radio" value="alfonic">
-              <label class="btn" for="load-alfonic">alfonic.org</label>
-            </div>
-            <div>
-              <input style="display:none" type="radio" id="load-qu" name="load-radio" value="qu">
-              <label class="btn" for="load-qu">«qu» devient soit «q» soit «qou» </label>
+              <input style="display:none" type="checkbox" id="load-checkbox" name="load-checkbox">
+              <label class="btn" for="load-checkbox" id="load-checkbox-label">
+                Charger la sélection (rien de sélectionner)
+              </label>
             </div>
           </details>
           <div id='load_error'></div>

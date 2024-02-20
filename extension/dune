@@ -10,13 +10,10 @@
  (action (run ./import-dict part1)))
 
 (rule
- (targets dict.gen.csv dict.js
-          alfonic.dict
-          ortograf_net_e_unique.dict
-          qu.dict)
+ (targets dict.gen.csv dict.js)
  (deps (sandbox always)
    import-dict
-   (glob_files ../data/homemade/*.csv)
+   (glob_files ../data/homemade/dict-erofa-ext.csv)
    dict.external-sources.gen.csv
    dict1990.gen.csv)
  (action

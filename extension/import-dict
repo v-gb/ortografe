@@ -103,8 +103,4 @@ if [ "${1-part2}" = part2 ]; then
         echo "const dict_erofa = $(string_of_file dict.gen.csv)"
         echo "const dict_rect1990 = $(string_of_file dict1990.gen.csv)"
     } > dict.js
-
-    for f in $DUNEROOT/data/homemade/dict-*.csv; do
-        cat "$f" > $(basename "$f" .csv | sed 's/dict-//' | tr .- __).dict
-    done
 fi

@@ -4,14 +4,6 @@ const is_manifest_v2 = false
 const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language', 'debug_lang_test'];
 const all_fields = ['disable'].concat(fields)
 
-async function grab_dict(name) {
-    // firefox linter is not happy with javascript files over 4MB, and also not happy with
-    // json files over 4MB. So we use make one dictionary per file, and it's not even
-    // json.
-    const response = await fetch("./" + name + ".dict");
-    return (await response.text());
-}
-
 async function display_dict_preview() {
     const custom_dict = (await storage_get('custom_dict')).custom_dict
     const elt = document.getElementById("dict")
@@ -52,19 +44,49 @@ function parse_dict(str) {
     return data ? { 'meta': meta, 'data': data } : null;
 }
 
+function count_char(str, c) {
+    let count = 0
+    for (const c2 of str) {
+        if (c2 == c) { count += 1 }
+    }
+    return count
+}
+
 async function set_dict(dict) {
-    console.log(`storing dict of size ${dict?.data?.length}`)
     if (dict?.data) {
+        const num_lines = count_char(dict.data, '\n')
+        console.log(`storing dict with ${num_lines} entries`)
         await b.storage.local.set({'custom_dict': dict});
     } else {
         await b.storage.local.remove('custom_dict');
     }
 }
 
-async function compute_dict() {
+function currently_selected_rules() {
+    const rules = dict_gen.rules()
+    const selected = rules.filter((rule) => document.getElementById(`load-${rule.name}`).checked)
+    const load_checkbox_label = document.getElementById("load-checkbox-label");
+    const selection_text = selected.length > 0 ? selected.map((r) => r.name).join(' ') : "rien de sélectionner"
+    load_checkbox_label.innerText = `Charger la sélection (${selection_text})`
+    return selected.map((r) => r.v)
+}
+
+function add_rule_selection_ui() {
+    const rules = dict_gen.rules()
+    const load_dict_details = document.getElementById("load-dict-details");
+    for (const rule of rules) {
+        const newnode = document.createElement("div")
+        newnode.innerHTML = `
+              <input type="checkbox" id="load-${rule.name}" name="load-${rule.name}">
+              <label for="load-${rule.name}"><span><strong>${rule.name}</strong> ${rule.doc}</span></label>`
+        load_dict_details.appendChild(newnode)
+    }
+}
+
+async function compute_dict(rules) {
     const lexique383 = await (await fetch("./Lexique383.gen.tsv")).text()
     const rect1990 = await (await fetch("./dict1990.gen.csv")).text()
-    const [dict, stats] = generate_dict(lexique383, rect1990)
+    const [dict, stats] = dict_gen.generate(lexique383, rect1990, rules)
     console.log(stats)
     return dict
 }
@@ -85,16 +107,17 @@ async function saveOptions(e) {
         }
     } else if (e.target.id.startsWith("load-")) {
         try {
-            let dict;
-            if (false) {
-                dict = await compute_dict();
-            } else {
-                const dict_name = e.target.id.substring("load-".length);
-                dict = await grab_dict(dict_name)
+            const target = e.target.id.substring("load-".length);
+            const rules = currently_selected_rules();
+            if (target == 'checkbox') {
+                // we should give feedback that the load is happening, because it's
+                // not horrible, but it's probably sufficiently slow that people would be
+                // confused.
+                dict = await compute_dict(rules);
+                set_dict(parse_dict(dict));
+                await display_dict_preview()
             }
-            set_dict(parse_dict(dict));
             document.getElementById("load_error").innerText = "";
-            await display_dict_preview()
         } catch (e) {
             document.getElementById("load_error").innerText = "error loading dict " + e.toString();
         }
@@ -151,6 +174,7 @@ async function restoreOptions() {
             }
         }
         document.getElementById("rewrite-" + options.rewrite).checked = true;
+        add_rule_selection_ui();
         await display_dict_preview()
     } catch (e) {
         // exceptions get swallowed in firefox, making them undebuggable, so just include

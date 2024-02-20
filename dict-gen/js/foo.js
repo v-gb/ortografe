@@ -12,7 +12,7 @@ async function foo() {
     }
     const lexique383 = await fetch("_build/default/" + "data/lexique/Lexique383.gen.tsv")
     const rect1990 = await fetch("_build/default/" + "extension/dict1990.gen.csv")
-    const [buffer, stats] = module.exports.generate_dict(lexique383, rect1990);
+    const [buffer, stats] = module.exports.dict_gen.generate(lexique383, rect1990, []);
     console.log(stats)
     console.log(buffer)
 }
