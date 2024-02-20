@@ -1,5 +1,6 @@
 open Base
 module Data = Dict_gen_common.Data
+module Rules = Dict_gen_common.Rules
 
 let string_search_pattern_replace_first_opt ?pos t ~in_:s ~with_ =
   (* String.Search_pattern.replace_first, modified to return an option so we can tell

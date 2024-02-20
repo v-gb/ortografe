@@ -1,5 +1,4 @@
 open Base
-module Data = Dict_gen_common.Data
 
 let (>$) = (>)
 let (<$) = (<)
@@ -14,6 +13,16 @@ let (<>) = String.(<>)
 let (<=) = String.(<=)
 let (>=) = String.(>=)
 let _ = (>$), (<$), (=$), (<>$), (<=$), (>=$), (>), (<), (=), (<>), (<=), (>=)
+
+let utf8_exists_non_shortcut str ~f =
+  let found = ref false in
+  let i = ref 0 in
+  while !i <$ String.length str; do
+    let decode = Stdlib.String.get_utf_8_uchar str !i in
+    found := !found || f (Stdlib.Uchar.utf_decode_uchar decode);
+    i := !i + Stdlib.Uchar.utf_decode_length decode;
+  done;
+  !found
 
 let uchar_of_str str =
   let utf_decode = Stdlib.String.get_utf_8_uchar str 0 in
@@ -575,27 +584,6 @@ let search (rules : t) word phon =
   in
   loop ()
 
-let check (lexique : Data.Lexique.t list) ~skip =
-  let rules = create () in
-  List.iteri lexique ~f:(fun i row ->
-      if skip row
-      then ()
-      else
-        match search rules row.ortho row.phon with
-        | Error s -> Core.prerr_endline (Sexp_with_utf8.to_string_hum s)
-        | Ok (path, surprise) ->
-           let graphemes =
-             List.map path ~f:(fun p ->
-                 if p.phonem = ""
-                 then "[32m" ^ p.graphem ^ "[39m"
-                 else p.graphem) |> String.concat ~sep:"|" in
-           let phonemes =
-             List.map path ~f:(fun p -> p.phonem)
-             |> String.concat ~sep:"|"
-           in
-           Core.printf "%d %d  %s %s  %s\n%!" i surprise row.ortho graphemes phonemes;
-    )
-
 let accent_aigu =
   let syllable_starts =
     lazy (Hash_set.of_list (module String)
@@ -618,10 +606,8 @@ let accent_aigu =
     then Uchar.(<>) right_phon#::(0, 1) !!"°" (* verra -> é *)
     else
       let vowels_follow =
-        Uutf.String.fold_utf_8 (fun acc _ -> function
-            | `Malformed _ -> assert false
-            | `Uchar uc -> acc || (in_phon_vowels uc && Uchar.(<>) uc !!"°")
-          ) false right_phon
+        utf8_exists_non_shortcut right_phon
+          ~f:(fun uc -> in_phon_vowels uc && Uchar.(<>) uc !!"°")
       in
       if vowels_follow
       then

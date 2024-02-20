@@ -1,5 +1,6 @@
 open Core
 module Data = Dict_gen_common.Data
+module Rules = Dict_gen_common.Rules
 module Unix = Core_unix
 let (^/) = Eio.Path.(/)
 
@@ -256,6 +257,27 @@ let gen_cmd ?static ?doc name =
          try gen ?static ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe ()
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
+  
+let check (lexique : Data.Lexique.t list) ~skip =
+  let rules = Rules.create () in
+  List.iteri lexique ~f:(fun i row ->
+      if skip row
+      then ()
+      else
+        match Rules.search rules row.ortho row.phon with
+        | Error s -> prerr_endline (Sexp_with_utf8.to_string_hum s)
+        | Ok (path, surprise) ->
+           let graphemes =
+             List.map path ~f:(fun p ->
+                 if String.(=) p.phonem ""
+                 then "[32m" ^ p.graphem ^ "[39m"
+                 else p.graphem) |> String.concat ~sep:"|" in
+           let phonemes =
+             List.map path ~f:(fun p -> p.phonem)
+             |> String.concat ~sep:"|"
+           in
+           printf "%d %d  %s %s  %s\n%!" i surprise row.ortho graphemes phonemes;
+    )
 
 let main () =
   let module C = Cmdliner in
@@ -274,7 +296,7 @@ let main () =
                    build_lexique_post90 lexique post90 ~fix_90:false (* to check both versions *)
                  else lexique
                in
-               Rules.check lexique ~skip:(Rewrite.load_skip ())))
+               check lexique ~skip:(Rewrite.load_skip ())))
       ; gen_cmd "gen"
       ; C.Cmd.v (C.Cmd.info "erofa-ext")
           (let+ () = return () in
