@@ -428,7 +428,57 @@ let erofa_prefilter' = lazy (
        ; str "h"
        ] @ List.map [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s -> str (s ^ s))
 ))
-let erofa_prefilter = lazy (Re.compile (force erofa_prefilter'))
+
+let bit_pattern_all_double_consonants = 0b11_1111_1111
+let bit_ch = 10
+let bit_ph = 11
+let bit_h = 12
+let bit_x = 13 
+let bit_oe = 14
+let bit_y = 15
+let find_relevant_patterns ortho =
+  (* bit 0..9: double consonne, pour chaque consonne dans l'ordre au dessus
+       bit 10: ch
+       bit 11: ph
+       bit 12: h
+       bit 13: x
+       bit 14: oe ou œ
+       bit 15: y
+
+       On utilise une hypothèse d'indépendence ici : les réécritures érofa
+       ne crée pas d'opportunités d'autres réécritures. Avec des mots arbitraires,
+       on pourrait avoir arhra, où une fois le h supprimé, une opportunité de
+       simplifier une double consonne se présente. Mais on ignore ce genre de
+       possibilités. Il serait peut-être possible de recalculer [find_relevant_patterns]
+       après un changement, si on voulais éviter cette hypothèse (par exemple,
+       si on voulait utiliser ce genre de calcul pour tous les prefilter). *)
+  let bits = ref 0 in
+  let prev = ref '\000' in
+  for i = 0 to String.length ortho - 1 do
+    let c = String.unsafe_get ortho i in
+    (match c with
+     | 'b' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 0)
+     | 'n' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 1)
+     | 'm' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 2)
+     | 'l' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 3)
+     | 't' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 4)
+     | 'p' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 5)
+     | 'f' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 6)
+     | 'r' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 7)
+     | 'c' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 8)
+     | 'd' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 9)
+     | 'h' -> bits := !bits
+                      lor ((Bool.to_int (Char.(=) !prev 'c')) lsl bit_ch)
+                      lor ((Bool.to_int (Char.(=) !prev 'p')) lsl bit_ph)
+                      lor (1 lsl bit_h)
+     | 'x' -> bits := !bits lor (1 lsl bit_x)
+     | 'e' -> if Char.(=) !prev 'o' then bits := !bits lor (1 lsl bit_oe)
+     | '\147' -> if Char.(=) !prev '\197' then bits := !bits lor (1 lsl bit_oe)
+     | 'y' -> bits := !bits lor (1 lsl bit_y)
+     | _ -> ());
+    prev := c;
+  done;
+  !bits
 
 let erofa_rule = lazy (
   let pattern_ph = String.Search_pattern.create "ph" in
@@ -461,66 +511,82 @@ let erofa_rule = lazy (
         ])
   in
   let patterns_double_consonants =
-    List.map [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s ->
-        String.Search_pattern.create (s ^ s), s)
-  in
+    List.mapi [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun bit s ->
+        bit, String.Search_pattern.create (s ^ s), s)
+  in    
   fun rules ((row : Data_src.Lexique.t), search_res) ->
-  if not (Re.execp (force erofa_prefilter) row.ortho)
+  let bits = find_relevant_patterns row.ortho in
+  if bits =$ 0
   then (row, search_res)
   else
-    let env = { rules; accept = if erofa_preserve row.ortho then erofa_preserve else const true } in
-     let ortho = ref (row.ortho, search_res) in
-     List.iter patterns_ch ~f:(fun (target, repl) ->
-         ortho := rewrite env row !ortho ~target ~repl);
-     List.iter patterns_oe ~f:(fun (target, repl) ->
-         ortho := rewrite env row !ortho ~target ~repl);
-     ortho := rewrite env row !ortho ~target:pattern_mph ~repl:"nf";
-     ortho := rewrite env row !ortho ~target:pattern_ph ~repl:"f";
-     (match String.chop_suffix (fst !ortho) ~suffix:"x" with
-      | Some rest ->
-         (* on vérifie que x est bien silencieux, pas remplaceable par s, comme
+    let env = { rules; accept = if erofa_preserve row.ortho then erofa_preserve else Fn.const true } in
+    let ortho = ref (row.ortho, search_res) in
+    if bits land (1 lsl bit_ch) <>$ 0 then
+      List.iter patterns_ch ~f:(fun (target, repl) ->
+          ortho := rewrite env row !ortho ~target ~repl);
+    if bits land (1 lsl bit_oe) <>$ 0 then
+      List.iter patterns_oe ~f:(fun (target, repl) ->
+          ortho := rewrite env row !ortho ~target ~repl);
+    if bits land (1 lsl bit_ph) <>$ 0 then (
+      ortho := rewrite env row !ortho ~target:pattern_mph ~repl:"nf";
+      ortho := rewrite env row !ortho ~target:pattern_ph ~repl:"f";
+    );
+    if bits land (1 lsl bit_x) <>$ 0 then (
+      (match String.chop_suffix (fst !ortho) ~suffix:"x" with
+       | Some rest ->
+          (* on vérifie que x est bien silencieux, pas remplaceable par s, comme
             dans coccyx *)
-         if fst (keep_if_plausible env row !ortho rest) = rest
-         then ortho := keep_if_plausible env row !ortho (rest ^ "s");
-      | None -> ());
-     List.iter [ pattern_auxq, "ausq"; pattern_auxd, "ausd" ]
-       ~f:(fun (pattern, with_) ->
-         (* les règles ont un cas particulier pour aux mais pas aus, et donc je crois
+          if fst (keep_if_plausible env row !ortho rest) = rest
+          then ortho := keep_if_plausible env row !ortho (rest ^ "s");
+       | None -> ());
+      List.iter [ pattern_auxq, "ausq"; pattern_auxd, "ausd" ]
+        ~f:(fun (pattern, with_) ->
+          (* les règles ont un cas particulier pour aux mais pas aus, et donc je crois
             que le changement est considéré comme surprenant par [keep_if_plausible]. *)
-         (match string_search_pattern_replace_all_opt pattern ~in_:(fst !ortho) ~with_ with
-          | None -> ()
-          | Some res -> ortho := keep_regardless env row !ortho res));
-     (match String.chop_prefix (fst !ortho) ~prefix:"deuxi" with
-      | None -> ()
-      | Some rest -> ortho := keep_if_plausible env row !ortho ("deusi" ^ rest));
-     (
+          (match string_search_pattern_replace_all_opt pattern ~in_:(fst !ortho) ~with_ with
+           | None -> ()
+           | Some res -> ortho := keep_regardless env row !ortho res));
+      (match String.chop_prefix (fst !ortho) ~prefix:"deuxi" with
+       | None -> ()
+       | Some rest -> ortho := keep_if_plausible env row !ortho ("deusi" ^ rest))
+    );
+    if bits land (1 lsl bit_y) <>$ 0 then (
        (* exclut des trucs du genre tramway -> tramwai *)
-       ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "i") ~to_:"i" ~start:1;
-       ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "j") ~to_:"i"
-                  ~start:(Bool.to_int (fst !ortho <> "yeus"));
-       ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "ij") ~to_:"i" ~start:1;
-       ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "in") ~to_:"in";
-       ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "5") ~to_:"in";
-       ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "im") ~to_:"im";
-       ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "5") ~to_:"im";
-     );
-     ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"é";
-     ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"è";
-     ortho := rewrite env row !ortho ~target:pattern_th ~repl:""; (* asthme *)
-     let h_start =
-       if String.is_prefix (fst !ortho) ~prefix:"déh"
-       then String.length "déh" (* déhancher serait déshancher si le h n'était pas aspiré *)
-       else Bool.to_int row.h_aspire
-     in
-     ortho := rewrite env row !ortho ~target:pattern_h ~repl:"" ~start:h_start;
-     let row =
-       let ortho2, search_res2, phon2 = rewrite_e_double_consonants env row !ortho in
-       ortho := (ortho2, search_res2);
-       { row with phon = phon2 }
-     in
-     List.iter patterns_double_consonants ~f:(fun (target, repl) ->
-         ortho := rewrite env row !ortho ~target ~repl);
-     { row with ortho = fst !ortho }, snd !ortho
+      ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "i") ~to_:"i" ~start:1;
+      ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "j") ~to_:"i"
+                 ~start:(Bool.to_int (fst !ortho <> "yeus"));
+      ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "ij") ~to_:"i" ~start:1;
+      ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "in") ~to_:"in";
+      ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "5") ~to_:"in";
+      ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "im") ~to_:"im";
+      ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "5") ~to_:"im";
+    );
+    if bits land (1 lsl bit_h) <>$ 0 then (
+      ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"é";
+      ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"è";
+      ortho := rewrite env row !ortho ~target:pattern_th ~repl:""; (* asthme *)
+      let h_start =
+        if String.is_prefix (fst !ortho) ~prefix:"déh"
+        then String.length "déh" (* déhancher serait déshancher si le h n'était pas aspiré *)
+        else Bool.to_int row.h_aspire
+      in
+      ortho := rewrite env row !ortho ~target:pattern_h ~repl:"" ~start:h_start;
+    );
+    let row =
+      if bits land bit_pattern_all_double_consonants =$ 0
+      then row
+      else
+        let row =
+          let ortho2, search_res2, phon2 = rewrite_e_double_consonants env row !ortho in
+          ortho := (ortho2, search_res2);
+          { row with phon = phon2 }
+        in
+        List.iter patterns_double_consonants ~f:(fun (bit, target, repl) ->
+            if bits land (1 lsl bit) <>$ 0 then
+              ortho := rewrite env row !ortho ~target ~repl);
+        row
+    in
+    { row with ortho = fst !ortho }, snd !ortho
 )
 let _ : string =
   new_rule
@@ -1080,7 +1146,7 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
         ~compare:(fun r1 r2 -> Int.compare (rank r1) (rank r2))
     in
     match which_rules with
-    | [] -> force erofa_rule, const true
+    | [] -> force erofa_rule, (fun word -> find_relevant_patterns word <>$ 0)
     | _ :: _ ->
        let rule =
          fun rules row_search_res ->
