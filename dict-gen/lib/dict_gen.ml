@@ -1,4 +1,5 @@
 open Core
+module Data = Dict_gen_common.Data
 module Unix = Core_unix
 let (^/) = Eio.Path.(/)
 

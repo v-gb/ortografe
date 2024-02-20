@@ -7,9 +7,10 @@
    core
    core_unix
    core_unix.sys_unix
-   re
+   dict_gen_common
    eio
    eio_main
+   re
    uucp
    uutf
    yojson

@@ -1,4 +1,5 @@
 open Base
+module Data = Dict_gen_common.Data
 
 let (>$) = (>)
 let (<$) = (<)

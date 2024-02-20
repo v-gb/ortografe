@@ -1,5 +1,7 @@
 (** Functionality to respell words in the given lexique *)
 
+module Data := Dict_gen_common.Data
+
 (** Matches words that shouldn't change, according to the érofa rules,
     like proper nouns, or manual exceptions. *)
 val erofa_preserve : string -> bool

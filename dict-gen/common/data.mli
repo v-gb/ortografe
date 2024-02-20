@@ -1,4 +1,4 @@
-open Core
+open Base
 
 module Lexique : sig
   type t =

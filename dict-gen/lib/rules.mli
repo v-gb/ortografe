@@ -2,6 +2,7 @@
     a list of (graphem, phonem), and provides an indication of how surprising the
     pronunciation is. *)
 
+module Data := Dict_gen_common.Data
 type t
 val create : unit -> t
 
