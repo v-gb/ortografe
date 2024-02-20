@@ -1,0 +1,9 @@
+(env
+  (_ (js_of_ocaml (compilation_mode whole_program))))
+
+(executable
+ (name dict_gen)
+ (libraries js_of_ocaml dict_gen_common)
+ ;; maybe I should use whatever dune does by default
+ (js_of_ocaml (flags --opt 3 --no-sourcemap))
+ (modes js))
