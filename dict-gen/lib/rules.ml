@@ -574,7 +574,7 @@ let search (rules : t) word phon =
   in
   loop ()
 
-let check (lexique : Data_src.Lexique.t list) ~skip =
+let check (lexique : Data.Lexique.t list) ~skip =
   let rules = create () in
   List.iteri lexique ~f:(fun i row ->
       if skip row

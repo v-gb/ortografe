@@ -1,20 +1,5 @@
 open Base
 
-type 'a src =
-  [ `Str of string | `Root of ([> Eio.Fs.dir_ty ] as 'a) Eio.Path.t ]
-
-let (^/) = Eio.Path.(/)
-
-let in_build_dir ~root filename =
-  if Eio.Path.is_file (root ^/ filename)
-  then root ^/ filename
-  else (root ^/ "_build/default") ^/ filename
-
-let read src filename =
-  match src with
-  | `Str str -> str
-  | `Root root -> Eio.Path.load (in_build_dir ~root filename)
-
 module Csv_header = struct
   type 'a t = (string, int) Hashtbl.t -> (string array -> 'a)
   let field name f =
@@ -66,9 +51,8 @@ module Lexique = struct
     }
   [@@deriving sexp_of]
 
-  let load src =
-    read src "data/lexique/Lexique383.gen.tsv"
-    |> Csv_header.parse_string
+  let parse src =
+    Csv_header.parse_string
       ~header:`In_string
       ~separator:'\t'
       Csv_header.(
@@ -82,6 +66,7 @@ module Lexique = struct
                   | s -> failwith ("unknown value of h_aspire: " ^ s))
       in
       { ortho; phon; lemme; h_aspire })
+      src
     |> List.filter ~f:(fun t ->
            not (List.exists [ " "; "ñ"; "."; "ã" ]
                   ~f:(fun substring -> String.is_substring ~substring t.ortho)))
@@ -413,10 +398,5 @@ let read_key_value_comma_sep_file str =
       | _ -> raise_s [%sexp "bad line", (line : string)]);
   h
 
-let load_erofa src =
-  read_key_value_comma_sep_file
-    (read src "extension/dict.external-sources.gen.csv")
-
-let load_post90 src =
-  read_key_value_comma_sep_file
-    (read src "extension/dict1990.gen.csv")
+let parse_erofa = read_key_value_comma_sep_file
+let parse_post90 = read_key_value_comma_sep_file
