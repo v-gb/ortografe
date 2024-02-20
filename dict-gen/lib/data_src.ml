@@ -40,36 +40,21 @@ module Csv_header = struct
   let (and+) = both
              
   let parse_string t ~header ~separator str =
-    if false (* why so slow?? confused *)
-    then
-      let rows = String.split_lines str in
-      let header, rows =
-        match header with
-        | `In_string -> String.split ~on:separator (List.hd_exn rows), List.tl_exn rows
-        | `Header h -> h, rows
-      in
-      let index_by_name =
-        List.mapi header ~f:(fun i h -> h, i)
-        |> Hashtbl.of_alist_exn (module String)
-      in
-      let f = t index_by_name in
-      List.map rows ~f:(fun row ->
-          f (Array.of_list (String.split row ~on:separator)))
-    else
-      let in_channel = Csv.of_string ~separator str in
-      let header =
-        match header with
-        | `In_string -> Csv.next in_channel
-        | `Header h -> h
-      in
-      let index_by_name =
-        List.mapi header ~f:(fun i h -> h, i)
-        |> Hashtbl.of_alist_exn (module String)
-      in
-      let f = t index_by_name in
-      Csv.fold_left in_channel ~init:[] ~f:(fun acc row ->
-          f (Array.of_list row) :: acc)
-      |> List.rev
+    (* The csvs we care about have no quoting, and this is lighter than compiler the csv
+       library for javascript *)
+    let rows = String.split_lines str in
+    let header, rows =
+      match header with
+      | `In_string -> String.split ~on:separator (List.hd_exn rows), List.tl_exn rows
+      | `Header h -> h, rows
+    in
+    let index_by_name =
+      List.mapi header ~f:(fun i h -> h, i)
+      |> Hashtbl.of_alist_exn (module String)
+    in
+    let f = t index_by_name in
+    List.map rows ~f:(fun row ->
+        f (Array.of_list (String.split row ~on:separator)))
 end
 
 module Lexique = struct
