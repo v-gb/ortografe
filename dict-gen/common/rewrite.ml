@@ -1,6 +1,4 @@
 open Base
-module Data = Dict_gen_common.Data
-module Rules = Dict_gen_common.Rules
 
 let string_search_pattern_replace_first_opt ?pos t ~in_:s ~with_ =
   (* String.Search_pattern.replace_first, modified to return an option so we can tell
@@ -90,13 +88,6 @@ let keep_regardless_exn rules (row : Data.Lexique.t) =
   match Rules.search rules row.ortho row.phon with
   | Error s -> raise_s s
   | Ok v -> v
-
-let _count_code_points str =
-  (* would likely be cheaper to count bytes with high bit clear *)
-  Uutf.String.fold_utf_8 (fun acc _ -> function
-      | `Malformed _ -> assert false
-      | `Uchar _ -> acc + 1
-    ) 0 str
 
 let rewrite_e_double_consonants =
   let rebuild_section ortho phon (p1 : Rules.path_elt) (p2 : Rules.path_elt) left_bit right_bit =
@@ -850,6 +841,16 @@ let _ : string =
              row, keep_regardless_exn env.rules row
         else row_search_res))
 
+let map_valid_utf_8 str ~f =
+  let acc = ref [] in
+  let i = ref 0 in
+  while !i <$ String.length str; do
+    let decode = Stdlib.String.get_utf_8_uchar str !i in
+    acc := f (Stdlib.Uchar.utf_decode_uchar decode) :: !acc;
+    i := !i + Stdlib.Uchar.utf_decode_length decode;
+  done;
+  List.rev !acc
+
 let _ : string =
   new_rule'
     "il--y"
@@ -885,11 +886,7 @@ let _ : string =
                 | _ -> ""
               in
               let suffix2 = if String.is_suffix p.graphem ~suffix:"s$" then "s" else "" in
-              Uutf.String.fold_utf_8 (fun acc _ -> function
-                  | `Malformed s -> s :: acc
-                  | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
-                [] p.phonem
-              |> List.rev
+              map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem)
               |> String.concat
               |> (fun s -> s ^ suffix1 ^ suffix2)
            | _ -> p.graphem)
@@ -987,12 +984,8 @@ let _ : string list =
                      | "c", "s" -> [ "ç" ]
                      | "x", ("gz" | "ks") -> [ "x" ]
                      | "e", "" -> [ "e" ]
-                     | _ ->
-                        Uutf.String.fold_utf_8 (fun acc _ -> function
-                            | `Malformed s -> s :: acc
-                            | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
-                          [] p.phonem
-                        |> List.rev)
+                     | _ -> map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem)
+                   )
                  |> Array.of_list
                with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
              in
@@ -1112,11 +1105,7 @@ let _ : string =
                  | "b", "p" -> [ "b" ]
                  | ("i" | "'" | "-" | " "), _ -> [ p.graphem ]
                  | _ ->
-                    Uutf.String.fold_utf_8 (fun acc _ -> function
-                        | `Malformed s -> s :: acc
-                        | `Uchar u -> Hashtbl.find_exn graphem_by_phonem u :: acc)
-                      [] p.phonem
-                    |> List.rev)
+                    map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem))
              |> String.concat
            with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
          in
@@ -1164,7 +1153,6 @@ type stats =
 [@@deriving sexp_of]
 
 let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) lexique f =
-  Sexp_with_utf8.linkme;
   let rules = Rules.create () in
   let skip = load_skip () in
   let rule, prefilter =
@@ -1225,7 +1213,7 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
              failed := !failed + 1;
              (match not_understood with
               | `Raise -> raise_s s
-              | `Print -> Stdlib.prerr_endline (Sexp_with_utf8.to_string_hum s)
+              | `Call f -> f s
               | `Ignore -> ());
              f row.ortho row.ortho
           | Ok search_res ->

@@ -1,6 +1,7 @@
 open Core
 module Data = Dict_gen_common.Data
 module Rules = Dict_gen_common.Rules
+module Rewrite = Dict_gen_common.Rewrite
 module Unix = Core_unix
 let (^/) = Eio.Path.(/)
 
@@ -280,6 +281,7 @@ let check (lexique : Data.Lexique.t list) ~skip =
     )
 
 let main () =
+  Sexp_with_utf8.linkme;
   let module C = Cmdliner in
   let open Cmdliner_bindops in
   let cmd =
