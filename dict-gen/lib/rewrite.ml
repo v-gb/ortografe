@@ -1,4 +1,4 @@
-open Core
+open Base
 
 let string_search_pattern_replace_first_opt ?pos t ~in_:s ~with_ =
   (* String.Search_pattern.replace_first, modified to return an option so we can tell
@@ -421,7 +421,7 @@ let new_rule' ?supports_repeated_rewrites name ?plurals_in_s doc ~prefilter f =
     (lazy (
       let f' = force f in
       fun rules row_and_search_res ->
-        f' { rules; accept = const true } row_and_search_res))
+        f' { rules; accept = Fn.const true } row_and_search_res))
 
 let erofa_prefilter' = lazy (
   let open Re in
@@ -962,7 +962,7 @@ let _ : string list =
              in
              let reverse_mapping =
                Hashtbl.to_alist graphem_by_phonem
-               |> List.map ~f:Tuple.T2.swap
+               |> List.map ~f:(fun (a, b) -> (b, a))
                |> Hashtbl.of_alist_multi (module String)
              in
              fun _env (row, search_res) ->
@@ -1191,10 +1191,10 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
          match
            List.map which_rules ~f:(fun r ->
                match r.prefilter () with
-               | `All -> raise Exit
+               | `All -> raise Stdlib.Exit
                | `Re re -> re)
          with
-         | exception Exit -> (fun _ _ -> true)
+         | exception Stdlib.Exit -> (fun _ _ -> true)
          | res ->
             let re = Re.compile (Re.alt (Re.str "oe" :: res)) in
             fun word _ -> Re.execp re word
@@ -1223,7 +1223,7 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
              failed := !failed + 1;
              (match not_understood with
               | `Raise -> raise_s s
-              | `Print -> prerr_endline (Sexp_with_utf8.to_string_hum s)
+              | `Print -> Stdlib.prerr_endline (Sexp_with_utf8.to_string_hum s)
               | `Ignore -> ());
              f row.ortho row.ortho
           | Ok search_res ->

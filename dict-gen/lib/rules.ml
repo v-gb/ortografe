@@ -1,4 +1,4 @@
-open Core
+open Base
 
 let (>$) = (>)
 let (<$) = (<)
@@ -532,12 +532,6 @@ let search (rules : t) word phon =
               (String.drop_prefix phon (snd !furthest) : string)]
     else
       let (i, j, surprise, path) = Heap.pop_minimum pqueue in
-      if false then
-        print_s [%sexp
-                    (String.prefix word i : string),
-                 (String.prefix phon j : string),
-                 (String.drop_prefix word i : string),
-                 (String.drop_prefix phon j : string)];
       if i >=$ String.length word
       then
         if j =$ String.length phon
@@ -587,7 +581,7 @@ let check (lexique : Data_src.Lexique.t list) ~skip =
       then ()
       else
         match search rules row.ortho row.phon with
-        | Error s -> prerr_endline (Sexp_with_utf8.to_string_hum s)
+        | Error s -> Core.prerr_endline (Sexp_with_utf8.to_string_hum s)
         | Ok (path, surprise) ->
            let graphemes =
              List.map path ~f:(fun p ->
@@ -598,7 +592,7 @@ let check (lexique : Data_src.Lexique.t list) ~skip =
              List.map path ~f:(fun p -> p.phonem)
              |> String.concat ~sep:"|"
            in
-           printf "%d %d  %s %s  %s\n%!" i surprise row.ortho graphemes phonemes;
+           Core.printf "%d %d  %s %s  %s\n%!" i surprise row.ortho graphemes phonemes;
     )
 
 let accent_aigu =
