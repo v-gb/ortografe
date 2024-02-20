@@ -388,7 +388,7 @@ module Lexique = struct
         (* not real words for this purpose *)
         "min"; "com"; "zzz"; "ah"; "oh"; "eh"; "ha"; "peuh"; "pouh"; "houhou"; "hare";
         "hon"; "haha"; "meuh"; "pouah"; "pfft"; "pff"; "hi"; "ohé"; "ouh"; "ouah"; "ho";
-        "bah"; "euh"; "hein"; "hep";
+        "bah"; "euh"; "hein"; "hep"; "zzzz";
          (* la phonetique est fausse pour ces mots (ou parfois
             la categories grammaticale) *)
         "télétexte"; "quadruple"; "hermès"; "pacsés"; "succion";
