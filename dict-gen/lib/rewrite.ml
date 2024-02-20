@@ -19,7 +19,7 @@ let string_search_pattern_replace_first_opt ?pos t ~in_:s ~with_ =
        ~dst
        ~dst_pos:(i + len_with)
        ~len:(len_s - i - len_t);
-     Some (Bytes.unsafe_to_string ~no_mutation_while_string_reachable:dst)
+     Some (Bytes.unsafe_to_string ~no_mutation_while_string_reachable:dst, i)
 ;;
 
 let string_search_pattern_replace_all_opt t ~in_ ~with_ =
@@ -58,12 +58,12 @@ let rewrite ?(start = 0) env (row : Data_src.Lexique.t)
     let ortho1, search_res1 = !ortho in
     match string_search_pattern_replace_first_opt target ~in_:ortho1 ~with_:repl ~pos:!pos with
     | None -> pos := String.length ortho1
-    | Some ortho2 ->
+    | Some (ortho2, match_i) ->
        (match Rules.search env.rules ortho2 row.phon with
         | Ok search_res2 when snd search_res2 <=$ snd search_res1 && env.accept ortho2 ->
            ortho := (ortho2, search_res2)
         | _ -> ());
-       pos := !pos + 1
+       pos := match_i + 1
   done;
   !ortho
 
