@@ -1,9 +1,9 @@
 {
     "manifest_version": 3,
-    "name": "Orthographe simplifiée",
+    "name": "Orthographe rationnelle",
     "version": "1.8",
 
-    "description": "Réécrit les pages web de l'orthographe normale à une orthographe simplifiée (mais pas phonétique)",
+    "description": "Réécrit les pages web de l'orthographe normale à une orthographe rationalisée (mais pas phonétique)",
 
     "browser_specific_settings": {
         "gecko": {
