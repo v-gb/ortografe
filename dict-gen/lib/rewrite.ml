@@ -436,7 +436,7 @@ let bit_h = 12
 let bit_x = 13 
 let bit_oe = 14
 let bit_y = 15
-let find_relevant_patterns ortho =
+let find_relevant_patterns ortho phon =
   (* bit 0..9: double consonne, pour chaque consonne dans l'ordre au dessus
        bit 10: ch
        bit 11: ph
@@ -478,7 +478,24 @@ let find_relevant_patterns ortho =
      | _ -> ());
     prev := c;
   done;
-  !bits
+  let bits = !bits in
+  let bits =
+    (* Il est couteux de considérer tous les ill prononcé /y/, donc on limite
+       les faux positifs en vérifier qu'il y a au moins un /l/ quelque part. *)
+    if bits land (1 lsl 3 (* l *)) <>$ 0
+       && not (String.mem phon 'l')
+    then bits lxor (1 lsl 3)
+    else bits
+  in
+  let bits =
+    (* Il est couteux de considérer tous les ch prononcé /S/, donc on limite
+       les faux positifs en vérifier qu'il y a au moins un /k/ quelque part. *)
+    if bits land (1 lsl bit_ch) <>$ 0
+       && not (String.mem phon 'k')
+    then bits lxor (1 lsl bit_ch)
+    else bits
+  in
+  bits
 
 let erofa_rule = lazy (
   let pattern_ph = String.Search_pattern.create "ph" in
@@ -515,7 +532,7 @@ let erofa_rule = lazy (
         bit, String.Search_pattern.create (s ^ s), s)
   in    
   fun rules ((row : Data_src.Lexique.t), search_res) ->
-  let bits = find_relevant_patterns row.ortho in
+  let bits = find_relevant_patterns row.ortho row.phon in
   if bits =$ 0
   then (row, search_res)
   else
@@ -1146,7 +1163,7 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
         ~compare:(fun r1 r2 -> Int.compare (rank r1) (rank r2))
     in
     match which_rules with
-    | [] -> force erofa_rule, (fun word -> find_relevant_patterns word <>$ 0)
+    | [] -> force erofa_rule, (fun word phon -> find_relevant_patterns word phon <>$ 0)
     | _ :: _ ->
        let rule =
          fun rules row_search_res ->
@@ -1160,8 +1177,10 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
                | `All -> raise Exit
                | `Re re -> re)
          with
-         | exception Exit -> const true
-         | res -> Re.execp (Re.compile (Re.alt (Re.str "oe" :: res)))
+         | exception Exit -> (fun _ _ -> true)
+         | res ->
+            let re = Re.compile (Re.alt (Re.str "oe" :: res)) in
+            fun word _ -> Re.execp re word
        in
        rule, prefilter
   in
@@ -1179,7 +1198,7 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
            0.85s. Considering that the fixed cost is 0.58s (i.e. the cost of generation if
            the skip function returns true immediately), that's a fairly substantial
            decrease. *)
-        if not (prefilter row.ortho)
+        if not (prefilter row.ortho row.phon)
         then (prefiltered_out := !prefiltered_out + 1; f row.ortho row.ortho)
         else
           match Rules.search rules row.ortho row.phon with
