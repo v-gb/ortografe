@@ -411,7 +411,8 @@ module Lexique = struct
         "quinquennat"; "transsudant"; "pueblo"; "chelem"; "corpsard";
         "transsexuel"; "marchiez"; "flagellant"; "species"; "pâlement";
         "curant"; "nerver"; "dénervation"; "ecsta"; "ectasie"; "iraquienne";
-        
+        "schproum";
+
         (* l'orthographe est ancienne *)
         "cuiller"; "cafeteria"; "cafeteria"; "artefact"; "bonneterie";
         "crematorium"; "acupuncture";
