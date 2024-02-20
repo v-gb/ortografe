@@ -5,7 +5,7 @@ cd $(dirname "$0")/src
 # https://extensionworkshop.com/documentation/publish/package-your-extension/
 
 shopt -s nullglob
-files=(*.{html,js,png,json,svg,dict})
+files=(*.{html,js,png,json,svg,dict,csv,tsv})
 zip -q ../extension.zip "${files[@]}"
 
 # create a version with manifest v2

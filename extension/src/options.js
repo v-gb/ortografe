@@ -61,6 +61,14 @@ async function set_dict(dict) {
     }
 }
 
+async function compute_dict() {
+    const lexique383 = await (await fetch("./Lexique383.gen.tsv")).text()
+    const rect1990 = await (await fetch("./dict1990.gen.csv")).text()
+    const [dict, stats] = generate_dict(lexique383, rect1990)
+    console.log(stats)
+    return dict
+}
+
 async function saveOptions(e) {
     e.preventDefault();
     // console.log("target", e.target)
@@ -77,8 +85,14 @@ async function saveOptions(e) {
         }
     } else if (e.target.id.startsWith("load-")) {
         try {
-            const dict_name = e.target.id.substring("load-".length);
-            set_dict(parse_dict(await grab_dict(dict_name)));
+            let dict;
+            if (false) {
+                dict = await compute_dict();
+            } else {
+                const dict_name = e.target.id.substring("load-".length);
+                dict = await grab_dict(dict_name)
+            }
+            set_dict(parse_dict(dict));
             document.getElementById("load_error").innerText = "";
             await display_dict_preview()
         } catch (e) {
