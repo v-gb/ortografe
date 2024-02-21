@@ -68,7 +68,7 @@ function currently_selected_rules() {
     const load_checkbox_label = document.getElementById("load-checkbox-label");
     const selection_text = selected.length > 0 ? selected.map((r) => r.name).join(' ') : "rien de sélectionner"
     load_checkbox_label.innerText = `Charger la sélection (${selection_text})`
-    return selected.map((r) => r.v)
+    return selected.map((r) => r.name)
 }
 
 function add_rule_selection_ui() {
@@ -84,11 +84,20 @@ function add_rule_selection_ui() {
 }
 
 async function compute_dict(rules) {
-    const lexique383 = await (await fetch("./Lexique383.gen.tsv")).text()
-    const rect1990 = await (await fetch("./dict1990.gen.csv")).text()
-    const [dict, stats] = dict_gen.generate(lexique383, rect1990, rules)
-    console.log(stats)
-    return dict
+    // We need to run this in a worker, otherwise the loading animation doesn't actually
+    // animate, which we kind of want it to, since the a 2s of waiting is on the longer
+    // side.
+    const worker = new Worker("dict_gen.bc.js")
+    try {
+        const [ dict, stats ] = await new Promise((resolve) => {
+            worker.onmessage = (e) => resolve(e.data);
+            worker.postMessage(rules)
+        })
+        console.log(stats)
+        return dict
+    } finally {
+        worker.terminate()
+    }
 }
 
 async function saveOptions(e) {
@@ -110,12 +119,17 @@ async function saveOptions(e) {
             const target = e.target.id.substring("load-".length);
             const rules = currently_selected_rules();
             if (target == 'checkbox') {
-                // we should give feedback that the load is happening, because it's
-                // not horrible, but it's probably sufficiently slow that people would be
-                // confused.
-                dict = await compute_dict(rules);
-                set_dict(parse_dict(dict));
-                await display_dict_preview()
+                const load_checkbox_label = document.getElementById("load-checkbox-label");
+                if (!load_checkbox_label.classList.contains("loading")) {
+                    load_checkbox_label.classList.add("loading")
+                    try {
+                        const dict = await compute_dict(rules);
+                        set_dict(parse_dict(dict));
+                        await display_dict_preview()
+                    } finally {
+                        load_checkbox_label.classList.remove("loading")
+                    }
+                }
             }
             document.getElementById("load_error").innerText = "";
         } catch (e) {
