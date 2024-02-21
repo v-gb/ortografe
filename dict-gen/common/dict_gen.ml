@@ -88,7 +88,39 @@ type static =
   { data_lexique_Lexique383_gen_tsv : string
   ; extension_dict1990_gen_csv : string }
 
-let gen ~rules ~rect90 ~all ~oe ~output ~json_to_string data =
+type rule = [ `Oe | `Rect1990 | `Rewrite of string ]
+let rewrite_rule_by_name =
+  lazy (
+      List.map (force Rewrite.all)
+        ~f:(fun r -> Rewrite.name r, r)
+      |> Map.of_alist_exn (module String))
+let all = lazy (`Oe
+                :: `Rect1990
+                :: List.map ~f:(fun r -> `Rewrite (Rewrite.name r))
+                     (force Rewrite.all))
+
+let name = function
+  | `Rewrite name -> name
+  | `Oe -> "oe"
+  | `Rect1990 -> "1990"
+let doc = function
+  | `Rewrite name -> Rewrite.doc (Map.find_exn (force rewrite_rule_by_name) name)
+  | `Oe -> "Corriger les @oe en @œ, comme @coeur -> @cœur"
+  | `Rect1990 -> "Appliquer les rectifications de 1990"
+
+let gen ~rules ~all ~output ~json_to_string data =
+  let rules = if List.is_empty rules then [ `Rewrite "erofa"; `Rect1990; `Oe ] else rules in
+  let rewrite_rules, oe, rect1990 =
+    let oe = ref false in
+    let rect1990 = ref false in
+    let rules =
+      List.filter_map rules ~f:(function
+          | `Rewrite s -> Some (Map.find_exn (force rewrite_rule_by_name) s)
+          | `Oe -> oe := true; None
+          | `Rect1990 -> rect1990 := true; None)
+    in
+    rules, !oe, !rect1990
+  in
   let post90, lexique =
     match data with
     | `Values (`Post90 post90, `Lexique lexique) -> post90, lexique
@@ -96,14 +128,9 @@ let gen ~rules ~rect90 ~all ~oe ~output ~json_to_string data =
        Data.parse_post90 extension_dict1990_gen_csv,
        Data.Lexique.parse data_lexique_Lexique383_gen_tsv
   in
-  let rect90 =
-    rect90
-    || List.is_empty rules
-    || List.exists rules ~f:(fun r -> String.(=) (Rewrite.name r) "erofa")
-  in
   let post90, lexique =
-    (if rect90 then post90 else Hashtbl.create (module String)),
-    build_lexique_post90 lexique post90 ~fix_90:rect90
+    (if rect1990 then post90 else Hashtbl.create (module String)),
+    build_lexique_post90 lexique post90 ~fix_90:rect1990
   in
   let print, after =
     if all
@@ -116,14 +143,10 @@ let gen ~rules ~rect90 ~all ~oe ~output ~json_to_string data =
       (fun old new_ -> add_ranked all ~key:old ~data:new_),
       (fun () ->
         add_post90_entries all post90;
-        let plurals_in_s = List.for_all rules ~f:Rewrite.plurals_in_s in
+        let plurals_in_s = List.for_all rewrite_rules ~f:Rewrite.plurals_in_s in
         simplify_mapping all ~plurals_in_s;
         (let name =
-           ((if rect90 then ["1990"] else [])
-            @ (if oe then ["oe"] else [])
-            @ if List.is_empty rules
-              then ["érofa" ]
-              else List.map rules ~f:Rewrite.name)
+           List.map rules ~f:name
            |> List.sort ~compare:String.compare
            |> String.concat ~sep:" "
          in
@@ -131,7 +154,7 @@ let gen ~rules ~rect90 ~all ~oe ~output ~json_to_string data =
            [ "desc", `String name
            ; "lang", `String "fr"
            ; "supports_repeated_rewrites",
-             `Bool (List.for_all rules ~f:Rewrite.supports_repeated_rewrites)
+             `Bool (List.for_all rewrite_rules ~f:Rewrite.supports_repeated_rewrites)
            ; "plurals_in_s", `Bool plurals_in_s
            ]
          |> json_to_string
@@ -145,7 +168,7 @@ let gen ~rules ~rect90 ~all ~oe ~output ~json_to_string data =
     Rewrite.gen
       ~not_understood:`Ignore
       ~fix_oe:oe
-      ~rules
+      ~rules:rewrite_rules
       lexique print in
   after ();
   `Stats [%sexp ~~(stats : Rewrite.stats)]

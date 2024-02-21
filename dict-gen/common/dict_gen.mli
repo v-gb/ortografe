@@ -17,11 +17,14 @@ type static =
   ; extension_dict1990_gen_csv : string
   }
 
+type rule
+val all : rule list Lazy.t
+val name : rule -> string
+val doc : rule -> string
+
 val gen
-    :  rules:Rewrite.rule list
-    -> rect90:bool
+    :  rules:rule list
     -> all:bool
-    -> oe:bool
     -> output:(string -> unit)
     -> json_to_string:
          ([> `Assoc of

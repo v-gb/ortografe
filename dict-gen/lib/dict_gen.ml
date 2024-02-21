@@ -2,6 +2,7 @@ open Core
 module Data = Dict_gen_common.Data
 module Rules = Dict_gen_common.Rules
 module Rewrite = Dict_gen_common.Rewrite
+module Dict_gen = Dict_gen_common.Dict_gen
 module Unix = Core_unix
 let (^/) = Eio.Path.(/)
 
@@ -23,7 +24,7 @@ let root ~from =
 
 let build_erofa_ext ~root =
   let combined_erofa =
-    Dict_gen_common.Dict_gen.build_erofa_ext
+    Dict_gen.build_erofa_ext
       ~erofa:(Data_fs.load_erofa (`Root root))
       ~post90:(Data_fs.load_post90 (`Root root))
       ~lexique:(Data_fs.load_lexique (`Root root))
@@ -62,7 +63,7 @@ let with_flow ~env ~write ~diff ~drop ~f =
      else Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
      None
 
-let gen ~env ?(static : Dict_gen_common.Dict_gen.static option) ~rules ~rect90 ~all ~write ~diff ~drop ~oe () =
+let gen ~env ?(static : Dict_gen.static option) ~rules ~all ~write ~diff ~drop () =
   let root = lazy (root ~from:(Eio.Stdenv.fs env)) in
   let lexique =
     Data_fs.load_lexique (match static with
@@ -78,11 +79,9 @@ let gen ~env ?(static : Dict_gen_common.Dict_gen.static option) ~rules ~rect90 ~
     with_flow ~env ~write ~diff ~drop ~f:(fun buf ->
         let write = if drop then ignore else (fun str -> Eio.Buf_write.string buf str) in
         let `Stats stats =
-          Dict_gen_common.Dict_gen.gen
+          Dict_gen.gen
             ~rules
-            ~rect90
             ~all
-            ~oe
             ~json_to_string:Yojson.to_string
             ~output:write
             (`Values (`Post90 post90, `Lexique lexique))
@@ -106,16 +105,13 @@ let gen_cmd ?static ?doc name =
     (let+ rules =
        List.fold_right
          ~init:(return [])
-         (force Rewrite.all)
+         (force Dict_gen.all)
          ~f:(fun rule acc ->
            let+ present = C.Arg.value (C.Arg.flag (C.Arg.info
-                                                     ~doc:(Rewrite.doc rule)
-                                                     [Rewrite.name rule]))
+                                                     ~doc:(Dict_gen.doc rule)
+                                                     [Dict_gen.name rule]))
            and+ acc in
            if present then rule :: acc else acc)
-     and+ rect90 = 
-       C.Arg.value (C.Arg.flag
-                      (C.Arg.info ~doc:"appliquer les rectifications de 1990" ["90"]))
      and+ all = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"inclure les mots inchangés" ["all"]))
      and+ write =
        C.Arg.value (C.Arg.opt (C.Arg.some C.Arg.string) None
@@ -126,12 +122,9 @@ let gen_cmd ?static ?doc name =
      and+ drop =
        C.Arg.value (C.Arg.flag
                       (C.Arg.info ~doc:"(pour profiler) jeter le dictionnaire calculé" ["drop"]))
-     and+ oe =
-       C.Arg.value (C.Arg.flag
-                      (C.Arg.info ~doc:"réécrire oe en œ quand c'est possible" ["oe"]))
      in
      Eio_main.run (fun env ->
-         try gen ?static ~env ~rules ~rect90 ~all ~write ~diff ~drop ~oe ()
+         try gen ?static ~env ~rules ~all ~write ~diff ~drop ()
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
   
@@ -171,7 +164,7 @@ let main () =
                  if post90
                  then
                    let post90 = Data_fs.load_post90 (`Root root) in
-                   Dict_gen_common.Dict_gen.build_lexique_post90
+                   Dict_gen.build_lexique_post90
                      lexique
                      post90
                      ~fix_90:false (* to check both versions *)
