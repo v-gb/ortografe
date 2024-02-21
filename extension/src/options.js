@@ -119,15 +119,15 @@ async function saveOptions(e) {
             const target = e.target.id.substring("load-".length);
             const rules = currently_selected_rules();
             if (target == 'checkbox') {
-                const load_checkbox_label = document.getElementById("load-checkbox-label");
-                if (!load_checkbox_label.classList.contains("loading")) {
-                    load_checkbox_label.classList.add("loading")
+                const elt = document.getElementById("floatingCirclesG");
+                if (elt.classList.contains("idle")) {
+                    elt.classList.remove("idle")
                     try {
                         const dict = await compute_dict(rules);
                         set_dict(parse_dict(dict));
                         await display_dict_preview()
                     } finally {
-                        load_checkbox_label.classList.remove("loading")
+                        elt.classList.add("idle")
                     }
                 }
             }
