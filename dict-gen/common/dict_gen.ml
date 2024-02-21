@@ -120,6 +120,7 @@ let gen ~rules ~rect90 ~all ~oe ~output ~json_to_string data =
         simplify_mapping all ~plurals_in_s;
         (let name =
            ((if rect90 then ["1990"] else [])
+            @ (if oe then ["oe"] else [])
             @ if List.is_empty rules
               then ["érofa" ]
               else List.map rules ~f:Rewrite.name)

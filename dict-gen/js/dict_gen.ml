@@ -4,10 +4,13 @@ let bool b = any (Js_of_ocaml.Js.bool b)
 let obj l = Js_of_ocaml.Js.Unsafe.obj (Array.of_list l)
 let list l = any (Js_of_ocaml.Js.array (Array.of_list l))
 
+let rule_1990 = "1990"
+let rule_oe = "oe"
+
 let generate a b rules =
   let t1 = Sys.time () in
   let buf = Buffer.create 1_000_000 in
-  let rules =
+  let rules, rect90, oe =
     (* we take rule names rather than rules so the argument to this function
          are serializable (so they can be written in postMessage). *)
     let rules_set =
@@ -20,16 +23,18 @@ let generate a b rules =
     List.filter
       (fun rule ->
         Base.Set.mem rules_set (Dict_gen_common.Rewrite.name rule))
-      (Lazy.force Dict_gen_common.Rewrite.all)
+      (Lazy.force Dict_gen_common.Rewrite.all),
+    Base.Set.mem rules_set rule_1990,
+    Base.Set.mem rules_set rule_oe
   in
   let `Stats stats =
     Dict_gen_common.Dict_gen.gen
       (`Static { data_lexique_Lexique383_gen_tsv = Js_of_ocaml.Js.to_string a
                ; extension_dict1990_gen_csv = Js_of_ocaml.Js.to_string b })
       ~rules
-      ~rect90:false
+      ~rect90
       ~all:false
-      ~oe:true
+      ~oe
       ~output:(Buffer.add_string buf)
       ~json_to_string:(
         let rec to_js = function
@@ -54,8 +59,8 @@ let rules () =
   let ui_doc =
     let re_word = Re.(compile (seq [ str "@"; rep (compl [set " ->@,."]) ])) in
     let re_url = Re.(compile (seq [ str "http"; rep (compl [set " ,"]) ])) in
-    fun rule ->
-    Dict_gen_common.Rewrite.doc rule
+    fun doc ->
+    doc
     |> Base.String.substr_replace_all
          ~pattern:"->"
          ~with_:"→"
@@ -73,12 +78,18 @@ let rules () =
            in
            [%string "<a href=\"%{url}\">%{display_url}</a>"])
   in
-  List.map (fun rule ->
-      obj [ "name", string (Dict_gen_common.Rewrite.name rule)
-          ; "doc", string (ui_doc rule)
-          ])
-    rules
-  |> list  
+  let js_rule ~name ~doc = obj [ "name", string name; "doc", string doc ] in
+  list (
+      [ js_rule ~name:rule_1990 ~doc:"Appliquer les rectifications de 1990"
+      ; js_rule ~name:rule_oe ~doc:(ui_doc "Corriger les @oe en @œ, comme @coeur -> @cœur")
+      ] @
+        List.map (fun rule ->
+            js_rule
+              ~name:(Dict_gen_common.Rewrite.name rule)
+              ~doc:(ui_doc (Dict_gen_common.Rewrite.doc rule))
+          )
+          rules
+    )
 
 let () =
   Js_of_ocaml.Js.Unsafe.set
