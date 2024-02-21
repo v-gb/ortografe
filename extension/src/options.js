@@ -68,7 +68,7 @@ function currently_selected_rules() {
     const load_checkbox_label = document.getElementById("load-checkbox-label");
     const selection_text = selected.length > 0 ? selected.map((r) => r.name).join(' ') : "rien de sélectionné"
     load_checkbox_label.innerText = `Charger la sélection (${selection_text})`
-    return selected.map((r) => r.name)
+    return selected.map((r) => r.v)
 }
 
 function add_rule_selection_ui() {

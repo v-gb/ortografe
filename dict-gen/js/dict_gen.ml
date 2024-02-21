@@ -7,21 +7,7 @@ let list l = any (Js_of_ocaml.Js.array (Array.of_list l))
 let generate a b rules =
   let t1 = Sys.time () in
   let buf = Buffer.create 1_000_000 in
-  let rules =
-    (* we take rule names rather than rules so the argument to this function
-         are serializable (so they can be written in postMessage). *)
-    let rules_set =
-      rules
-      |> Js_of_ocaml.Js.to_array
-      |> Array.to_list
-      |> List.map Js_of_ocaml.Js.to_string
-      |> Base.Set.of_list (module Base.String)
-    in
-    List.filter
-      (fun rule ->
-        Base.Set.mem rules_set (Dict_gen_common.Dict_gen.name rule))
-      (Lazy.force Dict_gen_common.Dict_gen.all)
-  in
+  let rules = rules |> Js_of_ocaml.Js.to_array |> Array.to_list in
   let `Stats stats =
     Dict_gen_common.Dict_gen.gen
       (`Static { data_lexique_Lexique383_gen_tsv = Js_of_ocaml.Js.to_string a
@@ -74,7 +60,8 @@ let rules () =
   rules
   |> List.map (fun rule ->
          obj [ "name", string (Dict_gen_common.Dict_gen.name rule)
-             ; "doc", string (ui_doc (Dict_gen_common.Dict_gen.doc rule)) ])
+             ; "doc", string (ui_doc (Dict_gen_common.Dict_gen.doc rule))
+             ; "v", any rule ])
   |> list
 
 let () =
