@@ -51,11 +51,33 @@ let generate a b rules =
 
 let rules () =
   let rules = Lazy.force Dict_gen_common.Rewrite.all in
+  let ui_doc =
+    let re_word = Re.(compile (seq [ str "@"; rep (compl [set " ->@,."]) ])) in
+    let re_url = Re.(compile (seq [ str "http"; rep (compl [set " ,"]) ])) in
+    fun rule ->
+    Dict_gen_common.Rewrite.doc rule
+    |> Base.String.substr_replace_all
+         ~pattern:"->"
+         ~with_:"→"
+    |> Re.replace re_word ~all:true ~f:(fun group ->
+           let word = Base.String.chop_prefix_exn (Re.Group.get group 0) ~prefix:"@" in
+           [%string "<i>%{word}</i>"])
+    |> Re.replace re_url ~all:true ~f:(fun group ->
+           let url = Re.Group.get group 0 in
+           let display_url =
+             url
+             |> Base.String.chop_prefix_if_exists ~prefix:"http://"
+             |> Base.String.chop_prefix_if_exists ~prefix:"https://"
+             |> Base.String.chop_prefix_if_exists ~prefix:"www."
+             |> Base.String.chop_suffix_if_exists ~suffix:"/"
+           in
+           [%string "<a href=\"%{url}\">%{display_url}</a>"])
+  in
   List.map (fun rule ->
-      obj
-        [ "name", string (Dict_gen_common.Rewrite.name rule)
-        ; "doc", string (Dict_gen_common.Rewrite.doc rule)
-    ]) rules
+      obj [ "name", string (Dict_gen_common.Rewrite.name rule)
+          ; "doc", string (ui_doc rule)
+          ])
+    rules
   |> list  
 
 let () =

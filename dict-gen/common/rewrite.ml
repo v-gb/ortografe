@@ -618,14 +618,14 @@ let erofa_rule = lazy (
 let _ : string =
   new_rule
     "erofa"
-    "Les règles telles que décrites sur erofa.free.fr"
+    "Les règles telles que décrites sur http://erofa.free.fr"
     ~prefilter:(fun () -> `Re (force erofa_prefilter'))
     erofa_rule
 
 let qu__q =
   new_rule'
-    "qu--q"
-    "question -> qestion mais aquarium inchangé"
+    "qu/q"
+    "@aquatique -> @aquatiqe"
     ~prefilter:(fun () -> `Re (Re.str "qu"))
     (lazy (
       let pattern_qu = String.Search_pattern.create "qu" in
@@ -636,8 +636,8 @@ let qu__q =
 
 let qu__qou =
   new_rule'
-    "qu--qou"
-    "aquatique -> aqouatique"
+    "qu/qou"
+    "@aquatique -> @aqouatique"
     ~prefilter:(fun () -> `Re (Re.str "qu"))
     (lazy (
       let pattern_qu = String.Search_pattern.create "qu" in
@@ -648,8 +648,8 @@ let qu__qou =
 
 let _ : string =
   new_rule'
-    "ti--ci"
-    "nation -> nacion, patient -> pacient, mais question inchangé"
+    "ti/ci"
+    "@nation -> @nacion, @patient -> @pacient, mais @question inchangé"
     ~prefilter:(fun () -> `Re (Re.str "ti"))
     (lazy (
       let pattern_ti = String.Search_pattern.create "ti" in
@@ -660,8 +660,8 @@ let _ : string =
 
 let emment__ament =
   new_rule'
-    "emment--ament"
-    "évidemment -> évidament"
+    "emment/ament"
+    "@évidemment -> @évidament"
     ~prefilter:(fun () -> `Re (Re.str "emment"))
     (lazy (
       let pattern_emment = String.Search_pattern.create "emment" in
@@ -674,8 +674,8 @@ let emment__ament =
 
 let _ : string =
   new_rule'
-    "oiement--oiment"
-    "aboiement -> aboiment"
+    "oiement/oiment"
+    "@aboiement -> @aboiment"
     ~prefilter:(fun () -> `Re (Re.str "oiement"))
     (lazy (
       let pattern_oiement = String.Search_pattern.create "oiement" in
@@ -686,8 +686,8 @@ let _ : string =
 
 let _ : string =
   new_rule'
-    "cq--q"
-    "grecque -> grèque"
+    "cq/q"
+    "@grecque -> @grèque"
     ~prefilter:(fun () -> `Re (Re.str "cq"))
     (lazy (
       let pattern_cq = String.Search_pattern.create "cq" in
@@ -701,8 +701,8 @@ let _ : string =
 
 let qua_o__ca_o =
   new_rule'
-    "qua-o--ca-o"
-    "qualité -> calité, quotient -> cotient"
+    "qua-o/ca-o"
+    "@qualité -> @calité, @quotient -> @cotient"
     ~prefilter:(fun () -> `Re (Re.alt [ Re.str "qua"; Re.str "quo" ]))
     (lazy (
       let pattern_qua = String.Search_pattern.create "qua" in
@@ -715,8 +715,8 @@ let qua_o__ca_o =
 
 let _ : string =
   new_rule'
-    "sc-sch--c-ch"
-    "science -> cience, fasciste -> fachiste, schéma -> chéma"
+    "sc-sch/c-ch"
+    "@science -> @cience, @fasciste -> @fachiste, @schéma -> @chéma"
     ~prefilter:(fun () -> `Re (Re.str "sc"))
     (lazy (
       let pattern_esc = String.Search_pattern.create "esc" in
@@ -736,8 +736,8 @@ let _ : string =
 
 let _ : string =
   new_rule'
-    "en--an"
-    "enfant -> anfant"
+    "en/an"
+    "@enfant -> @anfant"
     ~prefilter:(fun () -> `Re (Re.str "en"))
     (lazy (
       let pattern_en = String.Search_pattern.create "en" in
@@ -748,8 +748,8 @@ let _ : string =
 
 let _ : string =
   new_rule'
-    "gu--gh"
-    "guerre -> gherre (et aigüe -> aigue en principe, mais pas fait)"
+    "gu/gh"
+    "@guerre -> @gherre (et @aigüe -> @aigue en principe, mais non implémenté)"
     ~prefilter:(fun () -> `Re (Re.str "gu"))
     (lazy (
       let pattern_gu = String.Search_pattern.create "gu" in
@@ -760,8 +760,8 @@ let _ : string =
 
 let _ : string =
   new_rule'
-    "g--j"
-    "mange -> manje"
+    "g/j"
+    "@mange -> @manje"
     ~prefilter:(fun () -> `Re (Re.str "g"))
     (lazy (
       let pattern_g = String.Search_pattern.create "g" in
@@ -776,8 +776,8 @@ let _ : string =
 
 let _ : string =
   new_rule'
-    "ez--es"
-    "mangez -> mangés"
+    "ez/es"
+    "@mangez -> @mangés"
     ~prefilter:(fun () -> `Re (Re.str "ez"))
     (lazy (
       let pattern_ez = String.Search_pattern.create "ez" in
@@ -788,8 +788,8 @@ let _ : string =
 
 let _ : string =
   new_rule'
-    "ent--es"
-    "mangent -> manges"
+    "ent/es"
+    "@mangent -> @manges"
     ~prefilter:(fun () -> `Re (Re.str "ent"))
     (lazy (
       let pattern_ient = String.Search_pattern.create "ient" in
@@ -802,8 +802,8 @@ let _ : string =
 
 let _ : string =
   new_rule'
-    "m-mbp--n-mbp"
-    "compte -> conpte"
+    "m-mbp/n-mbp"
+    "@emmène -> @enmène, @nymphe -> @nynphe"
     ~prefilter:(fun () -> `Re (Re.seq [ Re.str "m"; Re.set "mbp" ]))
     (lazy (
       let pattern_mp = String.Search_pattern.create "mp" in
@@ -818,8 +818,8 @@ let _ : string =
 
 let _ : string =
   new_rule'
-    "aux--als"
-    "chevaux -> chevals, travaux -> travails"
+    "aux/als"
+    "@chevaux -> @chevals, @travaux -> @travails"
     ~prefilter:(fun () -> `Re (Re.alt [ Re.str "aux"; Re.set "aus" ]))
     (lazy (
       fun env (row, _ as row_search_res) ->
@@ -853,8 +853,8 @@ let map_valid_utf_8 str ~f =
 
 let _ : string =
   new_rule'
-    "il--y"
-     "fille -> fiye, mais ville inchangé"
+    "il/y"
+     "@fille -> @fiye, mais @ville inchangé"
      ~prefilter:(fun () -> `Re (Re.str "il"))
      (lazy (
           let graphem_by_phonem =
@@ -905,7 +905,7 @@ let _ : string list =
     | `B -> "é"
     | `C -> "ê"
   in
-  List.map [ true; false ] ~f:(fun e_unique ->
+  List.map [ false; true ] ~f:(fun e_unique ->
       new_rule'
         ~supports_repeated_rewrites:false
         ~plurals_in_s:false
@@ -1051,7 +1051,7 @@ let _ : string =
     ~supports_repeated_rewrites:false
     ~plurals_in_s:false
     "alfonic"
-    "(pas super testé) les règles de https://alfonic.org/"
+    "les règles de https://alfonic.org/"
     ~prefilter:(fun () -> `All)
     (lazy (
        (* problème :
@@ -1158,7 +1158,7 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
   let rule, prefilter =
     let which_rules =
       let rank rule =
-        if rule.name = emment__ament (* avant qua--ca car on crée des qua *)
+        if rule.name = emment__ament (* avant qua/ca car on crée des qua *)
         then -3
         else if rule.name = qua_o__ca_o (* avant qu__q sinon les qua ont été tranformés en qa *)
         then -2
@@ -1201,7 +1201,7 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
       if not (skip row) then (
         considered := !considered + 1;
         (* The filtering phase makes the creation of dict-arpetani go from 1.95 to 1.725s
-           or so.  But for smaller changes like cq--q + ti--ci, it goes from 1.25s to
+           or so.  But for smaller changes like cq/q + ti/ci, it goes from 1.25s to
            0.85s. Considering that the fixed cost is 0.58s (i.e. the cost of generation if
            the skip function returns true immediately), that's a fairly substantial
            decrease. *)

@@ -36,7 +36,7 @@
  (action
   (with-stdout-to dict-arpetani.csv
    (setenv DUNEROOT %{project_root}
-    (run %{project_root}/dict-gen/bin/dict_gen.exe gen --90 --cq--q --emment--ament --erofa --oiement--oiment --qua-o--ca-o --sc-sch--c-ch --ti--ci)))))
+    (run %{project_root}/dict-gen/bin/dict_gen.exe gen --90 --cq/q --emment/ament --erofa --oiement/oiment --qua-o/ca-o --sc-sch/c-ch --ti/ci)))))
 
 (copy_files (files %{project_root}/data/wiktionnaire/min.gen.csv.zst))
 
