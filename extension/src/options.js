@@ -91,7 +91,7 @@ async function compute_dict(rules) {
     try {
         const [ dict, stats ] = await new Promise((resolve) => {
             worker.onmessage = (e) => resolve(e.data);
-            worker.postMessage(rules)
+            worker.postMessage(["./Lexique383.gen.tsv", "./dict1990.gen.csv", rules])
         })
         console.log(stats)
         return dict

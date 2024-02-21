@@ -16,14 +16,12 @@ let json_to_string v =
     [| to_js v |]
   |> Js_of_ocaml.Js.to_string
 
-let generate a b rules =
+let generate static rules =
   let t1 = Sys.time () in
   let buf = Buffer.create 1_000_000 in
-  let rules = rules |> Js_of_ocaml.Js.to_array |> Array.to_list in
   let `Stats stats =
     Dict_gen_common.Dict_gen.gen
-      (`Static { data_lexique_Lexique383_gen_tsv = Js_of_ocaml.Js.to_string a
-               ; extension_dict1990_gen_csv = Js_of_ocaml.Js.to_string b })
+      (`Static static)
       ~rules
       ~all:false
       ~output:(Buffer.add_string buf)
@@ -31,7 +29,16 @@ let generate a b rules =
   in
   print_endline (Sexplib.Sexp.to_string_hum stats);
   let t2 = Sys.time () in
-  list [ string (Buffer.contents buf) ; string (string_of_float (t2 -. t1)) ]
+  (Buffer.contents buf, string_of_float (t2 -. t1))
+
+let generate_js a b rules =
+  let dict, duration =
+    generate
+      { data_lexique_Lexique383_gen_tsv = Js_of_ocaml.Js.to_string a
+      ; extension_dict1990_gen_csv = Js_of_ocaml.Js.to_string b }
+      (rules |> Js_of_ocaml.Js.to_array |> Array.to_list)
+  in
+  list [ string dict ; string duration ]
 
 let rules () =
   let rules = Lazy.force Dict_gen_common.Dict_gen.all in
@@ -64,19 +71,51 @@ let rules () =
              ; "v", any rule ])
   |> list
 
-let () =
-  Js_of_ocaml.Js.Unsafe.set
-    (Js_of_ocaml.Js.Unsafe.global)
-    "onmessage"
-    (Js_of_ocaml.Js.Unsafe.pure_js_expr {|async function(e) {
-    const lexique383 = await (await fetch("./Lexique383.gen.tsv")).text()
-    const rect1990 = await (await fetch("./dict1990.gen.csv")).text()
-    const res = globalThis.dict_gen.generate(lexique383, rect1990, e.data)
-    postMessage(res)
-}|})
+let fetch url =
+  let open Fut.Result_syntax in
+  let* response = Brr_io.Fetch.url url in
+  let* text = Brr_io.Fetch.Body.text (Brr_io.Fetch.Response.as_body response) in
+  Fut.return (Ok (Jstr.to_string text))
+  
+let on_message data =
+  let jv = Jv.to_jv_array data in
+  let lexique_url = jv.(0) |> Jv.to_jstr in
+  let dict1990_url = jv.(1) |> Jv.to_jstr in
+  let rules = jv.(2) |> Jv.to_list (Obj.magic : Jv.t -> Dict_gen_common.Dict_gen.rule) in
+  let open Fut.Result_syntax in
+  let* data_lexique_Lexique383_gen_tsv = fetch lexique_url in
+  let* extension_dict1990_gen_csv = fetch dict1990_url in
+  let* (dict, duration) =
+    match
+      generate
+        { data_lexique_Lexique383_gen_tsv
+        ; extension_dict1990_gen_csv
+        }
+        rules
+    with
+    | exception e -> Fut.error (Jv.Error.v (Jstr.of_string (Printexc.to_string e)))
+    | v -> Fut.ok v
+  in
+  Brr_webworkers.Worker.G.post (list [ string dict ; string duration ]);
+  Fut.return (Ok ())
+
+let throw e =
+  (Js_of_ocaml.Js.Unsafe.pure_js_expr
+     "(function (exn) { throw exn })" : Jv.Error.t -> _) e
 
 let () =
-  Js_of_ocaml.Js.export "dict_gen"
-    (obj [ "generate", any generate
-         ; "rules", any rules
-         ])
+    if Brr_webworkers.Worker.ami ()
+    then
+      let open Fut.Syntax in
+      Fut.await
+        (let* event = Brr.Ev.next Brr_io.Message.Ev.message Brr.G.target in
+         let data : Jv.t = Brr_io.Message.Ev.data (Brr.Ev.as_type event) in
+         on_message data)
+        (function
+         | Ok () -> ()
+         | Error e -> throw e)
+    else
+      Js_of_ocaml.Js.export "dict_gen"
+        (obj [ "generate", any generate_js
+             ; "rules", any rules
+        ])

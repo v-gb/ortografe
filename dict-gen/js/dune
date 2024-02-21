@@ -3,7 +3,7 @@
 
 (executable
  (name dict_gen)
- (libraries js_of_ocaml dict_gen_common)
+ (libraries js_of_ocaml dict_gen_common brr)
  ;; maybe I should use whatever dune does by default
  (js_of_ocaml (flags --opt 3 --no-sourcemap))
  (preprocess (pps ppx_compare ;; drop ppx_jane, to avoid the toplevel inline tests side effects
