@@ -53,4 +53,8 @@
               from tmp
               left join w on tmp.ortho = w.word
               left join w as w_lemme on tmp.lemme = w_lemme.word
+              where ortho not like '% %'
+                and ortho not like '%.%'
+                and ortho not like '%ñ%'
+                and ortho not like '%ã%'
               order by cast (freqfilms2 as real) desc"))))

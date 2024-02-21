@@ -67,9 +67,6 @@ module Lexique = struct
       in
       { ortho; phon; lemme; h_aspire })
       src
-    |> List.filter ~f:(fun t ->
-           not (List.exists [ " "; "ñ"; "."; "ã" ]
-                  ~f:(fun substring -> String.is_substring ~substring t.ortho)))
 
   let not_usable_words () =
     Hash_set.of_list (module String) [
