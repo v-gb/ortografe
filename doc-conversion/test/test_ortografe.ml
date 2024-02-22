@@ -207,7 +207,7 @@ let%expect_test "rewrite through tag noise in docx" = (
       -             (Element (docx:t ((Text Bravil)))))))
       -          (Element (docx:proofErr ((docx:type spellEnd)) ()))))))))))))
       +             (Element (docx:t ((Text Bravil)))))))))))))))))
-|}];    
+|}];
   )
 
 let%expect_test "epub" = (

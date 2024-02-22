@@ -433,7 +433,7 @@ let bit_pattern_all_double_consonants = 0b11_1111_1111
 let bit_ch = 10
 let bit_ph = 11
 let bit_h = 12
-let bit_x = 13 
+let bit_x = 13
 let bit_oe = 14
 let bit_y = 15
 let find_relevant_patterns ortho phon =
@@ -528,7 +528,7 @@ let erofa_rule = lazy (
   let patterns_double_consonants =
     List.mapi [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun bit s ->
         bit, String.Search_pattern.create (s ^ s), s)
-  in    
+  in
   fun rules ((row : Data.Lexique.row), search_res) ->
   let bits = find_relevant_patterns row.ortho row.phon in
   if bits =$ 0

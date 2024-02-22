@@ -43,7 +43,7 @@ let ranked tbl =
   Hashtbl.to_alist tbl
   |> List.map ~f:(fun (o, (n, rank)) -> (rank, (o, n)))
   |> List.sort ~compare:[%compare: int * (string * _)]
-  |> List.map ~f:snd  
+  |> List.map ~f:snd
 
 let build_lexique_post90 (lexique : Data.Lexique.t) post90 ~rect1990 =
   (* this causes a few regressions like
@@ -53,7 +53,7 @@ let build_lexique_post90 (lexique : Data.Lexique.t) post90 ~rect1990 =
      because the change of direction in accent is actually not taken into account
      in the prononciation, and so the erofa rewriting fails to apply.
 
-     Or even graffito -> grafito becoming graffito -> graffiti.         
+     Or even graffito -> grafito becoming graffito -> graffiti.
    *)
   if rect1990
   then
@@ -61,7 +61,7 @@ let build_lexique_post90 (lexique : Data.Lexique.t) post90 ~rect1990 =
       match Hashtbl.find post90 r.ortho with
       | None -> r
       | Some new_ortho -> { r with ortho = new_ortho })
-  else    
+  else
     List.concat_map lexique ~f:(fun r ->
         match Hashtbl.find post90 r.ortho with
         | None -> [ r ]

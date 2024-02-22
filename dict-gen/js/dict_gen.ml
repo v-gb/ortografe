@@ -111,7 +111,7 @@ let rpc : type q r.
     Brr_webworkers.Worker.terminate worker;
     Fut.return (Brr_io.Message.Ev.data (Brr.Ev.as_type event) : (r, Jv.Error.t) Result.t)
   )
-  
+
 let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n : Jv.t) profile =
   (* We need to run this in a worker, otherwise the loading animation doesn't actually
    * animate, which we kind of want it to, since the a 2s of waiting is on the longer
@@ -135,7 +135,7 @@ let () =
       (let* event = Brr.Ev.next Brr_io.Message.Ev.message Brr.G.target in
        let data = Brr_io.Message.Ev.data (Brr.Ev.as_type event) in
        match data with
-       | `On_message data -> on_message data ~k:Jv.repr) 
+       | `On_message data -> on_message data ~k:Jv.repr)
       (fun res -> Brr_webworkers.Worker.G.post (res : (Jv.t, Jv.Error.t) Result.t))
   else
     Js_of_ocaml.Js.export "dict_gen"

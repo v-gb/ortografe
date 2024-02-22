@@ -23,7 +23,7 @@ module Csv_header = struct
     f (f' row)
   let (let+) = map
   let (and+) = both
-             
+
   let parse_string t ~header ~separator str =
     (* The csvs we care about have no quoting, and this is lighter than compiler the csv
        library for javascript *)

@@ -331,4 +331,4 @@ module Interleaved = struct
     | `Not_special -> emit_structure_not_special t a
     | `Flush | `Space ->
        handle_result t (flush_as_list t) @ [a]
-end  
+end

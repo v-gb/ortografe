@@ -28,7 +28,7 @@ let build_erofa_ext ~root =
       ~erofa:(Data_fs.load_erofa (`Root root))
       ~post90:(Data_fs.load_post90 (`Root root))
       ~lexique:(Data_fs.load_lexique (`Root root))
-  in  
+  in
   List.iter combined_erofa ~f:(fun (old, new_) ->
       print_endline [%string "%{old},%{new_}"])
 
@@ -127,7 +127,7 @@ let gen_cmd ?static ?doc name =
          try gen ?static ~env ~rules ~all ~write ~diff ~drop ()
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
-  
+
 let check (lexique : Data.Lexique.t) ~skip =
   let rules = Rules.create () in
   List.iteri lexique ~f:(fun i row ->
@@ -180,4 +180,3 @@ let main () =
       ]
   in
   C.Cmd.eval cmd |> exit
-

@@ -564,7 +564,7 @@ let search (rules : t) word phon =
                   then longest_matching_core_graphem := Some (String.length graphem);
                   if String.is_substring_at phon ~pos:j ~substring:phonem
                   then
-                    let this_surprise = 
+                    let this_surprise =
                       (match importance with
                        | Core | Core_optional ->
                           (match !longest_matching_core_graphem with
