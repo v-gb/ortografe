@@ -136,7 +136,7 @@ let check (lexique : Data.Lexique.t) ~skip =
       else
         match Rules.search rules row.ortho row.phon with
         | Error s -> prerr_endline (Sexp_with_utf8.to_string_hum s)
-        | Ok (path, surprise) ->
+        | Ok { path; surprise } ->
            let graphemes =
              List.map path ~f:(fun p ->
                  if String.(=) p.phonem ""

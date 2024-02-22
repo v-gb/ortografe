@@ -18,7 +18,7 @@ type path_elt =
   ; this_surprise : int
   ; importance : importance
   }
-type search_res = path_elt list * int
+type search_res = { path : path_elt list; surprise : int }
 
 val search : t -> string -> string -> (search_res, Sexplib.Sexp.t) Result.t
 

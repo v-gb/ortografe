@@ -513,7 +513,7 @@ type path_elt =
   ; importance : importance
   }
 let __ p = p.i, p.j, p.this_surprise, p.importance
-type search_res = path_elt list * int
+type search_res = { path : path_elt list; surprise : int }
 
 module Heap =
   Binary_heap.Make(struct
@@ -545,7 +545,7 @@ let search (rules : t) word phon =
       if i >=$ String.length word
       then
         if j =$ String.length phon
-        then Ok (List.rev path, surprise)
+        then Ok { path = List.rev path; surprise }
         else loop ()
       else (
         if [%compare: int * int] (j, i) (snd !furthest, fst !furthest) >$ 0 then

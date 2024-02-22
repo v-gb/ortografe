@@ -62,7 +62,8 @@ let rewrite ?(start = 0) env (aligned_row : aligned_row) ~target ~repl =
     | None -> pos := String.length row1.ortho
     | Some (ortho2, match_i) ->
        (match Rules.search env.rules ortho2 row1.phon with
-        | Ok search_res2 when snd search_res2 <=$ snd aligned_row1.alignment && env.accept ortho2 ->
+        | Ok search_res2 when search_res2.surprise <=$ aligned_row1.alignment.surprise
+                              && env.accept ortho2 ->
            aligned_row := { row = { row1 with ortho = ortho2 }; alignment = search_res2 }
         | _ -> ());
        pos := match_i + 1
@@ -71,7 +72,8 @@ let rewrite ?(start = 0) env (aligned_row : aligned_row) ~target ~repl =
 
 let keep_if_plausible_phon_opt env (aligned_row : aligned_row) ortho2 phon2 =
   match Rules.search env.rules ortho2 phon2 with
-  | Ok search_res2 when snd search_res2 <=$ snd aligned_row.alignment && env.accept ortho2 ->
+  | Ok search_res2 when search_res2.surprise <=$ aligned_row.alignment.surprise
+                        && env.accept ortho2 ->
      Some { row = { aligned_row.row with ortho = ortho2; phon = phon2 }; alignment = search_res2 }
   | _ -> None
 
@@ -80,7 +82,8 @@ let keep_if_plausible_opt env (aligned_row : aligned_row) ortho2 =
 
 let keep_if_plausible env (aligned_row : aligned_row) ortho2 =
   match Rules.search env.rules ortho2 aligned_row.row.phon with
-  | Ok search_res2 when snd search_res2 <=$ snd aligned_row.alignment && env.accept ortho2 ->
+  | Ok search_res2 when search_res2.surprise <=$ aligned_row.alignment.surprise
+                        && env.accept ortho2 ->
      { row = { aligned_row.row with ortho = ortho2 }; alignment = search_res2 }
   | _ -> aligned_row
 
@@ -155,7 +158,7 @@ let rewrite_e_double_consonants =
         | _ :: rest -> loop (k + 1) rest
         | [] -> ()
       in
-      loop 0 (fst aligned_row1.alignment)
+      loop 0 aligned_row1.alignment.path
     done;
     !aligned_row
 
@@ -166,7 +169,7 @@ let rewrite_graphem' ?(start = 0) env aligned_row ~filter =
     keep_going := false;
     let aligned_row1 = !aligned_row in
     let (None | Some ()) =
-      List.find_mapi (fst aligned_row1.alignment) ~f:(fun k (path_elt : Rules.path_elt) ->
+      List.find_mapi aligned_row1.alignment.path ~f:(fun k (path_elt : Rules.path_elt) ->
           if path_elt.i <$ start
           then None
           else
@@ -174,7 +177,7 @@ let rewrite_graphem' ?(start = 0) env aligned_row ~filter =
             | None -> None
             | Some to_ ->
                let ortho2 =
-                 List.mapi (fst aligned_row1.alignment) ~f:(fun k' elt ->
+                 List.mapi aligned_row1.alignment.path ~f:(fun k' elt ->
                      if k =$ k'
                      then to_
                      else elt.graphem)
@@ -869,7 +872,7 @@ let _ : string =
        in
        fun env aligned_row ->
          let new_ortho =
-           List.map (fst aligned_row.alignment) ~f:(fun p ->
+           List.map aligned_row.alignment.path ~f:(fun p ->
              match p.graphem with
              | "il$" | "ils$" | "ill" | "illi" | "eil$" | "eils$" | "eill" | "eilli"
                   when not (String.mem p.phonem 'l')
@@ -889,7 +892,7 @@ let _ : string =
          in
          keep_if_plausible env aligned_row new_ortho)
 
-let dummy_search_res = [], 0
+let dummy_search_res : Rules.search_res = { path = []; surprise = 0 }
 let _ : string list =
   let pluriel_en_plus = true in
   let e_accente_unique =
@@ -960,7 +963,7 @@ let _ : string list =
              fun _env aligned_row ->
              let graphems =
                try
-                 List.concat_map (fst aligned_row.alignment) ~f:(fun p ->
+                 List.concat_map aligned_row.alignment.path ~f:(fun p ->
                      match p.graphem, p.phonem with
                      | "b", "p" -> [ "b" ]
                      | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
@@ -1093,7 +1096,7 @@ let _ : string =
       fun _env aligned_row ->
         let ortho =
           try
-            List.concat_map (fst aligned_row.alignment) ~f:(fun p ->
+            List.concat_map aligned_row.alignment.path ~f:(fun p ->
                 match p.graphem, p.phonem with
                 | "b", "p" -> [ "b" ]
                 | ("i" | "'" | "-" | " "), _ -> [ p.graphem ]
@@ -1107,7 +1110,7 @@ let _ : string =
 let respell_oe (aligned_row : aligned_row) =
   (* Lexique contient toujours œ écrit oe. On recolle les lettres, pour qu'on puisse
      réécrire à la fois cœur et coeur, par exemple. *)
-  if List.exists (fst aligned_row.alignment) ~f:(fun p ->
+  if List.exists aligned_row.alignment.path ~f:(fun p ->
          match p.graphem, p.phonem with
          | "oe", ("e" | "E" | "2" | "9")
          | "oeu", ("2" | "9")
@@ -1115,16 +1118,18 @@ let respell_oe (aligned_row : aligned_row) =
          | _ -> false)
   then
     let search_res =
-      List.map (fst aligned_row.alignment) ~f:(fun p ->
-          match p.graphem, p.phonem with
-          | "oe", ("e" | "E" | "2" | "9") -> { p with graphem = "œ" }
-          | "oeu", ("2" | "9") -> { p with graphem = "œu" }
-          | "coe", "se" -> { p with graphem = "cœ" }
-          | _ -> p),
-      snd aligned_row.alignment
+      { aligned_row.alignment
+        with path =
+               List.map aligned_row.alignment.path ~f:(fun p ->
+                   match p.graphem, p.phonem with
+                   | "oe", ("e" | "E" | "2" | "9") -> { p with graphem = "œ" }
+                   | "oeu", ("2" | "9") -> { p with graphem = "œu" }
+                   | "coe", "se" -> { p with graphem = "cœ" }
+                   | _ -> p)
+      }
     in
     let ortho =
-      List.map (fst search_res) ~f:(fun p -> p.graphem)
+      List.map search_res.path ~f:(fun p -> p.graphem)
       |> String.concat
       |> String.chop_suffix_if_exists ~suffix:"$"
     in
