@@ -21,24 +21,18 @@ let generate static rules =
   let buf = Buffer.create 1_000_000 in
   let `Stats stats =
     Dict_gen_common.Dict_gen.gen
-      (`Static static)
       ~rules
       ~all:false
       ~output:(Buffer.add_string buf)
       ~json_to_string
+      (`Static static)
   in
-  print_endline (Sexplib.Sexp.to_string_hum stats);
   let t2 = Sys.time () in
-  (Buffer.contents buf, string_of_float (t2 -. t1))
-
-let generate_js a b rules =
-  let dict, duration =
-    generate
-      { data_lexique_Lexique383_gen_tsv = Js_of_ocaml.Js.to_string a
-      ; extension_dict1990_gen_csv = Js_of_ocaml.Js.to_string b }
-      (rules |> Js_of_ocaml.Js.to_array |> Array.to_list)
+  let sexp_str =
+    let open Base in
+    Sexplib.Sexp.to_string_hum [%sexp (stats : Sexp.t), (t2 -. t1 : float)]
   in
-  list [ string dict ; string duration ]
+  (Buffer.contents buf, sexp_str)
 
 let rules () =
   let rules = Lazy.force Dict_gen_common.Dict_gen.all in
@@ -76,46 +70,72 @@ let fetch url =
   let* response = Brr_io.Fetch.url url in
   let* text = Brr_io.Fetch.Body.text (Brr_io.Fetch.Response.as_body response) in
   Fut.return (Ok (Jstr.to_string text))
-  
-let on_message data =
-  let jv = Jv.to_jv_array data in
-  let lexique_url = jv.(0) |> Jv.to_jstr in
-  let dict1990_url = jv.(1) |> Jv.to_jstr in
-  let rules = jv.(2) |> Jv.to_list (Obj.magic : Jv.t -> Dict_gen_common.Dict_gen.rule) in
-  let open Fut.Result_syntax in
-  let* data_lexique_Lexique383_gen_tsv = fetch lexique_url in
-  let* extension_dict1990_gen_csv = fetch dict1990_url in
-  let* (dict, duration) =
-    match
-      generate
-        { data_lexique_Lexique383_gen_tsv
-        ; extension_dict1990_gen_csv
-        }
-        rules
-    with
-    | exception e -> Fut.error (Jv.Error.v (Jstr.of_string (Printexc.to_string e)))
-    | v -> Fut.ok v
-  in
-  Brr_webworkers.Worker.G.post (list [ string dict ; string duration ]);
-  Fut.return (Ok ())
 
-let throw e =
-  (Js_of_ocaml.Js.Unsafe.pure_js_expr
-     "(function (exn) { throw exn })" : Jv.Error.t -> _) e
+let on_message
+      ((lexique_url : Jstr.t),
+       (dict1990_url : Jstr.t),
+       (rules : Dict_gen_common.Dict_gen.rule list))
+      ~k =
+  let open Fut.Result_syntax in
+  let* static =
+    let* data_lexique_Lexique383_gen_tsv = fetch lexique_url in
+    let* extension_dict1990_gen_csv = fetch dict1990_url in
+    Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
+           ; extension_dict1990_gen_csv
+      }
+  in
+  match generate static rules with
+  | exception e -> Fut.error (Jv.Error.v (Jstr.of_string (Printexc.to_string e)))
+  | v -> Fut.ok (k v)
+
+let rpc : type q r.
+          local:bool
+          -> (q -> (r, 'b) result Fut.t)
+          -> q
+          -> (q -> _)
+          -> (r, 'b) result Fut.t
+  = fun ~local impl arg constr ->
+  (* This function ensures well typedness, by tying the result in the worker
+     case and in the non-worker case. *)
+  let open Fut.Syntax in
+  if local
+  then impl arg
+  else (
+    let worker = Brr_webworkers.Worker.create (Jstr.of_string "./dict_gen.bc.js") in
+    Brr_webworkers.Worker.post worker (constr arg);
+    let* event = Brr.Ev.next Brr_io.Message.Ev.message
+                   (Brr_webworkers.Worker.as_target worker) in
+    Brr_webworkers.Worker.terminate worker;
+    Fut.return (Brr_io.Message.Ev.data (Brr.Ev.as_type event) : (r, Jv.Error.t) result)
+  )
+  
+let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n : Jv.t) =
+  (* We need to run this in a worker, otherwise the loading animation doesn't actually
+   * animate, which we kind of want it to, since the a 2s of waiting is on the longer
+   * side. *)
+  let rules = Jv.to_list (Obj.magic : Jv.t -> Dict_gen_common.Dict_gen.rule) rules in
+  let n = Jv.to_int n in
+  Fut.to_promise
+    ~ok:(fun (dict, duration) -> Jv.of_jv_list [ Jv.of_string dict ; Jv.of_string duration ])
+    (rpc
+       ~local:(n = 0)
+       (on_message ~k:Fun.id)
+       (lexique_url, dict1990_url, rules)
+       (fun arg -> `On_message arg))
 
 let () =
-    if Brr_webworkers.Worker.ami ()
-    then
-      let open Fut.Syntax in
-      Fut.await
-        (let* event = Brr.Ev.next Brr_io.Message.Ev.message Brr.G.target in
-         let data : Jv.t = Brr_io.Message.Ev.data (Brr.Ev.as_type event) in
-         on_message data)
-        (function
-         | Ok () -> ()
-         | Error e -> throw e)
-    else
-      Js_of_ocaml.Js.export "dict_gen"
-        (obj [ "generate", any generate_js
-             ; "rules", any rules
-        ])
+  if Brr_webworkers.Worker.ami ()
+  then
+    let open Fut.Syntax in
+    Fut.await
+      (let* event = Brr.Ev.next Brr_io.Message.Ev.message Brr.G.target in
+       let data = Brr_io.Message.Ev.data (Brr.Ev.as_type event) in
+       match data with
+       | `On_message data -> on_message data ~k:Jv.repr) 
+      (fun res -> Brr_webworkers.Worker.G.post (res : (Jv.t, Jv.Error.t) result))
+  else
+    Js_of_ocaml.Js.export "dict_gen"
+      (any
+         (Jv.obj [| "generate", Jv.callback ~arity:4 generate_in_worker
+                  ; "rules", Jv.callback ~arity:1 rules
+            |]))

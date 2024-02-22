@@ -84,20 +84,10 @@ function add_rule_selection_ui() {
 }
 
 async function compute_dict(rules) {
-    // We need to run this in a worker, otherwise the loading animation doesn't actually
-    // animate, which we kind of want it to, since the a 2s of waiting is on the longer
-    // side.
-    const worker = new Worker("dict_gen.bc.js")
-    try {
-        const [ dict, stats ] = await new Promise((resolve) => {
-            worker.onmessage = (e) => resolve(e.data);
-            worker.postMessage(["./Lexique383.gen.tsv", "./dict1990.gen.csv", rules])
-        })
-        console.log(stats)
-        return dict
-    } finally {
-        worker.terminate()
-    }
+    const [ dict, stats ] =
+          await dict_gen.generate("./Lexique383.gen.tsv", "./dict1990.gen.csv", rules, 1);
+    console.log(stats)
+    return dict
 }
 
 async function saveOptions(e) {
