@@ -1,20 +1,6 @@
 opam-version: "2.0"
 name: "ortografe"
 version: "~dev"
-build: [
-  ["dune" "subst"] {dev}
-  [
-    "dune"
-    "build"
-    "-p"
-    name
-    "-j"
-    jobs
-    "@install"
-    "@runtest" {with-test}
-    "@doc" {with-doc}
-  ]
-]
 depends: [
   "angstrom" {= "0.16.0"}
   "astring" {= "0.8.5" & with-doc}
@@ -33,6 +19,7 @@ depends: [
   "bigarray-overlap" {= "0.2.1"}
   "bigstringaf" {= "0.9.1"}
   "bin_prot" {= "v0.16.0"}
+  "brr" {= "0.0.6"}
   "camlp-streams" {= "5.0.1"}
   "caqti" {= "1.9.0"}
   "caqti-lwt" {= "1.9.0"}
@@ -47,7 +34,6 @@ depends: [
   "crunch" {= "3.3.1" & with-doc}
   "csexp" {= "1.5.2"}
   "cstruct" {= "6.2.0"}
-  "csv" {= "2.4"}
   "digestif" {= "1.1.4"}
   "domain-local-await" {= "1.0.0"}
   "dream" {= "1.0.0~alpha5"}
@@ -79,6 +65,7 @@ depends: [
   "jane-street-headers" {= "v0.16.0"}
   "js_of_ocaml" {= "5.6.0"}
   "js_of_ocaml-compiler" {= "5.6.0"}
+  "js_of_ocaml-toplevel" {= "5.6.0"}
   "jst-config" {= "v0.16.0"}
   "ke" {= "0.6"}
   "logs" {= "0.7.0"}
@@ -184,4 +171,18 @@ depends: [
   "variantslib" {= "v0.16.0"}
   "yojson" {= "2.1.2"}
   "zipc" {= "0.2.0"}
+]
+build: [
+  ["dune" "subst"] {dev}
+  [
+    "dune"
+    "build"
+    "-p"
+    name
+    "-j"
+    jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}
+  ]
 ]
