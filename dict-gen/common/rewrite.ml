@@ -50,7 +50,7 @@ type env =
   ; accept : string -> bool
   }
 
-let rewrite ?(start = 0) env (row : Data.Lexique.t)
+let rewrite ?(start = 0) env (row : Data.Lexique.row)
       (ortho, search_res) ~target ~repl =
   let pos = ref start in
   let ortho = ref (ortho, search_res) in
@@ -67,24 +67,24 @@ let rewrite ?(start = 0) env (row : Data.Lexique.t)
   done;
   !ortho
 
-let keep_if_plausible_opt env (row : Data.Lexique.t) (_ortho, search_res) ortho2 =
+let keep_if_plausible_opt env (row : Data.Lexique.row) (_ortho, search_res) ortho2 =
   match Rules.search env.rules ortho2 row.phon with
   | Ok search_res2 when snd search_res2 <=$ snd search_res && env.accept ortho2 ->
      Some (ortho2, search_res2)
   | _ -> None
 
-let keep_if_plausible env (row : Data.Lexique.t) (ortho, search_res) ortho2 =
+let keep_if_plausible env (row : Data.Lexique.row) (ortho, search_res) ortho2 =
   match Rules.search env.rules ortho2 row.phon with
   | Ok search_res2 when snd search_res2 <=$ snd search_res && env.accept ortho2 ->
      ortho2, search_res2
   | _ -> ortho, search_res
 
-let keep_regardless env (row : Data.Lexique.t) ortho1 ortho2 =
+let keep_regardless env (row : Data.Lexique.row) ortho1 ortho2 =
   match Rules.search env.rules ortho2 row.phon with
   | Ok search_res2 when env.accept ortho2 -> ortho2, search_res2
   | _ -> ortho1
 
-let keep_regardless_exn rules (row : Data.Lexique.t) =
+let keep_regardless_exn rules (row : Data.Lexique.row) =
   match Rules.search rules row.ortho row.phon with
   | Error s -> raise_s s
   | Ok v -> v
@@ -106,7 +106,7 @@ let rewrite_e_double_consonants =
     let phon' = String.concat [ left_phon; e_phon; right_phon ] in
     ortho', phon'
   in
-  fun env (row : Data.Lexique.t) (ortho, search_res) ->
+  fun env (row : Data.Lexique.row) (ortho, search_res) ->
     let ortho_phon = ref (ortho, search_res, row.phon) in
     let keep_going = ref true in
     while !keep_going; do
@@ -383,7 +383,7 @@ let erofa_preserve =
 
 let load_skip () =
   let skip = Data.Lexique.not_usable_words () in
-  fun (row : Data.Lexique.t) ->
+  fun (row : Data.Lexique.row) ->
     Hash_set.mem skip row.ortho
     || ((row.lemme ^ "s") = row.ortho && Hash_set.mem skip row.lemme)
     || String.length row.ortho =$ 1
@@ -393,8 +393,8 @@ type rule =
   { name : string
   ; doc : string
   ; f : (Rules.t
-         -> (Data.Lexique.t * Rules.search_res)
-         -> Data.Lexique.t * Rules.search_res
+         -> (Data.Lexique.row * Rules.search_res)
+         -> Data.Lexique.row * Rules.search_res
         ) Lazy.t
   ; prefilter : unit -> [ `Re of Re.t | `All ]
   ; supports_repeated_rewrites : bool
@@ -529,7 +529,7 @@ let erofa_rule = lazy (
     List.mapi [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun bit s ->
         bit, String.Search_pattern.create (s ^ s), s)
   in    
-  fun rules ((row : Data.Lexique.t), search_res) ->
+  fun rules ((row : Data.Lexique.row), search_res) ->
   let bits = find_relevant_patterns row.ortho row.phon in
   if bits =$ 0
   then (row, search_res)
@@ -1111,7 +1111,7 @@ let _ : string =
          in
          { row with ortho }, dummy_search_res))
 
-let respell_oe ((row : Data.Lexique.t), (search_res : Rules.search_res)) =
+let respell_oe ((row : Data.Lexique.row), (search_res : Rules.search_res)) =
   (* Lexique contient toujours œ écrit oe. On recolle les lettres, pour qu'on puisse
      réécrire à la fois cœur et coeur, par exemple. *)
   if List.exists (fst search_res) ~f:(fun p ->

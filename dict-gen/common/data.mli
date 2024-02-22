@@ -1,14 +1,16 @@
 open Base
 
 module Lexique : sig
-  type t =
+  type row =
     { ortho : string
     ; phon : string
     ; lemme : string
     ; h_aspire : bool
     }
   [@@deriving sexp_of]
-  val parse : string -> t list
+
+  type t = row list
+  val parse : string -> t
 
   val not_usable_words : unit -> string Hash_set.t
 end

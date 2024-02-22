@@ -4,7 +4,7 @@
     like proper nouns, or manual exceptions. *)
 val erofa_preserve : string -> bool
 
-val load_skip : unit -> (Data.Lexique.t -> bool)
+val load_skip : unit -> (Data.Lexique.row -> bool)
 
 type rule
 val doc : rule -> string
@@ -18,6 +18,6 @@ val gen
     :  ?fix_oe:bool
     -> ?not_understood:[ `Raise | `Call of (Sexplib.Sexp.t -> unit) | `Ignore ]
     -> ?rules: rule list
-    -> Data.Lexique.t list
+    -> Data.Lexique.t
     -> (string -> string -> unit)
     -> stats

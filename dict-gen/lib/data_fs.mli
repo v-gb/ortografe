@@ -6,4 +6,4 @@ type 'a src =
 
 val load_erofa : _ src -> (string, string) Hashtbl.t
 val load_post90 : _ src -> (string, string) Hashtbl.t
-val load_lexique : _ src -> Data.Lexique.t list
+val load_lexique : _ src -> Data.Lexique.t

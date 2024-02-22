@@ -43,13 +43,14 @@ module Csv_header = struct
 end
 
 module Lexique = struct
-  type t =
+  type row =
     { ortho : string
     ; phon : string
     ; lemme : string
     ; h_aspire : bool
     }
   [@@deriving sexp_of]
+  type t = row list
 
   let parse src =
     Csv_header.parse_string

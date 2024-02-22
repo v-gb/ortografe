@@ -45,7 +45,7 @@ let ranked tbl =
   |> List.sort ~compare:[%compare: int * (string * _)]
   |> List.map ~f:snd  
 
-let build_lexique_post90 (lexique : Data.Lexique.t list) post90 ~fix_90 =
+let build_lexique_post90 (lexique : Data.Lexique.t) post90 ~rect1990 =
   (* this causes a few regressions like
      allécherait,alécherait
      becomes
@@ -55,7 +55,7 @@ let build_lexique_post90 (lexique : Data.Lexique.t list) post90 ~fix_90 =
 
      Or even graffito -> grafito becoming graffito -> graffiti.         
    *)
-  if fix_90
+  if rect1990
   then
     List.map lexique ~f:(fun r ->
       match Hashtbl.find post90 r.ortho with
@@ -71,7 +71,7 @@ let build_erofa_ext ~erofa ~post90 ~lexique =
   (* start with whole erofa db, so [simplify_mapping] considers singular in the erofa csv *)
   let base = Hashtbl.map erofa ~f:(fun data -> data, -1) in
   ignore (
-      let lexique_post90 = build_lexique_post90 lexique post90 ~fix_90:true in
+      let lexique_post90 = build_lexique_post90 lexique post90 ~rect1990:true in
       Rewrite.gen
         ~not_understood:`Ignore
         ~fix_oe:true (* really only matters for proper nouns like Œdipe, since all other
@@ -86,7 +86,12 @@ let build_erofa_ext ~erofa ~post90 ~lexique =
 
 type static =
   { data_lexique_Lexique383_gen_tsv : string
-  ; extension_dict1990_gen_csv : string }
+  ; extension_dict1990_gen_csv : string
+  }
+type values =
+  { post90 : (string, string) Hashtbl.t
+  ; lexique : Data.Lexique.t
+  }
 
 type rule = [ `Oe | `Rect1990 | `Rewrite of string ]
 let rewrite_rule_by_name =
@@ -117,6 +122,11 @@ let time ~profile name f =
     x
   ) else f ()
 
+type 'a json =
+  [> `Assoc of (string * 'a json) list
+  | `Bool of bool
+  | `String of string ] as 'a
+
 let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
   let rules = if List.is_empty rules then [ `Rewrite "erofa"; `Rect1990; `Oe ] else rules in
   let rewrite_rules, oe, rect1990 =
@@ -132,7 +142,7 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
   in
   let post90, lexique =
     match data with
-    | `Values (`Post90 post90, `Lexique lexique) -> post90, lexique
+    | `Values { post90; lexique } -> post90, lexique
     | `Static { data_lexique_Lexique383_gen_tsv; extension_dict1990_gen_csv } ->
        time ~profile "read1990" (fun () ->
            Data.parse_post90 extension_dict1990_gen_csv),
@@ -142,7 +152,7 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
   let post90, lexique =
     time ~profile "post1990lexique" (fun () ->
         (if rect1990 then post90 else Hashtbl.create (module String)),
-        build_lexique_post90 lexique post90 ~fix_90:rect1990)
+        build_lexique_post90 lexique post90 ~rect1990)
   in
   let print, after =
     if all

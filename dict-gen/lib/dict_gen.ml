@@ -84,7 +84,7 @@ let gen ~env ?(static : Dict_gen.static option) ~rules ~all ~write ~diff ~drop (
             ~all
             ~json_to_string:Yojson.to_string
             ~output:write
-            (`Values (`Post90 post90, `Lexique lexique))
+            (`Values { post90; lexique })
         in
         if Unix.isatty Unix.stderr then
           eprint_s stats
@@ -128,7 +128,7 @@ let gen_cmd ?static ?doc name =
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
   
-let check (lexique : Data.Lexique.t list) ~skip =
+let check (lexique : Data.Lexique.t) ~skip =
   let rules = Rules.create () in
   List.iteri lexique ~f:(fun i row ->
       if skip row
@@ -167,7 +167,7 @@ let main () =
                    Dict_gen.build_lexique_post90
                      lexique
                      post90
-                     ~fix_90:false (* to check both versions *)
+                     ~rect1990:false (* to check both versions *)
                  else lexique
                in
                check lexique ~skip:(Rewrite.load_skip ())))
