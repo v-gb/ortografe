@@ -50,44 +50,50 @@ type env =
   ; accept : string -> bool
   }
 
-let rewrite ?(start = 0) env (row : Data.Lexique.row)
-      (ortho, search_res) ~target ~repl =
+type aligned_row = { row : Data.Lexique.row; alignment : Rules.search_res }
+
+let rewrite ?(start = 0) env (aligned_row : aligned_row) ~target ~repl =
   let pos = ref start in
-  let ortho = ref (ortho, search_res) in
-  while !pos <$ String.length (fst !ortho); do
-    let ortho1, search_res1 = !ortho in
-    match string_search_pattern_replace_first_opt target ~in_:ortho1 ~with_:repl ~pos:!pos with
-    | None -> pos := String.length ortho1
+  let aligned_row = ref aligned_row in
+  while !pos <$ String.length !aligned_row.row.ortho; do
+    let aligned_row1 = !aligned_row in
+    let row1 = aligned_row1.row in
+    match string_search_pattern_replace_first_opt target ~in_:row1.ortho ~with_:repl ~pos:!pos with
+    | None -> pos := String.length row1.ortho
     | Some (ortho2, match_i) ->
-       (match Rules.search env.rules ortho2 row.phon with
-        | Ok search_res2 when snd search_res2 <=$ snd search_res1 && env.accept ortho2 ->
-           ortho := (ortho2, search_res2)
+       (match Rules.search env.rules ortho2 row1.phon with
+        | Ok search_res2 when snd search_res2 <=$ snd aligned_row1.alignment && env.accept ortho2 ->
+           aligned_row := { row = { row1 with ortho = ortho2 }; alignment = search_res2 }
         | _ -> ());
        pos := match_i + 1
   done;
-  !ortho
+  !aligned_row
 
-let keep_if_plausible_opt env (row : Data.Lexique.row) (_ortho, search_res) ortho2 =
-  match Rules.search env.rules ortho2 row.phon with
-  | Ok search_res2 when snd search_res2 <=$ snd search_res && env.accept ortho2 ->
-     Some (ortho2, search_res2)
+let keep_if_plausible_phon_opt env (aligned_row : aligned_row) ortho2 phon2 =
+  match Rules.search env.rules ortho2 phon2 with
+  | Ok search_res2 when snd search_res2 <=$ snd aligned_row.alignment && env.accept ortho2 ->
+     Some { row = { aligned_row.row with ortho = ortho2; phon = phon2 }; alignment = search_res2 }
   | _ -> None
 
-let keep_if_plausible env (row : Data.Lexique.row) (ortho, search_res) ortho2 =
-  match Rules.search env.rules ortho2 row.phon with
-  | Ok search_res2 when snd search_res2 <=$ snd search_res && env.accept ortho2 ->
-     ortho2, search_res2
-  | _ -> ortho, search_res
+let keep_if_plausible_opt env (aligned_row : aligned_row) ortho2 =
+  keep_if_plausible_phon_opt env aligned_row ortho2 aligned_row.row.phon
 
-let keep_regardless env (row : Data.Lexique.row) ortho1 ortho2 =
-  match Rules.search env.rules ortho2 row.phon with
-  | Ok search_res2 when env.accept ortho2 -> ortho2, search_res2
-  | _ -> ortho1
+let keep_if_plausible env (aligned_row : aligned_row) ortho2 =
+  match Rules.search env.rules ortho2 aligned_row.row.phon with
+  | Ok search_res2 when snd search_res2 <=$ snd aligned_row.alignment && env.accept ortho2 ->
+     { row = { aligned_row.row with ortho = ortho2 }; alignment = search_res2 }
+  | _ -> aligned_row
+
+let keep_regardless env (aligned_row : aligned_row) ortho2 =
+  match Rules.search env.rules ortho2 aligned_row.row.phon with
+  | Ok search_res2 when env.accept ortho2 ->
+     { row = { aligned_row.row with ortho = ortho2 }; alignment = search_res2 }
+  | _ -> aligned_row
 
 let keep_regardless_exn rules (row : Data.Lexique.row) =
   match Rules.search rules row.ortho row.phon with
   | Error s -> raise_s s
-  | Ok v -> v
+  | Ok search_res2 -> { row; alignment = search_res2 }
 
 let rewrite_e_double_consonants =
   let rebuild_section ortho phon (p1 : Rules.path_elt) (p2 : Rules.path_elt) left_bit right_bit =
@@ -106,12 +112,12 @@ let rewrite_e_double_consonants =
     let phon' = String.concat [ left_phon; e_phon; right_phon ] in
     ortho', phon'
   in
-  fun env (row : Data.Lexique.row) (ortho, search_res) ->
-    let ortho_phon = ref (ortho, search_res, row.phon) in
+  fun env (aligned_row : aligned_row) ->
+    let aligned_row = ref aligned_row in
     let keep_going = ref true in
     while !keep_going; do
       keep_going := false;
-      let (ortho, (path, _), phon) = !ortho_phon in
+      let aligned_row1 = !aligned_row in
       let rec loop k : Rules.path_elt list -> _ = function
         | ({ graphem = "e"; phonem = ("e" | "E"); _ } as p1)
           :: ({ graphem = ("bb" | "nn" | "mm" | "ll" | "tt" | "pp" | "ff" | "rr" | "cc" | "dd")
@@ -120,53 +126,47 @@ let rewrite_e_double_consonants =
           :: rest
              when String.length phonem =$ 1
           ->
-           let ortho2, phon2 = rebuild_section ortho phon p1 p2 "" (String.prefix p2.graphem 1) in
-           (match Rules.search env.rules ortho2 phon2 with
-            | Error _ -> assert false
-            | Ok search_res2 ->
-               if env.accept ortho2
-               then (
-                 ortho_phon := (ortho2, search_res2, phon2);
-                 keep_going := true)
-               else loop (k + 2) rest)
+           let ortho2, phon2 =
+             rebuild_section
+               aligned_row1.row.ortho aligned_row1.row.phon
+               p1 p2 "" (String.prefix p2.graphem 1)
+           in
+           (match keep_if_plausible_phon_opt env aligned_row1 ortho2 phon2 with
+            | Some aligned_row2 -> aligned_row := aligned_row2; keep_going := true
+            | None -> loop (k + 2) rest)
         | ({ graphem = ("enn" | "emm")
            ; phonem = ("en" | "En" | "em" | "Em"); j; _ } as p1) :: rest ->
            let consonant = p1.graphem#:(1,2) in
-           let left_phon = String.prefix phon j in
-           let right_phon = consonant ^ String.drop_prefix phon (p1.j + String.length p1.phonem) in
+           let left_phon = String.prefix aligned_row1.row.phon j in
+           let right_phon = consonant ^ String.drop_prefix aligned_row1.row.phon (p1.j + String.length p1.phonem) in
            let e_phon, e_ortho = if Rules.accent_aigu right_phon then "e", "é" else "E", "è" in
            let ortho2 =
              String.concat
-               [ String.prefix ortho p1.i
+               [ String.prefix aligned_row1.row.ortho p1.i
                ; e_ortho
                ; consonant
-               ; String.drop_prefix ortho (p1.i + String.length p1.graphem)
+               ; String.drop_prefix aligned_row1.row.ortho (p1.i + String.length p1.graphem)
                ]
            in
            let phon2 = String.concat [ left_phon; e_phon; right_phon ] in
-           (match Rules.search env.rules ortho2 phon2 with
-            | Error _ -> assert false
-            | Ok search_res2 ->
-               if env.accept ortho2
-               then (
-                 ortho_phon := (ortho2, search_res2, phon2);
-                 keep_going := true)
-               else loop (k + 1) rest)
+           (match keep_if_plausible_phon_opt env aligned_row1 ortho2 phon2 with
+            | Some aligned_row2 -> aligned_row := aligned_row2; keep_going := true
+            | None -> loop (k + 1) rest)
         | _ :: rest -> loop (k + 1) rest
         | [] -> ()
       in
-      loop 0 path
+      loop 0 (fst aligned_row1.alignment)
     done;
-    !ortho_phon
+    !aligned_row
 
-let rewrite_graphem' ?(start = 0) env row ortho ~filter =
+let rewrite_graphem' ?(start = 0) env aligned_row ~filter =
   let keep_going = ref true in
-  let ortho = ref ortho in
+  let aligned_row = ref aligned_row in
   while !keep_going do
     keep_going := false;
-    let (ortho1, search_res1) = !ortho in
+    let aligned_row1 = !aligned_row in
     let (None | Some ()) =
-      List.find_mapi (fst search_res1) ~f:(fun k (path_elt : Rules.path_elt) ->
+      List.find_mapi (fst aligned_row1.alignment) ~f:(fun k (path_elt : Rules.path_elt) ->
           if path_elt.i <$ start
           then None
           else
@@ -174,25 +174,25 @@ let rewrite_graphem' ?(start = 0) env row ortho ~filter =
             | None -> None
             | Some to_ ->
                let ortho2 =
-                 List.mapi (fst search_res1) ~f:(fun k' elt ->
+                 List.mapi (fst aligned_row1.alignment) ~f:(fun k' elt ->
                      if k =$ k'
                      then to_
                      else elt.graphem)
                  |> String.concat
                  |> String.chop_suffix_if_exists ~suffix:"$"
                in
-               match keep_if_plausible_opt env row (ortho1, search_res1) ortho2 with
-               | Some res -> (keep_going := true; ortho := res; Some ())
+               match keep_if_plausible_opt env aligned_row1 ortho2 with
+               | Some res -> (keep_going := true; aligned_row := res; Some ())
                | None -> None)
     in
     ()
   done;
-  !ortho
+  !aligned_row
 
-let rewrite_graphem ?start env row ortho ~from:(from_g, from_p) ~to_ =
-  if not (String.Search_pattern.matches from_g (fst ortho))
-  then ortho
-  else rewrite_graphem' ?start env row ortho
+let rewrite_graphem ?start env aligned_row ~from:(from_g, from_p) ~to_ =
+  if not (String.Search_pattern.matches from_g aligned_row.row.ortho)
+  then aligned_row
+  else rewrite_graphem' ?start env aligned_row
          ~filter:(fun path_elt ->
            if path_elt.graphem = String.Search_pattern.pattern from_g
               && path_elt.phonem = from_p
@@ -391,9 +391,7 @@ let load_skip () =
 
 type f1 =
   { rules : Rules.t
-  ; compute :
-      ((Data.Lexique.row * Rules.search_res)
-       -> Data.Lexique.row * Rules.search_res)
+  ; compute : aligned_row -> aligned_row
   }
 type f = Rules. t -> f1
 
@@ -539,93 +537,90 @@ let erofa_rule rules =
   in
   { rules
   ; compute =
-      fun ((row : Data.Lexique.row), search_res) ->
-      let bits = find_relevant_patterns row.ortho row.phon in
+      fun aligned_row ->
+      let bits = find_relevant_patterns aligned_row.row.ortho aligned_row.row.phon in
       if bits =$ 0
-      then (row, search_res)
+      then aligned_row
       else
         let env =
-          { rules; accept = if erofa_preserve row.ortho then erofa_preserve else Fn.const true }
+          { rules; accept =
+                     if erofa_preserve aligned_row.row.ortho
+                     then erofa_preserve
+                     else Fn.const true }
         in
-        let ortho = ref (row.ortho, search_res) in
+        let aligned_row = ref aligned_row in
         if bits land (1 lsl bit_ch) <>$ 0 then
           List.iter patterns_ch ~f:(fun (target, repl) ->
-              ortho := rewrite env row !ortho ~target ~repl);
+              aligned_row := rewrite env !aligned_row ~target ~repl);
         if bits land (1 lsl bit_oe) <>$ 0 then
           List.iter patterns_oe ~f:(fun (target, repl) ->
-              ortho := rewrite env row !ortho ~target ~repl);
+              aligned_row := rewrite env !aligned_row ~target ~repl);
         if bits land (1 lsl bit_ph) <>$ 0 then (
-          ortho := rewrite env row !ortho ~target:pattern_mph ~repl:"nf";
-          ortho := rewrite env row !ortho ~target:pattern_ph ~repl:"f";
+          aligned_row := rewrite env !aligned_row ~target:pattern_mph ~repl:"nf";
+          aligned_row := rewrite env !aligned_row ~target:pattern_ph ~repl:"f";
         );
         if bits land (1 lsl bit_x) <>$ 0 then (
-          (match String.chop_suffix (fst !ortho) ~suffix:"x" with
+          (match String.chop_suffix !aligned_row.row.ortho ~suffix:"x" with
            | Some rest ->
               (* on vérifie que x est bien silencieux, pas remplaceable par s, comme
-            dans coccyx *)
-              if fst (keep_if_plausible env row !ortho rest) = rest
-              then ortho := keep_if_plausible env row !ortho (rest ^ "s");
+                 dans coccyx *)
+              (match keep_if_plausible_opt env !aligned_row rest with
+               | Some _ -> aligned_row := keep_if_plausible env !aligned_row (rest ^ "s")
+               | None -> ());
            | None -> ());
           List.iter [ pattern_auxq, "ausq"; pattern_auxd, "ausd" ]
             ~f:(fun (pattern, with_) ->
               (* les règles ont un cas particulier pour aux mais pas aus, et donc je crois
             que le changement est considéré comme surprenant par [keep_if_plausible]. *)
-              (match string_search_pattern_replace_all_opt pattern ~in_:(fst !ortho) ~with_ with
+              (match string_search_pattern_replace_all_opt pattern
+                       ~in_:!aligned_row.row.ortho ~with_ with
                | None -> ()
-               | Some res -> ortho := keep_regardless env row !ortho res));
-          (match String.chop_prefix (fst !ortho) ~prefix:"deuxi" with
+               | Some res -> aligned_row := keep_regardless env !aligned_row res));
+          (match String.chop_prefix !aligned_row.row.ortho ~prefix:"deuxi" with
            | None -> ()
-           | Some rest -> ortho := keep_if_plausible env row !ortho ("deusi" ^ rest))
+           | Some rest -> aligned_row := keep_if_plausible env !aligned_row ("deusi" ^ rest))
         );
         if bits land (1 lsl bit_y) <>$ 0 then (
           (* exclut des trucs du genre tramway -> tramwai *)
-          ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "i") ~to_:"i" ~start:1;
-          ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "j") ~to_:"i"
-                     ~start:(Bool.to_int (fst !ortho <> "yeus"));
-          ortho := rewrite_graphem env row !ortho ~from:(pattern_y, "ij") ~to_:"i" ~start:1;
-          ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "in") ~to_:"in";
-          ortho := rewrite_graphem env row !ortho ~from:(pattern_yn, "5") ~to_:"in";
-          ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "im") ~to_:"im";
-          ortho := rewrite_graphem env row !ortho ~from:(pattern_ym, "5") ~to_:"im";
+          aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_y, "i") ~to_:"i" ~start:1;
+          aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_y, "j") ~to_:"i"
+                     ~start:(Bool.to_int (!aligned_row.row.ortho <> "yeus"));
+          aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_y, "ij") ~to_:"i" ~start:1;
+          aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_yn, "in") ~to_:"in";
+          aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_yn, "5") ~to_:"in";
+          aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_ym, "im") ~to_:"im";
+          aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_ym, "5") ~to_:"im";
         );
         if bits land (1 lsl bit_h) <>$ 0 then (
-          ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"é";
-          ortho := rewrite env row !ortho ~target:pattern_eh ~repl:"è";
-          ortho := rewrite_graphem' env row !ortho ~filter:(fun path_elt ->
+          aligned_row := rewrite env !aligned_row ~target:pattern_eh ~repl:"é";
+          aligned_row := rewrite env !aligned_row ~target:pattern_eh ~repl:"è";
+          aligned_row := rewrite_graphem' env !aligned_row ~filter:(fun path_elt ->
                        (* asthme. Pas sûr qu'il soit nécessaire de matcher les graphèmes ici,
                       plutôt que d'utiliser rewrite. *)
                        match path_elt.graphem, path_elt.phonem with
                        | "th", "" -> Some ""
                        | _ -> None);
           let h_start =
-            if String.is_prefix (fst !ortho) ~prefix:"déh"
+            if String.is_prefix !aligned_row.row.ortho ~prefix:"déh"
             then String.length "déh" (* déhancher serait déshancher si le h n'était pas aspiré *)
-            else Bool.to_int row.h_aspire
+            else Bool.to_int !aligned_row.row.h_aspire
           in
           (* On sélectionne les graphèmes directement car la plupart des ch en particulier sont
          prononcés, ce qui crée beaucoup d'erreurs. *)
-          ortho := rewrite_graphem' ~start:h_start env row !ortho ~filter:(fun path_elt ->
+          aligned_row := rewrite_graphem' ~start:h_start env !aligned_row ~filter:(fun path_elt ->
                        match path_elt.graphem, path_elt.phonem with
                        | "h", "" -> Some ""
                        | "th", ("" | "t") -> Some "t"
                        | "désh", "dez" -> Some "dés"
                        | _ -> None)
         );
-        let row =
-          if bits land bit_pattern_all_double_consonants =$ 0
-          then row
-          else
-            let row =
-              let ortho2, search_res2, phon2 = rewrite_e_double_consonants env row !ortho in
-              ortho := (ortho2, search_res2);
-              { row with phon = phon2 }
-            in
-            List.iter patterns_double_consonants ~f:(fun (bit, target, repl) ->
-                if bits land (1 lsl bit) <>$ 0 then
-                  ortho := rewrite env row !ortho ~target ~repl);
-            row
-        in
-        { row with ortho = fst !ortho }, snd !ortho
+        if bits land bit_pattern_all_double_consonants <>$ 0 then (
+          aligned_row := rewrite_e_double_consonants env !aligned_row;
+          List.iter patterns_double_consonants ~f:(fun (bit, target, repl) ->
+              if bits land (1 lsl bit) <>$ 0 then
+                aligned_row := rewrite env !aligned_row ~target ~repl);
+        );
+        !aligned_row
   }
 
 let _ : string =
@@ -642,10 +637,8 @@ let qu__q =
     ~prefilter:(fun () -> `Re (Re.str "qu"))
     (fun () ->
       let pattern_qu = String.Search_pattern.create "qu" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"q";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        rewrite env aligned_row ~target:pattern_qu ~repl:"q")
 
 let qu__qou =
   new_rule'
@@ -654,10 +647,8 @@ let qu__qou =
     ~prefilter:(fun () -> `Re (Re.str "qu"))
     (fun () ->
       let pattern_qu = String.Search_pattern.create "qu" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_qu ~repl:"qou";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        rewrite env aligned_row ~target:pattern_qu ~repl:"qou")
 
 let _ : string =
   new_rule'
@@ -666,10 +657,8 @@ let _ : string =
     ~prefilter:(fun () -> `Re (Re.str "ti"))
     (fun () ->
       let pattern_ti = String.Search_pattern.create "ti" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_ti ~repl:"ci";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        rewrite env aligned_row ~target:pattern_ti ~repl:"ci")
 
 let emment__ament =
   new_rule'
@@ -679,11 +668,11 @@ let emment__ament =
     (fun () ->
       let pattern_emment = String.Search_pattern.create "emment" in
       let pattern_cemment = String.Search_pattern.create "cemment" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_emment ~repl:"ament";
-        ortho := rewrite env row !ortho ~target:pattern_cemment ~repl:"çament";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
+        aligned_row := rewrite env !aligned_row ~target:pattern_emment ~repl:"ament";
+        aligned_row := rewrite env !aligned_row ~target:pattern_cemment ~repl:"çament";
+        !aligned_row)
 
 let _ : string =
   new_rule'
@@ -692,10 +681,8 @@ let _ : string =
     ~prefilter:(fun () -> `Re (Re.str "oiement"))
     (fun () ->
       let pattern_oiement = String.Search_pattern.create "oiement" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_oiement ~repl:"oiment";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        rewrite env aligned_row ~target:pattern_oiement ~repl:"oiment")
 
 let _ : string =
   new_rule'
@@ -705,12 +692,12 @@ let _ : string =
     (fun () ->
       let pattern_cq = String.Search_pattern.create "cq" in
       let pattern_ecq = String.Search_pattern.create "ecq" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_ecq ~repl:"éq";
-        ortho := rewrite env row !ortho ~target:pattern_ecq ~repl:"èq";
-        ortho := rewrite env row !ortho ~target:pattern_cq ~repl:"q";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
+        aligned_row := rewrite env !aligned_row ~target:pattern_ecq ~repl:"éq";
+        aligned_row := rewrite env !aligned_row ~target:pattern_ecq ~repl:"èq";
+        aligned_row := rewrite env !aligned_row ~target:pattern_cq ~repl:"q";
+        !aligned_row)
 
 let qua_o__ca_o =
   new_rule'
@@ -720,11 +707,11 @@ let qua_o__ca_o =
     (fun () ->
       let pattern_qua = String.Search_pattern.create "qua" in
       let pattern_quo = String.Search_pattern.create "quo" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_qua ~repl:"ca";
-        ortho := rewrite env row !ortho ~target:pattern_quo ~repl:"co";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
+        aligned_row := rewrite env !aligned_row ~target:pattern_qua ~repl:"ca";
+        aligned_row := rewrite env !aligned_row ~target:pattern_quo ~repl:"co";
+        !aligned_row)
 
 let _ : string =
   new_rule'
@@ -735,17 +722,17 @@ let _ : string =
       let pattern_esc = String.Search_pattern.create "esc" in
       let pattern_sc = String.Search_pattern.create "sc" in
       let pattern_sch = String.Search_pattern.create "sch" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
         (* problème : on autorise descend->decend. À investiguer. Peut-être
            que le découpage se fait d-e-sc-en-d au lieu de d-es-c-en-d et donc
            le e est déjà surprenant. *)
-        ortho := rewrite env row !ortho ~target:pattern_esc ~repl:"éc";
-        ortho := rewrite env row !ortho ~target:pattern_esc ~repl:"èc";
-        ortho := rewrite env row !ortho ~target:pattern_sc ~repl:"c";
-        ortho := rewrite env row !ortho ~target:pattern_sc ~repl:"ch";
-        ortho := rewrite env row !ortho ~target:pattern_sch ~repl:"ch";
-        { row with ortho = fst !ortho }, snd !ortho)
+        aligned_row := rewrite env !aligned_row ~target:pattern_esc ~repl:"éc";
+        aligned_row := rewrite env !aligned_row ~target:pattern_esc ~repl:"èc";
+        aligned_row := rewrite env !aligned_row ~target:pattern_sc ~repl:"c";
+        aligned_row := rewrite env !aligned_row ~target:pattern_sc ~repl:"ch";
+        aligned_row := rewrite env !aligned_row ~target:pattern_sch ~repl:"ch";
+        !aligned_row)
 
 let _ : string =
   new_rule'
@@ -754,10 +741,8 @@ let _ : string =
     ~prefilter:(fun () -> `Re (Re.str "en"))
     (fun () ->
       let pattern_en = String.Search_pattern.create "en" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_en ~repl:"an";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        rewrite env aligned_row ~target:pattern_en ~repl:"an")
 
 let _ : string =
   new_rule'
@@ -766,10 +751,8 @@ let _ : string =
     ~prefilter:(fun () -> `Re (Re.str "gu"))
     (fun () ->
       let pattern_gu = String.Search_pattern.create "gu" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_gu ~repl:"gh";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        rewrite env aligned_row ~target:pattern_gu ~repl:"gh")
 
 let _ : string =
   new_rule'
@@ -780,12 +763,12 @@ let _ : string =
       let pattern_g = String.Search_pattern.create "g" in
       let pattern_gea = String.Search_pattern.create "gea" in
       let pattern_geo = String.Search_pattern.create "geo" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_gea ~repl:"ja";
-        ortho := rewrite env row !ortho ~target:pattern_geo ~repl:"jo";
-        ortho := rewrite env row !ortho ~target:pattern_g ~repl:"j";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
+        aligned_row := rewrite env !aligned_row ~target:pattern_gea ~repl:"ja";
+        aligned_row := rewrite env !aligned_row ~target:pattern_geo ~repl:"jo";
+        aligned_row := rewrite env !aligned_row ~target:pattern_g ~repl:"j";
+        !aligned_row)
 
 let _ : string =
   new_rule'
@@ -794,10 +777,8 @@ let _ : string =
     ~prefilter:(fun () -> `Re (Re.str "ez"))
     (fun () ->
       let pattern_ez = String.Search_pattern.create "ez" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_ez ~repl:"és";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        rewrite env aligned_row ~target:pattern_ez ~repl:"és")
 
 let _ : string =
   new_rule'
@@ -807,11 +788,11 @@ let _ : string =
     (fun () ->
       let pattern_ient = String.Search_pattern.create "ient" in
       let pattern_ent = String.Search_pattern.create "ent" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_ient ~repl:"is";
-        ortho := rewrite env row !ortho ~target:pattern_ent ~repl:"es";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
+        aligned_row := rewrite env !aligned_row ~target:pattern_ient ~repl:"is";
+        aligned_row := rewrite env !aligned_row ~target:pattern_ent ~repl:"es";
+        !aligned_row)
 
 let _ : string =
   new_rule'
@@ -822,12 +803,12 @@ let _ : string =
       let pattern_mp = String.Search_pattern.create "mp" in
       let pattern_mb = String.Search_pattern.create "mb" in
       let pattern_mm = String.Search_pattern.create "mm" in
-      fun env (row, search_res) ->
-        let ortho = ref (row.ortho, search_res) in
-        ortho := rewrite env row !ortho ~target:pattern_mp ~repl:"np";
-        ortho := rewrite env row !ortho ~target:pattern_mb ~repl:"nb";
-        ortho := rewrite env row !ortho ~target:pattern_mm ~repl:"nm";
-        { row with ortho = fst !ortho }, snd !ortho)
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
+        aligned_row := rewrite env !aligned_row ~target:pattern_mp ~repl:"np";
+        aligned_row := rewrite env !aligned_row ~target:pattern_mb ~repl:"nb";
+        aligned_row := rewrite env !aligned_row ~target:pattern_mm ~repl:"nm";
+        !aligned_row)
 
 let _ : string =
   new_rule'
@@ -835,24 +816,25 @@ let _ : string =
     "@chevaux -> @chevals, @travaux -> @travails"
     ~prefilter:(fun () -> `Re (Re.alt [ Re.str "aux"; Re.set "aus" ]))
     (fun () ->
-      fun env (row, _ as row_search_res) ->
-        if (String.is_suffix row.ortho ~suffix:"aux"
-            || String.is_suffix row.ortho ~suffix:"aus")
-           && (String.is_suffix row.lemme ~suffix:"al"
-               || String.is_suffix row.lemme ~suffix:"ail")
+      fun env aligned_row ->
+        if (String.is_suffix aligned_row.row.ortho ~suffix:"aux"
+            || String.is_suffix aligned_row.row.ortho ~suffix:"aus")
+           && (String.is_suffix aligned_row.row.lemme ~suffix:"al"
+               || String.is_suffix aligned_row.row.lemme ~suffix:"ail")
         then
-          match String.chop_suffix row.phon ~suffix:"o" with
-          | None -> row_search_res
+          match String.chop_suffix aligned_row.row.phon ~suffix:"o" with
+          | None -> aligned_row
           | Some phon_prefix ->
              let row =
-               { row with ortho = row.lemme ^ "s"
-                        ; phon = phon_prefix ^ (if String.is_suffix row.lemme ~suffix:"al"
-                                                then "al"
-                                                else "aj")
+               { aligned_row.row
+                 with ortho = aligned_row.row.lemme ^ "s"
+                    ; phon = phon_prefix ^ (if String.is_suffix aligned_row.row.lemme ~suffix:"al"
+                                            then "al"
+                                            else "aj")
                }
              in
-             row, keep_regardless_exn env.rules row
-        else row_search_res)
+             keep_regardless_exn env.rules row
+        else aligned_row)
 
 let map_valid_utf_8 str ~f =
   let acc = ref [] in
@@ -885,10 +867,9 @@ let _ : string =
            ; !!"e", "é"
            ]
        in
-       fun env (row, search_res) ->
-         let ortho = ref (row.ortho, search_res) in
+       fun env aligned_row ->
          let new_ortho =
-           List.map (fst (snd !ortho)) ~f:(fun p ->
+           List.map (fst aligned_row.alignment) ~f:(fun p ->
              match p.graphem with
              | "il$" | "ils$" | "ill" | "illi" | "eil$" | "eils$" | "eill" | "eilli"
                   when not (String.mem p.phonem 'l')
@@ -906,8 +887,7 @@ let _ : string =
            |> String.concat
            |> String.chop_suffix_if_exists ~suffix:"$"
          in
-         ortho := keep_if_plausible env row !ortho new_ortho;
-         { row with ortho = fst !ortho }, snd !ortho)
+         keep_if_plausible env aligned_row new_ortho)
 
 let dummy_search_res = [], 0
 let _ : string list =
@@ -977,10 +957,10 @@ let _ : string list =
                |> List.map ~f:(fun (a, b) -> (b, a))
                |> Hashtbl.of_alist_multi (module String)
              in
-             fun _env (row, search_res) ->
+             fun _env aligned_row ->
              let graphems =
                try
-                 List.concat_map (fst search_res) ~f:(fun p ->
+                 List.concat_map (fst aligned_row.alignment) ~f:(fun p ->
                      match p.graphem, p.phonem with
                      | "b", "p" -> [ "b" ]
                      | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
@@ -1000,7 +980,7 @@ let _ : string list =
                      | _ -> map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem)
                    )
                  |> Array.of_list
-               with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
+               with e -> raise_s [%sexp (e : exn), (aligned_row.row : Data.Lexique.row)]
              in
              let ortho =
                let last_uchar str = Rules.(#::) str (String.length str, -1) in
@@ -1038,12 +1018,12 @@ let _ : string list =
              let ortho =
                if pluriel_en_plus
                then
-                 if String.is_suffix row.ortho ~suffix:"s"
-                    && row.ortho = row.lemme ^ "s"
+                 if String.is_suffix aligned_row.row.ortho ~suffix:"s"
+                    && aligned_row.row.ortho = aligned_row.row.lemme ^ "s"
                  then ortho ^ "+"
                  else
                    (* le lemme de "les" est "les" et pas "le" ? Bizarre. *)
-                   match row.ortho with
+                   match aligned_row.row.ortho with
                    | "ces" | "des" | "les" | "mes" | "ses" | "tes"
                    | "nous" | "vous" | "ils" | "elles" | "aux" -> ortho ^ "+"
                    | _ -> ortho
@@ -1052,12 +1032,12 @@ let _ : string list =
                     fait. Comme les principales (ou seules ?) qui sont obligatoires sont
                     avec les articles, on écrit un z en exposant après les articles, pour
                     indiquer "z optionnel". *)
-                 match row.ortho with
+                 match aligned_row.row.ortho with
                  | "ces" | "des" | "les" | "mes" | "ses" | "tes"
                  | "nous" | "vous" | "ils" | "elles" | "aux" -> ortho ^ "\u{1DBB}"
                  | _ -> ortho
              in
-             { row with ortho }, dummy_search_res))
+             { row = { aligned_row.row with ortho }; alignment = dummy_search_res }))
 
 let _ : string =
   new_rule'
@@ -1110,24 +1090,24 @@ let _ : string =
           ; !!"z", "z"
           ]
       in
-      fun _env (row, search_res) ->
+      fun _env aligned_row ->
         let ortho =
           try
-            List.concat_map (fst search_res) ~f:(fun p ->
+            List.concat_map (fst aligned_row.alignment) ~f:(fun p ->
                 match p.graphem, p.phonem with
                 | "b", "p" -> [ "b" ]
                 | ("i" | "'" | "-" | " "), _ -> [ p.graphem ]
                 | _ ->
                    map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem))
             |> String.concat
-          with e -> raise_s [%sexp (e : exn), (row.ortho : string), (row.phon : string)]
+          with e -> raise_s [%sexp (e : exn), (aligned_row.row : Data.Lexique.row)]
         in
-        { row with ortho }, dummy_search_res)
+        { row = { aligned_row.row with ortho }; alignment = dummy_search_res })
 
-let respell_oe ((row : Data.Lexique.row), (search_res : Rules.search_res)) =
+let respell_oe (aligned_row : aligned_row) =
   (* Lexique contient toujours œ écrit oe. On recolle les lettres, pour qu'on puisse
      réécrire à la fois cœur et coeur, par exemple. *)
-  if List.exists (fst search_res) ~f:(fun p ->
+  if List.exists (fst aligned_row.alignment) ~f:(fun p ->
          match p.graphem, p.phonem with
          | "oe", ("e" | "E" | "2" | "9")
          | "oeu", ("2" | "9")
@@ -1135,21 +1115,21 @@ let respell_oe ((row : Data.Lexique.row), (search_res : Rules.search_res)) =
          | _ -> false)
   then
     let search_res =
-      List.map (fst search_res) ~f:(fun p ->
+      List.map (fst aligned_row.alignment) ~f:(fun p ->
           match p.graphem, p.phonem with
           | "oe", ("e" | "E" | "2" | "9") -> { p with graphem = "œ" }
           | "oeu", ("2" | "9") -> { p with graphem = "œu" }
           | "coe", "se" -> { p with graphem = "cœ" }
           | _ -> p),
-      snd search_res
+      snd aligned_row.alignment
     in
     let ortho =
       List.map (fst search_res) ~f:(fun p -> p.graphem)
       |> String.concat
       |> String.chop_suffix_if_exists ~suffix:"$"
     in
-    { row with ortho }, search_res
-  else row, search_res
+    { row = { aligned_row.row with ortho }; alignment = search_res }
+  else aligned_row
 
 let doc rule = rule.doc
 let name rule = rule.name
@@ -1241,9 +1221,10 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
              (* Le oe est une correction du lexique, il s'applique donc à l'orthographe de
                 départ, pas l'orthographe d'arrivée comme les calculs de changements
                 d'orthographe. *)
-             let row_oe, search_res_oe = respell_oe (row, search_res) in
-             let row_oe', _ = rule (row_oe, search_res_oe) in
-             if row.ortho <> row_oe.ortho then (
+             let aligned_row = { row; alignment = search_res } in
+             let aligned_row_oe = respell_oe aligned_row in
+             let { row = row_oe'; _ } = rule aligned_row_oe in
+             if row.ortho <> aligned_row_oe.row.ortho then (
                let row' =
                  if fix_oe (* Quand fix_oe, on réécrit tous les oe qui survive à la transformation
                               en œ, sinon, on s'assure simplement qu'on réécrit les deux formes
@@ -1254,10 +1235,10 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) le
                               - fix_oe=false : cœur -> kœur, coeur -> koeur
                             *)
                  then row_oe'
-                 else fst (rule (row, search_res))
+                 else (rule aligned_row).row
                in
                f row.ortho row'.ortho
              );
-             f row_oe.ortho row_oe'.ortho
+             f aligned_row_oe.row.ortho row_oe'.ortho
     ));
   { total = !total; considered = !considered; prefiltered_out = !prefiltered_out; failed = !failed }
