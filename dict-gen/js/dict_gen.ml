@@ -1,22 +1,15 @@
 open Base
 
-let any = Js_of_ocaml.Js.Unsafe.inject
-let string s = any (Js_of_ocaml.Js.string s)
-let bool b = any (Js_of_ocaml.Js.bool b)
-let obj l = Js_of_ocaml.Js.Unsafe.obj (Array.of_list l)
-let list l = any (Js_of_ocaml.Js.array (Array.of_list l))
-
 let json_to_string v =
   let rec to_js = function
-    | `Bool b -> bool b
-    | `String s -> string s
-    | `Assoc l -> obj (List.map ~f:(fun (k, v) -> (k, to_js v)) l)
+    | `Bool b -> Jv.of_bool b
+    | `String s -> Jv.of_string s
+    | `Assoc l ->
+       List.map ~f:(fun (k, v) -> (k, to_js v)) l
+       |> Array.of_list
+       |> Jv.obj
   in
-  Js_of_ocaml.Js.Unsafe.meth_call
-    (Js_of_ocaml.Js._JSON)
-    "stringify"
-    [| to_js v |]
-  |> Js_of_ocaml.Js.to_string
+  Jstr.to_string (Brr.Json.encode (to_js v))
 
 let generate static rules =
   let t1 = Stdlib.Sys.time () in
@@ -60,12 +53,11 @@ let rules () =
            in
            [%string "<a href=\"%{url}\">%{display_url}</a>"])
   in
-  rules
-  |> List.map ~f:(fun rule ->
-         obj [ "name", string (Dict_gen_common.Dict_gen.name rule)
-             ; "doc", string (ui_doc (Dict_gen_common.Dict_gen.doc rule))
-             ; "v", any rule ])
-  |> list
+  Jv.of_list (fun rule ->
+      Jv.obj [| "name", Jv.of_string (Dict_gen_common.Dict_gen.name rule)
+              ; "doc", Jv.of_string (ui_doc (Dict_gen_common.Dict_gen.doc rule))
+              ; "v", Jv.Id.to_jv rule
+             |]) rules
 
 let fetch url =
   let open Fut.Result_syntax in
@@ -137,7 +129,7 @@ let () =
       (fun res -> Brr_webworkers.Worker.G.post (res : (Jv.t, Jv.Error.t) Result.t))
   else
     Js_of_ocaml.Js.export "dict_gen"
-      (any
+      (Js_of_ocaml.Js.Unsafe.inject
          (Jv.obj [| "generate", Jv.callback ~arity:4 generate_in_worker
                   ; "rules", Jv.callback ~arity:1 rules
             |]))
