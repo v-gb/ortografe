@@ -54,7 +54,7 @@ The commands below should:
 - rebuild everything as you make changes
 
 ```console
-$ make install-opam-and-dune
+$ make first-install
 $ make all-w
 ```
 

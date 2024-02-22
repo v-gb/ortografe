@@ -1,4 +1,4 @@
-.PHONY: install-opam-and-dune all all-w serve build-container run-container fly-deploy
+.PHONY: first-install all all-w serve build-container run-container fly-deploy
 
 all:
 	dune build --trace-file _build/trace ./server_all.exe @default @runtest
@@ -23,8 +23,14 @@ update-opam:
 	@ # and tell dune to put that in the opam file, rather than have dune just do it
 	./update-opam-file
 
-install-opam-and-dune:
+first-install:
 	@ # instructions from https://opam.ocaml.org/doc/Install.html
 	if ! which opam > /dev/null; then bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"; fi
+	if ! [ -d _opam ]; then opam switch create . 5.1.1 --yes; fi
 	@ echo "[32mignore complaints about missing fields below, opam is being silly, and it doesn't prevent the command from working[39m"
-	opam install --deps-only ./ortografe.opam
+	opam exec -- opam install --locked --deps-only ./ortografe.opam --yes
+	mkdir -p _build
+	# build only the extension, as building everything implies grabbing
+	# stuff from wikisource, which is a problem and is thus not automatic
+	opam exec -- dune build extension/extension2.zip
+	@ echo "[32mExtensions built at _build/default/extension/*.zip ![39m"

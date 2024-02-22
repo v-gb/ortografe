@@ -1,7 +1,7 @@
 # How to tweak and try locally
 
 ```bash
-# (cd ../; make install-opam-and-dune)
+# (cd ../; make first-install)
 # make all
 ```
 
