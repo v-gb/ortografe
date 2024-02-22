@@ -261,6 +261,7 @@ let create () : t =
   new_fixed "s" [ "", Surprising ]; (* disjoncteur *)
   new_fixed "c" [ "", Surprising ]; (* succinctement *)
   new_fixed "coe" [ "se", Surprising ]; (* coelacanthe *)
+  new_fixed "cœ" [ "se", Surprising ]; (* coelacanthe *)
   new_fixed "sc" [ "S", Surprising ]; (* fasciste *)
   new_fixed "iz$" [ "i", Surprising ]; (* riz *)
   new_fixed "az$" [ "a", Surprising ]; (* raz *)

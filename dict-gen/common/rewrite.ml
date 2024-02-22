@@ -1107,6 +1107,100 @@ let _ : string =
         in
         { row = { aligned_row.row with ortho }; alignment = dummy_search_res })
 
+let _ : string =
+  new_rule'
+    "ou/w"
+    "crée une lettre @ou en utilisant @w, @loup -> @lwp, @ouest -> @west, @aquatique -> @aqwatique"
+    ~prefilter:(fun () ->
+      `Re (Re.alt [ Re.str "ou"; Re.str "où"; Re.str "oû"; Re.str "qu"; Re.str "gu" ]))
+    (fun () ->
+      ();
+      fun _env aligned_row ->
+        let path =
+          List.map aligned_row.alignment.path
+            ~f:(fun path_elt ->
+               match path_elt.graphem, path_elt.phonem with
+               | ("ou" | "oû"), ("w" | "u") -> { path_elt with graphem = "w" }
+               | "où", ("w" | "u") -> { path_elt with graphem = "w\u{300}" }
+               | "qu", "kw" -> { path_elt with graphem = "qw" }
+               | "gu", "gw" -> { path_elt with graphem = "gw" }
+               | _ -> path_elt)
+        in
+        let ortho =
+          List.map path ~f:(fun p -> p.graphem)
+          |> String.concat ~sep:""
+          |> String.chop_suffix_if_exists ~suffix:"$"
+        in
+        { row = { aligned_row.row with ortho }
+        ; alignment = { aligned_row.alignment with path }
+        }
+   )
+
+let _ : string =
+  if true then "" else
+  new_rule
+    "u-ou-io/y-u-ua"
+    "crée une lettre @ou en utilisant @u comme en latin. Pour ce faire, remplace @y par @î, @u par @y, @ou par @u (et @oi par @ua)"
+    ~prefilter:(fun () -> `All)
+    (fun rules ->
+      let pattern_icirc = String.Search_pattern.create "î" in
+      let pattern_y = String.Search_pattern.create "y" in
+      let accept = Fn.const true in
+      { rules
+      ; compute =
+          fun aligned_row ->
+          let aligned_row = ref aligned_row in
+          aligned_row := rewrite { rules; accept }
+                           !aligned_row ~target:pattern_icirc ~repl:"i";
+          let path = !aligned_row.alignment.path in
+          let path =
+            List.map path
+              ~f:(fun path_elt ->
+                 match path_elt.graphem, path_elt.phonem with
+                 | "ay", ("ej" | "Ej" | "ei" | "Ei") -> { path_elt with graphem = "aiî" }
+                 | "oy", ("waj" | "wai") -> { path_elt with graphem = "oiî" }
+                 | "ey", ("ej" | "Ej" | "ei" | "Ei") -> { path_elt with graphem = "eiî" }
+                 | "y", "i" -> { path_elt with graphem = "i" }
+                 | "yn", ("5" | "in") -> { path_elt with graphem = "in" }
+                 | "ym", ("5" | "im") -> { path_elt with graphem = "im" }
+                 | graphem, _ ->
+                    { path_elt
+                      with graphem =
+                             String.Search_pattern.replace_all pattern_y ~in_:graphem ~with_:"î" }
+              )
+          in
+          let path =
+            (* Non seulement il faudrait changer les règles pour pouvoir combiner ce changement
+               avec d'autres, mais en plus il faut changer l'ensemble de voyelle faibles pour
+               enlever le y. *)
+            List.map path
+              ~f:(fun path_elt ->
+                match path_elt.graphem, path_elt.phonem with
+                | "u", ("y" | "8") -> { path_elt with graphem = "y" }
+                | "un", ("ym" | "1") -> { path_elt with graphem = "yn" }
+                | _ -> path_elt)
+          in
+          let path =
+            let prev = ref "" in
+            List.map path
+              ~f:(fun path_elt ->
+                let res =
+                  match path_elt.graphem, path_elt.phonem with
+                  | "ou", ("u" | "w") -> { path_elt with graphem = "u" }
+                  | "oi", ("wa") -> { path_elt with graphem = "ua" }
+                  | _ -> path_elt
+                in
+                prev := path_elt.graphem;
+                res)
+          in
+          let ortho =
+            List.map path ~f:(fun p -> p.graphem)
+            |> String.concat ~sep:""
+            |> String.chop_suffix_if_exists ~suffix:"$"
+          in
+          { row = { !aligned_row.row with ortho }; alignment = dummy_search_res }
+    })
+
 let respell_oe (aligned_row : aligned_row) =
   (* Lexique contient toujours œ écrit oe. On recolle les lettres, pour qu'on puisse
      réécrire à la fois cœur et coeur, par exemple. *)
