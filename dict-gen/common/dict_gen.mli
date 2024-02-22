@@ -23,7 +23,8 @@ val name : rule -> string
 val doc : rule -> string
 
 val gen
-    :  rules:rule list
+    :  ?profile:bool
+    -> rules:rule list
     -> all:bool
     -> output:(string -> unit)
     -> json_to_string:
@@ -36,3 +37,5 @@ val gen
        | `Values of [ `Post90 of (string, string) Hashtbl.t ]
                     * [ `Lexique of Data.Lexique.t list ] ]
     -> [ `Stats of Sexplib.Sexp.t ]
+
+val time : profile:bool -> string -> (unit -> 'a) -> 'a

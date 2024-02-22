@@ -108,7 +108,16 @@ let doc = function
   | `Oe -> "Corriger les @oe en @œ, comme @coeur -> @cœur"
   | `Rect1990 -> "Appliquer les rectifications de 1990"
 
-let gen ~rules ~all ~output ~json_to_string data =
+let time ~profile name f =
+  if profile then (
+    let t1 = Stdlib.Sys.time () in
+    let x = f () in
+    let t2 = Stdlib.Sys.time () in
+    Stdlib.prerr_endline [%string "%{name}: %{Float.to_string_hum ~decimals:2 (t2 -. t1)}s"];
+    x
+  ) else f ()
+
+let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
   let rules = if List.is_empty rules then [ `Rewrite "erofa"; `Rect1990; `Oe ] else rules in
   let rewrite_rules, oe, rect1990 =
     let oe = ref false in
@@ -125,12 +134,15 @@ let gen ~rules ~all ~output ~json_to_string data =
     match data with
     | `Values (`Post90 post90, `Lexique lexique) -> post90, lexique
     | `Static { data_lexique_Lexique383_gen_tsv; extension_dict1990_gen_csv } ->
-       Data.parse_post90 extension_dict1990_gen_csv,
-       Data.Lexique.parse data_lexique_Lexique383_gen_tsv
+       time ~profile "read1990" (fun () ->
+           Data.parse_post90 extension_dict1990_gen_csv),
+       time ~profile "readerofa" (fun () ->
+           Data.Lexique.parse data_lexique_Lexique383_gen_tsv)
   in
   let post90, lexique =
-    (if rect1990 then post90 else Hashtbl.create (module String)),
-    build_lexique_post90 lexique post90 ~fix_90:rect1990
+    time ~profile "post1990lexique" (fun () ->
+        (if rect1990 then post90 else Hashtbl.create (module String)),
+        build_lexique_post90 lexique post90 ~fix_90:rect1990)
   in
   let print, after =
     if all
@@ -165,10 +177,13 @@ let gen ~rules ~all ~output ~json_to_string data =
             output [%string "%{old},%{new_}\n"])))
   in
   let stats =
+    time ~profile "rewrite" (fun () ->
     Rewrite.gen
       ~not_understood:`Ignore
       ~fix_oe:oe
       ~rules:rewrite_rules
-      lexique print in
-  after ();
+      lexique print)
+  in
+  time ~profile "post-computation" (fun () ->
+      after ());
   `Stats [%sexp ~~(stats : Rewrite.stats)]
