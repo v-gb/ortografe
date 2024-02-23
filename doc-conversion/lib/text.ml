@@ -168,10 +168,13 @@ let uppercase_as_much_as_possible w =
       | `Self -> `Uchars [c]
       | `Uchars _ as uchars -> uchars)
 
+let mem dict x =
+  Option.is_some (dict x)
+
 let iter_pure_text ~options src ~f =
   let dict = options.dict in
   let src = nfc src in
-  iter_words src ~f_mem:(Hashtbl.mem dict) ~f:(fun what start len ->
+  iter_words src ~f_mem:(mem dict) ~f:(fun what start len ->
     let w = String.sub src start len in
     match what with
     | `Out -> f w
@@ -180,7 +183,7 @@ let iter_pure_text ~options src ~f =
          match uncapitalize w with
          | None -> w, (fun x -> x)
          | Some wu ->
-            if Hashtbl.mem dict w
+            if mem dict w
             then "", (fun x -> x)
             else
               match
@@ -193,17 +196,17 @@ let iter_pure_text ~options src ~f =
                  if
                    match capitalize wl with
                    | None -> false
-                   | Some c -> Hashtbl.mem dict c
+                   | Some c -> mem dict c
                  then "", (fun x -> x)
                  else wl, (fun w -> Option.value (uppercase_as_much_as_possible w) ~default:w)
        in
-       match Hashtbl.find_opt dict wu with
+       match dict wu with
        | Some res -> f (recapitalize res)
        | None ->
           match if options.plurals_in_s then depluralize wu else None with
           | None -> f w
           | Some wu ->
-             match Hashtbl.find_opt dict wu with
+             match dict wu with
              | Some res -> f (recapitalize (pluralize res))
              | None -> f w
     )

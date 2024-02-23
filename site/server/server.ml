@@ -164,7 +164,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                     (hum_size_of_bytes (String.length fcontents));
                   (match Ortografe.convert_string ~ext fcontents
                            ~options:{ convert_uppercase = false
-                                    ; dict = Lazy.force Ortografe.erofa
+                                    ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa)
                                     ; interleaved = true
                                     ; plurals_in_s = true }
                    with

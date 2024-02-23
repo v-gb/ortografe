@@ -2,7 +2,7 @@ val erofa : (string, string) Hashtbl.t Lazy.t
 val rect1990 : (string, string) Hashtbl.t Lazy.t
 type options =
   { convert_uppercase : bool
-  ; dict : (string, string) Hashtbl.t
+  ; dict : string -> string option
   ; interleaved : bool
   ; plurals_in_s : bool
   }

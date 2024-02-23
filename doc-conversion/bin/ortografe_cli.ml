@@ -83,7 +83,7 @@ let () =
            in
            Ortografe.convert_files
              ~options:{ convert_uppercase
-                      ; dict
+                      ; dict = Stdlib.Hashtbl.find_opt dict
                       ; interleaved =
                           (match Sys.getenv "INTERLEAVED" with
                            | "false" -> false

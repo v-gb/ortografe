@@ -71,7 +71,7 @@ let make_the_html_mobile_friendly html =
     ~with_:{|<head><meta name="viewport" content="width=device-width, initial-scale=1"/>|}
 
 let options = lazy { Ortografe.convert_uppercase = true
-                   ; dict = Lazy.force Ortografe.erofa
+                   ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa)
                    ; interleaved = true
                    ; plurals_in_s = true 
                    }

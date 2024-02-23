@@ -19,7 +19,7 @@ let buffer ?(n = 123) buf =
 
 type options =
   { convert_uppercase : bool
-  ; dict : (string, string) Hashtbl.t
+  ; dict : (string -> string option)
   ; interleaved : bool
   ; plurals_in_s : bool
   }

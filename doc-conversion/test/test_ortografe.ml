@@ -2,7 +2,7 @@ open Core
 
 let options =
   { Ortografe.convert_uppercase = false
-  ; dict = force Ortografe.erofa
+  ; dict = Stdlib.Hashtbl.find_opt (force Ortografe.erofa)
   ; interleaved = true
   ; plurals_in_s = true
   }
@@ -98,7 +98,7 @@ Majuscules: HISTOIRE.
   let rewrite3 =
     Ortografe.pure_text
       ~dst:String
-      ~options:{options with dict = force Ortografe.rect1990 }
+      ~options:{options with dict = Stdlib.Hashtbl.find_opt (force Ortografe.rect1990) }
       {|
 Le maître a dû goûter ce week-end.
 Un sèche-cheveux, des sèche-cheveux.
