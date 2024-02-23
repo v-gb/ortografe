@@ -161,11 +161,12 @@ let lowercase w =
       then Uucp.Case.Map.to_lower c
       else `Self)
 
-let uppercase w =
+let uppercase_as_much_as_possible w =
+  (* ortograf.net uses "+" as a "letter". So do a best effort uppercasing. *)
   map_case w ~f:(fun c ->
-      if Uucp.Case.is_lower c
-      then Uucp.Case.Map.to_upper c
-      else `Self)
+      match Uucp.Case.Map.to_upper c with
+      | `Self -> `Uchars [c]
+      | `Uchars _ as uchars -> uchars)
 
 let iter_pure_text ~options src ~f =
   let dict = options.dict in
@@ -194,7 +195,7 @@ let iter_pure_text ~options src ~f =
                    | None -> false
                    | Some c -> Hashtbl.mem dict c
                  then "", (fun x -> x)
-                 else wl, (fun w -> Option.value (uppercase w) ~default:w)
+                 else wl, (fun w -> Option.value (uppercase_as_much_as_possible w) ~default:w)
        in
        match Hashtbl.find_opt dict wu with
        | Some res -> f (recapitalize res)
