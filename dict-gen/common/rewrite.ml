@@ -1110,7 +1110,7 @@ let _ : string =
 let _ : string =
   new_rule'
     "ou/w"
-    "crée une lettre @ou en utilisant @w, @loup -> @lwp, @ouest -> @west, @aquatique -> @aqwatique"
+    "créer une lettre @ou en utilisant @w, @loup -> @lwp, @ouest -> @west, @aquatique -> @aqwatique"
     ~prefilter:(fun () ->
       `Re (Re.alt [ Re.str "ou"; Re.str "où"; Re.str "oû"; Re.str "qu"; Re.str "gu" ]))
     (fun () ->
@@ -1140,7 +1140,7 @@ let _ : string =
   if true then "" else
   new_rule
     "u-ou-io/y-u-ua"
-    "crée une lettre @ou en utilisant @u comme en latin. Pour ce faire, remplace @y par @î, @u par @y, @ou par @u (et @oi par @ua)"
+    "créer une lettre @ou en utilisant @u comme en latin. Pour ce faire, remplace @y par @î, @u par @y, @ou par @u (et @oi par @ua)"
     ~prefilter:(fun () -> `All)
     (fun rules ->
       let pattern_icirc = String.Search_pattern.create "î" in
