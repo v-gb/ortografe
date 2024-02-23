@@ -1107,34 +1107,41 @@ let _ : string =
         in
         { row = { aligned_row.row with ortho }; alignment = dummy_search_res })
 
-let _ : string =
-  new_rule'
-    "ou/w"
-    "créer une lettre @ou en utilisant @w, @loup -> @lwp, @ouest -> @west, @aquatique -> @aqwatique"
-    ~prefilter:(fun () ->
-      `Re (Re.alt [ Re.str "ou"; Re.str "où"; Re.str "oû"; Re.str "qu"; Re.str "gu" ]))
-    (fun () ->
-      ();
-      fun _env aligned_row ->
-        let path =
-          List.map aligned_row.alignment.path
-            ~f:(fun path_elt ->
-               match path_elt.graphem, path_elt.phonem with
-               | ("ou" | "oû"), ("w" | "u") -> { path_elt with graphem = "w" }
-               | "où", ("w" | "u") -> { path_elt with graphem = "w\u{300}" }
-               | "qu", "kw" -> { path_elt with graphem = "qw" }
-               | "gu", "gw" -> { path_elt with graphem = "gw" }
-               | _ -> path_elt)
-        in
-        let ortho =
-          List.map path ~f:(fun p -> p.graphem)
-          |> String.concat ~sep:""
-          |> String.chop_suffix_if_exists ~suffix:"$"
-        in
-        { row = { aligned_row.row with ortho }
-        ; alignment = { aligned_row.alignment with path }
-        }
-   )
+let () =
+  List.iter
+    [ "w", "w"
+    ; "ω", "omega"
+    (* autres symboles dans unicode qui pourrait ressembler à des double-u,
+       càd des w arrondi ɯ ш ѡ *)
+    ] ~f:(fun (w, name) ->
+      ignore (new_rule'
+        ("ou/" ^ name)
+        [%string "créer une lettre @ou en utilisant @%{w}, @loup -> @l%{w}p, @ouest -> @%{w}est, @aquatique -> @aq%{w}atique"]
+        ~prefilter:(fun () ->
+          `Re (Re.alt [ Re.str "ou"; Re.str "où"; Re.str "oû"; Re.str "qu"; Re.str "gu" ]))
+        (fun () ->
+          ();
+          fun _env aligned_row ->
+          let path =
+            List.map aligned_row.alignment.path
+              ~f:(fun path_elt ->
+                match path_elt.graphem, path_elt.phonem with
+                | ("ou" | "oû"), ("w" | "u") -> { path_elt with graphem = w }
+                | "où", ("w" | "u") -> { path_elt with graphem = w ^ "\u{300}" }
+                | "qu", "kw" -> { path_elt with graphem = "q" ^ w }
+                | "gu", "gw" -> { path_elt with graphem = "g" ^ w }
+                | _ -> path_elt)
+          in
+          let ortho =
+            List.map path ~f:(fun p -> p.graphem)
+            |> String.concat ~sep:""
+            |> String.chop_suffix_if_exists ~suffix:"$"
+          in
+          { row = { aligned_row.row with ortho }
+          ; alignment = { aligned_row.alignment with path }
+          }
+        )
+    ))
 
 let _ : string =
   if true then "" else
