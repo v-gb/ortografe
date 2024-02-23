@@ -98,20 +98,25 @@ let gen ~env ?(static : Dict_gen.static option) ~rules ~all ~write ~diff ~drop (
        ]
        ~is_success:(function 0 | 1 -> true | _ -> false)
 
+let rules_cli () =
+  let module C = Cmdliner in
+  let open Cmdliner_bindops in
+  List.fold_right
+    ~init:(return [])
+    (force Dict_gen.all)
+    ~f:(fun rule acc ->
+      let+ present = C.Arg.value (C.Arg.flag (C.Arg.info
+                                                ~docs:"Sélection du dictionnaire de réécriture"
+                                                ~doc:(Dict_gen.doc rule)
+                                                [Dict_gen.name rule]))
+      and+ acc in
+      if present then rule :: acc else acc)
+
 let gen_cmd ?static ?doc name =
   let module C = Cmdliner in
   let open Cmdliner_bindops in
   C.Cmd.v (C.Cmd.info ?doc name)
-    (let+ rules =
-       List.fold_right
-         ~init:(return [])
-         (force Dict_gen.all)
-         ~f:(fun rule acc ->
-           let+ present = C.Arg.value (C.Arg.flag (C.Arg.info
-                                                     ~doc:(Dict_gen.doc rule)
-                                                     [Dict_gen.name rule]))
-           and+ acc in
-           if present then rule :: acc else acc)
+    (let+ rules = rules_cli ()
      and+ all = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"inclure les mots inchangés" ["all"]))
      and+ write =
        C.Arg.value (C.Arg.opt (C.Arg.some C.Arg.string) None

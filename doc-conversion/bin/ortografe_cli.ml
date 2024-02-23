@@ -1,3 +1,23 @@
+let static () : Dict_gen_common.Dict_gen.static =
+  { data_lexique_Lexique383_gen_tsv = Dict.data_lexique_Lexique383_gen_tsv
+  ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv }  
+
+let parse_dict str =
+  let lines = Core.String.split_lines str in
+  let lines =
+    match lines with
+    | first :: lines when String.starts_with first ~prefix:"{" -> lines
+    | _ -> lines
+  in
+  let h = Hashtbl.create (List.length lines) in
+  List.iter (fun l ->
+      match String.split_on_char ',' l with
+      | [ a; b ] -> Hashtbl.replace h a b
+      | _ -> failwith (Printf.sprintf
+                         "didn't get exactly 2 items in line %S" l))
+    lines;
+  h
+
 let () =
   let module C = Cmdliner in
   let open Cmdliner_bindops in
@@ -6,53 +26,49 @@ let () =
       (C.Cmd.info (Filename.basename Sys.executable_name))
       [ C.Cmd.v
           (C.Cmd.info
-             ~doc:"conversion de documents vers l'orthographe Érofa"
+             ~doc:"conversion de documents vers l'orthographe Érofa (ou autre)"
              "conv")
           (let+ arg1 =
-             C.Arg.value (C.Arg.pos 0 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"INPUT_FILE" []))
+             C.Arg.value (C.Arg.pos 0 (C.Arg.some C.Arg.string) None
+                            (C.Arg.info ~docv:"INPUT_FILE" []))
            and+ arg2 =
-             C.Arg.value (C.Arg.pos 1 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"OUTPUT_FILE" []))
-           and+ convert_uppercase = C.Arg.value (C.Arg.flag (C.Arg.info ["convert-uppercase"]))
-           and+ dict =
-             let enum = [ "erofa", `Erofa; "1990", `Rect1990; "empty", `Empty ] in
-             C.Arg.value
-               (C.Arg.opt
-                  (C.Arg.some (C.Arg.enum enum))
-                  None
-                  (C.Arg.info ["dict"] ~doc:(C.Arg.doc_alts_enum enum)))
+             C.Arg.value (C.Arg.pos 1 (C.Arg.some C.Arg.string) None
+                            (C.Arg.info ~docv:"OUTPUT_FILE" []))
+           and+ convert_uppercase =
+             C.Arg.value (C.Arg.flag
+                            (C.Arg.info ~doc:"réécrit les mots tout en majuscule (que l'on traite comme des noms propres et excluont par défaut)" ["convert-uppercase"]))
+           and+ rules = Dict_gen.rules_cli ()
            and+ dict_file =
              C.Arg.value
                (C.Arg.opt
                   (C.Arg.some C.Arg.file)
                   None
-                  (C.Arg.info ["dict-file"]
+                  (C.Arg.info ~docv:"FILENAME" ["dict-file"]
                      ~doc:"a filename, for instance as output by $(mname) dict"))
            in
            let dict =
-             match dict, dict_file with
-             | None, None -> Lazy.force Ortografe.erofa
-             | Some _, Some _ -> failwith "cannot specify both --dict and --dict-file"
-             | Some `Erofa, None -> Lazy.force Ortografe.erofa
-             | Some `Rect1990, None -> Lazy.force Ortografe.rect1990
-             | Some `Empty, None -> Hashtbl.create 1
-             | None, Some file ->
-                let h = Hashtbl.create 10000 in
-                let lines =
-                  Core.String.split_lines
-                    (Core.In_channel.read_all file)
-                in
-                let lines =
-                  match lines with
-                  | first :: lines when String.starts_with first ~prefix:"{" -> lines
-                  | _ -> lines
-                in
-                List.iter (fun l ->
-                    match String.split_on_char ',' l with
-                    | [ a; b ] -> Hashtbl.replace h a b
-                    | _ -> failwith (Printf.sprintf
-                                       "didn't get exactly 2 items in line %S" l))
-                  lines;
-                h
+             match rules, dict_file with
+             | _ :: _, Some _ -> failwith "cannot specify both dictionary rules and --dict-file"
+             | [], Some file -> parse_dict (Core.In_channel.read_all file)
+             | [], None -> Lazy.force Ortografe.erofa
+             | (_ :: _ as rules), None ->
+                (match rules with
+                 | [ rule ] when Dict_gen_common.Dict_gen.name rule = "erofa" ->
+                    Lazy.force Ortografe.erofa
+                 | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
+                    Lazy.force Ortografe.rect1990
+                 | _ ->
+                    let b = Buffer.create 100 in
+                    let `Stats _ =
+                      Dict_gen_common.Dict_gen.gen
+                        ~rules
+                        ~all:false
+                        ~output:(Buffer.add_string b)
+                        ~json_to_string:(Yojson.to_string)
+                        (`Static (static ()))
+                    in
+                    parse_dict (Buffer.contents b)
+                )
            in
            Ortografe.convert_files
              ~options:{ convert_uppercase
@@ -64,8 +80,7 @@ let () =
              }
              arg1 arg2)
       ; Dict_gen.gen_cmd "dict"
-          ~static:{ data_lexique_Lexique383_gen_tsv = Dict.data_lexique_Lexique383_gen_tsv
-                  ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv }
+          ~static:(static ())
           ~doc:"génération de dictionnaires de réécriture personnalisés pour la conversion \
                 de document, ou pour l'extension de navigateur internet"
       ]
