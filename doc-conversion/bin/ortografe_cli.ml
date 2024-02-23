@@ -4,10 +4,13 @@ let static () : Dict_gen_common.Dict_gen.static =
 
 let parse_dict str =
   let lines = Core.String.split_lines str in
-  let lines =
+  let lines, plurals_in_s =
     match lines with
-    | first :: lines when String.starts_with first ~prefix:"{" -> lines
-    | _ -> lines
+    | first :: lines when String.starts_with first ~prefix:"{" ->
+       let json = Yojson.Basic.from_string first in
+       let metadata = Dict_gen_common.Dict_gen.metadata_of_json json in
+       lines, metadata.plurals_in_s
+    | _ -> lines, None
   in
   let h = Hashtbl.create (List.length lines) in
   List.iter (fun l ->
@@ -16,7 +19,7 @@ let parse_dict str =
       | _ -> failwith (Printf.sprintf
                          "didn't get exactly 2 items in line %S" l))
     lines;
-  h
+  h, plurals_in_s
 
 let () =
   let module C = Cmdliner in
@@ -54,17 +57,17 @@ let () =
                   (C.Arg.info ~docv:"FILENAME" ["dict-file"]
                      ~doc:"a filename, for instance as output by $(mname) dict"))
            in
-           let dict =
+           let dict, plurals_in_s =
              match rules, dict_file with
              | _ :: _, Some _ -> failwith "cannot specify both dictionary rules and --dict-file"
              | [], Some file -> parse_dict (Core.In_channel.read_all file)
-             | [], None -> Lazy.force Ortografe.erofa
+             | [], None -> Lazy.force Ortografe.erofa, None
              | (_ :: _ as rules), None ->
                 (match rules with
                  | [ rule ] when Dict_gen_common.Dict_gen.name rule = "erofa" ->
-                    Lazy.force Ortografe.erofa
+                    Lazy.force Ortografe.erofa, None
                  | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
-                    Lazy.force Ortografe.rect1990
+                    Lazy.force Ortografe.rect1990, None
                  | _ ->
                     let b = Buffer.create 100 in
                     let `Stats _ =
@@ -85,7 +88,7 @@ let () =
                           (match Sys.getenv "INTERLEAVED" with
                            | "false" -> false
                            | _ | exception Not_found -> true)
-                      ; plurals_in_s = true
+                      ; plurals_in_s = plurals_in_s ||? true
                       }
              arg1 arg2)
       ; Dict_gen.gen_cmd "dict"

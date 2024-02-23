@@ -1,6 +1,7 @@
 (executable
  (name ortografe_cli)
- (libraries cmdliner cmdliner_bindops ortografe dict_gen))
+ (libraries cmdliner cmdliner_bindops ortografe dict_gen yojson)
+ (preprocess (pps ppx_jane ppx_lazy_option_op)))
 
 (rule
  (deps

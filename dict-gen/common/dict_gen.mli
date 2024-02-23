@@ -40,4 +40,12 @@ val gen
     -> [ `Static of static | `Values of values ]
     -> [ `Stats of Sexp.t ]
 
+type metadata =
+  { desc : string option
+  ; lang : string option
+  ; supports_repeated_rewrites : bool option
+  ; plurals_in_s : bool option
+  }
+val metadata_of_json : _ json -> metadata
+
 val time : profile:bool -> string -> (unit -> 'a) -> 'a

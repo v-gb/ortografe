@@ -127,6 +127,41 @@ type 'a json =
   | `Bool of bool
   | `String of string ] as 'a
 
+type metadata =
+  { desc : string option
+  ; lang : string option
+  ; supports_repeated_rewrites : bool option
+  ; plurals_in_s : bool option
+  }
+
+let metadata_of_json (json : _ json) =
+  let desc = ref None in
+  let lang = ref None in
+  let supports_repeated_rewrites = ref None in
+  let plurals_in_s = ref None in
+  (match json with
+   | `Assoc l ->
+      List.iter l ~f:(function
+          | "desc", `String s -> desc := Some s
+          | "lang", `String s -> lang := Some s
+          | "supports_repeated_rewrites", `Bool b -> supports_repeated_rewrites := Some b
+          | "plurals_in_s", `Bool b -> plurals_in_s := Some b
+          | _ -> ())
+   | _ -> ());
+  { desc = !desc
+  ; lang = !lang
+  ; supports_repeated_rewrites = !supports_repeated_rewrites
+  ; plurals_in_s = !plurals_in_s
+  }
+
+let json_of_metadata ~desc ~lang ~supports_repeated_rewrites ~plurals_in_s =
+  `Assoc
+    [ "desc", `String desc
+    ; "lang", `String lang
+    ; "supports_repeated_rewrites", `Bool supports_repeated_rewrites
+    ; "plurals_in_s", `Bool plurals_in_s
+    ]
+
 let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
   let rules = if List.is_empty rules then [ `Rewrite "erofa"; `Rect1990; `Oe ] else rules in
   let rewrite_rules, oe, rect1990 =
@@ -172,13 +207,11 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
            |> List.sort ~compare:String.compare
            |> String.concat ~sep:" "
          in
-         `Assoc
-           [ "desc", `String name
-           ; "lang", `String "fr"
-           ; "supports_repeated_rewrites",
-             `Bool (List.for_all rewrite_rules ~f:Rewrite.supports_repeated_rewrites)
-           ; "plurals_in_s", `Bool plurals_in_s
-           ]
+         json_of_metadata
+           ~desc:name
+           ~lang:"fr"
+           ~supports_repeated_rewrites:(List.for_all rewrite_rules ~f:Rewrite.supports_repeated_rewrites)
+           ~plurals_in_s
          |> json_to_string
          |> (fun s -> s ^ "\n")
          |> output
