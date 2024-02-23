@@ -467,7 +467,7 @@ let create () : t =
     rule_xm "a" ["a"] "@";
     rule_xm "ai" ["e"; "E"] "5";
     rule_xm "i" ["i"] "5";
-    rule_xm "o" ["o"] "§";
+    rule_xm "o" ["o"; "O"] "§";
     rule_xm "u" ["y"] "1";
     rule_xm "y" ["i"] "5";
   );
