@@ -205,7 +205,7 @@ async function plausibly_lang(b, lang, root, debug, force_fallback) {
 function rewrite_under(options, table, root){
     let count = 0
     let to_remove = []
-    const backgroundColor = options.background_color || '#b9f4b9'
+    const backgroundColor = options.background_color || options.default_background_color || '#b9f4b9'
     const plurals_in_s = options.plurals_in_s != false;
     const walk = make_walk(root);
     while(n=walk.nextNode()) {
@@ -377,9 +377,28 @@ function load_dict(options) {
     return table
 }
 
+function default_highlighting() {
+    // You can check if the user prefers dark mode, and maybe if the site supports dark
+    // mode, but you can't really ask "is this site using dark mode now?". So we just
+    // check the background color. It would be more principled to put a class on the rewritten
+    // text, but good enough for now.
+    const color = window.getComputedStyle(document.body).getPropertyValue('background-color');
+    const color_components = color.match(/\d+/g);
+    if (color_components
+        && color_components.length == 3
+        && color_components.reduce((a, b) => a + (b | 0),0) < 255 / 2 * 3
+       ) {
+        return '#106410'
+    }
+    return '#b9f4b9'
+}
+
 function normalize_options(options) {
     if (!options.rewrite) {
         options.rewrite = options.disable ? 'disable' : 'erofa';
+    }
+    if (!options.default_background_color) {
+        options.default_background_color = default_highlighting()
     }
 }
 
