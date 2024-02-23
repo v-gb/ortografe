@@ -35,8 +35,16 @@ let () =
              C.Arg.value (C.Arg.pos 1 (C.Arg.some C.Arg.string) None
                             (C.Arg.info ~docv:"OUTPUT_FILE" []))
            and+ convert_uppercase =
-             C.Arg.value (C.Arg.flag
-                            (C.Arg.info ~doc:"réécrit les mots tout en majuscule (que l'on traite comme des noms propres et excluont par défaut)" ["convert-uppercase"]))
+             let+ b =
+               (* We don't do this in the extension, but some books seems to regularly
+                  have uppercase text hardcoded rather than as styling, and so we miss
+                  bits of text.  It seems less annoying if we convert these. *)
+               C.Arg.value
+                 (C.Arg.flag
+                    (C.Arg.info
+                       ~doc:"ne pas réécrire les mots tout en majuscule" ["no-convert-uppercase"]))
+             in
+             not b
            and+ rules = Dict_gen.rules_cli ()
            and+ dict_file =
              C.Arg.value
