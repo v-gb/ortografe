@@ -200,7 +200,7 @@ let iter_pure_text ~options src ~f =
        match Hashtbl.find_opt dict wu with
        | Some res -> f (recapitalize res)
        | None ->
-          match depluralize wu with
+          match if options.plurals_in_s then depluralize wu else None with
           | None -> f w
           | Some wu ->
              match Hashtbl.find_opt dict wu with

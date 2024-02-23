@@ -4,6 +4,7 @@ let options =
   { Ortografe.convert_uppercase = false
   ; dict = force Ortografe.erofa
   ; interleaved = true
+  ; plurals_in_s = true
   }
 
 let pp_xml src =
@@ -58,8 +59,9 @@ Mots simples: comment choix photographie.
 Diacritiques: nfd la\204\128 paralle\204\128le
               nfc l\195\160  parall\195\168le
 Urls: https://comment/choix/photographie-123-prix
+Pluriels: hommes.
 Capitalisation: Choix.
-Tirets: plouf-européennes
+Tirets: plouf-européenne
 Majuscules: HISTOIRE.
 " in
   let rewrite1 = Ortografe.pure_text ~options test ~dst:String in
@@ -69,17 +71,30 @@ Majuscules: HISTOIRE.
     Diacritiques: nfd l\195\160 paral\195\168le
                   nfc l\195\160  paral\195\168le
     Urls: https://comment/choix/photographie-123-prix
+    Pluriels: omes.
     Capitalisation: Chois.
-    Tirets: plouf-europ\195\169\195\168nes
+    Tirets: plouf-europ\195\169\195\168ne
     Majuscules: HISTOIRE. "];
-  let rewrite2 =
-    Ortografe.pure_text test ~dst:String
-      ~options:{options with convert_uppercase = true}
-  in
-  print_string (diff_strings rewrite1 rewrite2 ~context:0);
-  [%expect "
-    -Majuscules: HISTOIRE.
-    +Majuscules: ISTOIRE."];
+  (
+    let rewrite2 =
+      Ortografe.pure_text test ~dst:String
+        ~options:{options with convert_uppercase = true}
+    in
+    print_string (diff_strings rewrite1 rewrite2 ~context:0);
+    [%expect "
+      -Majuscules: HISTOIRE.
+      +Majuscules: ISTOIRE."];
+  );
+  (
+    let rewrite2 =
+      Ortografe.pure_text test ~dst:String
+        ~options:{options with plurals_in_s = false}
+    in
+    print_string (diff_strings rewrite1 rewrite2 ~context:0);
+    [%expect "
+      -Pluriels: omes.
+      +Pluriels: hommes."];
+  );
   let rewrite3 =
     Ortografe.pure_text
       ~dst:String

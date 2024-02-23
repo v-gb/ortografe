@@ -43,7 +43,9 @@ let rec rewrite ~books_html = function
        |> Ortografe.html
             ~options:{ convert_uppercase = false
                      ; dict = Lazy.force Ortografe.erofa
-                     ; interleaved = true }
+                     ; interleaved = true
+                     ; plurals_in_s = true
+                     }
             ~dst:String
        |> trees_of_string
        |> List.hd_exn

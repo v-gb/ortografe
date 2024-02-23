@@ -85,7 +85,8 @@ let () =
                           (match Sys.getenv "INTERLEAVED" with
                            | "false" -> false
                            | _ | exception Not_found -> true)
-             }
+                      ; plurals_in_s = true
+                      }
              arg1 arg2)
       ; Dict_gen.gen_cmd "dict"
           ~static:(static ())

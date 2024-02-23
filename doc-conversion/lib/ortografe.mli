@@ -4,6 +4,7 @@ type options =
   { convert_uppercase : bool
   ; dict : (string, string) Hashtbl.t
   ; interleaved : bool
+  ; plurals_in_s : bool
   }
 
 type 'a out =

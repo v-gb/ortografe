@@ -165,7 +165,8 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                   (match Ortografe.convert_string ~ext fcontents
                            ~options:{ convert_uppercase = false
                                     ; dict = Lazy.force Ortografe.erofa
-                                    ; interleaved = true }
+                                    ; interleaved = true
+                                    ; plurals_in_s = true }
                    with
                    | exception e -> respond_error_text (`Status 422) (Printexc.to_string e)
                    | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
