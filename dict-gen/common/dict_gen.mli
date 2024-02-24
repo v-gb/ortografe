@@ -12,7 +12,7 @@ val build_erofa_ext
    -> lexique:Data.Lexique.t
    -> (string * string) list
 
-type static =
+type embedded =
   { data_lexique_Lexique383_gen_tsv : string
   ; extension_dict1990_gen_csv : string
   }
@@ -37,7 +37,7 @@ val gen
     -> all:bool
     -> output:(string -> unit)
     -> json_to_string: (_ json -> string)
-    -> [ `Static of static | `Values of values ]
+    -> [ `Embedded of embedded | `Values of values ]
     -> [ `Stats of Sexp.t ]
 
 type metadata =

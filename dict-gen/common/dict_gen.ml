@@ -84,7 +84,7 @@ let build_erofa_ext ~erofa ~post90 ~lexique =
   Hashtbl.filter_inplace base ~f:(fun (_, rank) -> rank >= 0 (* i.e. "not from erofa" *));
   ranked base
 
-type static =
+type embedded =
   { data_lexique_Lexique383_gen_tsv : string
   ; extension_dict1990_gen_csv : string
   }
@@ -178,7 +178,7 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
   let post90, lexique =
     match data with
     | `Values { post90; lexique } -> post90, lexique
-    | `Static { data_lexique_Lexique383_gen_tsv; extension_dict1990_gen_csv } ->
+    | `Embedded { data_lexique_Lexique383_gen_tsv; extension_dict1990_gen_csv } ->
        time ~profile "read1990" (fun () ->
            Data.parse_post90 extension_dict1990_gen_csv),
        time ~profile "readerofa" (fun () ->

@@ -22,7 +22,7 @@ let json_to_string v =
   in
   Jstr.to_string (Brr.Json.encode (to_js v))
 
-let generate ?profile static rules =
+let generate ?profile embedded rules =
   let t1 = Stdlib.Sys.time () in
   let buf = Buffer.create 1_000_000 in
   let `Stats stats =
@@ -32,7 +32,7 @@ let generate ?profile static rules =
       ~all:false
       ~output:(Buffer.add_string buf)
       ~json_to_string
-      (`Static static)
+      (`Embedded embedded)
   in
   let t2 = Stdlib.Sys.time () in
   let sexp_str =
@@ -79,7 +79,7 @@ let fetch url =
 
 let on_message (lexique_url, dict1990_url, rules, profile) ~k =
   let open Fut.Result_syntax in
-  let* static =
+  let* embedded =
     time_fut ~profile "fetch" (fun () ->
         let* data_lexique_Lexique383_gen_tsv = fetch lexique_url in
         let* extension_dict1990_gen_csv = fetch dict1990_url in
@@ -87,7 +87,7 @@ let on_message (lexique_url, dict1990_url, rules, profile) ~k =
                ; extension_dict1990_gen_csv
           })
   in
-  match generate ~profile static rules with
+  match generate ~profile embedded rules with
   | exception e -> Fut.error (Jv.Error.v (Jstr.of_string (Exn.to_string e)))
   | v -> Fut.ok (k v)
 

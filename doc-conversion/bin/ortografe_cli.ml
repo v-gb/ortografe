@@ -1,4 +1,4 @@
-let static () : Dict_gen_common.Dict_gen.static =
+let embedded : Dict_gen_common.Dict_gen.embedded =
   { data_lexique_Lexique383_gen_tsv = Ortografe_embedded.data_lexique_Lexique383_gen_tsv
   ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv }  
 
@@ -76,7 +76,7 @@ let () =
                         ~all:false
                         ~output:(Buffer.add_string b)
                         ~json_to_string:(Yojson.to_string)
-                        (`Static (static ()))
+                        (`Embedded embedded)
                     in
                     parse_dict (Buffer.contents b)
                 )
@@ -92,7 +92,7 @@ let () =
                       }
              arg1 arg2)
       ; Dict_gen.gen_cmd "dict"
-          ~static:(static ())
+          ~embedded
           ~doc:"génération de dictionnaires de réécriture personnalisés pour la conversion \
                 de document, ou pour l'extension de navigateur internet"
       ]

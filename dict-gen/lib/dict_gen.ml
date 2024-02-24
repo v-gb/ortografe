@@ -63,15 +63,15 @@ let with_flow ~env ~write ~diff ~drop ~f =
      else Eio.Buf_write.with_flow (Eio.Stdenv.stdout env) f;
      None
 
-let gen ~env ?(static : Dict_gen.static option) ~rules ~all ~write ~diff ~drop () =
+let gen ~env ?(embedded : Dict_gen.embedded option) ~rules ~all ~write ~diff ~drop () =
   let root = lazy (root ~from:(Eio.Stdenv.fs env)) in
   let lexique =
-    Data_fs.load_lexique (match static with
+    Data_fs.load_lexique (match embedded with
                            | None -> `Root (force root)
                            | Some r -> `Str r.data_lexique_Lexique383_gen_tsv)
   in
   let post90 =
-    Data_fs.load_post90 (match static with
+    Data_fs.load_post90 (match embedded with
                          | None -> `Root (force root)
                          | Some r -> `Str r.extension_dict1990_gen_csv)
   in
@@ -112,7 +112,7 @@ let rules_cli () =
       and+ acc in
       if present then rule :: acc else acc)
 
-let gen_cmd ?static ?doc name =
+let gen_cmd ?embedded ?doc name =
   let module C = Cmdliner in
   let open Cmdliner_bindops in
   C.Cmd.v (C.Cmd.info ?doc name)
@@ -129,7 +129,7 @@ let gen_cmd ?static ?doc name =
                       (C.Arg.info ~doc:"(pour profiler) jeter le dictionnaire calculé" ["drop"]))
      in
      Eio_main.run (fun env ->
-         try gen ?static ~env ~rules ~all ~write ~diff ~drop ()
+         try gen ?embedded ~env ~rules ~all ~write ~diff ~drop ()
          with Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _) ->
            ()))
 
