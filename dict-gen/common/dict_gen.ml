@@ -162,7 +162,7 @@ let json_of_metadata ~desc ~lang ~supports_repeated_rewrites ~plurals_in_s =
     ; "plurals_in_s", `Bool plurals_in_s
     ]
 
-let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
+let interpret_rules rules =
   let rules = if List.is_empty rules then [ `Rewrite "erofa"; `Rect1990; `Oe ] else rules in
   let rewrite_rules, oe, rect1990 =
     let oe = ref false in
@@ -175,6 +175,10 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
     in
     rules, !oe, !rect1990
   in
+  rules, rewrite_rules, oe, rect1990
+
+let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
+  let rules, rewrite_rules, oe, rect1990 = interpret_rules rules in
   let post90, lexique =
     match data with
     | `Values { post90; lexique } -> post90, lexique
