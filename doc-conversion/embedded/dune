@@ -1,0 +1,11 @@
+(library
+ (name ortografe_embedded))
+
+(rule
+ (deps
+   (sandbox always)
+   (:lexique %{project_root}/data/lexique/Lexique383.gen.tsv))
+ (action (with-stdout-to ortografe_embedded.ml
+          (run bash
+               -euo pipefail
+               -c "echo -n 'let data_lexique_Lexique383_gen_tsv = {|'; cat %{lexique}; echo '|}';"))))

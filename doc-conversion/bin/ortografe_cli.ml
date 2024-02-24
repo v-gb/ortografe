@@ -1,5 +1,5 @@
 let static () : Dict_gen_common.Dict_gen.static =
-  { data_lexique_Lexique383_gen_tsv = Dict.data_lexique_Lexique383_gen_tsv
+  { data_lexique_Lexique383_gen_tsv = Ortografe_embedded.data_lexique_Lexique383_gen_tsv
   ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv }  
 
 let parse_dict str =
