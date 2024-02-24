@@ -1251,53 +1251,54 @@ type stats =
   }
 [@@deriving sexp_of]
 
+let compose_rules rules ~which_rules =
+  let which_rules =
+    let rank rule =
+      if rule.name = emment__ament (* avant qua/ca car on crée des qua *)
+      then -3
+      else if rule.name = qua_o__ca_o (* avant qu__q sinon les qua ont été tranformés en qa *)
+      then -2
+      else if rule.name = qu__q || rule.name = qu__qou
+      then -1
+      else 0
+    in
+    List.stable_sort which_rules
+      ~compare:(fun r1 r2 -> Int.compare (rank r1) (rank r2))
+  in
+  match which_rules with
+  | [] ->
+     (erofa_rule rules).compute,
+     (fun word phon -> find_relevant_patterns word phon <>$ 0)
+  | _ :: _ ->
+     let compute =
+       let rev_computes, _ =
+         List.fold_left which_rules ~init:([], rules) ~f:(fun (acc, rules) rule ->
+             let { rules; compute } = rule.f rules in
+             (compute :: acc, rules))
+       in
+       let computes = List.rev rev_computes in
+       fun row_search_res ->
+       List.fold_left computes ~init:row_search_res ~f:(fun row_search_res compute ->
+           compute row_search_res)
+     in
+     let prefilter =
+       match
+         List.map which_rules ~f:(fun r ->
+             match r.prefilter () with
+             | `All -> raise Stdlib.Exit
+             | `Re re -> re)
+       with
+       | exception Stdlib.Exit -> (fun _ _ -> true)
+       | res ->
+          let re = Re.compile (Re.alt (Re.str "oe" :: res)) in
+          fun word _ -> Re.execp re word
+     in
+     compute, prefilter
+
 let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) lexique f =
   let rules = Rules.create () in
   let skip = load_skip () in
-  let rule, prefilter =
-    let which_rules =
-      let rank rule =
-        if rule.name = emment__ament (* avant qua/ca car on crée des qua *)
-        then -3
-        else if rule.name = qua_o__ca_o (* avant qu__q sinon les qua ont été tranformés en qa *)
-        then -2
-        else if rule.name = qu__q || rule.name = qu__qou
-        then -1
-        else 0
-      in
-      List.stable_sort which_rules
-        ~compare:(fun r1 r2 -> Int.compare (rank r1) (rank r2))
-    in
-    match which_rules with
-    | [] ->
-       (erofa_rule rules).compute,
-       (fun word phon -> find_relevant_patterns word phon <>$ 0)
-    | _ :: _ ->
-       let compute =
-         let rev_computes, _ =
-           List.fold_left which_rules ~init:([], rules) ~f:(fun (acc, rules) rule ->
-               let { rules; compute } = rule.f rules in
-               (compute :: acc, rules))
-         in
-         let computes = List.rev rev_computes in
-         fun row_search_res ->
-         List.fold_left computes ~init:row_search_res ~f:(fun row_search_res compute ->
-             compute row_search_res)
-       in
-       let prefilter =
-         match
-           List.map which_rules ~f:(fun r ->
-               match r.prefilter () with
-               | `All -> raise Stdlib.Exit
-               | `Re re -> re)
-         with
-         | exception Stdlib.Exit -> (fun _ _ -> true)
-         | res ->
-            let re = Re.compile (Re.alt (Re.str "oe" :: res)) in
-            fun word _ -> Re.execp re word
-       in
-       compute, prefilter
-  in
+  let rule, prefilter = compose_rules rules ~which_rules in
   let total = ref 0 in
   let considered = ref 0 in
   let prefiltered_out = ref 0 in
