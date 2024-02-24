@@ -154,13 +154,14 @@ let metadata_of_json (json : _ json) =
   ; plurals_in_s = !plurals_in_s
   }
 
-let json_of_metadata ~desc ~lang ~supports_repeated_rewrites ~plurals_in_s =
+let json_of_metadata t =
   `Assoc
-    [ "desc", `String desc
-    ; "lang", `String lang
-    ; "supports_repeated_rewrites", `Bool supports_repeated_rewrites
-    ; "plurals_in_s", `Bool plurals_in_s
-    ]
+    (List.filter_opt
+       [ Option.map t.desc ~f:(fun s -> "desc", `String s)
+       ; Option.map t.lang ~f:(fun s -> "lang", `String s)
+       ; Option.map t.supports_repeated_rewrites ~f:(fun b -> "supports_repeated_rewrites", `Bool b)
+       ; Option.map t.plurals_in_s ~f:(fun b -> "plurals_in_s", `Bool b)
+       ])
 
 let interpret_rules rules =
   let rules = if List.is_empty rules then [ `Rewrite "erofa"; `Rect1990; `Oe ] else rules in
@@ -175,10 +176,25 @@ let interpret_rules rules =
     in
     rules, !oe, !rect1990
   in
-  rules, rewrite_rules, oe, rect1990
+  let metadata =
+    let name =
+      List.map rules ~f:name
+      |> List.sort ~compare:String.compare
+      |> String.concat ~sep:" "
+    in
+    let plurals_in_s = List.for_all rewrite_rules ~f:Rewrite.plurals_in_s in
+    { desc = Some name
+    ; lang = Some "fr"
+    ; supports_repeated_rewrites =
+        Some (List.for_all rewrite_rules ~f:Rewrite.supports_repeated_rewrites)
+    ; plurals_in_s = Some plurals_in_s
+    }
+  in
+  rewrite_rules, oe, rect1990, metadata
 
 let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
-  let rules, rewrite_rules, oe, rect1990 = interpret_rules rules in
+  let rewrite_rules, oe, rect1990, metadata = interpret_rules rules in
+  let plurals_in_s = metadata.plurals_in_s ||? failwith "missing plurals_in_s" in
   let post90, lexique =
     match data with
     | `Values { post90; lexique } -> post90, lexique
@@ -204,18 +220,8 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
       (fun old new_ -> add_ranked all ~key:old ~data:new_),
       (fun () ->
         add_post90_entries all post90;
-        let plurals_in_s = List.for_all rewrite_rules ~f:Rewrite.plurals_in_s in
         simplify_mapping all ~plurals_in_s;
-        (let name =
-           List.map rules ~f:name
-           |> List.sort ~compare:String.compare
-           |> String.concat ~sep:" "
-         in
-         json_of_metadata
-           ~desc:name
-           ~lang:"fr"
-           ~supports_repeated_rewrites:(List.for_all rewrite_rules ~f:Rewrite.supports_repeated_rewrites)
-           ~plurals_in_s
+        (json_of_metadata metadata
          |> json_to_string
          |> (fun s -> s ^ "\n")
          |> output
