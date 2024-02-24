@@ -240,3 +240,36 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
   time ~profile "post-computation" (fun () ->
       after ());
   `Stats [%sexp ~~(stats : Rewrite.stats)]
+
+let staged_gen data =
+  let rect1990 = false (* Simpler for now. We can do the erofa or 1990 rewriting with the
+                          regular [gen] function, which can handle this. *) in
+  let post90, lexique =
+    match data with
+    | `Values { post90; lexique } -> post90, lexique
+    | `Embedded { data_lexique_Lexique383_gen_tsv; extension_dict1990_gen_csv } ->
+       Data.parse_post90 extension_dict1990_gen_csv,
+       Data.Lexique.parse data_lexique_Lexique383_gen_tsv
+  in
+  let lexique = build_lexique_post90 lexique post90 ~rect1990 in
+  let table = Hashtbl.create (module String) ~size:(List.length lexique) in
+  List.iter lexique ~f:(fun row ->
+      ignore (Hashtbl.add table ~key:row.ortho ~data:row : [ `Ok | `Duplicate ]));
+  fun rules ->
+    let rewrite_rules, _oe, _rect1990, metadata = interpret_rules rules in
+    let cache = Hashtbl.create (module String) ~size:200 in
+    let staged = Rewrite.staged_gen ~rules:rewrite_rules () in
+    metadata,
+    fun ortho ->
+      match Hashtbl.find cache ortho with
+      | Some opt -> opt
+      | None ->
+         match Hashtbl.find table ortho with
+         | None -> None (* maybe we should handle the oe and the rect1990 case here: if the word
+                           contains œ, rewrite that to oe, and retry the lookup in [table]. For
+                           rect1990, it should be the same thing if we can pull out the body
+                           of add_post90_entries and call it here. *)
+         | Some row ->
+            let opt = staged row in
+            Hashtbl.add_exn cache ~key:ortho ~data:opt;
+            opt

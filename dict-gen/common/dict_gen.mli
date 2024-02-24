@@ -48,4 +48,9 @@ type metadata =
   }
 val metadata_of_json : _ json -> metadata
 
+val staged_gen
+    : [< `Embedded of embedded | `Values of values ]
+  -> (rule list
+      -> metadata * (string -> string option))
+
 val time : profile:bool -> string -> (unit -> 'a) -> 'a

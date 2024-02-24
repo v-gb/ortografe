@@ -19,7 +19,7 @@ let parse_dict str =
       | _ -> failwith (Printf.sprintf
                          "didn't get exactly 2 items in line %S" l))
     lines;
-  h, plurals_in_s
+  Stdlib.Hashtbl.find_opt h, plurals_in_s
 
 let () =
   let module C = Cmdliner in
@@ -61,29 +61,38 @@ let () =
              match rules, dict_file with
              | _ :: _, Some _ -> failwith "cannot specify both dictionary rules and --dict-file"
              | [], Some file -> parse_dict (Core.In_channel.read_all file)
-             | [], None -> Lazy.force Ortografe.erofa, None
+             | [], None -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
              | (_ :: _ as rules), None ->
-                (match rules with
-                 | [ rule ] when Dict_gen_common.Dict_gen.name rule = "erofa" ->
-                    Lazy.force Ortografe.erofa, None
-                 | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
-                    Lazy.force Ortografe.rect1990, None
-                 | _ ->
-                    let b = Buffer.create 100 in
-                    let `Stats _ =
-                      Dict_gen_common.Dict_gen.gen
-                        ~rules
-                        ~all:false
-                        ~output:(Buffer.add_string b)
-                        ~json_to_string:(Yojson.to_string)
-                        (`Embedded embedded)
-                    in
-                    parse_dict (Buffer.contents b)
-                )
+                match rules with
+                | [ rule ] when Dict_gen_common.Dict_gen.name rule = "erofa" ->
+                   Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
+                | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
+                   Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), None
+                | _ ->
+                   if not (List.exists (fun r ->
+                               match Dict_gen_common.Dict_gen.name r with
+                               | "oe" | "1990" -> true (* not yet supported *)
+                               | _ -> false) rules)
+                   then
+                     let metadata, dict =
+                       Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) rules in
+                     dict, metadata.plurals_in_s
+                   else (
+                     let b = Buffer.create 100 in
+                     let `Stats _ =
+                       Dict_gen_common.Dict_gen.gen
+                         ~rules
+                         ~all:false
+                         ~output:(Buffer.add_string b)
+                         ~json_to_string:(Yojson.to_string)
+                         (`Embedded embedded)
+                     in
+                     parse_dict (Buffer.contents b)
+                   )
            in
            Ortografe.convert_files
              ~options:{ convert_uppercase
-                      ; dict = Stdlib.Hashtbl.find_opt dict
+                      ; dict
                       ; interleaved =
                           (match Sys.getenv "INTERLEAVED" with
                            | "false" -> false

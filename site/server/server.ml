@@ -142,7 +142,13 @@ let from_filesystem root path request =
     response_headers;
   Lwt.return response
 
+let embedded : Dict_gen_common.Dict_gen.embedded =
+  { data_lexique_Lexique383_gen_tsv = Ortografe_embedded.data_lexique_Lexique383_gen_tsv
+  ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv
+  }  
+
 let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
+  let staged = lazy (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded)) in
   Ortografe.max_size := max_input_size * 2; (* xml can be quite large when decompressed *)
   let static_root = where_to_find_static_files () in
   Dream.run ?port ?tls
@@ -162,11 +168,19 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                   let ext = Filename.extension fname in
                   Dream.log "upload ext:%S size:%s" ext
                     (hum_size_of_bytes (String.length fcontents));
+                  let dict, plurals_in_s =
+                    if false
+                    then
+                      let metadata, dict = (Lazy.force staged) [] in
+                      dict, metadata.plurals_in_s
+                    else
+                      Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
+                  in
                   (match Ortografe.convert_string ~ext fcontents
                            ~options:{ convert_uppercase = false
-                                    ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa)
+                                    ; dict
                                     ; interleaved = true
-                                    ; plurals_in_s = true }
+                                    ; plurals_in_s = plurals_in_s ||? true }
                    with
                    | exception e -> respond_error_text (`Status 422) (Printexc.to_string e)
                    | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
