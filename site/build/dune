@@ -4,12 +4,12 @@
    cmdliner
    cmdliner_bindops
    core
+   core_unix.sys_unix
    dict_gen_common
    dream
    hyper
    ortografe
    ortografe_embedded
-   core_unix.sys_unix
    uri
  )
  (preprocess (pps ppx_jane lwt_ppx ppx_lazy_option_op))
