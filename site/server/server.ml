@@ -177,7 +177,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                       Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
                   in
                   (match Ortografe.convert_string ~ext fcontents
-                           ~options:{ convert_uppercase = false
+                           ~options:{ convert_uppercase = true
                                     ; dict
                                     ; interleaved = true
                                     ; plurals_in_s = plurals_in_s ||? true }
