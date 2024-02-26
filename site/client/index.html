@@ -338,6 +338,24 @@
       </section>
 
       <section>
+        <details>
+          <summary style="list-style: none;"><h3>Support pour d'autres orthographes<span style="text-decoration-line: underline">...</span></h3></summary>
+          <p> Notez que ces orthographes ne sont pas des recommendations (ni des
+            futures recommendations), simplement des possibilités d'expérimentation.
+          </p>
+
+          <form action="/conv" method="post" enctype="multipart/form-data">
+            <label class="upload">
+              <input style="display:none" type="file" name="file" accept=".doc,.docx,.odt,.html,.xhtml,.htmlz,.epub,.txt,.mkd,.md" onchange="form.submit()">
+              choisir un fichier
+            </label>
+            <rules></rules>
+          </form>
+          
+        </details>
+      </section>
+
+      <section>
         <h3>Données</h3>
 
         <p>Nous fournissons des données brutes qui décrivent le passage de l'orthographe

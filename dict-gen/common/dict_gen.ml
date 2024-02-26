@@ -108,6 +108,13 @@ let name = function
   | `Rewrite name -> name
   | `Oe -> "oe"
   | `Rect1990 -> "1990"
+let of_name =
+  let tbl =
+    lazy (Hashtbl.of_alist_exn (module String)
+            (List.map (force all) ~f:(fun rule -> name rule, rule)))
+  in
+  fun n -> Hashtbl.find (force tbl) n
+
 let doc = function
   | `Rewrite name -> Rewrite.doc (Map.find_exn (force rewrite_rule_by_name) name)
   | `Oe -> "Corriger les @oe en @œ, comme @coeur -> @cœur"

@@ -24,6 +24,7 @@ type values =
 type rule
 val all : rule list Lazy.t
 val name : rule -> string
+val of_name : string -> rule option
 val doc : rule -> string
 val html : id_prefix:string -> name_prefix:string -> rule -> string
 
