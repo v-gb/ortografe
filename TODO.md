@@ -72,3 +72,8 @@ De façon générale, voir ./README.md pour comment tout construire.
       donc ça pourrait suffire.
 
 - Supporter la conversion de fichier PDF. Probablement difficile.
+
+- Charger un dictinonaire à partir d'une URL (sur téléphone, il est plus simple que de
+  télécharger un fichier puis de le charger). Encore mieux, remplir le champ par défault
+  d'après le contenu de la page (par exemple, un lien avec une class
+  "orthographe-rationnelle").
