@@ -195,7 +195,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                                         ; interleaved = true
                                         ; plurals_in_s = plurals_in_s ||? true }
                        with
-                       | exception e -> respond_error_text (`Status 422) (Printexc.to_string e)
+                       | exception e -> respond_error_text (`Status 422) (Base.Exn.to_string e)
                        | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
                        | Some (new_ext, new_body) ->
                           let new_fname = Filename.remove_extension fname ^ "-conv" ^ new_ext in
