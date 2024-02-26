@@ -76,13 +76,8 @@ function add_rule_selection_ui() {
     const load_dict_details = document.getElementById("load-dict-details");
     for (const rule of rules) {
         const newnode = document.createElement("div")
-        // All the rule.name and rule.doc here are static, meaning the possible values are
-        // shipped in the extension, and contain no annoying characters like quotes, angle
-        // brackets or ampersands. rule.doc is intended to contain a few html tags
-        // like <i> or <a> for nicer display.
-        newnode.innerHTML = `
-              <input type="checkbox" id="load-${rule.name}" name="load-${rule.name}">
-              <label for="load-${rule.name}"><span><strong>${rule.name}</strong> ${rule.doc}</span></label>`
+        // The html is static, meaning the possible values are shipped in the extension.
+        newnode.innerHTML = rule.html
         load_dict_details.appendChild(newnode)
     }
 }

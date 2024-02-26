@@ -43,31 +43,10 @@ let generate ?profile embedded rules =
 
 let rules () =
   let rules = Lazy.force Dict_gen_common.Dict_gen.all in
-  let ui_doc =
-    let re_word = Re.(compile (seq [ str "@"; rep (compl [set " ->@,."]) ])) in
-    let re_url = Re.(compile (seq [ str "http"; rep (compl [set " ,"]) ])) in
-    fun doc ->
-    doc
-    |> String.substr_replace_all
-         ~pattern:"->"
-         ~with_:"→"
-    |> Re.replace re_word ~all:true ~f:(fun group ->
-           let word = String.chop_prefix_exn (Re.Group.get group 0) ~prefix:"@" in
-           [%string "<i>%{word}</i>"])
-    |> Re.replace re_url ~all:true ~f:(fun group ->
-           let url = Re.Group.get group 0 in
-           let display_url =
-             url
-             |> String.chop_prefix_if_exists ~prefix:"http://"
-             |> String.chop_prefix_if_exists ~prefix:"https://"
-             |> String.chop_prefix_if_exists ~prefix:"www."
-             |> String.chop_suffix_if_exists ~suffix:"/"
-           in
-           [%string "<a href=\"%{url}\">%{display_url}</a>"])
-  in
   Jv.of_list (fun rule ->
       Jv.obj [| "name", Jv.of_string (Dict_gen_common.Dict_gen.name rule)
-              ; "doc", Jv.of_string (ui_doc (Dict_gen_common.Dict_gen.doc rule))
+              ; "html", Jv.of_string (Dict_gen_common.Dict_gen.html rule
+                                        ~id_prefix:"load-" ~name_prefix:"load-")
               ; "v", Jv.Id.to_jv rule
              |]) rules
 

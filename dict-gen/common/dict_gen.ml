@@ -112,6 +112,37 @@ let doc = function
   | `Rewrite name -> Rewrite.doc (Map.find_exn (force rewrite_rule_by_name) name)
   | `Oe -> "Corriger les @oe en @œ, comme @coeur -> @cœur"
   | `Rect1990 -> "Appliquer les rectifications de 1990"
+let html_doc =
+  let re =
+    lazy (
+        Re.(compile (seq [ str "@"; rep (compl [set " ->@,."]) ])),
+        Re.(compile (seq [ str "http"; rep (compl [set " ,"]) ]))
+      ) in
+  fun rule ->
+  let re_word, re_url = force re in
+  doc rule
+  |> String.substr_replace_all
+       ~pattern:"->"
+       ~with_:"→"
+  |> Re.replace re_word ~all:true ~f:(fun group ->
+         let word = String.chop_prefix_exn (Re.Group.get group 0) ~prefix:"@" in
+         [%string "<i>%{word}</i>"])
+  |> Re.replace re_url ~all:true ~f:(fun group ->
+         let url = Re.Group.get group 0 in
+         let display_url =
+           url
+           |> String.chop_prefix_if_exists ~prefix:"http://"
+           |> String.chop_prefix_if_exists ~prefix:"https://"
+           |> String.chop_prefix_if_exists ~prefix:"www."
+           |> String.chop_suffix_if_exists ~suffix:"/"
+         in
+         [%string "<a href=\"%{url}\">%{display_url}</a>"])
+
+let html ~id_prefix ~name_prefix rule =
+  String.strip [%string {|
+<input type="checkbox" id="%{id_prefix ^ name rule}" name="%{name_prefix ^ name rule}">
+<label for="%{id_prefix ^ name rule}"><span><strong>%{name rule}</strong> %{html_doc rule}</span></label>
+|}]
 
 let time ~profile name f =
   if profile then (

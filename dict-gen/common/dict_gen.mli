@@ -25,6 +25,7 @@ type rule
 val all : rule list Lazy.t
 val name : rule -> string
 val doc : rule -> string
+val html : id_prefix:string -> name_prefix:string -> rule -> string
 
 type 'a json =
   [> `Assoc of (string * 'a json) list
