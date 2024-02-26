@@ -11,3 +11,7 @@
  )
  (deps    Emblem_of_La_Francophonie.svg)
  (action  (run ../make-icon)))
+
+(rule
+ (target dict-format.html)
+ (action  (run pandoc %{dep:dict-format.md} -o %{target})))
