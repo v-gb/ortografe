@@ -10,7 +10,7 @@
 (copy_files (files %{project_root}/erofa-texte.pdf))
 (rule
  (targets index.html )
- (action (run ../server/server.exe rewrite-index
+ (action (run ../build/build.exe rewrite-index
               %{dep:../client/index.html}
               %{dep:books.html})))
 
@@ -19,7 +19,7 @@
  (deps    (glob_files %{project_root}/dl.gen/*) (sandbox always))
  (action
   (setenv DUNEROOT %{project_root}
-   (run ../server/server.exe convert-all))))
+   (run ../build/build.exe convert-all))))
 
 (rule
  (targets erofa-texte.pdf)
