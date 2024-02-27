@@ -18,9 +18,9 @@ type stats [@@deriving sexp_of]
 val gen
     :  ?fix_oe:bool
     -> ?not_understood:[ `Raise | `Call of (Sexplib.Sexp.t -> unit) | `Ignore ]
-    -> ?rules: rule list
+    -> rules: rule list
     -> Data.Lexique.t
     -> (string -> string -> unit)
     -> stats
 
-val staged_gen : ?fix_oe:bool -> ?rules: rule list -> unit -> (Data.Lexique.row -> string)
+val staged_gen : ?fix_oe:bool -> rules: rule list -> unit -> (Data.Lexique.row -> string)

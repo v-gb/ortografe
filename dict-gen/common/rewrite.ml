@@ -1269,20 +1269,23 @@ let compose_rules rules ~which_rules =
       ~compare:(fun r1 r2 -> Int.compare (rank r1) (rank r2))
   in
   match which_rules with
-  | [] ->
+  | [ rule ] when rule.name = erofa.name ->
      (erofa_rule rules).compute,
      (fun word phon -> find_relevant_patterns word phon <>$ 0)
-  | _ :: _ ->
+  | _ ->
      let compute =
-       let rev_computes, _ =
-         List.fold_left which_rules ~init:([], rules) ~f:(fun (acc, rules) rule ->
-             let { rules; compute } = rule.f rules in
-             (compute :: acc, rules))
-       in
-       let computes = List.rev rev_computes in
-       fun row_search_res ->
-       List.fold_left computes ~init:row_search_res ~f:(fun row_search_res compute ->
-           compute row_search_res)
+       match which_rules with
+       | [] -> Fn.id
+       | _ :: _ ->
+          let rev_computes, _ =
+            List.fold_left which_rules ~init:([], rules) ~f:(fun (acc, rules) rule ->
+                let { rules; compute } = rule.f rules in
+                (compute :: acc, rules))
+          in
+          let computes = List.rev rev_computes in
+          fun row_search_res ->
+          List.fold_left computes ~init:row_search_res ~f:(fun row_search_res compute ->
+              compute row_search_res)
      in
      let prefilter =
        match
@@ -1298,7 +1301,7 @@ let compose_rules rules ~which_rules =
      in
      compute, prefilter
 
-let staged_gen ?(fix_oe = false) ?rules:(which_rules=[]) () =
+let staged_gen ?(fix_oe = false) ~rules:which_rules () =
   let rules = Rules.create () in
   let skip = load_skip () in
   let rule, prefilter = compose_rules rules ~which_rules in
@@ -1319,7 +1322,7 @@ let staged_gen ?(fix_oe = false) ?rules:(which_rules=[]) () =
            in
            (rule aligned_row).row.ortho
 
-let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) lexique f =
+let gen ?(fix_oe = false) ?(not_understood = `Ignore) ~rules:which_rules lexique f =
   let rules = Rules.create () in
   let skip = load_skip () in
   let rule, prefilter = compose_rules rules ~which_rules in

@@ -90,6 +90,7 @@ let build_erofa_ext ~erofa ~post90 ~lexique =
   ignore (
       let lexique_post90 = build_lexique_post90 lexique post90 ~rect1990:true in
       Rewrite.gen
+        ~rules:[Rewrite.erofa]
         ~not_understood:`Ignore
         ~fix_oe:true (* really only matters for proper nouns like Œdipe, since all other
                           œ get removed *)
