@@ -81,13 +81,13 @@ let repo_root () =
 
 let where_to_find_static_files () =
   if Sys.file_exists "/static" (* when in container *)
-  then "/static"
+  then "/static", `In_container true
   else
     (* In dev, setup symlinks to the files in the repo, so we can just
        modify the files and reload without fiddling with the server. *)
     let repo_root = repo_root () in
     (* keep in sync with Dockerfile *)
-    Filename.concat repo_root "_build/default/site/static"
+    Filename.concat repo_root "_build/default/site/static", `In_container false
 
 let respond_error_text status str =
   let code = Dream.status_to_int status
@@ -147,13 +147,29 @@ let embedded : Dict_gen_common.Dict_gen.embedded =
   ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv
   }  
 
+let define_client_ip : Dream.middleware =
+  fun handler request ->
+  let open Core in
+  (match
+     Dream.headers request "X-Forwarded-For"
+     |> String.concat ~sep:","
+     |> String.split ~on:','
+     |> List.map ~f:String.strip
+     |> List.filter ~f:(function "" -> false | _ -> true)
+     |> List.hd
+   with
+   | None -> ()
+   | Some addr -> Dream.set_client request addr);
+  handler request
+
 let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
   let staged = lazy (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded)) in
   Ortografe.max_size := max_input_size * 2; (* xml can be quite large when decompressed *)
-  let static_root = where_to_find_static_files () in
+  let static_root, `In_container in_container = where_to_find_static_files () in
   Dream.run ?port ?tls
     ~interface:"0.0.0.0" (* apparently only listens on lo otherwise *)
     ~error_handler:(Dream.error_template my_error_template)
+  @@ (if in_container (* approximates "in prod" *) then define_client_ip else Fun.id)
   @@ (if log then Dream.logger else Fun.id)
   @@ Dream.router
        [ Dream.post "/conv" (fun request ->
