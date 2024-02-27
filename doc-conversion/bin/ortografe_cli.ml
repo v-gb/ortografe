@@ -21,10 +21,6 @@ let load_rules rules ~prebuild =
         (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), no_metadata)
      | _ ->
         if not prebuild
-        && not (List.exists (fun r ->
-                    match Dict_gen_common.Dict_gen.name r with
-                    | "oe" | "1990" -> true (* not yet supported *)
-                    | _ -> false) rules)
         then
           let staged = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
           fun () -> staged rules

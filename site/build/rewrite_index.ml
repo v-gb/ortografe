@@ -56,12 +56,9 @@ let rec rewrite ~books_html = function
   | `Element ((_, "rules"), _, _) ->
      let l = force Dict_gen_common.Dict_gen.all in
      List.filter_map l ~f:(fun rule ->
-         match Dict_gen_common.Dict_gen.name rule with
-         | "oe" | "1990" -> None (* not yet supported in the server *)
-         | _ ->
-            let name_prefix = "" in
-            let id_prefix = "conv-" in
-            Some [%string "<div>%{Dict_gen_common.Dict_gen.html ~name_prefix ~id_prefix rule}</div>\n"])
+         let name_prefix = "" in
+         let id_prefix = "conv-" in
+         Some [%string "<div>%{Dict_gen_common.Dict_gen.html ~name_prefix ~id_prefix rule}</div>\n"])
      |> String.concat
      |> trees_of_string
   | `Element (name, attrs, children) ->
