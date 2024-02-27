@@ -78,7 +78,7 @@ rien: rien
 1990 + érofa: apparaître
 oe: oedipien oedipienne
 œ: œdipien œdipienne
-cas difficile: chariot
+cas difficile: chariot chariotage
 |} in
   let check_and_compare rules =
     let all_at_once = convert ~rules ~which_dict:`All_at_once str in
@@ -94,7 +94,7 @@ cas difficile: chariot
     1990 + érofa: aparaître
     oe: oedipien oedipiène
     œ: œdipien œdipiène
-    cas dificile: chariot |}];
+    cas dificile: chariot chariotage |}];
   let () = check_and_compare [ "erofa"; "1990" ] in
   [%expect {|
     rien: rien
@@ -103,7 +103,7 @@ cas difficile: chariot
     1990 + érofa: aparaitre
     oe: oedipien oedipiène
     œ: œdipien œdipiène
-    cas dificile: chariot |}];
+    cas dificile: chariot chariotage |}];
   let () = check_and_compare [ "erofa"; "oe" ] in
   [%expect {|
     rien: rien
@@ -112,7 +112,7 @@ cas difficile: chariot
     1990 + érofa: aparaître
     oe: œdipien œdipiène
     œ: œdipien œdipiène
-    cas dificile: chariot |}];
+    cas dificile: chariot chariotage |}];
   let () = check_and_compare [ "erofa"; "1990"; "oe" ] in
   [%expect {|
     rien: rien
@@ -121,7 +121,7 @@ cas difficile: chariot
     1990 + érofa: aparaitre
     oe: œdipien œdipiène
     œ: œdipien œdipiène
-    cas dificile: chariot |}];
+    cas dificile: chariot chariotage |}];
   let () = check_and_compare [ "1990" ] in
   [%expect {|
     rien: rien
@@ -130,7 +130,7 @@ cas difficile: chariot
     1990 + érofa: apparaitre
     oe: oedipien oedipienne
     œ: œdipien œdipienne
-    cas difficile: charriot |}];
+    cas difficile: charriot chariotage |}];
   let () = check_and_compare [ "oe" ] in
   [%expect {|
     rien: rien
@@ -139,7 +139,7 @@ cas difficile: chariot
     1990 + érofa: apparaître
     oe: œdipien œdipienne
     œ: œdipien œdipienne
-    cas difficile: chariot |}];
+    cas difficile: chariot chariotage |}];
   let () = check_and_compare [ "1990"; "oe" ] in
   [%expect {|
     rien: rien
@@ -148,5 +148,5 @@ cas difficile: chariot
     1990 + érofa: apparaitre
     oe: œdipien œdipienne
     œ: œdipien œdipienne
-    cas difficile: charriot |}];
+    cas difficile: charriot chariotage |}];
   ()
