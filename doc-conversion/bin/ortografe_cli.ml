@@ -3,23 +3,11 @@ let embedded : Dict_gen_common.Dict_gen.embedded =
   ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv }  
 
 let parse_dict str =
-  let lines = Core.String.split_lines str in
-  let lines, plurals_in_s =
-    match lines with
-    | first :: lines when String.starts_with first ~prefix:"{" ->
-       let json = Yojson.Basic.from_string first in
-       let metadata = Dict_gen_common.Dict_gen.metadata_of_json json in
-       lines, metadata.plurals_in_s
-    | _ -> lines, None
+  let lookup, metadata =
+    Dict_gen_common.Dict_gen.parse str
+      ~json_of_string:Yojson.Basic.from_string
   in
-  let h = Hashtbl.create (List.length lines) in
-  List.iter (fun l ->
-      match String.split_on_char ',' l with
-      | [ a; b ] -> Hashtbl.replace h a b
-      | _ -> failwith (Printf.sprintf
-                         "didn't get exactly 2 items in line %S" l))
-    lines;
-  fun () -> Stdlib.Hashtbl.find_opt h, plurals_in_s
+  fun () -> lookup, metadata.plurals_in_s
 
 let load_rules rules ~prebuild =
   match rules with
@@ -39,7 +27,7 @@ let load_rules rules ~prebuild =
         then
           let staged = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
           fun () ->
-            let metadata, dict = staged rules in
+            let dict, metadata = staged rules in
             dict, metadata.plurals_in_s
         else (
           let b = Buffer.create 100 in

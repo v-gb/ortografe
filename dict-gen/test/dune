@@ -1,0 +1,14 @@
+(library
+ (name dict_gen_tests)
+ (libraries
+   core
+   dict_gen_common
+   ortografe
+   ortografe_embedded
+   patience_diff
+   yojson
+ )
+ (inline_tests)
+ (preprocess (pps ppx_jane
+                  ppx_uchar_literal
+                  ppx_lazy_option_op)))

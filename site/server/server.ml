@@ -186,7 +186,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                         | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
                            Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), None
                         | _ ->
-                          let metadata, dict = (Lazy.force staged) rules in
+                          let dict, metadata = (Lazy.force staged) rules in
                           dict, metadata.plurals_in_s
                       in
                       (match Ortografe.convert_string ~ext fcontents

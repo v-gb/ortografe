@@ -171,7 +171,12 @@ type metadata =
   ; supports_repeated_rewrites : bool option
   ; plurals_in_s : bool option
   }
-
+let no_metadata =
+  { desc = None
+  ; lang = None
+  ; supports_repeated_rewrites = None
+  ; plurals_in_s = None
+  }
 let metadata_of_json (json : _ json) =
   let desc = ref None in
   let lang = ref None in
@@ -297,8 +302,7 @@ let staged_gen data =
     let rewrite_rules, _oe, _rect1990, metadata = interpret_rules rules in
     let cache = Hashtbl.create (module String) ~size:200 in
     let staged = Rewrite.staged_gen ~rules:rewrite_rules () in
-    metadata,
-    fun ortho ->
+    (fun ortho ->
       match Hashtbl.find cache ortho with
       | Some opt -> opt
       | None ->
@@ -310,4 +314,24 @@ let staged_gen data =
          | Some row ->
             let opt = staged row in
             Hashtbl.add_exn cache ~key:ortho ~data:opt;
-            opt
+            opt),
+    metadata
+
+let parse str ~json_of_string =
+  let lines = String.split_lines str in
+  let lines, metadata =
+    match lines with
+    | first :: lines when String.is_prefix first ~prefix:"{" ->
+       let json = json_of_string first in
+       let metadata = metadata_of_json json in
+       lines, metadata
+    | _ -> lines, no_metadata
+  in
+  let h = Stdlib.Hashtbl.create (List.length lines) in
+  List.iter lines ~f:(fun l ->
+      match String.split ~on:',' l with
+      | [ a; b ] -> Stdlib.Hashtbl.replace h a b
+      | _ -> failwith (Printf.sprintf
+                         "didn't get exactly 2 items in line %S" l));
+  Stdlib.Hashtbl.find_opt h, metadata
+

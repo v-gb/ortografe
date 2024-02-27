@@ -50,9 +50,11 @@ type metadata =
   }
 val metadata_of_json : _ json -> metadata
 
+val parse : string -> json_of_string:(string -> _ json) -> (string -> string option) * metadata
+
 val staged_gen
     : [< `Embedded of embedded | `Values of values ]
   -> (rule list
-      -> metadata * (string -> string option))
+      -> (string -> string option) * metadata)
 
 val time : profile:bool -> string -> (unit -> 'a) -> 'a
