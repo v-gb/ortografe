@@ -12,6 +12,15 @@ let simplify_mapping tbl ~plurals_in_s =
                  | _ -> true)
              | _ -> true))
 
+let change_from_1990_is_undesirable post90 =
+  (* filter out changes such as chariotage->charriotage. In principle, this only make
+     sense if we're simplifying h or double consonants. Close enough for now. *)
+  String.is_prefix post90 ~prefix:"charr"
+  || String.is_prefix post90 ~prefix:"combatt"
+  || String.is_prefix post90 ~prefix:"hindou" (* don't understand if the h is really
+                                                 dropped here? *)
+  || String.(=) post90 "reboursouffler"
+  
 let add_post90_entries base post90 =
   Hashtbl.iteri post90 ~f:(fun ~key:pre90 ~data:post90 ->
       match Hashtbl.find base pre90 with
@@ -25,12 +34,7 @@ let add_post90_entries base post90 =
             Hashtbl.add_exn base ~key:pre90
               ~data:(new_ortho, if rank >= 0 then rank else 100000000)
          | None ->
-            (* filter out changes such as chariotage->charriotage *)
-            if String.is_prefix post90 ~prefix:"charr"
-               || String.is_prefix post90 ~prefix:"combatt"
-               || String.is_prefix post90 ~prefix:"hindou" (* don't understand if the h is really
-                                                              dropped here? *)
-               || String.(=) post90 "reboursouffler"
+            if change_from_1990_is_undesirable post90
             then ()
             else
               (* we created fixed ranks to generated the same ordering as previous code *)
