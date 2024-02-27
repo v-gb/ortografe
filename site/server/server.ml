@@ -181,8 +181,6 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                         match rules with
                         | [] ->
                            Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
-                        | [ rule ] when Dict_gen_common.Dict_gen.name rule = "erofa" ->
-                           Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
                         | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
                            Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), None
                         | _ ->
