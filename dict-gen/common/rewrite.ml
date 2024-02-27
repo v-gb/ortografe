@@ -1297,7 +1297,7 @@ let compose_rules rules ~which_rules =
      in
      compute, prefilter
 
-let staged_gen ?rules:(which_rules=[]) () =
+let staged_gen ?(fix_oe = false) ?rules:(which_rules=[]) () =
   let rules = Rules.create () in
   let skip = load_skip () in
   let rule, prefilter = compose_rules rules ~which_rules in
@@ -1310,7 +1310,13 @@ let staged_gen ?rules:(which_rules=[]) () =
       else
         match Rules.search rules row.ortho row.phon with
         | Error _ -> row.ortho
-        | Ok search_res -> (rule { row; alignment = search_res }).row.ortho
+        | Ok search_res ->
+           let aligned_row =
+             if fix_oe
+             then respell_oe { row; alignment = search_res }
+             else { row; alignment = search_res }
+           in
+           (rule aligned_row).row.ortho
 
 let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) lexique f =
   let rules = Rules.create () in

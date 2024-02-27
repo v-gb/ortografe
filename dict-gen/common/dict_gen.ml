@@ -319,6 +319,22 @@ let staged_gen data =
   let table = Hashtbl.create (module String) ~size:(List.length lexique) in
   List.iter lexique ~f:(fun row ->
       ignore (Hashtbl.add table ~key:row.ortho ~data:(`Lexique row) : [ `Ok | `Duplicate ]));
+  (
+    let pattern_oe = String.Search_pattern.create "oe" in
+    Hashtbl.fold table ~init:[] ~f:(fun ~key:_ ~data acc ->
+        match data with
+        | `Lexique row ->
+           if String.Search_pattern.matches pattern_oe row.ortho
+           then
+             (* This creates nonsense entries like cœxiste, but it doesn't matter as texts
+                won't contain such words, and even if they did by mistake, rewrite.ml won't
+                know how to explain their prononciation and so it won't touch them. *)
+             let ortho = String.Search_pattern.replace_all pattern_oe ~in_:row.ortho ~with_:"œ" in
+             (ortho, `Lexique { row with ortho }) :: acc
+           else acc
+        | `Rect1990 _ -> assert false)
+    |> List.iter ~f:(fun (key, data) -> Hashtbl.add_exn table ~key ~data)
+  );
   Hashtbl.iteri post90 ~f:(fun ~key:pre90 ~data:post90 ->
       match Hashtbl.find table pre90 with
       | Some _ -> ()
@@ -328,11 +344,11 @@ let staged_gen data =
          | None ->
             if change_from_1990_is_undesirable post90
             then ()
-            else Hashtbl.add_exn table ~key:pre90 ~data:(`Rect1990 post90));
-  fun rules ->
-    let rewrite_rules, _oe, rect1990, metadata = interpret_rules rules in
+             else Hashtbl.add_exn table ~key:pre90 ~data:(`Rect1990 post90));
+   fun rules ->
+    let rewrite_rules, oe, rect1990, metadata = interpret_rules rules in
     let cache = Hashtbl.create (module String) ~size:200 in
-    let staged = Rewrite.staged_gen ~rules:rewrite_rules () in
+    let staged = Rewrite.staged_gen ~fix_oe:oe ~rules:rewrite_rules () in
     (fun ortho ->
       match Hashtbl.find cache ortho with
       | Some opt -> opt

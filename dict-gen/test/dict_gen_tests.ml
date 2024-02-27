@@ -94,12 +94,7 @@ cas difficile: chariot
     1990 + érofa: aparaître
     oe: oedipien oedipiène
     œ: œdipien œdipiène
-    cas dificile: chariot
-
-     oe: oedipien oedipiène
-    -œ: œdipien œdipiène
-    +œ: œdipien œdipienne
-     cas dificile: chariot |}];
+    cas dificile: chariot |}];
   let () = check_and_compare [ "erofa"; "1990" ] in
   [%expect {|
     rien: rien
@@ -108,12 +103,7 @@ cas difficile: chariot
     1990 + érofa: aparaitre
     oe: oedipien oedipiène
     œ: œdipien œdipiène
-    cas dificile: chariot
-
-     oe: oedipien oedipiène
-    -œ: œdipien œdipiène
-    +œ: œdipien œdipienne
-     cas dificile: chariot |}];
+    cas dificile: chariot |}];
   let () = check_and_compare [ "erofa"; "oe" ] in
   [%expect {|
     rien: rien
@@ -122,14 +112,7 @@ cas difficile: chariot
     1990 + érofa: aparaître
     oe: œdipien œdipiène
     œ: œdipien œdipiène
-    cas dificile: chariot
-
-     1990 + érofa: aparaître
-    -oe: œdipien œdipiène
-    -œ: œdipien œdipiène
-    +oe: oedipien oedipiène
-    +œ: œdipien œdipienne
-     cas dificile: chariot |}];
+    cas dificile: chariot |}];
   let () = check_and_compare [ "erofa"; "1990"; "oe" ] in
   [%expect {|
     rien: rien
@@ -138,12 +121,5 @@ cas difficile: chariot
     1990 + érofa: aparaitre
     oe: œdipien œdipiène
     œ: œdipien œdipiène
-    cas dificile: chariot
-
-     1990 + érofa: aparaitre
-    -oe: œdipien œdipiène
-    -œ: œdipien œdipiène
-    +oe: oedipien oedipiène
-    +œ: œdipien œdipienne
-     cas dificile: chariot |}];
+    cas dificile: chariot |}];
   ()
