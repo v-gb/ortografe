@@ -13,29 +13,27 @@ let no_metadata = Dict_gen_common.Dict_gen.no_metadata
 let load_rules rules ~prebuild =
   match rules with
   | [] -> (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata)
-  | _ :: _ ->
-     match rules with
-     | [ rule ] when Dict_gen_common.Dict_gen.name rule = "erofa" ->
-        (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata)
-     | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
-        (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), no_metadata)
-     | _ ->
-        if not prebuild
-        then
-          let staged = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
-          fun () -> staged rules
-        else (
-          let b = Buffer.create 100 in
-          let `Stats _ =
-            Dict_gen_common.Dict_gen.gen
-              ~rules
-              ~all:false
-              ~output:(Buffer.add_string b)
-              ~json_to_string:(Yojson.to_string)
-              (`Embedded embedded)
-          in
-          parse_dict (Buffer.contents b)
-        )  
+  | [ rule ] when Dict_gen_common.Dict_gen.name rule = "erofa" ->
+     (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata)
+  | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
+     (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), no_metadata)
+  | _ ->
+     if not prebuild
+     then
+       let staged = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
+       fun () -> staged rules
+     else (
+       let b = Buffer.create 100 in
+       let `Stats _ =
+         Dict_gen_common.Dict_gen.gen
+           ~rules
+           ~all:false
+           ~output:(Buffer.add_string b)
+           ~json_to_string:(Yojson.to_string)
+           (`Embedded embedded)
+       in
+       parse_dict (Buffer.contents b)
+     )  
 
 let bench =
   let module C = Cmdliner in
