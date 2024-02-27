@@ -409,8 +409,9 @@ type rule =
 
 let all = ref []
 let new_rule ?(supports_repeated_rewrites = true) ?(plurals_in_s = true) name doc ~prefilter f =
-  all := { name; doc; f; prefilter; supports_repeated_rewrites; plurals_in_s } :: !all;
-  name
+  let rule = { name; doc; f; prefilter; supports_repeated_rewrites; plurals_in_s } in
+  all := rule :: !all;
+  rule
 let new_rule' ?supports_repeated_rewrites name ?plurals_in_s doc ~prefilter f =
   new_rule name
     ?supports_repeated_rewrites
@@ -626,7 +627,7 @@ let erofa_rule rules =
         !aligned_row
   }
 
-let _ : string =
+let erofa =
   new_rule
     "erofa"
     "Les règles telles que décrites sur http://erofa.free.fr"
@@ -653,7 +654,7 @@ let qu__qou =
       fun env aligned_row ->
         rewrite env aligned_row ~target:pattern_qu ~repl:"qou")
 
-let _ : string =
+let _ : rule =
   new_rule'
     "ti/ci"
     "@nation -> @nacion, @patient -> @pacient, mais @question inchangé"
@@ -677,7 +678,7 @@ let emment__ament =
         aligned_row := rewrite env !aligned_row ~target:pattern_cemment ~repl:"çament";
         !aligned_row)
 
-let _ : string =
+let _ : rule =
   new_rule'
     "oiement/oiment"
     "@aboiement -> @aboiment"
@@ -687,7 +688,7 @@ let _ : string =
       fun env aligned_row ->
         rewrite env aligned_row ~target:pattern_oiement ~repl:"oiment")
 
-let _ : string =
+let _ : rule =
   new_rule'
     "cq/q"
     "@grecque -> @grèque"
@@ -716,7 +717,7 @@ let qua_o__ca_o =
         aligned_row := rewrite env !aligned_row ~target:pattern_quo ~repl:"co";
         !aligned_row)
 
-let _ : string =
+let _ : rule =
   new_rule'
     "sc-sch/c-ch"
     "@science -> @cience, @fasciste -> @fachiste, @schéma -> @chéma"
@@ -737,7 +738,7 @@ let _ : string =
         aligned_row := rewrite env !aligned_row ~target:pattern_sch ~repl:"ch";
         !aligned_row)
 
-let _ : string =
+let _ : rule =
   new_rule'
     "en/an"
     "@enfant -> @anfant"
@@ -747,7 +748,7 @@ let _ : string =
       fun env aligned_row ->
         rewrite env aligned_row ~target:pattern_en ~repl:"an")
 
-let _ : string =
+let _ : rule =
   new_rule'
     "gu/gh"
     "@guerre -> @gherre (et @aigüe -> @aigue en principe, mais non implémenté)"
@@ -757,7 +758,7 @@ let _ : string =
       fun env aligned_row ->
         rewrite env aligned_row ~target:pattern_gu ~repl:"gh")
 
-let _ : string =
+let _ : rule =
   new_rule'
     "g/j"
     "@mange -> @manje"
@@ -773,7 +774,7 @@ let _ : string =
         aligned_row := rewrite env !aligned_row ~target:pattern_g ~repl:"j";
         !aligned_row)
 
-let _ : string =
+let _ : rule =
   new_rule'
     "ez/es"
     "@mangez -> @mangés"
@@ -783,7 +784,7 @@ let _ : string =
       fun env aligned_row ->
         rewrite env aligned_row ~target:pattern_ez ~repl:"és")
 
-let _ : string =
+let _ : rule =
   new_rule'
     "ent/es"
     "@mangent -> @manges"
@@ -797,7 +798,7 @@ let _ : string =
         aligned_row := rewrite env !aligned_row ~target:pattern_ent ~repl:"es";
         !aligned_row)
 
-let _ : string =
+let _ : rule =
   new_rule'
     "m-mbp/n-mbp"
     "@emmène -> @enmène, @nymphe -> @nynphe"
@@ -813,7 +814,7 @@ let _ : string =
         aligned_row := rewrite env !aligned_row ~target:pattern_mm ~repl:"nm";
         !aligned_row)
 
-let _ : string =
+let _ : rule =
   new_rule'
     "aux/als"
     "@chevaux -> @chevals, @travaux -> @travails"
@@ -849,7 +850,7 @@ let map_valid_utf_8 str ~f =
   done;
   List.rev !acc
 
-let _ : string =
+let _ : rule =
   new_rule'
     "il/y"
      "@fille -> @fiye, mais @ville inchangé"
@@ -893,7 +894,7 @@ let _ : string =
          keep_if_plausible env aligned_row new_ortho)
 
 let dummy_search_res : Rules.search_res = { path = []; surprise = 0 }
-let _ : string list =
+let _ : rule list =
   let pluriel_en_plus = true in
   let e_accente_unique =
     match `A with
@@ -1042,7 +1043,7 @@ let _ : string list =
              in
              { row = { aligned_row.row with ortho }; alignment = dummy_search_res }))
 
-let _ : string =
+let _ : rule =
   new_rule'
     ~supports_repeated_rewrites:false
     ~plurals_in_s:false
@@ -1107,7 +1108,7 @@ let _ : string =
         in
         { row = { aligned_row.row with ortho }; alignment = dummy_search_res })
 
-let (_ : string), ou__omega =
+let (_ : rule), ou__omega =
   let f w name =
     new_rule'
       ("ou/" ^ name)
@@ -1143,9 +1144,9 @@ let (_ : string), ou__omega =
     (* autres symboles dans unicode qui pourrait ressembler à des double-u,
        càd des w arrondi ɯ ш ѡ *)
 
-let _ : string =
-  if true then "" else
-  new_rule
+let _ : rule option =
+  if true then None else
+  Some (new_rule
     "u-ou-io/y-u-ua"
     "créer une lettre @ou en utilisant @u comme en latin. Pour ce faire, remplace @y par @î, @u par @y, @ou par @u (et @oi par @ua)"
     ~prefilter:(fun () -> `All)
@@ -1206,7 +1207,7 @@ let _ : string =
             |> String.chop_suffix_if_exists ~suffix:"$"
           in
           { row = { !aligned_row.row with ortho }; alignment = dummy_search_res }
-    })
+    }))
 
 let respell_oe (aligned_row : aligned_row) =
   (* Lexique contient toujours œ écrit oe. On recolle les lettres, pour qu'on puisse
@@ -1254,13 +1255,13 @@ type stats =
 let compose_rules rules ~which_rules =
   let which_rules =
     let rank rule =
-      if rule.name = emment__ament (* avant qua/ca car on crée des qua *)
+      if rule.name = emment__ament.name (* avant qua/ca car on crée des qua *)
       then -3
-      else if rule.name = qua_o__ca_o (* avant qu__q sinon les qua ont été tranformés en qa *)
+      else if rule.name = qua_o__ca_o.name (* avant qu__q sinon les qua ont été tranformés en qa *)
       then -2
-      else if rule.name = qu__q || rule.name = qu__qou
+      else if rule.name = qu__q.name || rule.name = qu__qou.name
       then -1
-      else if rule.name = ou__omega
+      else if rule.name = ou__omega.name
       then 1 (* créer des caractéres qui n'existent pas en français *)
       else 0
     in

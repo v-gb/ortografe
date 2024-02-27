@@ -9,6 +9,7 @@ val load_skip : unit -> (Data.Lexique.row -> bool)
 type rule
 val doc : rule -> string
 val name : rule -> string
+val erofa : rule
 val all : rule list Lazy.t
 val supports_repeated_rewrites : rule -> bool
 val plurals_in_s : rule -> bool

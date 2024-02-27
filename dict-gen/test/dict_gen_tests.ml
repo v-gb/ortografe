@@ -131,5 +131,22 @@ cas difficile: chariot
     oe: oedipien oedipiène
     œ: œdipien œdipiène
     cas dificile: chariot |}];
-  (* should be charriot *)
+  let () = check_and_compare [ "oe" ] in
+  [%expect {|
+    rien: rien
+    érofa: ritme aparaitre
+    1990: maître wallabies
+    1990 + érofa: aparaître
+    oe: œdipien œdipiène
+    œ: œdipien œdipiène
+    cas dificile: chariot |}];
+  let () = check_and_compare [ "1990"; "oe" ] in
+  [%expect {|
+    rien: rien
+    érofa: ritme aparaitre
+    1990: maitre wallabys
+    1990 + érofa: aparaitre
+    oe: œdipien œdipiène
+    œ: œdipien œdipiène
+    cas dificile: chariot |}];
   ()
