@@ -49,6 +49,7 @@ type metadata =
   ; plurals_in_s : bool option
   }
 val metadata_of_json : _ json -> metadata
+val no_metadata : metadata
 
 val parse : string -> json_of_string:(string -> _ json) -> (string -> string option) * metadata
 

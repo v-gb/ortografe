@@ -7,17 +7,18 @@ let parse_dict str =
     Dict_gen_common.Dict_gen.parse str
       ~json_of_string:Yojson.Basic.from_string
   in
-  fun () -> lookup, metadata.plurals_in_s
+  fun () -> lookup, metadata
 
+let no_metadata = Dict_gen_common.Dict_gen.no_metadata
 let load_rules rules ~prebuild =
   match rules with
-  | [] -> (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None)
+  | [] -> (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata)
   | _ :: _ ->
      match rules with
      | [ rule ] when Dict_gen_common.Dict_gen.name rule = "erofa" ->
-        (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None)
+        (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata)
      | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
-        (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), None)
+        (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), no_metadata)
      | _ ->
         if not prebuild
         && not (List.exists (fun r ->
@@ -26,9 +27,7 @@ let load_rules rules ~prebuild =
                     | _ -> false) rules)
         then
           let staged = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
-          fun () ->
-            let dict, metadata = staged rules in
-            dict, metadata.plurals_in_s
+          fun () -> staged rules
         else (
           let b = Buffer.create 100 in
           let `Stats _ =
@@ -56,7 +55,7 @@ let bench =
      let staged = load_rules rules ~prebuild in
      for i = 1 to 5 do
        let t1 = Sys.time () in
-       let dict, plurals_in_s = staged () in
+       let dict, metadata = staged () in
        Ortografe.convert_files
          ~options:{ convert_uppercase = true
                   ; dict
@@ -64,7 +63,7 @@ let bench =
                       (match Sys.getenv "INTERLEAVED" with
                        | "false" -> false
                        | _ | exception Not_found -> true)
-                  ; plurals_in_s = plurals_in_s ||? true
+                  ; plurals_in_s = metadata.plurals_in_s ||? true
          }
          arg1 (Some "/dev/null");
        let t2 = Sys.time () in
@@ -108,11 +107,11 @@ let () =
                   (C.Arg.info ~docv:"FILENAME" ["dict-file"]
                      ~doc:"a filename, for instance as output by $(mname) dict"))
            in
-           let dict, plurals_in_s =
+           let dict, metadata =
              match rules, dict_file with
              | _ :: _, Some _ -> failwith "cannot specify both dictionary rules and --dict-file"
              | [], Some file -> parse_dict (Core.In_channel.read_all file) ()
-             | [], None -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
+             | [], None -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata
              | (_ :: _ as rules), None -> load_rules rules ~prebuild:false ()
            in
            Ortografe.convert_files
@@ -122,7 +121,7 @@ let () =
                           (match Sys.getenv "INTERLEAVED" with
                            | "false" -> false
                            | _ | exception Not_found -> true)
-                      ; plurals_in_s = plurals_in_s ||? true
+                      ; plurals_in_s = metadata.plurals_in_s ||? true
                       }
              arg1 arg2)
       ; bench
