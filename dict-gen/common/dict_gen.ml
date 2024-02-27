@@ -12,16 +12,17 @@ let simplify_mapping tbl ~plurals_in_s =
                  | _ -> true)
              | _ -> true))
 
-let change_from_1990_is_undesirable post90 =
-  (* filter out changes such as chariotage->charriotage. In principle, this only make
-     sense if we're simplifying h or double consonants. Close enough for now. *)
-  String.is_prefix post90 ~prefix:"charr"
-  || String.is_prefix post90 ~prefix:"combatt"
-  || String.is_prefix post90 ~prefix:"hindou" (* don't understand if the h is really
-                                                 dropped here? *)
-  || String.(=) post90 "reboursouffler"
+let change_from_1990_is_undesirable ~has_erofa post90 =
+  has_erofa
+  && (
+    (* filter out changes such as chariotage->charriotage *)
+    String.is_prefix post90 ~prefix:"charr"
+    || String.is_prefix post90 ~prefix:"combatt"
+    || String.is_prefix post90 ~prefix:"hindou" (* don't understand if the h is really
+                                                   dropped here? *)
+    || String.(=) post90 "reboursouffler")
   
-let add_post90_entries base post90 =
+let add_post90_entries base post90 ~has_erofa =
   Hashtbl.iteri post90 ~f:(fun ~key:pre90 ~data:post90 ->
       match Hashtbl.find base pre90 with
       | Some _ -> () (* erofa dictionary contains pre-1990 spellings, like frisotter rather than
@@ -34,7 +35,7 @@ let add_post90_entries base post90 =
             Hashtbl.add_exn base ~key:pre90
               ~data:(new_ortho, if rank >= 0 then rank else 100000000)
          | None ->
-            if change_from_1990_is_undesirable post90
+            if change_from_1990_is_undesirable post90 ~has_erofa
             then ()
             else
               (* we created fixed ranks to generated the same ordering as previous code *)
@@ -97,7 +98,7 @@ let build_erofa_ext ~erofa ~post90 ~lexique =
         lexique_post90
         (fun old new_ -> add_ranked base ~key:old ~data:new_)
       : Rewrite.stats);
-  add_post90_entries base post90;
+  add_post90_entries base post90 ~has_erofa:true;
   simplify_mapping base ~plurals_in_s:true;
   Hashtbl.filter_inplace base ~f:(fun (_, rank) -> rank >= 0 (* i.e. "not from erofa" *));
   ranked base
@@ -112,6 +113,7 @@ type values =
   }
 
 type rule = [ `Oe | `Rect1990 | `Rewrite of string ]
+[@@deriving compare]
 let rewrite_rule_by_name =
   lazy (
       List.map (force Rewrite.all)
@@ -226,6 +228,7 @@ let json_of_metadata t =
 
 let interpret_rules rules =
   let rules = if List.is_empty rules then [ `Rewrite "erofa"; `Rect1990; `Oe ] else rules in
+  let has_erofa = List.mem rules (`Rewrite "erofa") ~equal:[%compare.equal: rule] in
   let rewrite_rules, oe, rect1990 =
     let oe = ref false in
     let rect1990 = ref false in
@@ -251,10 +254,10 @@ let interpret_rules rules =
     ; plurals_in_s = Some plurals_in_s
     }
   in
-  rewrite_rules, oe, rect1990, metadata
+  has_erofa, rewrite_rules, oe, rect1990, metadata
 
 let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
-  let rewrite_rules, oe, rect1990, metadata = interpret_rules rules in
+  let has_erofa, rewrite_rules, oe, rect1990, metadata = interpret_rules rules in
   let plurals_in_s = metadata.plurals_in_s ||? failwith "missing plurals_in_s" in
   let post90, lexique =
     match data with
@@ -280,7 +283,7 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
       let all = Hashtbl.create (module String) ~size:(List.length lexique) in
       (fun old new_ -> add_ranked all ~key:old ~data:new_),
       (fun () ->
-        add_post90_entries all post90;
+        add_post90_entries all post90 ~has_erofa;
         simplify_mapping all ~plurals_in_s;
         (json_of_metadata metadata
          |> json_to_string
@@ -343,11 +346,11 @@ let staged_gen data =
          match Hashtbl.find table post90 with
          | Some _ -> ()
          | None ->
-            if change_from_1990_is_undesirable post90
-            then ()
-             else Hashtbl.add_exn table ~key:pre90 ~data:(`Rect1990 post90));
+            Hashtbl.add_exn table
+              ~key:pre90
+              ~data:(`Rect1990 (post90, change_from_1990_is_undesirable post90 ~has_erofa:true)));
    fun rules ->
-    let rewrite_rules, oe, rect1990, metadata = interpret_rules rules in
+    let has_erofa, rewrite_rules, oe, rect1990, metadata = interpret_rules rules in
     let cache = Hashtbl.create (module String) ~size:200 in
     let staged = Rewrite.staged_gen ~fix_oe:oe ~rules:rewrite_rules () in
     (fun ortho ->
@@ -356,8 +359,12 @@ let staged_gen data =
       | None ->
          match Hashtbl.find table ortho with
          | None -> None
-         | Some (`Rect1990 post90) ->
-            let opt = if rect1990 then Some post90 else None in
+         | Some (`Rect1990 (post90, undesirable_if_erofa)) ->
+            let opt =
+              if rect1990 && (not undesirable_if_erofa || not has_erofa)
+              then Some post90
+              else None
+            in
             Hashtbl.add_exn cache ~key:ortho ~data:opt;
             opt
          | Some (`Lexique row) ->

@@ -130,7 +130,7 @@ cas difficile: chariot chariotage
     1990 + érofa: apparaitre
     oe: oedipien oedipienne
     œ: œdipien œdipienne
-    cas difficile: charriot chariotage |}];
+    cas difficile: charriot charriotage |}];
   let () = check_and_compare [ "oe" ] in
   [%expect {|
     rien: rien
@@ -148,5 +148,5 @@ cas difficile: chariot chariotage
     1990 + érofa: apparaitre
     oe: œdipien œdipienne
     œ: œdipien œdipienne
-    cas difficile: charriot chariotage |}];
+    cas difficile: charriot charriotage |}];
   ()
