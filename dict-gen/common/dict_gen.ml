@@ -316,7 +316,12 @@ let staged_gen data =
                            rect1990, it should be the same thing if we can pull out the body
                            of add_post90_entries and call it here. *)
          | Some row ->
-            let opt = staged row in
+            let new_ortho = staged row in
+            let opt =
+              if phys_equal ortho new_ortho || String.(=) ortho new_ortho
+              then None
+              else Some new_ortho
+            in
             Hashtbl.add_exn cache ~key:ortho ~data:opt;
             opt),
     metadata

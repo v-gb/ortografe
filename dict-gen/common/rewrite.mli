@@ -22,4 +22,4 @@ val gen
     -> (string -> string -> unit)
     -> stats
 
-val staged_gen : ?rules: rule list -> unit -> (Data.Lexique.row -> string option)
+val staged_gen : ?rules: rule list -> unit -> (Data.Lexique.row -> string)

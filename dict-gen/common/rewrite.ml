@@ -1303,18 +1303,14 @@ let staged_gen ?rules:(which_rules=[]) () =
   let rule, prefilter = compose_rules rules ~which_rules in
   fun row ->
     if skip row
-    then None
+    then row.ortho
     else
       if not (prefilter row.ortho row.phon)
-      then None
+      then row.ortho
       else
         match Rules.search rules row.ortho row.phon with
-        | Error _ -> None
-        | Ok search_res ->
-           let { row = row'; _ } = rule { row; alignment = search_res } in
-           if row.ortho <> row'.ortho
-           then Some row'.ortho
-           else None
+        | Error _ -> row.ortho
+        | Ok search_res -> (rule { row; alignment = search_res }).row.ortho
 
 let gen ?(fix_oe = false) ?(not_understood = `Ignore) ?rules:(which_rules=[]) lexique f =
   let rules = Rules.create () in
