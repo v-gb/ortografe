@@ -59,6 +59,19 @@ let build_lexique_post90 (lexique : Data.Lexique.t) post90 ~rect1990 =
 
      Or even graffito -> grafito becoming graffito -> graffiti.
    *)
+  (* The code might be simpler if we returned instead:
+     List.concat_map lexique ~f:(fun r ->
+        match Hashtbl.find post90 r.ortho with
+        | None -> [ r ]
+        | Some new_ortho ->
+          let r_new = { r with ortho = new_ortho } in
+          [ r.ortho, (if rect1990 then r_new else t)
+          ; new_ortho, r_new
+          ])
+
+      This would increase computations a bit when applying 1990 rectifications (we'd try to
+      convert both « maitre » and « maître » separately instead of once), but maybe that
+      makes no difference in practice. *)
   if rect1990
   then
     List.map lexique ~f:(fun r ->
@@ -289,8 +302,6 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
   `Stats [%sexp ~~(stats : Rewrite.stats)]
 
 let staged_gen data =
-  let rect1990 = false (* Simpler for now. We can do the erofa or 1990 rewriting with the
-                          regular [gen] function, which can handle this. *) in
   let post90, lexique =
     match data with
     | `Values { post90; lexique } -> post90, lexique
@@ -298,12 +309,28 @@ let staged_gen data =
        Data.parse_post90 extension_dict1990_gen_csv,
        Data.Lexique.parse data_lexique_Lexique383_gen_tsv
   in
-  let lexique = build_lexique_post90 lexique post90 ~rect1990 in
+  let lexique =
+    build_lexique_post90 lexique post90 ~rect1990:false
+    (* [rect1990:false] so the lexique has one entry for each of « maitre » and « maître ».
+       When rewriting « maître » once we know the specific rules in effect, if we want to
+       apply the 1990 rectifications, we will use [post90] to transform « maître » into
+       « maitre » first. *)
+  in
   let table = Hashtbl.create (module String) ~size:(List.length lexique) in
   List.iter lexique ~f:(fun row ->
-      ignore (Hashtbl.add table ~key:row.ortho ~data:row : [ `Ok | `Duplicate ]));
+      ignore (Hashtbl.add table ~key:row.ortho ~data:(`Lexique row) : [ `Ok | `Duplicate ]));
+  Hashtbl.iteri post90 ~f:(fun ~key:pre90 ~data:post90 ->
+      match Hashtbl.find table pre90 with
+      | Some _ -> ()
+      | None ->
+         match Hashtbl.find table post90 with
+         | Some _ -> ()
+         | None ->
+            if change_from_1990_is_undesirable post90
+            then ()
+            else Hashtbl.add_exn table ~key:pre90 ~data:(`Rect1990 post90));
   fun rules ->
-    let rewrite_rules, _oe, _rect1990, metadata = interpret_rules rules in
+    let rewrite_rules, _oe, rect1990, metadata = interpret_rules rules in
     let cache = Hashtbl.create (module String) ~size:200 in
     let staged = Rewrite.staged_gen ~rules:rewrite_rules () in
     (fun ortho ->
@@ -311,12 +338,23 @@ let staged_gen data =
       | Some opt -> opt
       | None ->
          match Hashtbl.find table ortho with
-         | None -> None (* maybe we should handle the oe and the rect1990 case here: if the word
-                           contains œ, rewrite that to oe, and retry the lookup in [table]. For
-                           rect1990, it should be the same thing if we can pull out the body
-                           of add_post90_entries and call it here. *)
-         | Some row ->
-            let new_ortho = staged row in
+         | None -> None
+         | Some (`Rect1990 post90) ->
+            let opt = if rect1990 then Some post90 else None in
+            Hashtbl.add_exn cache ~key:ortho ~data:opt;
+            opt
+         | Some (`Lexique row) ->
+            let new_ortho =
+              let row =
+                if rect1990
+                then
+                  match Hashtbl.find post90 ortho with
+                  | None -> row
+                  | Some post90_ortho -> { row with ortho = post90_ortho }
+                else row
+              in
+              staged row
+            in
             let opt =
               if phys_equal ortho new_ortho || String.(=) ortho new_ortho
               then None

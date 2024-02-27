@@ -110,11 +110,6 @@ cas difficile: chariot
     œ: œdipien œdipiène
     cas dificile: chariot
 
-     érofa: ritme aparaitre
-    -1990: maitre wallabys
-    -1990 + érofa: aparaitre
-    +1990: maître wallabies
-    +1990 + érofa: aparaître
      oe: oedipien oedipiène
     -œ: œdipien œdipiène
     +œ: œdipien œdipienne
@@ -145,13 +140,9 @@ cas difficile: chariot
     œ: œdipien œdipiène
     cas dificile: chariot
 
-     érofa: ritme aparaitre
-    -1990: maitre wallabys
-    -1990 + érofa: aparaitre
+     1990 + érofa: aparaitre
     -oe: œdipien œdipiène
     -œ: œdipien œdipiène
-    +1990: maître wallabies
-    +1990 + érofa: aparaître
     +oe: oedipien oedipiène
     +œ: œdipien œdipienne
      cas dificile: chariot |}];
