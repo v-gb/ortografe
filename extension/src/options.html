@@ -25,6 +25,15 @@
           visibility: hidden;
       }
 
+      #load-dict-section ul {
+          margin-top: 0;
+          /* list-style-type: none; */
+      }
+      #load-dict-section li {
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+      }
+
        /* https://css-tricks.com/snippets/css/non-form-fieldset-look/
           tweaked quite a bit to make it almost like firefox's.
           Ideally I'd have margin-top: 1em, but that create scrollbars for reasons
@@ -177,45 +186,48 @@
       </div>
 
       <div id="load-dict-section">
-        <form class="form-onchange">
-          <div>
-            <label for="load-dict-input" class="btn">charger un dictionnaire depuis un fichier</label>
-            <input style="display:none" type="file" id="load-dict-input">
-            <a href="./dict-format.html" target="_blank">doc du format</a>
-          </div>
-          <div id='file_error'></div>
-        </form>
-        
-        <form class="form-onchange">
-          <details id="load-dict-details">
-            <summary>Ou explorer d'autres orthographes</summary>
-            <span> Notez que ces orthographes ne sont pas des recommendations (ni des
-                   futures recommendations), simplement des possibilités d'expérimentation.
-            </span>
-            <div>
-              <input style="display:none" type="checkbox" id="load-checkbox" name="load-checkbox">
-              <label class="btn" for="load-checkbox" id="load-checkbox-label">
-                Charger la sélection (rien de sélectionné)
-              </label>
-              <div style="display:inline-block">
-                <div class="idle" id="floatingCirclesG">
-                  <div class="f_circleG" id="frotateG_01"></div>
-                  <div class="f_circleG" id="frotateG_02"></div>
-                  <div class="f_circleG" id="frotateG_03"></div>
-                  <div class="f_circleG" id="frotateG_04"></div>
-                  <div class="f_circleG" id="frotateG_05"></div>
-                  <div class="f_circleG" id="frotateG_06"></div>
-                  <div class="f_circleG" id="frotateG_07"></div>
-                  <div class="f_circleG" id="frotateG_08"></div>
-                </div>
-              </div>
-            </div>
-          </details>
-          <div id='load_error'></div>
-        </form>
-      </div>
+        Charger un dictionnaire
+        <ul>
+          <li>
+            <form class="form-onchange">
+              <label for="load-dict-input" class="btn">choisir un fichier</label>
+              <input style="display:none" type="file" id="load-dict-input">
+              (<a href="./dict-format.html" target="_blank">doc du format</a>)
+              <div id='file_error'></div>
+            </form>
+          </li>
 
-      <br>
+          <li>
+            <form class="form-onchange">
+              <details id="load-dict-details">
+                <summary>combiner des règles</summary>
+                <span> Notez que ces orthographes ne sont pas des recommendations (ni des
+                  futures recommendations), simplement des possibilités d'expérimentation.
+                </span>
+                <div>
+                  <input style="display:none" type="checkbox" id="load-checkbox" name="load-checkbox">
+                  <label class="btn" for="load-checkbox" id="load-checkbox-label">
+                    Charger la sélection (rien de sélectionné)
+                  </label>
+                  <div style="display:inline-block">
+                    <div class="idle" id="floatingCirclesG">
+                      <div class="f_circleG" id="frotateG_01"></div>
+                      <div class="f_circleG" id="frotateG_02"></div>
+                      <div class="f_circleG" id="frotateG_03"></div>
+                      <div class="f_circleG" id="frotateG_04"></div>
+                      <div class="f_circleG" id="frotateG_05"></div>
+                      <div class="f_circleG" id="frotateG_06"></div>
+                      <div class="f_circleG" id="frotateG_07"></div>
+                      <div class="f_circleG" id="frotateG_08"></div>
+                    </div>
+                  </div>
+                </div>
+              </details>
+              <div id='load_error'></div>
+            </form>
+          </li>
+        </ul>
+      </div>
 
       <form class="form-onchange">
         <details>
