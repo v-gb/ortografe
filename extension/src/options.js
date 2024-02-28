@@ -97,10 +97,10 @@ async function saveOptions(e) {
             try {
                 const file = e.target.files.item(0)
                 set_dict(parse_dict(await file.text()));
-                document.getElementById("file_error").innerText = "";
+                document.getElementById("load_error").innerText = "";
                 await display_dict_preview()
             } catch (e) {
-                document.getElementById("file_error").innerText = "error importing file " + e.toString();
+                document.getElementById("load_error").innerText = "error importing file " + e.toString();
             }
         }
     } else if (e.target.id.startsWith("load-")) {
