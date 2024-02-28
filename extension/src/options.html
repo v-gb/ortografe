@@ -21,8 +21,21 @@
           padding: 3px 4px;
       }
 
+      input, button, textarea, select {
+          font: inherit;
+      }
+
       .idle {
           visibility: hidden;
+      }
+
+      .dl-icon {
+          height: 1.6em;
+          width: auto;
+          vertical-align: sub;
+          /* seems like there should be a better way to center? */
+          position: relative;
+          top: 3px;
       }
 
       #load-dict-section ul {
@@ -30,8 +43,8 @@
           /* list-style-type: none; */
       }
       #load-dict-section li {
-          margin-top: 0.5em;
-          margin-bottom: 0.5em;
+          margin-top: 0.3em;
+          margin-bottom: 0.3em;
       }
 
        /* https://css-tricks.com/snippets/css/non-form-fieldset-look/
@@ -57,6 +70,11 @@
           margin-right: 0;
           background: #fff;
           padding: 0 3px;
+      }
+
+      pre:empty {
+          /* ensure the error nodes don't waste space when empty */
+          margin: 0;
       }
 
 /* https://cssload.net/en/spinners */
@@ -186,14 +204,21 @@
       </div>
 
       <div id="load-dict-section">
-        Charger un dictionnaire
-        <div id='load_error'></div>
+        <span>Charger un dictionnaire</span>
+        <pre id='load_error'></pre>
         <ul>
           <li>
             <form class="form-onchange">
               <label for="load-dict-input" class="btn">choisir un fichier</label>
               <input style="display:none" type="file" id="load-dict-input">
               (<a href="./dict-format.html" target="_blank">doc du format</a>)
+            </form>
+          </li>
+
+          <li>
+            <form id="dict-link-form">
+              <input style="min-width: 15.5em" type="text" id="dict-link" placeholder="lien d'un fichier à télécharger">
+              <input class="dl-icon" type="image" src="download_12181265.png" id="dict-link">
             </form>
           </li>
 
@@ -259,6 +284,10 @@
       </form>
 
     </section>
+
+    <div style="font-size: 0.7rem">
+      <a href="https://www.freepik.com/icon/download_12181265#fromView=search&page=1&position=9&uuid=5794a2cc-1cc9-4e5a-b1f6-12b83f9d87bb">Icon by Awicon</a>
+    </div>
 
     <script src="dict_gen.bc.js"></script>
     <script src="options.js"></script>

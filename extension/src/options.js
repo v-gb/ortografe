@@ -187,10 +187,31 @@ async function restoreOptions() {
     }
 }
 
+async function download_dict(e) {
+    e.preventDefault();
+    try {
+        const link = document.getElementById("dict-link").value;
+        const response = await fetch(link);
+        if (!response.ok) {
+            // actually necessary, otherwise you get terrible behavior
+            throw new Error(`${response.status} ${response.statusText}`);
+        }
+        const dict = await response.text()
+        set_dict(parse_dict(dict));
+        await display_dict_preview()
+        document.getElementById("dict-link").value = ""
+        document.getElementById("load_error").textContent = ""
+    } catch (e) {
+        document.getElementById("load_error").textContent = e.toString() // + "\n" + e.stack
+        throw e
+    }
+}
+
 document.addEventListener('DOMContentLoaded', restoreOptions);
 for (const elt of document.querySelectorAll(".form-onchange")) {
     elt.addEventListener("change", saveOptions);
 }
+document.getElementById("dict-link-form").addEventListener("submit", download_dict);
 const open_options_page_elt = document.getElementById("open-options-page")
 const load_dict = document.getElementById("load-dict-section")
 // On firefox on computer, the "#popup" is all we need, to distinguish between the popup
