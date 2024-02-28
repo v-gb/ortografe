@@ -24,6 +24,32 @@
       .idle {
           visibility: hidden;
       }
+
+       /* https://css-tricks.com/snippets/css/non-form-fieldset-look/
+          tweaked quite a bit to make it almost like firefox's.
+          Ideally I'd have margin-top: 1em, but that create scrollbars for reasons
+          that I don't understand and don't plan to dig into. */
+      .fieldset {
+          position: relative;
+          border: 1.8px solid #bbb;
+          margin: 0em 2px 0px 2px; 
+          padding: 1em 0.8em 0.7em 0.8em;
+      }
+
+      .fieldset h1 {
+          position: absolute;
+          top: 0;
+          font-size: unset;
+          font-weight: normal;
+          line-height: 1;
+          margin-top: calc(-0.5em);
+          margin-bottom: 0;
+          margin-left: 0;
+          margin-right: 0;
+          background: #fff;
+          padding: 0 3px;
+      }
+
 /* https://cssload.net/en/spinners */
 #floatingCirclesG {
     position:relative;
@@ -107,8 +133,8 @@
 
   <body style="min-width:25em;">
     <form>
-    <fieldset>
-      <legend>Configuration:</legend>
+    <section class="fieldset">
+      <h1>Configuration</h1>
 
       <div>
         <input type="checkbox" id="color-checkbox" name="color-checkbox">
@@ -216,7 +242,7 @@
         <pre><code id=debug-info>?</code></pre>
       </details>
       <div id='error'></div>
-    </fieldset>
+    </section>
     </form>
 
     <script src="dict_gen.bc.js"></script>
