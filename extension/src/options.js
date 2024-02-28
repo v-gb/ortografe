@@ -40,6 +40,12 @@ function parse_dict(str) {
             meta.plurals_in_s = meta_json.plurals_in_s;
         }
     }
+    for (const line of lines.slice(0,10)) {
+        let num_commas = line.match(/,/g)?.length || 0
+        if (num_commas != 1) {
+            throw new Error(`unexpected line (expected one comma per line, found ${num_commas})`)
+        }
+    }
     const data = lines.join("\n")
     return data ? { 'meta': meta, 'data': data } : null;
 }
