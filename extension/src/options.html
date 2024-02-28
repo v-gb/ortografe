@@ -136,31 +136,31 @@
       <h1>Configuration</h1>
 
       <form>
-      <div>
-        <input type="checkbox" id="color-checkbox" name="color-checkbox">
-        <label for="color-checkbox">surligner les mots réécrits</label>
-      </div>
-      <br>
-      <div>
-        Comment réécrire :
         <div>
-          <input type="radio" id="rewrite-disable" name="rewrite-radio" value="disable">
-          <label for="rewrite-disable">ne rien réécrire</label>
+          <input type="checkbox" id="color-checkbox" name="color-checkbox">
+          <label for="color-checkbox">surligner les mots réécrits</label>
         </div>
+        <br>
         <div>
-          <input type="radio" id="rewrite-erofa" name="rewrite-radio" value="erofa">
-          <label for="rewrite-erofa">convertir vers l'orthographe érofa (défaut)</label>
+          Comment réécrire :
+          <div>
+            <input type="radio" id="rewrite-disable" name="rewrite-radio" value="disable">
+            <label for="rewrite-disable">ne rien réécrire</label>
+          </div>
+          <div>
+            <input type="radio" id="rewrite-erofa" name="rewrite-radio" value="erofa">
+            <label for="rewrite-erofa">convertir vers l'orthographe érofa (défaut)</label>
+          </div>
+          <div>
+            <input type="radio" id="rewrite-rect1990" name="rewrite-radio" value="rect1990">
+            <label for="rewrite-rect1990">convertir vers les rectifications de 1990</label>
+          </div>
+          <div>
+            <input type="radio" id="rewrite-custom" name="rewrite-radio" value="custom">
+            <label for="rewrite-custom">convertir avec un dictionnaire que vous chargez</label>
+            (actuellement : <span id="dict"></span>)
+          </div>
         </div>
-        <div>
-          <input type="radio" id="rewrite-rect1990" name="rewrite-radio" value="rect1990">
-          <label for="rewrite-rect1990">convertir vers les rectifications de 1990</label>
-        </div>
-        <div>
-          <input type="radio" id="rewrite-custom" name="rewrite-radio" value="custom">
-          <label for="rewrite-custom">convertir avec un dictionnaire que vous chargez</label>
-          (actuellement : <span id="dict"></span>)
-        </div>
-      </div>
       </form>
 
       <br>
@@ -218,33 +218,33 @@
       <br>
 
       <form>
-      <details>
-        <summary>Pour débugger</summary>
-        <div>
-          <input type="checkbox" id="disable-watch-checkbox" name="disable-watch-checkbox">
-          <label for="disable-watch-checkbox">désactiver la réécriture quand la page change</label>
-        </div>
+        <details>
+          <summary>Pour débugger</summary>
+          <div>
+            <input type="checkbox" id="disable-watch-checkbox" name="disable-watch-checkbox">
+            <label for="disable-watch-checkbox">désactiver la réécriture quand la page change</label>
+          </div>
 
-        <div>
-          <input type="checkbox" id="trivial-checkbox" name="trivial-checkbox">
-          <label for="trivial-checkbox">réécrire les "a" en "X"</label>
-        </div>
-        <div>
-          <input type="checkbox" id="debug-changes-checkbox" name="debug-changes-checkbox">
-          <label for="debug-changes-checkbox">plus de logs à propos des mutations du DOM</label>
-        </div>
-        <div>
-          <input type="checkbox" id="debug-language-checkbox" name="debug-language-checkbox">
-          <label for="debug-language-checkbox">plus de logs à propos de la détection de la langue</label>
-        </div>
-        <div>
-          <input type="checkbox" id="debug-lang-test-checkbox" name="debug-lang-test-checkbox">
-          <label for="debug-lang-test-checkbox">utiliser la détection de langue faite maison</label>
-        </div>
-        <br>
-        <pre><code id=debug-info>?</code></pre>
-      </details>
-      <div id='error'></div>
+          <div>
+            <input type="checkbox" id="trivial-checkbox" name="trivial-checkbox">
+            <label for="trivial-checkbox">réécrire les "a" en "X"</label>
+          </div>
+          <div>
+            <input type="checkbox" id="debug-changes-checkbox" name="debug-changes-checkbox">
+            <label for="debug-changes-checkbox">plus de logs à propos des mutations du DOM</label>
+          </div>
+          <div>
+            <input type="checkbox" id="debug-language-checkbox" name="debug-language-checkbox">
+            <label for="debug-language-checkbox">plus de logs à propos de la détection de la langue</label>
+          </div>
+          <div>
+            <input type="checkbox" id="debug-lang-test-checkbox" name="debug-lang-test-checkbox">
+            <label for="debug-lang-test-checkbox">utiliser la détection de langue faite maison</label>
+          </div>
+          <br>
+          <pre><code id=debug-info>?</code></pre>
+        </details>
+        <div id='error'></div>
       </form>
 
     </section>
