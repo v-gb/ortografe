@@ -188,7 +188,7 @@ async function restoreOptions() {
 }
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
-for (const elt of document.querySelectorAll("form")) {
+for (const elt of document.querySelectorAll(".form-onchange")) {
     elt.addEventListener("change", saveOptions);
 }
 const open_options_page_elt = document.getElementById("open-options-page")

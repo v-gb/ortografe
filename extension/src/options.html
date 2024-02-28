@@ -135,7 +135,7 @@
     <section class="fieldset">
       <h1>Configuration</h1>
 
-      <form>
+      <form class="form-onchange">
         <div>
           <input type="checkbox" id="color-checkbox" name="color-checkbox">
           <label for="color-checkbox">surligner les mots réécrits</label>
@@ -177,7 +177,7 @@
       </div>
 
       <div id="load-dict-section">
-        <form>
+        <form class="form-onchange">
           <div>
             <label for="load-dict-input" class="btn">charger un dictionnaire depuis un fichier</label>
             <input style="display:none" type="file" id="load-dict-input">
@@ -186,7 +186,7 @@
           <div id='file_error'></div>
         </form>
         
-        <form>
+        <form class="form-onchange">
           <details id="load-dict-details">
             <summary>Ou explorer d'autres orthographes</summary>
             <span> Notez que ces orthographes ne sont pas des recommendations (ni des
@@ -217,7 +217,7 @@
 
       <br>
 
-      <form>
+      <form class="form-onchange">
         <details>
           <summary>Pour débugger</summary>
           <div>
