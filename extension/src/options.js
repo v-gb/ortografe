@@ -189,8 +189,14 @@ async function restoreOptions() {
 
 async function download_dict(e) {
     e.preventDefault();
+    document.getElementById("load_error").textContent = ""
     try {
         const link = document.getElementById("dict-link").value;
+        if (!link) return;
+        if (!link.startsWith("http://") && !link.startsWith("https://")) {
+            // prevents grabbing files relative to extension itself, which is weird
+            throw new Error(`${link} n'est pas un lien http/https`);
+        }
         const response = await fetch(link);
         if (!response.ok) {
             // actually necessary, otherwise you get terrible behavior
@@ -200,9 +206,8 @@ async function download_dict(e) {
         set_dict(parse_dict(dict));
         await display_dict_preview()
         document.getElementById("dict-link").value = ""
-        document.getElementById("load_error").textContent = ""
     } catch (e) {
-        document.getElementById("load_error").textContent = e.toString() // + "\n" + e.stack
+        document.getElementById("load_error").textContent = (new Date()).toLocaleTimeString() + ": " + e.toString() // + "\n" + e.stack
         throw e
     }
 }
