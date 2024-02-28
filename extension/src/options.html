@@ -132,10 +132,10 @@
   </head>
 
   <body style="min-width:25em;">
-    <form>
     <section class="fieldset">
       <h1>Configuration</h1>
 
+      <form>
       <div>
         <input type="checkbox" id="color-checkbox" name="color-checkbox">
         <label for="color-checkbox">surligner les mots réécrits</label>
@@ -161,6 +161,8 @@
           (actuellement : <span id="dict"></span>)
         </div>
       </div>
+      </form>
+
       <br>
       <!-- We make people go to the options page, because file input basically doesn't
            work in popup windows. Essentially, the focus moves away from the popup when
@@ -215,6 +217,7 @@
 
       <br>
 
+      <form>
       <details>
         <summary>Pour débugger</summary>
         <div>
@@ -242,8 +245,9 @@
         <pre><code id=debug-info>?</code></pre>
       </details>
       <div id='error'></div>
+      </form>
+
     </section>
-    </form>
 
     <script src="dict_gen.bc.js"></script>
     <script src="options.js"></script>

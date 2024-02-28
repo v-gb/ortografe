@@ -188,7 +188,9 @@ async function restoreOptions() {
 }
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
-document.querySelector("form").addEventListener("change", saveOptions);
+for (const elt of document.querySelectorAll("form")) {
+    elt.addEventListener("change", saveOptions);
+}
 const open_options_page_elt = document.getElementById("open-options-page")
 const load_dict = document.getElementById("load-dict-section")
 // On firefox on computer, the "#popup" is all we need, to distinguish between the popup
