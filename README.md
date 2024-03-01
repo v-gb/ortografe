@@ -7,8 +7,8 @@ This project contains tools to help with proposed spelling rationalizations for 
   not in French, to avoid messing up English text.
   
   This extension is deployed:
-    - [for firefox](https://addons.mozilla.org/fr/firefox/addon/orthographe-rationnelle/) (computer and phone)
-    - [for chrome](https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl), and presumably all chromium-based browsers. Chrome doesn't support extensions on Android, but some of the other chromium-based browsers do, so the extension should work there.
+    - [to firefox](https://addons.mozilla.org/fr/firefox/addon/orthographe-rationnelle/) (computer and phone)
+    - [to chrome](https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl), and presumably all chromium-based browsers. Chrome doesn't support extensions on Android, but some of the other chromium-based browsers do, so the extension should work there.
 
     
 - a [WIP website](https://ortografe-server.fly.dev/), to transcribe text and documents
