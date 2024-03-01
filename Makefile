@@ -1,4 +1,4 @@
-.PHONY: first-install all all-w serve build-container run-container fly-deploy
+.PHONY: first-install all all-w serve build-container run-container fly-deploy tarball
 
 all:
 	dune build --trace-file _build/trace ./server_all.exe @default @runtest
@@ -34,3 +34,7 @@ first-install:
 	# stuff from wikisource, which is a problem and is thus not automatic
 	opam exec -- dune build extension/extension2.zip
 	@ echo "[32mExtensions built at _build/default/extension/*.zip ![39m"
+
+tarball:
+	@ # requested by the firefox addon website, due to the generated javascript
+	jj files | tar -zcf source.tar.gz --files-from=-
