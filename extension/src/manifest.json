@@ -3,7 +3,7 @@
     "name": "Orthographe rationnelle",
     "version": "2.1",
 
-    "description": "Réécrit les pages web de l'orthographe normale à une orthographe rationalisée (mais pas phonétique)",
+    "description": "Réécrit les pages web de l'orthographe normale à une orthographe rationalisée",
 
     "browser_specific_settings": {
         "gecko": {
