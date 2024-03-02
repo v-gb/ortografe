@@ -5,7 +5,7 @@ const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes',
 const all_fields = ['disable'].concat(fields)
 
 async function display_dict_preview() {
-    const custom_dict = (await storage_get('custom_dict')).custom_dict
+    const { custom_dict } = (await storage_get('custom_dict'))
     const elt = document.getElementById("dict")
     if (custom_dict?.data) {
         const lines = custom_dict.data.trim().split('\n');
@@ -104,7 +104,7 @@ async function saveOptions(e) {
                 const file = e.target.files.item(0)
                 set_dict(parse_dict(await file.text()));
                 document.getElementById("load_error").innerText = "";
-                await display_dict_preview()
+                await display_dict_preview();
             } catch (e) {
                 document.getElementById("load_error").innerText = "error importing file " + e.toString();
             }
@@ -120,7 +120,7 @@ async function saveOptions(e) {
                     try {
                         const dict = await compute_dict(rules);
                         set_dict(parse_dict(dict));
-                        await display_dict_preview()
+                        await display_dict_preview();
                     } finally {
                         elt.classList.add("idle")
                     }
@@ -133,7 +133,7 @@ async function saveOptions(e) {
     }
     else {
         const options = {}
-        for (f of fields) {
+        for (const f of fields) {
             if (f == 'rewrite') {
                 options[f] = document.querySelector('input[name="rewrite-radio"]:checked').value || 'erofa';
             } else {
@@ -176,7 +176,7 @@ async function restoreOptions() {
         const options = await storage_get(all_fields)
         console.log('loaded', options)
         normalize_options(options)
-        for (f of fields) {
+        for (const f of fields) {
             if (f != 'disable' && f != 'rewrite') {
                 document.getElementById(f.replaceAll("_", "-") + "-checkbox").checked =
                     options[f] || false;
@@ -184,7 +184,7 @@ async function restoreOptions() {
         }
         document.getElementById("rewrite-" + options.rewrite).checked = true;
         add_rule_selection_ui();
-        await display_dict_preview()
+        await display_dict_preview();
     } catch (e) {
         // exceptions get swallowed in firefox, making them undebuggable, so just include
         // them in the page itself
@@ -208,10 +208,10 @@ async function download_dict(e) {
             // actually necessary, otherwise you get terrible behavior
             throw new Error(`${response.status} ${response.statusText}`);
         }
-        const dict = await response.text()
+        const dict = await response.text();
         set_dict(parse_dict(dict));
-        await display_dict_preview()
-        document.getElementById("dict-link").value = ""
+        await display_dict_preview();
+        document.getElementById("dict-link").value = "";
     } catch (e) {
         document.getElementById("load_error").textContent = (new Date()).toLocaleTimeString() + ": " + e.toString() // + "\n" + e.stack
         throw e
