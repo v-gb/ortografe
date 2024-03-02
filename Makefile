@@ -1,14 +1,14 @@
 .PHONY: first-install all all-w serve build-container run-container fly-deploy tarball
 
 all:
-	dune build --trace-file _build/trace ./server_all.exe @default @runtest
+	opam exec -- dune build --trace-file _build/trace ./server_all.exe @default @runtest
 all-w:
-	dune build --trace-file _build/trace -w ./server_all.exe @default @runtest
+	opam exec -- dune build --trace-file _build/trace -w ./server_all.exe @default @runtest
 serve:
-	dune exec --trace-file _build/trace -w -- ./server_all.exe serve -p 8081
+	opam exec -- dune exec --trace-file _build/trace -w -- ./server_all.exe serve -p 8081
 
 build-container:
-	dune build --trace-file _build/trace -- ./server_all.exe
+	opam exec -- dune build --trace-file _build/trace -- ./server_all.exe
 	podman build -f site/deployment/Dockerfile . -t ortografe-server
 
 run-container: build-container
