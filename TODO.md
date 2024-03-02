@@ -13,12 +13,19 @@ De façon générale, voir ./README.md pour comment tout construire.
     - (pour voir ce que ça donne) remplacer les s prononcés z par z
 
 - dans l'extension, permettre de créer des dictionnaires dans l'extension en
-  écrivant quelque chose comme "oi -> wa".
+  écrivant quelque chose comme "oi/wa".
 
 - pluriels simples des rectifications de 1990. En gardant le mot précédent en mémoire, et
   quand on trouve un mot ambigu comme sèche-cheveux, on peut regarder si mot précédent
   est un article comme le/un/mes/quelques etc. Ce pourrait suffisamment peu couteux pour
   être utilisable dans l'extension.
+
+- dans l'extension, supporter la réécriture de "mots" comprenant des espaces. Ça
+  permettrait de réécrire « un a priori » en « un apriori ». Ça permettrait de parfois
+  désambigüiser des homographes comme « je sens qu'il a du bon sens ».
+
+- investiguer le cout de supporter un peu d'analyse des phrases, pour distinguer singulier
+  et pluriel (un sèche-cheveu, des sèche-cheveux), verbe et nom (sens, couvent)
 
 ## Technique
 
@@ -73,7 +80,5 @@ De façon générale, voir ./README.md pour comment tout construire.
 
 - Supporter la conversion de fichier PDF. Probablement difficile.
 
-- Charger un dictinonaire à partir d'une URL (sur téléphone, il est plus simple que de
-  télécharger un fichier puis de le charger). Encore mieux, remplir le champ par défault
-  d'après le contenu de la page (par exemple, un lien avec une class
-  "orthographe-rationnelle").
+- Remplir le champ qui permet de récupérer un dico d'une URL d'après le contenu de la
+  dernière page visitée (par exemple, un lien avec une class "orthographe-rationnelle").
