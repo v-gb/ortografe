@@ -1,0 +1,220 @@
+#!/bin/bash
+set -e -u -o pipefail
+
+case "${1-}" in
+    help)
+        ebook-convert a.epub b.pdf --help | less;;
+    orig)
+        xdg-open 'https://fr.wikisource.org/wiki/Livre:Lewis_Caroll_-_Alice_au_pays_des_merveilles,_traduction_Henri_Bu%C3%A9.djvu'
+        ;;
+    pdf)
+        # zoom a 73% pour ouvrir à taille réelle
+        xdg-open Alice_au_pays_des_merveilles-conv-manual.pdf;;
+    manual-changes)
+        function patdiff {
+            ~/.opam/5.1.1/bin/patdiff "$@"
+        }
+        unzip -l Alice_au_pays_des_merveilles.epub \
+            | grep -E -o 'OPS/.*([.]html|[.]xhtml|[.]css)$' \
+            | while read f; do
+                 patdiff -keep-whitespace -context 0 -alt-old $f -alt-new $f \
+                         <(unzip -p Alice_au_pays_des_merveilles-conv.epub $f) \
+                         <(unzip -p Alice_au_pays_des_merveilles-conv-manual.epub $f) || true
+              done \
+            |& grep -v "No newline at the end" \
+            | less -R
+        ;;
+    *)
+        # Améliorations possibles :
+        # - les titres des premières pages est avec sérif dans l'original
+        # - le epub n'a pas la couverture
+        # - la page initiale "exporté de wiktionnaire" est moche, à enlever
+        # - la page des matiere ne montre pas les numero de page
+        # pour rendre le truc reproduisible
+        # - appliquer les changements du epub sur le fichier source
+        # - mettre le epub orig et manuel dans le server
+        # - faire que le script choppe les fichiers du serveur, convertisse
+        # il faudrait une page qui dit
+        # - écrit par ...
+        # - illustré par ..
+        # - mis en page par ..
+        # - traduit par ..
+        # - scanné par google
+        # - transcrit en texte numérique par wikisource (voir puis loin), que l'on remercie bien d'avoir mis à disposition de tout le monde ce travail laborieux
+        # - converti en orthographe érofa, puis remis en page par
+        #   Valentin Gatien-Baron pour l'association érofa
+        if false; then
+            if ! [ -f Alice_au_pays_des_merveilles.epub ]; then
+                curl -o Alice_au_pays_des_merveilles.epub 'https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Alice_au_pays_des_merveilles'
+            fi
+            if ! [ -f Alice_au_pays_des_merveilles-manual.epub ]; then
+                curl -o Alice_au_pays_des_merveilles-manual.epub 'https://orthographe-rationnelle.info/static/Alice_au_pays_des_merveilles-manual.epub'
+            fi
+        fi
+        ebook-convert \
+            Alice_au_pays_des_merveilles-conv-manual.epub \
+            Alice_au_pays_des_merveilles-conv-manual.pdf \
+            --pdf-page-numbers \
+            --pdf-use-document-margins \
+            --pdf-default-font-size=16 \
+            --pdf-page-number-map='n < 9 ? 0 : n - 9 + 1' \
+            --remove-paragraph-spacing \
+            --remove-paragraph-spacing-indent-size=-1 \
+            --pdf-hyphenate $(true pour le chapitre 1, image du rideau) \
+            --pdf-footer-template "$(cat <<EOF
+<footer>
+    <div style="margin: auto; font-size: smaller"></div>
+    <script>
+      if (_PAGENUM_ > 0) {
+        document.currentScript.parentNode.querySelector("div").innerHTML = "" + _PAGENUM_
+      }
+    </script>
+</footer>
+EOF
+)" \
+            --extra-css <(cat <<'EOF'
+__img {
+  border: solid 1px blue;
+}
+
+/* any instance of <br style> indicates a bad split between text and image, so we remove
+   them all (in the source) and join paragraphs that got split by images */
+
+[data-title*="_02.png"] {
+  /* lapin chap 1 */
+  width: auto;
+  height: calc(0.5 * 13.8cm);
+  margin-bottom: 2em;
+}
+[data-title*="_03.png"] {
+  /* somehow even with !important, we can override inline styles for the width and height,
+     so we have to remove them from the epub */
+  width: calc(0.60 * 8.6cm);
+  height: auto;
+  margin-bottom: -5px;
+  margin-left: -5px;
+}
+[data-title*="_04.png"] {
+  /* alice prend la bouteille */
+  width: calc(0.55 * 8.6cm);
+  height: auto;
+  margin-top: -5px;
+  margin-right: -5px;
+  margin-bottom: -10px;
+}
+[data-title*="_05.png"] {
+  width: auto;
+  height: 13.8cm;
+  margin: -5px -5px -5px 0;
+}
+
+/* chap habitation du lapin */
+[data-title*="_12.png"] {
+  /* main qui prend le lapin */
+  width: calc(0.60 * 8.6cm);
+  height: auto;
+  margin: -5px 0 -5px -5px;
+}
+[data-title*="_13.png"] {
+  /* lézard cheminée */
+  margin-right: -12px;
+  margin-left: -5px;
+}
+
+/* chap chenille */
+[data-title*="_05a-1116x1492.jpg"] {
+  /* chenille qui fume */
+  width: auto;
+  height: calc(0.6 * 13.8cm);
+  margin-bottom: 2em;
+}
+
+/* porc et poivre */
+[data-title*="_22.png"] {
+  /* cochon dans les bras */
+  width: calc(0.60 * 8.6cm);
+  height: auto;
+  margin: -5px;
+  margin-bottom: -15px;
+}
+#figure23 {
+  /* chat dans l'arbre qui parle avec alice avec encart */
+  shape-outside: polygon(0% 0%, 100% 0%, 100% 43%, 47% 43%, 47% 95%, 0% 95%);
+}
+
+/* le croquet */
+[data-title*="_28.png"] {
+  /* cartes qui se parlent */
+  width: calc(0.60 * 8.6cm);
+  height: auto;
+  margin-bottom: -15px;
+}
+[data-title*="_30.png"] {
+  /* cartes qui se parlent */
+  width: calc(0.60 * 8.6cm);
+  height: auto;
+  margin-bottom: -5px;
+}
+
+/* histoire de la fausse-tortue */
+[data-title*="_32.png"] {
+  /* parle avec la duchesse */
+  width: calc(0.60 * 8.6cm);
+  height: auto;
+  margin-bottom: -5px;
+}
+
+/* le quadrille de homard */
+[data-title*="_36.png"] {
+  /* homard */
+  width: calc(0.65 * 8.6cm);
+  height: auto;
+  margin-bottom: -15px;
+  margin-left: -5px;
+}
+
+/* qui a volé les tartes */
+[data-title*="_38.png"] {
+  /* chapelier */
+  width: calc(0.65 * 8.6cm);
+  height: auto;
+  margin-bottom: -15px;
+  margin-left: -10px;
+}
+
+/* la déposition d'alice */
+#figure41 {
+  /* roi qui regarde à droite */
+  shape-outside: polygon(0% 0%, 55% 0%, 55% 70%, 100% 70%, 100% 97%, 0% 97%);
+}
+
+@page {
+  size: 11cm 18cm;
+  margin: 1.8cm 1.2cm 2.4cm 1.2cm;
+}
+
+.mw-halign-center {
+  /* remove display:table so we can put float: left, so we can have the text flow above
+     the image, to avoid big gaps at page breaks that precede images. */
+  display: block;
+  float:left;
+  width: 100%; /* ensure no text flows around the image */
+  /* border: solid; */
+}
+
+.mw-halign-center a {
+  /* so the image ("img" inside "a" inside "figure" with cass mw-halign-center) is centered
+     within the a, instead of being flushed to the left. The simpler method would be to make
+     the image display:block and margin:auto, but that prevent text from flowing around it,
+     which is the whole point of using float here. */
+  display: flex;
+  justify-content: center;
+  page-break-inside: avoid;
+}
+
+.poem {
+  margin-left: 0.5em;
+}
+EOF
+                 )
+esac
