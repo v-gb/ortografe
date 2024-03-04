@@ -26,7 +26,7 @@ function pluralize(s) {
     return s ? s + "s" : s
 }
 
-function rewrite_word(table, plurals_in_s, s) {
+function rewrite_word(table, plurals_in_s, word) {
     // unsure if the browser gives any guarantee about NFC vs NFD,
     // because currently we assume diacritics are represented the same
     // in the dict and in the page
@@ -208,6 +208,7 @@ function rewrite_under(options, table, root){
     const backgroundColor = options.background_color || options.default_background_color || '#b9f4b9'
     const plurals_in_s = options.plurals_in_s != false;
     const walk = make_walk(root);
+    let n;
     while(n=walk.nextNode()) {
         let regular_text = ""
         // we want to split on words, although there's some ambiguity as to
@@ -218,7 +219,7 @@ function rewrite_under(options, table, root){
         // - non breakable space should be a word boundary, same as regular spaces
         // \p{L} is any unicode letter I think: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Regular_expressions/Unicode_character_class_escape
         const words1 = n.nodeValue.split(/(\p{L}+(?:[-:./_0-9?]+\p{L}+)*)/u)
-        for (word1 of words1) {
+        for (const word1 of words1) {
             const words2 =
                   // if we have a word made purely of letters and dashes (but no slashes,
                   // dots, etc), then actually treat that as multiple words, to handle
@@ -228,7 +229,7 @@ function rewrite_under(options, table, root){
                      ? [ word1 ]
                      : word1.split(/(-)/))
                   : [ word1 ]
-            for (word of words2) {
+            for (const word of words2) {
                 const repl = rewrite_word(table, plurals_in_s, word)
                 if (!options.color) {
                     regular_text = regular_text + (repl ? repl : word)
@@ -266,7 +267,7 @@ function rewrite_under(options, table, root){
             }
         }
     }
-    for (n of to_remove) {
+    for (const n of to_remove) {
         n.remove()
     }
     return count
@@ -275,14 +276,14 @@ function rewrite_under(options, table, root){
 const synchronous_updates = new Map([
     [ 'www.youtube.com', function(options, table, mutations) {
         let to_rewrite = [];
-        for (m of mutations) {
-            for (node of m.addedNodes) {
+        for (const m of mutations) {
+            for (const node of m.addedNodes) {
                 if (node.nodeType == 1 && node.classList.contains('ytp-caption-segment')) {
                     to_rewrite.push(node)
                 }
             }
         }
-        for (node of to_rewrite) {
+        for (const node of to_rewrite) {
             // The separate loop was to see if it would make the screen update faster
             // after the DOM was updated. Doesn't seem to help though, sadly, but maybe
             // the batching is good anyway. Somehow for hand-written subtitles, this seems
@@ -360,7 +361,7 @@ function load_dict(options) {
               options.rewrite == 'rect1990' ? [ dict_rect1990, '/' ] :
               options.rewrite == 'custom' ? [ (options.custom_dict || ''), '\n' ] :
               [ dict_erofa, '/' ];
-        for (line of dict.split(separator)) {
+        for (const line of dict.split(separator)) {
             const [a,b] = line.split(",")
             if (a && b && a != b) {
                 table.set(a, b)
