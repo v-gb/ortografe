@@ -12,3 +12,5 @@ trace.fxt*
 _opam
 TODO.html
 source.tar.gz
+*.epub
+*.pdf
