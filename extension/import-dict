@@ -67,7 +67,12 @@ select distinct l.ortho,
        end as suggested_new
 from l
 left join w on l.ortho = w.pre1990
-where (w.post1990 is null or l.post90 = w.post1990)
+where (w.post1990 is null
+       or case 
+          when l.type = 1 then l.post90 = w.post1990
+          else substring(l.post90,instr(l.post90,'/')+1) = w.post1990
+            or substring(l.post90,1,instr(l.post90,'/')-1) = w.post1990
+          end)
 and suggested_new <> l.ortho
 union all
 select distinct w.pre1990,w.post1990
