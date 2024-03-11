@@ -1,3 +1,5 @@
+"use strict";
+
 function is_capitalized(s) {
     return s && s.charAt(0).toLowerCase() != s.charAt(0)
 }
