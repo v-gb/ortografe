@@ -8,11 +8,22 @@ shopt -s nullglob
 files=(*.{html,js,png,json,svg,dict,csv,tsv})
 zip -q ../extension.zip "${files[@]}"
 
-# create a version with manifest v2
+# create a version with manifest v2.
+#
+# optional_host_permissions/host_permissions are manifest v3 only, although even if we
+# wanted to use manifest v3 with firefox it wouldn't support optional_host_permissions,
+# only # optional_permissions.
+# https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/optional_permissions
 mkdir -p ../src2
 rsync -a -d "${files[@]}" ../src2
 chmod +w ../src2/*
-jq '.manifest_version=2 | . + {"browser_action": .action} | del(.action)' < manifest.json > ../src2/manifest.json
+jq  < manifest.json > ../src2/manifest.json \
+    '.manifest_version=2
+    | . + {"browser_action": .action}
+    | del(.action)
+    | . + {"optional_permissions": .optional_host_permissions}
+    | del(.optional_host_permissions)
+    '
 sed -i 's/is_manifest_v2 = false/is_manifest_v2 = true/' ../src2/*.js
 cd ../src2;
 zip -q ../extension2.zip "${files[@]}"

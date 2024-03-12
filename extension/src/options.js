@@ -196,6 +196,16 @@ async function download_dict(e) {
             // prevents grabbing files relative to extension itself, which is weird
             throw new Error(`${link} n'est pas un lien http/https`);
         }
+        // It would seem natural to check if we have the permission before requesting, but
+        // if we do anything async (like checking if we already have the permissions), we
+        // lose the ability to ask for permissions
+        // (https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/User_actions)
+        // More relevant stuff:
+        // https://extensionworkshop.com/documentation/develop/request-the-right-permissions/
+        // https://extensionworkshop.com/documentation/develop/test-permission-requests/
+        if (!await browser.permissions.request({origins:[link]})) {
+            throw new Error(`pas possible de télécharger ${link} sans permission`);
+        }
         const response = await fetch(link);
         if (!response.ok) {
             // actually necessary, otherwise you get terrible behavior
