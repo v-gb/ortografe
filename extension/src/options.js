@@ -1,11 +1,13 @@
-const b = window.chrome ? chrome : browser;
+if (typeof browser == "undefined") {
+    globalThis.browser = chrome;
+}
 const is_manifest_v2 = false;
 
 const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language', 'debug_lang_test'];
 const all_fields = ['disable'].concat(fields);
 
 async function display_dict_preview() {
-    const { custom_dict } = (await storage_get('custom_dict'));
+    const { custom_dict } = (await browser.storage.local.get('custom_dict'));
     const elt = document.getElementById("dict");
     if (custom_dict?.data) {
         const lines = custom_dict.data.trim().split('\n');
@@ -64,9 +66,9 @@ async function set_dict(dict) {
     if (dict?.data) {
         const num_lines = count_char(dict.data, '\n');
         console.log(`storing dict with ${num_lines} entries`);
-        await b.storage.local.set({ 'custom_dict': dict });
+        await browser.storage.local.set({ 'custom_dict': dict });
     } else {
-        await b.storage.local.remove('custom_dict');
+        await browser.storage.local.remove('custom_dict');
     }
 }
 
@@ -141,7 +143,7 @@ async function saveOptions(e) {
             }
         }
         console.log('storing', options);
-        await b.storage.local.set(options);
+        await browser.storage.local.set(options);
     }
 }
 
@@ -149,14 +151,6 @@ function normalize_options(options) {
     if (!options.rewrite) {
         options.rewrite = options.disable ? 'disable' : 'erofa';
     }
-}
-
-async function storage_get(fields) {
-    // b.storage.local.get always returns a promise in rewrite.js,
-    // while here we only get a promise with manifest v3??
-    return (is_manifest_v2
-            ? new Promise((resolve) => b.storage.local.get(fields, resolve))
-            : b.storage.local.get(fields))
 }
 
 function debug_information() {
@@ -172,7 +166,7 @@ function debug_information() {
 async function restoreOptions() {
     try {
         debug_information();
-        const options = await storage_get(all_fields);
+        const options = await browser.storage.local.get(all_fields);
         console.log('loaded', options);
         normalize_options(options);
         for (const f of fields) {
@@ -187,7 +181,7 @@ async function restoreOptions() {
     } catch (e) {
         // exceptions get swallowed in firefox, making them undebuggable, so just include
         // them in the page itself
-        document.getElementById("error").textContent = e.toString() + "\n" + e.stack + b.storage.local.get.toString();
+        document.getElementById("error").textContent = e.toString() + "\n" + e.stack + browser.storage.local.get.toString();
         throw e;
     }
 }
@@ -230,7 +224,7 @@ const load_dict = document.getElementById("load-dict-section");
 // a new tab but doesn't make you navigate to it, which is not convenient. We detect
 // firefox-on-android with the window size check.
 if (location.hash === '#popup' && window.screen.width != window.innerWidth) {
-    open_options_page_elt.addEventListener("click", () => b.runtime.openOptionsPage());
+    open_options_page_elt.addEventListener("click", () => browser.runtime.openOptionsPage());
     load_dict.style["display"] = "none";
 } else {
     open_options_page_elt.style["display"] = "none";
