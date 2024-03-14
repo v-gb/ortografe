@@ -92,15 +92,15 @@ function lazy(f) {
     }
 }
 
-async function detect_language_with_browser_api(b, lazystr, lang) {
-    if (!b?.i18n?.detectLanguage) {
+async function detect_language_with_browser_api(browser, lazystr, lang) {
+    if (!browser?.i18n?.detectLanguage) {
         return  { res: null, fallback: true }
     }
     const [str, dur] = lazystr();
     if (str.length == 0) {
         return { res: null, fallback: false }
     }
-    const { isReliable, languages } = await b.i18n.detectLanguage(str)
+    const { isReliable, languages } = await browser.i18n.detectLanguage(str)
     // I've seen cases where isReliable:false, which was needlessly conservative.
     //
     // Rewrite even if lang is not the main language, because oftentimes there is a
@@ -142,7 +142,7 @@ function detect_language_custom(lazystr, lang) {
            }
 }
 
-async function plausibly_lang_once_unlogged(b, lang, root, debug, force_fallback) {
+async function plausibly_lang_once_unlogged(browser, lang, root, debug, force_fallback) {
     const lazystr = lazy(() => {
         const t1 = performance.now();
         const walk = make_walk(root);
@@ -160,7 +160,7 @@ async function plausibly_lang_once_unlogged(b, lang, root, debug, force_fallback
     })
     let res = { res: null, fallback : true };
     if (res.res == null && res.fallback && !force_fallback) {
-        res = await detect_language_with_browser_api(b, lazystr, lang);
+        res = await detect_language_with_browser_api(browser, lazystr, lang);
     }
     if (res.res == null && res.fallback && !force_fallback) {
         res = detect_language_with_lang_attr(lang);
@@ -174,18 +174,18 @@ async function plausibly_lang_once_unlogged(b, lang, root, debug, force_fallback
     return res.res == null ? null : res
 }
 
-async function plausibly_lang_once(b, lang, root, debug, force_fallback) {
+async function plausibly_lang_once(browser, lang, root, debug, force_fallback) {
     const t1 = performance.now();
-    const res = await plausibly_lang_once_unlogged(b, lang, root, debug, force_fallback);
+    const res = await plausibly_lang_once_unlogged(browser, lang, root, debug, force_fallback);
     const t2 = performance.now();
     console.log(`page is ${lang}:${res ? res.res : "-"}, ${t2 - t1}ms,`, ...(res ? res.why : []))
     return res ? res.res : res
 }
 
-async function plausibly_lang(b, lang, root, debug, force_fallback) {
+async function plausibly_lang(browser, lang, root, debug, force_fallback) {
     let delay = 100;
     while (true) {
-        const res = await plausibly_lang_once(b, lang, root, debug, force_fallback)
+        const res = await plausibly_lang_once(browser, lang, root, debug, force_fallback)
         if (res !== null) {
             return res;
         }
@@ -406,15 +406,17 @@ function normalize_options(options) {
 }
 
 async function extension_main() {
-    const b = window.chrome ? chrome : browser;
+    if (typeof browser == "undefined") {
+        globalThis.browser = chrome;
+    }
     const before_storage = performance.now()
-    const options = await b.storage.local.get(
+    const options = await browser.storage.local.get(
         ['rewrite', 'disable', 'disable_watch', 'color','trivial', 'debug_changes',
          'debug_language', 'debug_lang_test']
     )
     const halfway_storage = performance.now();
     if (options.rewrite === 'custom') {
-        const { meta, data } = (await b.storage.local.get(['custom_dict'])).custom_dict;
+        const { meta, data } = (await browser.storage.local.get(['custom_dict'])).custom_dict;
         options.custom_dict = data;
         options.lang = meta?.lang;
         if (meta?.supports_repeated_rewrites == false) {
@@ -435,7 +437,7 @@ async function extension_main() {
     // iterating over <style> nodes even though they contain nothing,
     // and setting their nodeValue messes up pages for some reason
     const root = document.body;
-    if (!(await plausibly_lang(b, (options.lang || 'fr'), root,
+    if (!(await plausibly_lang(browser, (options.lang || 'fr'), root,
                                options.debug_language,
                                options.debug_lang_test))) {
         return
