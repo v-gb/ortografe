@@ -6,7 +6,7 @@ const is_manifest_v2 = false;
 const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language', 'debug_lang_test'];
 const all_fields = ['disable'].concat(fields);
 
-async function display_dict_preview() {
+async function display_dict_preview(highlight) {
     const { custom_dict } = (await browser.storage.local.get('custom_dict'));
     const elt = document.getElementById("dict");
     if (custom_dict?.data) {
@@ -19,14 +19,28 @@ async function display_dict_preview() {
         } else {
             elt.innerText = `"${lines[0]}" + ${lines.length - 1} lignes`;
         }
+        if (custom_dict?.meta?.src) {
+            const dict_link = document.getElementById("dict-link")
+            if (!dict_link.value) {
+                dict_link.value = custom_dict.meta.src
+            }
+        }
+        if (highlight) {
+            elt.classList.remove('highlight')
+            void elt.offsetWidth; // trigger reflow, so the animation restarts
+            elt.classList.add('highlight')
+        }
     } else {
         elt.innerText = "vide";
     }
 }
 
-function parse_dict(str) {
+function parse_dict(str, link = undefined) {
     let lines = str.trim().split("\n");
     let meta = {};
+    if (link != undefined) {
+        meta.src = link;
+    }
     if (lines.length > 0 && lines[0].startsWith("{")) {
         const meta_json = JSON.parse(lines.shift());
         if (typeof meta_json?.desc == "string") {
@@ -107,7 +121,7 @@ async function saveOptions(e) {
                 const file = e.target.files.item(0);
                 set_dict(parse_dict(await file.text()));
                 document.getElementById("load_error").innerText = "";
-                await display_dict_preview();
+                await display_dict_preview(true);
             } catch (e) {
                 document.getElementById("load_error").innerText = "error importing file " + e.toString();
             }
@@ -123,7 +137,7 @@ async function saveOptions(e) {
                     try {
                         const dict = await compute_dict(rules);
                         set_dict(parse_dict(dict));
-                        await display_dict_preview();
+                        await display_dict_preview(true);
                     } finally {
                         elt.classList.add("idle");
                     }
@@ -177,7 +191,7 @@ async function restoreOptions() {
         }
         document.getElementById("rewrite-" + options.rewrite).checked = true;
         add_rule_selection_ui();
-        await display_dict_preview();
+        await display_dict_preview(false);
     } catch (e) {
         // exceptions get swallowed in firefox, making them undebuggable, so just include
         // them in the page itself
@@ -212,13 +226,28 @@ async function download_dict(e) {
             throw new Error(`${response.status} ${response.statusText}`);
         }
         const dict = await response.text();
-        set_dict(parse_dict(dict));
-        await display_dict_preview();
-        document.getElementById("dict-link").value = "";
+        set_dict(parse_dict(dict, link));
+        await display_dict_preview(true);
     } catch (e) {
         document.getElementById("load_error").textContent = (new Date()).toLocaleTimeString() + ": " + e.toString();
         throw e;
     }
+}
+
+function default_highlighting() {
+    // You can check if the user prefers dark mode, and maybe if the site supports dark
+    // mode, but you can't really ask "is this site using dark mode now?". So we just
+    // check the background color. It would be more principled to put a class on the rewritten
+    // text, but good enough for now.
+    const color = window.getComputedStyle(document.body).getPropertyValue('background-color');
+    const color_components = color.match(/\d+/g);
+    if (color_components
+        && color_components.length == 3
+        && color_components.reduce((a, b) => a + (b | 0),0) < 255 / 2 * 3
+       ) {
+        return '#106410'
+    }
+    return '#b9f4b9'
 }
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
@@ -239,3 +268,4 @@ if (location.hash === '#popup' && window.screen.width != window.innerWidth) {
 } else {
     open_options_page_elt.style["display"] = "none";
 }
+document.documentElement.style.setProperty("--highlight-color", default_highlighting())

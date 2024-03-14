@@ -80,6 +80,22 @@
           white-space: pre-wrap;
       }
 
+      .highlight {
+          animation-duration: 0.3s;
+          animation-name: highlight;
+          animation-timing-function: ease-in;
+          border-radius: 2px;
+      }
+
+      :root {
+          --highlight-color: #b9f4b9;
+      }
+
+      @keyframes highlight {
+          from { background-color: var(--highlight-color); }
+          to {}
+      }
+
 /* https://cssload.net/en/spinners */
 #floatingCirclesG {
     position:relative;
