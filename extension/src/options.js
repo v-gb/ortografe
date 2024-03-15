@@ -112,52 +112,64 @@ async function compute_dict(rules) {
     return dict;
 }
 
-async function saveOptions(e) {
+async function load_dict_from_disk(e) {
+    if (e.target.files.length > 0) {
+        try {
+            const file = e.target.files.item(0);
+            set_dict(parse_dict(await file.text()));
+            document.getElementById("load_error").innerText = "";
+            await display_dict_preview(true);
+        } catch (e) {
+            document.getElementById("load_error").innerText = "error importing file " + e.toString();
+        }
+    }
+}
+
+async function load_dict_from_computation(e) {
+    try {
+        const target = e.target.id.substring("load-".length);
+        const rules = currently_selected_rules();
+        if (target == 'checkbox') {
+            const elt = document.getElementById("floatingCirclesG");
+            if (elt.classList.contains("idle")) {
+                elt.classList.remove("idle");
+                try {
+                    const dict = await compute_dict(rules);
+                    set_dict(parse_dict(dict));
+                    await display_dict_preview(true);
+                } finally {
+                    elt.classList.add("idle");
+                }
+            }
+        }
+        document.getElementById("load_error").innerText = "";
+    } catch (e) {
+        document.getElementById("load_error").innerText = "error loading dict " + e.toString();
+    }
+}
+
+async function save_options() {
+    const options = {};
+    for (const f of fields) {
+        if (f == 'rewrite') {
+            options[f] = document.querySelector('input[name="rewrite-radio"]:checked').value || 'erofa';
+        } else {
+            options[f] = document.getElementById(f.replaceAll("_", "-") + "-checkbox").checked;
+        }
+    }
+    console.log('storing', options);
+    await browser.storage.local.set(options);
+}
+
+async function form_change(e) {
     e.preventDefault();
     // console.log("target", e.target)
     if (e.target.id == 'load-dict-input') {
-        if (e.target.files.length > 0) {
-            try {
-                const file = e.target.files.item(0);
-                set_dict(parse_dict(await file.text()));
-                document.getElementById("load_error").innerText = "";
-                await display_dict_preview(true);
-            } catch (e) {
-                document.getElementById("load_error").innerText = "error importing file " + e.toString();
-            }
-        }
+        await load_dict_from_disk(e)
     } else if (e.target.id.startsWith("load-")) {
-        try {
-            const target = e.target.id.substring("load-".length);
-            const rules = currently_selected_rules();
-            if (target == 'checkbox') {
-                const elt = document.getElementById("floatingCirclesG");
-                if (elt.classList.contains("idle")) {
-                    elt.classList.remove("idle");
-                    try {
-                        const dict = await compute_dict(rules);
-                        set_dict(parse_dict(dict));
-                        await display_dict_preview(true);
-                    } finally {
-                        elt.classList.add("idle");
-                    }
-                }
-            }
-            document.getElementById("load_error").innerText = "";
-        } catch (e) {
-            document.getElementById("load_error").innerText = "error loading dict " + e.toString();
-        }
+        await load_dict_from_computation(e)
     } else {
-        const options = {};
-        for (const f of fields) {
-            if (f == 'rewrite') {
-                options[f] = document.querySelector('input[name="rewrite-radio"]:checked').value || 'erofa';
-            } else {
-                options[f] = document.getElementById(f.replaceAll("_", "-") + "-checkbox").checked;
-            }
-        }
-        console.log('storing', options);
-        await browser.storage.local.set(options);
+        await save_options()
     }
 }
 
@@ -200,38 +212,49 @@ async function restoreOptions() {
     }
 }
 
-async function download_dict(e) {
-    e.preventDefault();
-    document.getElementById("load_error").textContent = "";
+async function download_dict(link) {
+    if (!link) return;
+    if (!link.startsWith("http://") && !link.startsWith("https://")) {
+        // prevents grabbing files relative to extension itself, which is weird
+        throw new Error(`${link} n'est pas un lien http/https`);
+    }
+    // It would seem natural to check if we have the permission before requesting, but
+    // if we do anything async (like checking if we already have the permissions), we
+    // lose the ability to ask for permissions
+    // (https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/User_actions)
+    // More relevant stuff:
+    // https://extensionworkshop.com/documentation/develop/request-the-right-permissions/
+    // https://extensionworkshop.com/documentation/develop/test-permission-requests/
+    if (!await browser.permissions.request({origins:[link]})) {
+        throw new Error(`pas possible de télécharger ${link} sans permission`);
+    }
+    const response = await fetch(link);
+    if (!response.ok) {
+        // actually necessary, otherwise you get terrible behavior
+        throw new Error(`${response.status} ${response.statusText}`);
+    }
+    const dict = await response.text();
+    set_dict(parse_dict(dict, link));
+    await display_dict_preview(true);
+}
+
+async function with_exn_in_dom(id, f) {
+    document.getElementById(id).textContent = "";
     try {
-        const link = document.getElementById("dict-link").value;
-        if (!link) return;
-        if (!link.startsWith("http://") && !link.startsWith("https://")) {
-            // prevents grabbing files relative to extension itself, which is weird
-            throw new Error(`${link} n'est pas un lien http/https`);
-        }
-        // It would seem natural to check if we have the permission before requesting, but
-        // if we do anything async (like checking if we already have the permissions), we
-        // lose the ability to ask for permissions
-        // (https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/User_actions)
-        // More relevant stuff:
-        // https://extensionworkshop.com/documentation/develop/request-the-right-permissions/
-        // https://extensionworkshop.com/documentation/develop/test-permission-requests/
-        if (!await browser.permissions.request({origins:[link]})) {
-            throw new Error(`pas possible de télécharger ${link} sans permission`);
-        }
-        const response = await fetch(link);
-        if (!response.ok) {
-            // actually necessary, otherwise you get terrible behavior
-            throw new Error(`${response.status} ${response.statusText}`);
-        }
-        const dict = await response.text();
-        set_dict(parse_dict(dict, link));
-        await display_dict_preview(true);
+        return await f();
     } catch (e) {
-        document.getElementById("load_error").textContent = (new Date()).toLocaleTimeString() + ": " + e.toString();
+        document.getElementById(id).textContent =
+            (new Date()).toLocaleTimeString() + ": " + e.toString();
         throw e;
     }
+}
+
+function download_dict_click(e) {
+    e.preventDefault();
+    with_exn_in_dom("load_error", async () => {
+        const link = document.getElementById("dict-link").value;
+        await download_dict(link)
+    })
 }
 
 function default_highlighting() {
@@ -252,9 +275,9 @@ function default_highlighting() {
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
 for (const elt of document.querySelectorAll(".form-onchange")) {
-    elt.addEventListener("change", saveOptions);
+    elt.addEventListener("change", form_change);
 }
-document.getElementById("dict-link-form").addEventListener("submit", download_dict);
+document.getElementById("dict-link-form").addEventListener("submit", download_dict_click);
 const open_options_page_elt = document.getElementById("open-options-page");
 const load_dict = document.getElementById("load-dict-section");
 // On firefox on computer, the "#popup" is all we need, to distinguish between the popup
