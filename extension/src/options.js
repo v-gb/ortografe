@@ -1,7 +1,6 @@
 if (typeof browser == "undefined") {
     globalThis.browser = chrome;
 }
-const is_manifest_v2 = false;
 
 const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language', 'debug_lang_test'];
 const all_fields = ['disable'].concat(fields);
@@ -180,8 +179,10 @@ function normalize_options(options) {
 }
 
 function debug_information() {
+    const manifest = browser.runtime.getManifest();
     const json = {
-        manifest_version: is_manifest_v2 ? "2" : "3",
+        "version": manifest.version,
+        "manifest_version": manifest.manifest_version,
         "window.screen.width": window.screen.width,
         "window.innerWidth": window.innerWidth,
         "location.hash": location.hash,

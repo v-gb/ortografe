@@ -24,6 +24,5 @@ jq  < manifest.json > ../src2/manifest.json \
     | . + {"optional_permissions": .optional_host_permissions}
     | del(.optional_host_permissions)
     '
-sed -i 's/is_manifest_v2 = false/is_manifest_v2 = true/' ../src2/*.js
 cd ../src2;
 zip -q ../extension2.zip "${files[@]}"
