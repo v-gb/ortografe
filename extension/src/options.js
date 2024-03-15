@@ -273,22 +273,54 @@ function default_highlighting() {
     return '#b9f4b9'
 }
 
+async function suggest_dict_from_active_tab() {
+    const tabs = await browser.tabs.query({currentWindow: true, active: true});
+    const tab = tabs?.[0];
+    if (tab) {
+        const link =
+              false
+              ? "https://www.sinplegraf.org/DataJS/sinple.js"
+              : await browser.tabs.sendMessage(tab.id, "dictionary-url");
+        if (link) {
+            document.getElementById("load-from-page").removeAttribute("style");
+            {
+                const url_elt = document.getElementById("load-from-page-url");
+                url_elt.innerText = "dictionnaire de " + (new URL(link)).hostname;
+                url_elt.setAttribute("href", link);
+            }
+            document.getElementById("load-from-page-button").
+                addEventListener("click", () => {
+                    with_exn_in_dom("load_error", async () => {
+                        await download_dict(link);
+                        document.getElementById("rewrite-custom").checked = true;
+                        await save_options();
+                    })
+                })
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', restoreOptions);
 for (const elt of document.querySelectorAll(".form-onchange")) {
     elt.addEventListener("change", form_change);
 }
 document.getElementById("dict-link-form").addEventListener("submit", download_dict_click);
 const open_options_page_elt = document.getElementById("open-options-page");
-const load_dict = document.getElementById("load-dict-section");
+open_options_page_elt.addEventListener("click", (e) => {
+    e.preventDefault();
+    browser.runtime.openOptionsPage()
+});
 // On firefox on computer, the "#popup" is all we need, to distinguish between the popup
 // window and full blow options page. On firefox on android though, the popup page is
 // already full screen and trying to open the openOptionsPage does something like opening
 // a new tab but doesn't make you navigate to it, which is not convenient. We detect
 // firefox-on-android with the window size check.
 if (location.hash === '#popup' && window.screen.width != window.innerWidth) {
-    open_options_page_elt.addEventListener("click", () => browser.runtime.openOptionsPage());
-    load_dict.style["display"] = "none";
+    for (const elt of document.getElementsByClassName("only-if-large")) {
+        elt.style.display = "none";
+    }
 } else {
-    open_options_page_elt.style["display"] = "none";
+    open_options_page_elt.style.display = "none";
 }
 document.documentElement.style.setProperty("--highlight-color", default_highlighting())
+suggest_dict_from_active_tab()

@@ -405,10 +405,25 @@ function normalize_options(options) {
     }
 }
 
+function look_for_dictionary(browser) {
+    browser.runtime.onMessage.addListener((data, sender) => {
+        if (data == "dictionary-url") {
+            if (false) {
+                return Promise.resolve("https://www.sinplegraf.org/DataJS/sinple.js")
+            }
+            const elts = document.getElementsByClassName("orthographe-rationnelle-dict");
+            const attr = elts?.[0]?.getAttribute("orthographe-rationnelle-dict-url");
+            return Promise.resolve(attr);
+        }
+        return false;
+    });
+}
+
 async function extension_main() {
     if (typeof browser == "undefined") {
         globalThis.browser = chrome;
     }
+    look_for_dictionary(browser);
     const before_storage = performance.now()
     const options = await browser.storage.local.get(
         ['rewrite', 'disable', 'disable_watch', 'color','trivial', 'debug_changes',

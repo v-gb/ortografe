@@ -38,7 +38,7 @@
           top: 3px;
       }
 
-      #load-dict-section ul {
+      #load-dict-section {
           margin-top: 0;
           /* list-style-type: none; */
       }
@@ -210,26 +210,27 @@
       </form>
 
       <br>
-      <!-- We make people go to the options page, because file input basically doesn't
-           work in popup windows. Essentially, the focus moves away from the popup when
-           the user chooses the file, which makes the popup go away, which prevents
-           anything callback from running. For more details:
-           https://discourse.mozilla.org/t/webextension-prevent-a-popup-panel-to-hide-itself/17857.
-        -->
-      <div id="open-options-page">
-        <div>
-          <button>
-            Ouvrir la page d'options pour charger un dictionnaire
-          </button>
-        </div>
-        <br>
-      </div>
 
-      <div id="load-dict-section">
-        <span>Pour charger un dictionnaire</span>
+      <div>
+        <span>Pour charger un dictionnaire :</span>
         <pre id='load_error'></pre>
-        <ul>
-          <li>
+        <ul id="load-dict-section">
+          <li id="load-from-page" style="display:none">
+            <div>
+              <button id="load-from-page-button"> charger + activer </button>
+              un <a id='load-from-page-url'></a>
+            </div>
+          </li>
+          <li id="open-options-page">
+            <!-- We make people go to the options page, because file input basically doesn't
+                 work in popup windows. Essentially, the focus moves away from the popup when
+                 the user chooses the file, which makes the popup go away, which prevents
+                 anything callback from running. For more details:
+                 https://discourse.mozilla.org/t/webextension-prevent-a-popup-panel-to-hide-itself/17857.
+              -->
+            voir la <a href="">page d'options</a>
+          </li>
+          <li class="only-if-large">
             <form class="form-onchange">
               <label for="load-dict-input" class="btn">choisir un fichier</label>
               <input style="display:none" type="file" id="load-dict-input">
@@ -237,14 +238,14 @@
             </form>
           </li>
 
-          <li>
+          <li class="only-if-large">
             <form id="dict-link-form">
               <input style="min-width: 15.5em" type="text" id="dict-link" placeholder="lien d'un fichier à télécharger">
               <input class="dl-icon" type="image" src="download_12181265.png" id="dict-link">
             </form>
           </li>
 
-          <li>
+          <li class="only-if-large">
             <form class="form-onchange">
               <details id="load-dict-details">
                 <summary>combiner des règles</summary>

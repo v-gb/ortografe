@@ -45,3 +45,18 @@ famille,famiye
 travaille,travaye
 travailler,travayer
 ```
+
+# Asking other people to load your dictionary
+
+If you want to ask people to load a dictionary you provide, you can of course ask them to
+copy a link and paste it into the extension.
+
+Alternatively, once someone is running the extension, the popup options page will look for
+an element with class `orthographe-rationnelle-dict` and attribute
+`orthographe-rationnelle-dict-url` in the current page, and propose loading that. So
+putting:
+
+    <span class=orthographe-rationnelle-dict orthographe-rationnelle-dict-url="https://blablabla"></span>
+
+in a page would make the extension provide a potentially easier way to load the
+dictionary.
