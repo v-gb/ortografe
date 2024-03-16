@@ -32,13 +32,14 @@
     "optional_permissions": ["*://*/*"],
 
     "options_ui": {
-	"page": "options.html"
+        "page": "options.html"
     },
 
     "content_scripts": [
-	{
-	    "matches": ["*://*/*", "file:///*"],
-	    "js": ["dict.js", "rewrite.js", "rewrite_main.js"]
-	}
+        {
+            "matches": ["*://*/*", "file:///*"],
+            "js": ["dict.js", "rewrite.js", "rewrite_main.js"],
+            "run_at": "document_end"
+        }
     ]
 }
