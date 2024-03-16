@@ -56,9 +56,13 @@ insert into l(ortho,type,post90) select ortho,type,post90 from e;
 drop table e;
 
 .import ../data/wiktionnaire/1990.csv w
--- fix errors in wiktionnaire, or in the extraction maybe
-update w set post1990 = 'cloitreraient' where pre1990 = 'cloîtreraient';
-update w set post1990 = 'surs' where pre1990 = 'sûrs';
+
+.import ../data/wiktionnaire/1990-corrections.csv e
+update w
+set post1990 = e.post1990
+from e
+where w.pre1990 = e.pre1990;
+drop table e;
 
 select distinct l.ortho,
        case

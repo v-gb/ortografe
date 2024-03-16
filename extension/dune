@@ -6,6 +6,7 @@
    import-dict
    ../data/erofa/DOR-numerique_v1.0.2.csv
    ../data/wiktionnaire/1990.csv
+   ../data/wiktionnaire/1990-corrections.csv
    ../data/homemade/1990-extra.csv
    ../data/lexique/1990.csv)
  (action (run ./import-dict part1)))
