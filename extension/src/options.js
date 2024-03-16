@@ -286,7 +286,7 @@ async function suggest_dict_from_active_tab() {
             document.getElementById("load-from-page").removeAttribute("style");
             {
                 const url_elt = document.getElementById("load-from-page-url");
-                url_elt.innerText = "dictionnaire de " + (new URL(link)).hostname;
+                url_elt.innerText = (new URL(link)).hostname.replace(/^www[.]([^.]+[.][^.]+)$/, (_, s) => s);
                 url_elt.setAttribute("href", link);
             }
             document.getElementById("load-from-page-button").
