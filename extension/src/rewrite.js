@@ -406,16 +406,18 @@ function normalize_options(options) {
 }
 
 function look_for_dictionary(browser) {
-    browser.runtime.onMessage.addListener((data, sender) => {
+    browser.runtime.onMessage.addListener((data, sender, send_response) => {
         if (data == "dictionary-url") {
             if (false) {
-                return Promise.resolve("https://www.sinplegraf.org/DataJS/sinple.js")
+                send_response("https://www.sinplegraf.org/DataJS/sinple.js");
+            } else {
+                const elts = document.getElementsByClassName("orthographe-rationnelle-dict");
+                const attr = elts?.[0]?.getAttribute("orthographe-rationnelle-dict-url");
+                send_response(attr);
             }
-            const elts = document.getElementsByClassName("orthographe-rationnelle-dict");
-            const attr = elts?.[0]?.getAttribute("orthographe-rationnelle-dict-url");
-            return Promise.resolve(attr);
+        } else {
+            return false;
         }
-        return false;
     });
 }
 
