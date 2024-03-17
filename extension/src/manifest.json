@@ -4,6 +4,7 @@
     "version": "2.6",
 
     "description": "Réécrit les pages web de l'orthographe normale à une orthographe rationalisée",
+    "homepage_url": "https://orthographe-rationnelle.info/",
 
     "browser_specific_settings": {
         "gecko": {
@@ -13,7 +14,6 @@
             "strict_min_version": "113.0"
         }
     },
-
     "icons": {
         "64": "Emblem_of_La_Francophonie.64.png",
         "128": "Emblem_of_La_Francophonie.128.png"

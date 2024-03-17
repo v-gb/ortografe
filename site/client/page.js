@@ -22,3 +22,4 @@ user_text.oninput = function() {
         user_text.height = converted_text.height
     }
 }
+document.getElementById('mailelt').setAttribute('href', 'mzilto:contzct@orthogrzphe-rztionnelle.info'.replaceAll('z', 'a'))

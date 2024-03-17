@@ -11,15 +11,14 @@ This project contains tools to help with proposed spelling rationalizations for 
     - [to chrome](https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl), and presumably all chromium-based browsers. Chrome doesn't support extensions on Android, but some of the other chromium-based browsers do, so the extension should work there.
 
     
-- a [WIP website](https://ortografe-server.fly.dev/), to transcribe text and documents
-interactively without installing anything. [Source](site/).
+- a [website](https://orthographe-rationnelle.info/) that provides an entry point to all
+  the tools, and in particular transcribe text and documents interactively without
+  installing anything. [Source](site/).
 
-- a [CLI tool](doc-conversion/) that transcribes text and documents in various formats
-  (pure text, .html, .xhtml, .htmlz, .doc, .docx, .odt, .epub).
+- a [CLI tool](doc-conversion/) that:
 
-    The tool can also create dictionaries for other spelling changes, and use those when
-    converting documents. These dictionaries can also be plugged into the browser
-    extension above, for interactive use.
+    - transcribes text and documents in various formats (pure text, .html, .xhtml, .htmlz, .doc, .docx, .odt, .epub)
+    - creates dictionaries for other kinds of spelling changes (which can be used to convert document, or with the browser extension)
 
 - [data](data/) for this work (it is surprisingly difficult to find structured data)
 
@@ -34,7 +33,8 @@ should work for other spelling changes or other languages, with the following co
 - the spelling change can be expressed as a word->word dictionary mapping old spelling to
   new spelling, without analysis of the context.
 
-For instance, by loading a dictionary containing:
+For instance, by loading a dictionary containing ([dict format
+doc](extension/src/dict-format.md)):
 
 ```
 { "lang": "en" }
