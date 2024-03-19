@@ -21,7 +21,10 @@ EOF
         # Drop héro and héroïne to avoid removing the h for the meaning of héroique.
         # We then make the error of not removing the h for the drug, but oh well, that
         # seems like a less confusing error to make.
-        grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq'
+        #
+        # Drop phillipine, as as a game it should be rewritten, but this word is almost
+        # likely the adjective for the people (or the country when pluralalized)
+        grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq|philippin'
         echo sinophone,sinofone # missing
     } \
         | cat > dict.external-sources.gen.csv
