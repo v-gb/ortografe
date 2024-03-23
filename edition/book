@@ -1,6 +1,21 @@
 #!/bin/bash
 set -e -u -o pipefail
 
+function patdiff {
+    ~/.opam/5.1.1/bin/patdiff "$@"
+}
+
+function manual-changes2 {
+    unzip -l "$1" \
+        | grep -E -o 'OPS/.*([.]html|[.]xhtml|[.]css)$' \
+        | while read f; do
+        { diff -u \
+               <(unzip -p "$1" $f) \
+               <(unzip -p "$2" $f) || true
+          } | sed -e "1c--- $f" -e "2c+++ $f"
+    done > manual-changes.diff
+}
+
 case "${1-}" in
     help)
         ebook-convert a.epub b.pdf --help | less;;
@@ -9,11 +24,8 @@ case "${1-}" in
         ;;
     pdf)
         # zoom a 73% pour ouvrir à taille réelle
-        xdg-open Alice_au_pays_des_merveilles-conv-manual.pdf;;
-    manual-changes)
-        function patdiff {
-            ~/.opam/5.1.1/bin/patdiff "$@"
-        }
+        xdg-open Alice_au_pays_des_merveilles-manual-conv.pdf;;
+    old--manual-changes)
         unzip -l Alice_au_pays_des_merveilles.epub \
             | grep -E -o 'OPS/.*([.]html|[.]xhtml|[.]css)$' \
             | while read f; do
@@ -24,16 +36,26 @@ case "${1-}" in
             |& grep -v "No newline at the end" \
             | less -R
         ;;
+    old--remaining-delta)
+        $(jj workspace root)/_build/default/doc-conversion/bin/ortografe_cli.exe conv \
+                            Alice_au_pays_des_merveilles-manual.epub
+        unzip -l Alice_au_pays_des_merveilles.epub \
+            | grep -E -o 'OPS/.*([.]html|[.]xhtml|[.]css)$' \
+            | while read f; do
+                 patdiff -keep-whitespace -context 0 -alt-old $f -alt-new $f \
+                         <(unzip -p Alice_au_pays_des_merveilles-conv-manual.epub $f) \
+                         <(unzip -p Alice_au_pays_des_merveilles-manual-conv.epub $f | sed 's/ZZstyle/__style/') || true
+              done \
+            |& grep -v "No newline at the end" \
+            | less -R
+        ;;
     *)
         # Améliorations possibles :
         # - les titres des premières pages est avec sérif dans l'original
         # - le epub n'a pas la couverture
         # - la page initiale "exporté de wiktionnaire" est moche, à enlever
         # - la page des matiere ne montre pas les numero de page
-        # pour rendre le truc reproduisible
-        # - appliquer les changements du epub sur le fichier source
-        # - mettre le epub orig et manuel dans le server
-        # - faire que le script choppe les fichiers du serveur, convertisse
+        #
         # il faudrait une page qui dit
         # - écrit par ...
         # - illustré par ..
@@ -43,17 +65,26 @@ case "${1-}" in
         # - transcrit en texte numérique par wikisource (voir puis loin), que l'on remercie bien d'avoir mis à disposition de tout le monde ce travail laborieux
         # - converti en orthographe érofa, puis remis en page par
         #   Valentin Gatien-Baron pour l'association érofa
-        if false; then
-            if ! [ -f Alice_au_pays_des_merveilles.epub ]; then
-                curl -o Alice_au_pays_des_merveilles.epub 'https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Alice_au_pays_des_merveilles'
-            fi
-            if ! [ -f Alice_au_pays_des_merveilles-manual.epub ]; then
-                curl -o Alice_au_pays_des_merveilles-manual.epub 'https://orthographe-rationnelle.info/static/Alice_au_pays_des_merveilles-manual.epub'
-            fi
+        server=http://localhost:8081
+        server=https://orthographe-rationnelle.info
+        if ! [ -f Alice_au_pays_des_merveilles.epub ]; then
+            # the original, but since it's mutable, so we pin the version
+            url='https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Alice_au_pays_des_merveilles'
+            url="$server/static/Alice_au_pays_des_merveilles.epub"
+            curl --no-progress-meter --fail-with-body -o Alice_au_pays_des_merveilles.epub "$url"
         fi
+        if ! [ -f Alice_au_pays_des_merveilles-manual.epub ]; then
+            curl --no-progress-meter --fail-with-body -o Alice_au_pays_des_merveilles-manual.epub "$server/static/Alice_au_pays_des_merveilles-manual.epub"
+        fi
+        manual-changes2 \
+            Alice_au_pays_des_merveilles.epub \
+            Alice_au_pays_des_merveilles-manual.epub
+        root=$(jj workspace root 2> /dev/null || git rev-parse --show-toplevel)
+        "$root"/_build/default/doc-conversion/bin/ortografe_cli.exe conv \
+               Alice_au_pays_des_merveilles-manual.epub
         ebook-convert \
-            Alice_au_pays_des_merveilles-conv-manual.epub \
-            Alice_au_pays_des_merveilles-conv-manual.pdf \
+            Alice_au_pays_des_merveilles-manual-conv.epub \
+            Alice_au_pays_des_merveilles-manual-conv.pdf \
             --pdf-page-numbers \
             --pdf-use-document-margins \
             --pdf-default-font-size=16 \
@@ -104,8 +135,8 @@ __img {
 }
 [data-title*="_05.png"] {
   width: auto;
-  height: 13.8cm;
-  margin: -5px -5px -5px 0;
+  height: 13cm;
+  margin: -5px -18px -5px -20px;
 }
 
 /* chap habitation du lapin */
@@ -139,7 +170,7 @@ __img {
 }
 #figure23 {
   /* chat dans l'arbre qui parle avec alice avec encart */
-  shape-outside: polygon(0% 0%, 100% 0%, 100% 43%, 47% 43%, 47% 95%, 0% 95%);
+  shape-outside: polygon(0% 0%, 100% 0%, 100% 43%, 47% 43%, 47% 96%, 0% 96%);
 }
 
 /* le croquet */
