@@ -53,22 +53,11 @@ case "${1-}" in
         # Améliorations possibles :
         # - les titres des premières pages est avec sérif dans l'original
         # - le epub n'a pas la couverture
-        # - la page initiale "exporté de wiktionnaire" est moche, à enlever
-        # - la page des matiere ne montre pas les numero de page
-        #
-        # il faudrait une page qui dit
-        # - écrit par ...
-        # - illustré par ..
-        # - mis en page par ..
-        # - traduit par ..
-        # - scanné par google
-        # - transcrit en texte numérique par wikisource (voir puis loin), que l'on remercie bien d'avoir mis à disposition de tout le monde ce travail laborieux
-        # - converti en orthographe érofa, puis remis en page par
-        #   Valentin Gatien-Baron pour l'association érofa
+        # - la page des matiere ne montre pas les numéros de page
         server=http://localhost:8081
         server=https://orthographe-rationnelle.info
         if ! [ -f Alice_au_pays_des_merveilles.epub ]; then
-            # the original, but since it's mutable, so we pin the version
+            # the original, but since it's mutable, we pin the version
             url='https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Alice_au_pays_des_merveilles'
             url="$server/static/Alice_au_pays_des_merveilles.epub"
             curl --no-progress-meter --fail-with-body -o Alice_au_pays_des_merveilles.epub "$url"
