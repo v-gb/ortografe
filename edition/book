@@ -51,6 +51,7 @@ case "${1-}" in
         ;;
     *)
         # Améliorations possibles :
+        # - regarder les pages deux par deux, et rajouter des pages blanches où nécessaire
         # - les titres des premières pages est avec sérif dans l'original
         # - le epub n'a pas la couverture
         #   cette page https://fr.wikisource.org/wiki/Page:Lewis_Caroll_-_Alice_au_pays_des_merveilles,_traduction_Henri_Bu%C3%A9.djvu/3
@@ -237,8 +238,19 @@ __img {
 .poem {
   margin-left: 0.5em;
 }
+
+/* __page {
+  counter-increment: page;
+} */
+/* I think calibre might be too old to support target-counter, I should update
+.tableItem a::after {
+    content: "(page" target-counter(attr(href), page) ")"
+}
+*/
 EOF
                          )
         qpdf Alice_au_pays_des_merveilles-manual-conv-tmp.pdf --pages . 2-z -- \
              Alice_au_pays_des_merveilles-manual-conv.pdf
+        rm -f Alice_au_pays_des_merveilles-manual-conv.epub
+        rm -f Alice_au_pays_des_merveilles-manual-conv-tmp.pdf
 esac

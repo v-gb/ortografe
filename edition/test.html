@@ -16,6 +16,11 @@
       @page {
           size: 11cm 18cm;
       }
+      a::after {
+          content: "foo";
+          content: counter(page);
+          content: target-counter(attr(href));
+      }
     </style>
   </head>
   <body>
