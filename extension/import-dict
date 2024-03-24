@@ -87,6 +87,7 @@ where (w.post1990 is null
             or substring(l.post90,1,instr(l.post90,'/')-1) = w.post1990
           end)
 and suggested_new <> l.ortho
+and l.ortho <> "fût" -- the nom is rewritten, not the verb
 union all
 select distinct w.pre1990,w.post1990
 from w
