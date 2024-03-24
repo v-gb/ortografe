@@ -53,6 +53,8 @@ case "${1-}" in
         # Améliorations possibles :
         # - les titres des premières pages est avec sérif dans l'original
         # - le epub n'a pas la couverture
+        #   cette page https://fr.wikisource.org/wiki/Page:Lewis_Caroll_-_Alice_au_pays_des_merveilles,_traduction_Henri_Bu%C3%A9.djvu/3
+        #   serait mieux que la page qui sert actuellement de couverture
         # - la page des matiere ne montre pas les numéros de page
         server=http://localhost:8081
         server=https://orthographe-rationnelle.info
@@ -73,7 +75,7 @@ case "${1-}" in
                Alice_au_pays_des_merveilles-manual.epub
         ebook-convert \
             Alice_au_pays_des_merveilles-manual-conv.epub \
-            Alice_au_pays_des_merveilles-manual-conv.pdf \
+            Alice_au_pays_des_merveilles-manual-conv-tmp.pdf \
             --pdf-page-numbers \
             --pdf-use-document-margins \
             --pdf-default-font-size=16 \
@@ -236,5 +238,7 @@ __img {
   margin-left: 0.5em;
 }
 EOF
-                 )
+                         )
+        qpdf Alice_au_pays_des_merveilles-manual-conv-tmp.pdf --pages . 2-z -- \
+             Alice_au_pays_des_merveilles-manual-conv.pdf
 esac
