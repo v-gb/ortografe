@@ -183,6 +183,50 @@
  <section data-mw-section-id="-1"><h2 class="tmp" style="border-bottom:0 none; font-size: 120%;margin: 2em 0em;" id="CHAPITRE_V."><span id="CHAPITRE_V.CONSEILS_D.E2.80.99UNE_CHENILLE."/><span class="mw-headline" id="CHAPITRE_V.CONSEILS_D_UNE_CHENILLE.">CHAPITRE V.<br/><br/><span style="font-size: 80%; line-height: normal;">CONSEILS D’UNE CHENILLE.</span></span></h2>
  <p><span class="sc">La</span> Chenille et Alice se considérèrent un instant en silence. Enfin la Chenille sortit le houka de sa bouche,
  et lui adressa la parole d’une voix endormie et traînante. <span><span class="pagenum ws-pagenum" id="id-61" title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/81"/></span>
+@@ -35,7 +35,7 @@
+ </p><p>Alice croisa les mains et commença : <span><span class="pagenum ws-pagenum" id="id-65" title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/85"/></span>
+ </p><p><br/>
+ </p>
+-<figure class="mw-halign-center" typeof="mw:File"><span><img src="images/c31_Alice_par_John_Tenniel_16.png_450px_Alice_par_John_Tenniel_16.png" decoding="async" class="mw-file-element" style="width:450; height:340; " data-title="Alice_par_John_Tenniel_16.png-450px-Alice_par_John_Tenniel_16.png"/></span><figcaption/></figure>
++<figure class="mw-halign-center" typeof="mw:File" style="float: none"><span><img src="images/c31_Alice_par_John_Tenniel_16.png_450px_Alice_par_John_Tenniel_16.png" decoding="async" class="mw-file-element" style="width:450; height:340; " data-title="Alice_par_John_Tenniel_16.png-450px-Alice_par_John_Tenniel_16.png"/></span><figcaption/></figure>
+ <p><br/>
+ </p>
+ <div class="poem verse">
+@@ -52,7 +52,7 @@
+ </div> <span><span class="pagenum ws-pagenum" id="id-66" title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/86"/></span>
+ <p><br/>
+ </p>
+-<figure class="mw-halign-center" typeof="mw:File"><span><img src="images/c32_Alice_05c.jpg_450px_Alice_05c.jpg" decoding="async" class="mw-file-element" style="width:450; height:342; " data-title="Alice_05c.jpg-450px-Alice_05c.jpg"/></span><figcaption/></figure>
++<figure class="mw-halign-center" typeof="mw:File" style="float: none"><span><img src="images/c32_Alice_05c.jpg_450px_Alice_05c.jpg" decoding="async" class="mw-file-element" style="width:450; height:342; " data-title="Alice_05c.jpg-450px-Alice_05c.jpg"/></span><figcaption/></figure>
+ <p><br/>
+ </p>
+ <div class="poem verse">
+@@ -69,7 +69,7 @@
+ </div> <span><span class="pagenum ws-pagenum" id="id-67" title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/87"/></span>
+ <p><br/>
+ </p>
+-<figure class="mw-halign-center" typeof="mw:File"><span><img src="images/c33_Alice_05d.jpg_450px_Alice_05d.jpg" decoding="async" class="mw-file-element" style="width:450; height:343; " data-title="Alice_05d.jpg-450px-Alice_05d.jpg"/></span><figcaption/></figure>
++<figure class="mw-halign-center" typeof="mw:File" style="float: none"><span><img src="images/c33_Alice_05d.jpg_450px_Alice_05d.jpg" decoding="async" class="mw-file-element" style="width:450; height:343; " data-title="Alice_05d.jpg-450px-Alice_05d.jpg"/></span><figcaption/></figure>
+ <p><br/>
+ </p>
+ <div class="poem verse">
+@@ -86,7 +86,7 @@
+ </div> <span><span class="pagenum ws-pagenum" id="id-68" title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/88"/></span>
+ <p><br/>
+ </p>
+-<figure class="mw-halign-center" typeof="mw:File"><span><img src="images/c34_Alice_05e.jpg_450px_Alice_05e.jpg" decoding="async" class="mw-file-element" style="width:450; height:341; " data-title="Alice_05e.jpg-450px-Alice_05e.jpg"/></span><figcaption/></figure>
++<figure class="mw-halign-center" typeof="mw:File" style="float: none"><span><img src="images/c34_Alice_05e.jpg_450px_Alice_05e.jpg" decoding="async" class="mw-file-element" style="width:450; height:341; " data-title="Alice_05e.jpg-450px-Alice_05e.jpg"/></span><figcaption/></figure>
+ <p><br/>
+ </p>
+ <div class="poem verse">
+@@ -101,6 +101,7 @@
+ <i>Vous envoyer bien loin d’ici. »</i>
+ </p>
+ </div> <span><span class="pagenum ws-pagenum" id="id-69" title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/89"/></span>
++<div style="height: 100px;"> </div>
+ <p>« Ce n’est pas cela, » dit la Chenille.
+ </p><p>« Pas tout à fait, je le crains bien, » dit Alice timidement. « Tous les mots ne sont pas les mêmes. » 
+ </p><p>« C’est tout de travers d’un bout à l’autre, » dit la Chenille d’un ton décidé ; et il se fit un silence de quelques minutes.
 --- OPS/c7_Alice_au_pays_des_merveilles_6.xhtml
 +++ OPS/c7_Alice_au_pays_des_merveilles_6.xhtml
 @@ -24,9 +24,9 @@
