@@ -34,6 +34,47 @@
 +					</ul>
 +        </body>
 +			</html>
+--- OPS/c0_Alice_au_pays_des_merveilles.xhtml
++++ OPS/c0_Alice_au_pays_des_merveilles.xhtml
+@@ -1,6 +1,8 @@
+ <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ <!DOCTYPE html>
+-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" dir="ltr"><head><meta charset="UTF-8"/><link type="text/css" rel="stylesheet" href="main.css"/><title>Alice au pays des merveilles</title></head><body class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output" dir="ltr" xml:lang="fr"><section data-mw-section-id="0">
++<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" dir="ltr"><head><meta charset="UTF-8"/><link type="text/css" rel="stylesheet" href="main.css"/><title>Alice au pays des merveilles</title></head><body class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output" dir="ltr" xml:lang="fr">
++<div style="break-after: right; height:1px;"> </div>
++<section data-mw-section-id="0">
+ <div class="prp-pages-output" typeof="mw:Extension/pages" about="#mwt3">
+ <div itemscope="" itemtype="http://schema.org/Book" itemid="http://www.wikidata.org/entity/Q40580209"><div class="ws-summary" style="margin-top:1em">
+ <div style="text-align:center;clear:both;font-size:125%;margin-top:2em;margin-bottom:2em;"><span style="letter-spacing:3px;">TABLE</span>.</div>
+--- OPS/c1_Alice_au_pays_des_merveilles_D.xhtml
++++ OPS/c1_Alice_au_pays_des_merveilles_D.xhtml
+@@ -1,18 +1,23 @@
+ <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ <!DOCTYPE html>
+-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" dir="ltr"><head><meta charset="UTF-8"/><link type="text/css" rel="stylesheet" href="main.css"/><title>Dédicace</title></head><body class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output" dir="ltr" xml:lang="fr"><section data-mw-section-id="0"><span about="#mwt1">
++<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" dir="ltr"><head><meta charset="UTF-8"/><link type="text/css" rel="stylesheet" href="main.css"/><title>Dédicace</title></head><body class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output" dir="ltr" xml:lang="fr">
++<div style="break-after: right; height:1px;"> </div>
++<section data-mw-section-id="0"><span about="#mwt1">
+ </span>
+ <div class="prp-pages-output" typeof="mw:Extension/pages" about="#mwt15" xml:lang="fr">
+ <div itemscope="" itemtype="http://schema.org/Chapter"><link itemprop="mainEntityOfPage" href="https://fr.wikisource.org/wiki/Alice_au_pays_des_merveilles/D"/><meta itemprop="inLanguage" content="fr"/><meta itemprop="http://purl.org/library/placeOfPublication" content="Londres"/><span itemprop="associatedMedia" itemscope="" itemtype="http://schema.org/MediaObject"><link itemprop="mainEntityOfPage" href="https://fr.wikisource.org/wiki/Fichier:Lewis_Caroll_-_Alice_au_pays_des_merveilles,_traduction_Henri_Bu%C3%A9.djvu"/><meta itemprop="width" content="2550"/><meta itemprop="height" content="3300"/><meta itemprop="fileFormat" content="image/vnd.djvu"/></span></div>
+ <span><span class="pagenum ws-pagenum" id="Ill." title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/12"/></span><figure class="mw-halign-center" typeof="mw:File"><span><img src="images/c15_Alice_frontispiece_937x1333.jpg_460px_Alice_frontispiece_937x1333.jpg" decoding="async" class="mw-file-element" style="width:460; height:654; " data-title="Alice_frontispiece-937x1333.jpg-460px-Alice_frontispiece-937x1333.jpg"/></span><figcaption/></figure>
+-<p style="break-after:page; page-break-after:always; width:0; height:0; line-height:0; font-size:0; padding:0; margin:0; border:none;">‌</p> <span><span class="pagenum ws-pagenum" id="id-." title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/13"/></span>
++<div style="break-after: right; height:1px;"> </div>
++<p style="break-after:page; page-break-after:always; width:0; height:0; line-height:0; font-size:0; padding:0; margin:0; border:none">‌</p> <span><span class="pagenum ws-pagenum" id="id-." title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/13"/></span>
+ <p class="mw-empty-elt">
+ </p><p><br/>
+ </p>
+-<div style="padding-bottom: 0em;"> </div><div style="text-align:center;clear:both;font-size:220%;"><span style="letter-spacing:0.1em;">AVENTURES D’ALICE</span></div>
++<div style="display:none">
++<div style="padding-bottom: 0em;"> </div><div style="text-align:center;clear:both;font-size:220%"><span style="letter-spacing:0.1em;">AVENTURES D’ALICE</span></div>
+ <div style="padding-bottom: 2em;"> </div><div style="text-align:center;clear:both;font-size:140%;"><i>AU PAYS DES MERVEILLES.</i></div><div style="padding-bottom: 4em;"> </div><div style="text-align:center;clear:both;font-size:90%;">PAR</div><div style="padding-bottom: 0.5em;"> </div><div style="text-align:center;clear:both;font-size:140%;">LEWIS CARROLL.</div><div style="padding-bottom: 3em;"> </div><div style="text-align:center;clear:both;font-size:100%;">TRADUIT DE L’ANGLAIS PAR HENRI BUÉ.</div><div style="padding-bottom: 3em;"> </div><div style="text-align:center;clear:both;font-size:100%;"><i>OUVRAGE ILLUSTRÉ DE 42 VIGNETTES PAR</i></div><div style="padding-bottom: 0em;"> </div><div style="text-align:center;clear:both;font-size:100%;"><i>JOHN TENNIEL.</i></div><div style="padding-bottom: 4em;"> </div><div style="text-align:center;clear:both;font-size:100%;">Londres :</div><div style="padding-bottom: 0em;"> </div><div style="text-align:center;clear:both;font-size:110%;"><span style="letter-spacing:0.1em;">MACMILLAN AND CO.</span></div><div style="padding-bottom: 0em;"> </div><div style="text-align:center;clear:both;font-size:100%;">1869.</div>
+ <p><br/>
+ </p>
++</div>
+ <p style="break-after:page; page-break-after:always; width:0; height:0; line-height:0; font-size:0; padding:0; margin:0; border:none;">‌</p> <span><span class="pagenum ws-pagenum" id="Dedi." title="Page:Lewis Caroll - Alice au pays des merveilles, traduction Henri Bué.djvu/14"/></span>
+ <div style="line-height:8;"><br/></div>
+ <p>[L’Auteur désire exprimer ici sa reconnaissance envers le Traducteur de ce qu’il a remplacé par des parodies de sa composition quelques parodies de morceaux de poésie anglais, qui n’avaient de valeur que pour des enfants anglais ; et aussi, de ce qu’il a su donner en jeux de mots français les équivalents des jeux de mots anglais, dont la traduction n’était pas possible.]
 --- OPS/c2_Alice_au_pays_des_merveilles_1.xhtml
 +++ OPS/c2_Alice_au_pays_des_merveilles_1.xhtml
 @@ -4,7 +4,7 @@
