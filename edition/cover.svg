@@ -38,14 +38,14 @@
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:zoom="0.94902149"
-     inkscape:cx="404.10044"
+     inkscape:cx="408.31531"
      inkscape:cy="278.70812"
      inkscape:window-width="1850"
      inkscape:window-height="1016"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer2"
+     inkscape:current-layer="layer1"
      inkscape:snap-page="true">
     <sodipodi:guide
        position="25.85567,183.99999"
@@ -183,7 +183,9 @@
          id="tspan52748"
          x="178.06148"
          y="159.62207"
-         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.35px;font-family:serif;-inkscape-font-specification:'serif, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1">au pays des merveilles Érofa</tspan></text>
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.35px;font-family:serif;-inkscape-font-specification:'serif, Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1">au pays des merveilles <tspan
+   style="fill:#ffcc00"
+   id="tspan1809">Érofa</tspan></tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:6.35px;line-height:1.05;font-family:sans-serif;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
@@ -205,44 +207,44 @@
        transform="translate(0.51042186,11.159461)"><tspan
          x="16.802734"
          y="26.617991"
-         id="tspan1010"><tspan
+         id="tspan26307"><tspan
            style="font-family:serif;-inkscape-font-specification:serif"
-           id="tspan1008">Alice au pays des merveilles transcrit en </tspan></tspan><tspan
+           id="tspan26305">Alice au pays des merveilles transcrit en </tspan></tspan><tspan
          x="16.802734"
          y="31.362503"
-         id="tspan1014"><tspan
+         id="tspan26311"><tspan
            style="font-family:serif;-inkscape-font-specification:serif"
-           id="tspan1012">orthographe Érofa évoque évidemment </tspan></tspan><tspan
+           id="tspan26309">orthographe Érofa évoque évidemment </tspan></tspan><tspan
          x="16.802734"
          y="36.107016"
-         id="tspan1018"><tspan
+         id="tspan26315"><tspan
            style="font-family:serif;-inkscape-font-specification:serif"
-           id="tspan1016">l'absurdité et les crimes de lèse-majesté. </tspan></tspan><tspan
+           id="tspan26313">l'absurdité et les crimes de lèse-majesté. </tspan></tspan><tspan
          x="16.802734"
          y="40.851527"
-         id="tspan1022"><tspan
+         id="tspan26319"><tspan
            style="font-family:serif;-inkscape-font-specification:serif"
-           id="tspan1020">Mais orthographe mise à part, c'est aussi </tspan></tspan><tspan
+           id="tspan26317">Mais orthographe mise à part, c'est aussi </tspan></tspan><tspan
          x="16.802734"
          y="45.596041"
-         id="tspan1026"><tspan
+         id="tspan26323"><tspan
            style="font-family:serif;-inkscape-font-specification:serif"
-           id="tspan1024">une reine qui pert ses nerfs pendant un jeu </tspan></tspan><tspan
+           id="tspan26321">une reine qui pert ses nerfs pendant un jeu </tspan></tspan><tspan
          x="16.802734"
          y="50.340556"
-         id="tspan1030"><tspan
+         id="tspan26327"><tspan
            style="font-family:serif;-inkscape-font-specification:serif"
-           id="tspan1028">de croquet avec des flamands roses et des </tspan></tspan><tspan
+           id="tspan26325">de croquet avec des flamands roses et des </tspan></tspan><tspan
          x="16.802734"
          y="55.08507"
-         id="tspan1034"><tspan
+         id="tspan26331"><tspan
            style="font-family:serif;-inkscape-font-specification:serif"
-           id="tspan1032">hérissons.</tspan></tspan></text>
+           id="tspan26329">hérissons.</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="scale(0.26458333)"
        id="text148019"
-       style="fill:black;fill-opacity:1;line-height:1.25;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;white-space:pre;shape-inside:url(#rect148021)" />
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect148021);fill:#000000;fill-opacity:1;stroke:none" />
     <rect
        style="fill:none;fill-opacity:1;stroke-width:0.264999"
        id="rect183156"
@@ -254,6 +256,6 @@
        xml:space="preserve"
        transform="scale(0.26458333)"
        id="text224736"
-       style="fill:black;fill-opacity:1;line-height:1.25;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;white-space:pre;shape-inside:url(#rect224738)" />
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect224738);fill:#000000;fill-opacity:1;stroke:none" />
   </g>
 </svg>
