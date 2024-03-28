@@ -111,6 +111,59 @@ let respond_error_text status str =
 let hum_size_of_bytes n =
   Core.Byte_units.Short.to_string (Core.Byte_units.of_bytes_int n)
 
+let stream_end = Dream.new_field ~name:"stream-end" ()
+
+let actual_from_system root disk_path _request =
+  (* Embarrasingly, Dream.from_filesystem reads the whole file into memory and then sends
+     it. Two downloads of the 27MB ortografe_cli.exe in parallel were enough to crash the
+     server into the 256MB limit. If we stream the data out, the memory usage is just 1MB per
+     concurrent download (of files over 1MB). *)
+  let file_path = Filename.concat root disk_path in
+  Lwt.catch
+    (fun () ->
+      let%lwt stat = Lwt_unix.stat file_path (* Lwt_io.file_length is, uh, suboptimal *) in
+      let%lwt ch = Lwt_io.open_file ~mode:Input file_path in
+      if stat.st_size < 1_000_000
+      then
+        (* This branch is mostly to keep the logs clean. But it might be good as well to limit
+           the allocation of bigstrings, because the gc tends to not be good at them. *)
+        let%lwt contents =
+          Lwt.finalize (fun () -> Lwt_io.read ch)
+            (fun () -> Lwt_io.close ch)
+        in
+        Dream.respond ~headers:(Dream.mime_lookup file_path) contents
+      else 
+        let promise, resolver = Lwt.wait () in
+        let%lwt response =
+          Dream.stream
+            ~headers:(Dream.mime_lookup file_path)
+            (fun stream ->
+              let got_exn = Lwt.wakeup_later_exn resolver in
+              let buf = Lwt_bytes.create 1_000_000 in
+              let rec loop () =
+                Lwt.on_any
+                  (Lwt_io.read_into_bigstring ch buf 0 (Lwt_bytes.length buf))
+                  (function
+                   | 0 -> Lwt.wakeup_later resolver ()
+                   | n ->
+                      Dream.write_stream stream buf 0 n false false
+                        ~close:(fun _ -> Lwt.wakeup_later resolver ())
+                        ~exn:got_exn
+                        loop)
+                  got_exn
+              in
+              Lwt.finalize (fun () ->
+                  loop ();
+                  promise)
+                (fun () ->
+                  let%lwt () = Lwt_io.close ch in
+                  Dream.close stream))
+        in
+        Dream.set_field response stream_end promise;
+        Lwt.return response)
+    (fun _exn ->
+      Dream.respond ~status:`Not_Found "")
+
 let from_filesystem root path request =
   let disk_path, response_headers =
     match path with
@@ -124,7 +177,10 @@ let from_filesystem root path request =
        else path, []
     | _ -> path, []
   in
-  let%lwt response = Dream.from_filesystem root disk_path request in
+  let%lwt response =
+    (if true then actual_from_system else Dream.from_filesystem)
+      root disk_path request
+  in
   let cache =
     (* the big things we'd like to avoid repeating queries for are dict.js
        and the screenshot *)
@@ -219,6 +275,16 @@ let logger = function
          in
          Stdlib.prerr_endline [%string "%{ofday} %{bcolor}%{Dream.status_to_int status#Int}%{ecolor} %{id#Int} %{client} in %{duration#Int}us"];
          Stdlib.flush stderr;
+         (match Dream.field response stream_end with
+          | None -> ()
+          | Some promise ->
+             ignore (
+                 Lwt.on_termination promise (fun () ->
+                     let bcolor, ecolor = "[35m", "[39m" in
+                     let duration = Time_ns.Span.to_int_us (Time_ns.diff (Time_ns.now ()) before) in
+                     Stdlib.prerr_endline [%string "%{ofday} %{bcolor}DON%{ecolor} %{id#Int} %{client} in %{duration#Int}us"];
+                     Stdlib.flush stderr;
+                   )));
          Lwt.return response)
        (fun exn ->
          Stdlib.prerr_string [%string "Aborted by: %{Exn.to_string exn}"];
