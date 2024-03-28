@@ -71,7 +71,20 @@ let () =
       (C.Cmd.info (Filename.basename Sys.executable_name))
       [ C.Cmd.v
           (C.Cmd.info
-             ~doc:"conversion de documents vers l'orthographe Érofa (ou autre)"
+             ~doc:"transcrit des documents vers l'orthographe Érofa (ou autre)"
+             ~man:[ `S C.Manpage.s_description
+                  ; `P "Transcrit le texte du document INPUT_FILE (ou stdin si non
+                        spécifié) en OUTPUT_FILE (ou un nom dérivé de INPUT_FILE si non
+                        spécifié, ou stdout). La transcription utilise l'orthographe à moins
+                        qu'une autre orthographe ne soit sélectionnée."
+                  ; `P "Exemples :"
+                  ; `Pre "$(iname) foo.docx"
+                  ; `Noblank; `P "(produit foo-conv.docx en orthographe Érofa)"
+                  ; `Pre "$(iname) foo.docx foo-erofa.docx"
+                  ; `Pre "$(iname) < ~/fichier.txt"
+                  ; `Pre "$(iname) foo.docx foo-modif.docx --1990 --qu/qou --qu/q"
+                  ; `Noblank; `P "(transcrit avec les règles spécifiées au lieu des règles Érofa)"
+                  ]
              "conv")
           (let+ arg1 =
              C.Arg.value (C.Arg.pos 0 (C.Arg.some C.Arg.string) None
