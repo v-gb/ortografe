@@ -79,6 +79,3 @@ De façon générale, voir ./README.md pour comment tout construire.
       donc ça pourrait suffire.
 
 - Supporter la conversion de fichier PDF. Probablement difficile.
-
-- Remplir le champ qui permet de récupérer un dico d'une URL d'après le contenu de la
-  dernière page visitée (par exemple, un lien avec une class "orthographe-rationnelle").
