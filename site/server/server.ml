@@ -162,6 +162,69 @@ let define_client_ip : Dream.middleware =
    | Some addr -> Dream.set_client request addr);
   handler request
 
+let logger = function
+  | `Long -> Dream.logger
+  | `Short ->
+     let open Core in
+     let next_id =
+       let r = ref (-1) in
+       fun () ->
+       r := !r + 1;
+       !r
+     in
+     fun handler request ->
+     (* format for request  : 13:04:49.553 GET ID IP PATH UA"
+        format for response : 13:04:49.553 200 ID in INTus"
+      *)
+     let id = next_id () in
+     let before = Time_ns.now () in
+     let ofday =
+       Time_ns.now ()
+       |> Time_ns.to_int63_ns_since_epoch
+       |> Int63.to_int_exn
+       |> (fun i -> i mod (86400 * 1_000_000_000))
+       |> Time_ns.Span.of_int_ns
+       |> Time_ns.Ofday.of_span_since_start_of_day_exn
+       |> Time_ns.Ofday.to_millisecond_string
+     in
+     let method_ = Dream.method_to_string (Dream.method_ request) in
+     let user_agent =
+       let user_agent = String.concat (Dream.headers request "User-Agent") in
+       match String.rsplit2 user_agent ~on:' ' with
+       | None -> user_agent
+       | Some (_, s) ->
+          match String.rsplit2 s ~on:'/' with
+          | Some (("Safari" | "Firefox" | "Chrome"), _) -> s
+          | _ -> user_agent
+     in
+     let client =
+       let s = Dream.client request in
+       match String.lsplit2 s ~on:':' with
+       | None -> s
+       | Some p -> fst p
+     in
+     Stdlib.prerr_endline [%string "%{ofday} %{method_} %{id#Int} %{client} %{Dream.target request}  %{user_agent}"];
+     Stdlib.flush stderr;
+     Lwt.try_bind
+       (fun () -> handler request)
+       (fun response ->
+         let duration = Time_ns.Span.to_int_us (Time_ns.diff (Time_ns.now ()) before) in
+         let status = Dream.status response in
+         let bcolor, ecolor =
+           if Dream.is_server_error status
+           then "[31m", "[39m"
+           else if Dream.is_client_error status
+           then "[33m", "[39m"
+           else "[32m", "[39m"
+         in
+         Stdlib.prerr_endline [%string "%{ofday} %{bcolor}%{Dream.status_to_int status#Int}%{ecolor} %{id#Int} %{client} in %{duration#Int}us"];
+         Stdlib.flush stderr;
+         Lwt.return response)
+       (fun exn ->
+         Stdlib.prerr_string [%string "Aborted by: %{Exn.to_string exn}"];
+         Stdlib.flush stderr;
+         Lwt.fail exn)
+
 let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
   let staged = lazy (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded)) in
   Ortografe.max_size := max_input_size * 2; (* xml can be quite large when decompressed *)
@@ -170,7 +233,9 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
     ~interface:"0.0.0.0" (* apparently only listens on lo otherwise *)
     ~error_handler:(Dream.error_template my_error_template)
   @@ (if in_container (* approximates "in prod" *) then define_client_ip else Fun.id)
-  @@ (if log then Dream.logger else Fun.id)
+  @@ (if log
+      then logger `Short
+      else Fun.id)
   @@ Dream.router
        [ Dream.post "/conv" (fun request ->
              match%lwt limit_body_size ~max_size:max_input_size request with
