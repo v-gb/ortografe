@@ -41,13 +41,34 @@ let generate ?profile embedded rules =
   in
   (Buffer.contents buf, sexp_str)
 
+let get_element_by_id id =
+  Jv.call (Jv.get Jv.global "document") "getElementById" [| Jv.of_jstr id |]
+
+let currently_selected_rules id_prefix =
+  let rules = Lazy.force Dict_gen_common.Dict_gen.all in
+  let selected_rules =
+    List.filter rules ~f:(fun rule ->
+        Jv.get
+          (get_element_by_id
+             (Jstr.of_string
+                (id_prefix ^ Dict_gen_common.Dict_gen.name rule)))
+          "checked"
+        |> Jv.to_bool)
+  in
+  let selection_text =
+    if List.is_empty selected_rules
+    then "rien de sélectionné"
+    else List.map selected_rules ~f:Dict_gen_common.Dict_gen.name
+         |> String.concat ~sep:" "
+  in
+  Jv.of_list Fn.id [Jv.Id.to_jv selected_rules; Jv.of_string selection_text]
+
 let rules () =
   let rules = Lazy.force Dict_gen_common.Dict_gen.all in
   Jv.of_list (fun rule ->
       Jv.obj [| "name", Jv.of_string (Dict_gen_common.Dict_gen.name rule)
               ; "html", Jv.of_string (Dict_gen_common.Dict_gen.html rule
                                         ~id_prefix:"load-" ~name_prefix:"load-")
-              ; "v", Jv.Id.to_jv rule
              |]) rules
 
 let fetch url =
@@ -95,7 +116,7 @@ let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n :
   (* We need to run this in a worker, otherwise the loading animation doesn't actually
    * animate, which we kind of want it to, since the a 2s of waiting is on the longer
    * side. *)
-  let rules = Jv.to_list (Stdlib.Obj.magic : Jv.t -> Dict_gen_common.Dict_gen.rule) rules in
+  let rules = (Stdlib.Obj.magic : Jv.t -> Dict_gen_common.Dict_gen.rule list) rules in
   let n = Jv.to_int n in
   let profile = Jv.to_bool profile in
   Fut.to_promise
@@ -121,4 +142,5 @@ let () =
       (Js_of_ocaml.Js.Unsafe.inject
          (Jv.obj [| "generate", Jv.callback ~arity:5 generate_in_worker
                   ; "rules", Jv.callback ~arity:1 rules
+                  ; "currently_selected_rules", Jv.callback ~arity:1 currently_selected_rules
             |]))
