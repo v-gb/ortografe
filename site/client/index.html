@@ -41,7 +41,7 @@
       h3 {
           font-size: 1.3rem;
       }
-      #converted-text {
+      .converted-text {
           white-space: pre-wrap;
           flex: 1 1 0px;
           min-width: 15em;
@@ -53,14 +53,14 @@
           border-radius: 6px;
       }
       /* https://css-tricks.com/snippets/css/a-guide-to-flexbox/ */
-      #user-text {
+      .user-text {
           background-color: #FAF9F6;
           flex: 1 1 0px;
           min-width: 15em;
           min-height: 6em;
           max-width: 30em;
       }
-      #interactive-transcription {
+      .interactive-transcription {
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
@@ -256,9 +256,9 @@
           <p><strong>Cet fonctionalité requiert du javascript.</strong></p>
         </noscript>
 
-        <div id="interactive-transcription">
-          <textarea id="user-text">Babar a une mémoire exceptionnelle, car c'est un élé...</textarea>
-          <div id="converted-text" class="notranscribe"></div>
+        <div class="interactive-transcription">
+          <textarea id="user-text" class="user-text">Babar a une mémoire exceptionnelle, car c'est un élé...</textarea>
+          <div id="converted-text" class="converted-text notranscribe"></div>
         </div>
       </section>
 
