@@ -1,5 +1,4 @@
-.PHONY: first-install all all-w serve build-container run-container fly-deploy tarball
-
+.PHONY: all all-w serve
 all:
 	opam exec -- dune build --trace-file _build/trace ./server_all.exe @default @runtest
 all-w:
@@ -7,6 +6,7 @@ all-w:
 serve:
 	opam exec -- dune exec --trace-file _build/trace -w -- ./server_all.exe serve -p 8081
 
+.PHONY: build-container run-container fly-deploy
 build-container:
 	opam exec -- dune build --trace-file _build/trace -- ./server_all.exe
 	podman build -f site/deployment/Dockerfile . -t ortografe-server
@@ -18,11 +18,16 @@ run-container: build-container
 fly-deploy: build-container
 	fly deploy
 
+.PHONY: update-opam update-lock-file
 update-opam:
 	@ # it's a mystery why you have to run dune describe external-lib-deps
 	@ # and tell dune to put that in the opam file, rather than have dune just do it
-	./update-opam-file
+	opam exec -- ./update-opam-file
+update-lock-file:
+	rm -f ortografe.opam.locked
+	opam lock ./ortografe.opam
 
+.PHONY: first-install
 first-install:
 	@ # instructions from https://opam.ocaml.org/doc/Install.html
 	if ! which opam > /dev/null; then bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"; fi
@@ -35,6 +40,7 @@ first-install:
 	opam exec -- dune build extension/extension2.zip
 	@ echo "[32mExtensions built at _build/default/extension/*.zip ![39m"
 
+.PHONY: tarball
 tarball:
 	@ # requested by the firefox addon website, due to the generated javascript
 	jj files | tar -zcf source.tar.gz --files-from=-
