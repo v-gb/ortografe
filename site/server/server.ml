@@ -182,13 +182,14 @@ let from_filesystem root path request =
       root disk_path request
   in
   let cache =
-    (* the big things we'd like to avoid repeating queries for are dict.js
-       and the screenshot *)
+    (* The big things we'd like to avoid repeating queries for are dict.js,
+       the screenshot and the data (mostly for the clients to avoid downloading
+       large stuff over and over in the last case). *)
     match path with
-    | "dict.js" -> true
+    | "dict.js" | "dict_gen.bc.js" -> true
     | _ ->
        match Filename.extension path with
-       | ".png" | ".svg" | ".jpg" -> true
+       | ".png" | ".svg" | ".jpg" | ".csv" | ".tsv" -> true
        | _ -> false
   in
   if cache

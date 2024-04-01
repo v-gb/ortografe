@@ -343,7 +343,7 @@
           <summary style="list-style: none;"><h3>Support pour d'autres orthographes<span style="text-decoration-line: underline">...</span></h3></summary>
           <p>Parmi nos outils, voici ceux qui supportent d'autres orthographes que l'orthographe Érofa&#8239;:</p>
           <ul>
-            <li style='list-style-type:"\274C&nbsp"'>transcription interactive</li>
+            <li style='list-style-type:"\2705&nbsp"'>transcription interactive (voir plus bas)</li>
             <li style='list-style-type:"\2705&nbsp"'>transcription de documents (voir plus bas)</li>
             <li style='list-style-type:"\2705&nbsp"'>transcription de documents sur votre ordinateur (voir <code>--help</code>)</li>
             <li style='list-style-type:"\2705&nbsp"'>transcription de pages que vous visitez (voir les options de l'extension)</li>
@@ -355,13 +355,19 @@
           </p>
 
           <form action="/conv" method="post" enctype="multipart/form-data">
+            <rules></rules>
+            <br>
             <label class="upload">
               <input style="display:none" type="file" name="file" accept=".doc,.docx,.odt,.html,.xhtml,.htmlz,.epub,.txt,.mkd,.md" onchange="form.submit()">
               choisir un fichier
             </label>
-            <rules></rules>
           </form>
           
+          <br>
+          <div class="interactive-transcription">
+            <textarea id="user-text2" class="user-text" placeholder="Quand vous changez les règles ci-dessus, tapez quelque chose ici pour mettre le texte à jour"></textarea>
+            <div id="converted-text2" class="converted-text notranscribe"></div>
+          </div>          
         </details>
       </section>
 
