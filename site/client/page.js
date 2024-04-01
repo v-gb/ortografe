@@ -93,6 +93,8 @@ user_text2.oninput = ignoring_concurrent_calls(async () => {
         if (selection_text == cache2?.selection_text) {
             break;
         } else {
+            // ideally, we would generate the dictionary on demand, like we do when converting docs
+            // but that code works on text, not the dom, and can't highlight things.
             [ cache2.dict, cache2.stats ] =
                 await dict_gen.generate("/static", "/static/Lexique383.gen.tsv", "/static/rect1990.csv", rules, 1, false);
             cache2.selection_text = selection_text;
