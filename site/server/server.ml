@@ -167,13 +167,13 @@ let actual_from_system root disk_path _request =
 let from_filesystem root path request =
   let disk_path, response_headers =
     match path with
-    | "dict.js" ->
+    | "Lexique383.gen.tsv" | "dict.js" ->
        if
          List.exists (fun s ->
              String.split_on_char ',' s
              |> List.exists (fun s -> String.trim s = "gzip"))
            (Dream.headers request "Accept-Encoding")
-       then "dict.js.gz", [("Content-Encoding", "gzip")] @ Dream.mime_lookup path
+       then path ^ ".gz", [("Content-Encoding", "gzip")] @ Dream.mime_lookup path
        else path, []
     | _ -> path, []
   in

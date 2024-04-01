@@ -9,6 +9,10 @@
 (rule
   (target dict.js.gz)
   (action  (run gzip -f -n -k %{dep:dict.js})))
+(rule
+  (target Lexique383.gen.tsv.gz)
+  (action  (run gzip -f -n -k %{dep:Lexique383.gen.tsv})))
+
 (copy_files (files %{project_root}/doc-conversion/bin/ortografe_cli.exe))
 (copy_files (files %{project_root}/erofa-texte.pdf))
 (rule
