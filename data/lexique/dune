@@ -39,6 +39,22 @@
         -cmd ".mode tab"
         -cmd ".import Lexique383-full.gen.tsv tmp"
         -cmd ".header on"
+        ;; transform "à l'aveuglette" into "aveuglette"
+        -cmd "update tmp
+              set ortho = substring(ortho, 6),
+                  lemme = substring(lemme, 6),
+                  phon = substring(phon, 4)
+              where ortho like 'à la %' and phon like 'ala%'"
+        -cmd "update tmp
+              set ortho = substring(ortho, 5),
+                  lemme = substring(lemme, 5),
+                  phon = substring(phon, 3)
+              where ortho like 'à l''%' and phon like 'al%'"
+        -cmd "update tmp
+              set ortho = substring(ortho, 3),
+                  lemme = substring(lemme, 3),
+                  phon = substring(phon, 2)
+              where ortho like 'à %' and phon like 'a%'"
         -cmd "select ortho,phon,lemme,
                      (case
                       when ortho like 'h%'
