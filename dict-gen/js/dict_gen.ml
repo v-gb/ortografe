@@ -93,18 +93,19 @@ let on_message (lexique_url, dict1990_url, rules, profile) ~k =
 
 let rpc : type q r.
           local:bool
+          -> path:string
           -> (q -> (r, 'b) Result.t Fut.t)
           -> q
           -> (q -> _)
           -> (r, 'b) Result.t Fut.t
-  = fun ~local impl arg constr ->
+  = fun ~local ~path impl arg constr ->
   (* This function ensures well typedness, by tying the result in the worker
      case and in the non-worker case. *)
   let open Fut.Syntax in
   if local
   then impl arg
   else (
-    let worker = Brr_webworkers.Worker.create (Jstr.of_string "./dict_gen.bc.js") in
+    let worker = Brr_webworkers.Worker.create (Jstr.of_string (path ^ "/dict_gen.bc.js")) in
     Brr_webworkers.Worker.post worker (constr arg);
     let* event = Brr.Ev.next Brr_io.Message.Ev.message
                    (Brr_webworkers.Worker.as_target worker) in
@@ -112,10 +113,11 @@ let rpc : type q r.
     Fut.return (Brr_io.Message.Ev.data (Brr.Ev.as_type event) : (r, Jv.Error.t) Result.t)
   )
 
-let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n : Jv.t) profile =
+let generate_in_worker path (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n : Jv.t) profile =
   (* We need to run this in a worker, otherwise the loading animation doesn't actually
    * animate, which we kind of want it to, since the a 2s of waiting is on the longer
    * side. *)
+  let path = Jv.to_string path in
   let rules = (Stdlib.Obj.magic : Jv.t -> Dict_gen_common.Dict_gen.rule list) rules in
   let n = Jv.to_int n in
   let profile = Jv.to_bool profile in
@@ -123,6 +125,7 @@ let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n :
     ~ok:(fun (dict, duration) -> Jv.of_jv_list [ Jv.of_string dict ; Jv.of_string duration ])
     (rpc
        ~local:(n = 0)
+       ~path
        (on_message ~k:Fn.id)
        (lexique_url, dict1990_url, rules, profile)
        (fun arg -> `On_message arg))
@@ -140,7 +143,7 @@ let () =
   else
     Js_of_ocaml.Js.export "dict_gen"
       (Js_of_ocaml.Js.Unsafe.inject
-         (Jv.obj [| "generate", Jv.callback ~arity:5 generate_in_worker
+         (Jv.obj [| "generate", Jv.callback ~arity:6 generate_in_worker
                   ; "rules", Jv.callback ~arity:1 rules
                   ; "currently_selected_rules", Jv.callback ~arity:1 currently_selected_rules
             |]))
