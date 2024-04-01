@@ -165,9 +165,10 @@ let html_doc =
          in
          [%string "<a href=\"%{url}\">%{display_url}</a>"])
 
-let html ~id_prefix ~name_prefix rule =
+let html ~id_prefix ~name_prefix ?(checked = false) rule =
+  let checked = if checked then " checked" else "" in
   String.strip [%string {|
-<input type="checkbox" id="%{id_prefix ^ name rule}" name="%{name_prefix ^ name rule}">
+<input type="checkbox" id="%{id_prefix ^ name rule}" name="%{name_prefix ^ name rule}"%{checked}>
 <label for="%{id_prefix ^ name rule}"><span><strong>%{name rule}</strong> %{html_doc rule}</span></label>
 |}]
 
