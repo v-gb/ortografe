@@ -750,6 +750,16 @@ let _ : rule =
 
 let _ : rule =
   new_rule'
+    "um/ome"
+    "@forum -> @forome"
+    ~prefilter:(fun () -> `Re (Re.str "um"))
+    (fun () ->
+      let pattern_um = String.Search_pattern.create "um" in
+      fun env aligned_row ->
+        rewrite env aligned_row ~target:pattern_um ~repl:"ome")
+
+let _ : rule =
+  new_rule'
     "gu/gh"
     "@guerre -> @gherre (et @aigüe -> @aigue en principe, mais non implémenté)"
     ~prefilter:(fun () -> `Re (Re.str "gu"))
