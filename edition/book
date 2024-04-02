@@ -25,26 +25,14 @@ case "${1-}" in
     pdf)
         # zoom a 73% pour ouvrir à taille réelle
         xdg-open Alice_au_pays_des_merveilles-manual-conv.pdf;;
-    old--manual-changes)
-        unzip -l Alice_au_pays_des_merveilles.epub \
+    diff-epubs)
+        shift
+        unzip -l "$1" \
             | grep -E -o 'OPS/.*([.]html|[.]xhtml|[.]css)$' \
             | while read f; do
                  patdiff -keep-whitespace -context 0 -alt-old $f -alt-new $f \
-                         <(unzip -p Alice_au_pays_des_merveilles-conv.epub $f) \
-                         <(unzip -p Alice_au_pays_des_merveilles-conv-manual.epub $f) || true
-              done \
-            |& grep -v "No newline at the end" \
-            | less -R
-        ;;
-    old--remaining-delta)
-        $(jj workspace root)/_build/default/doc-conversion/bin/ortografe_cli.exe conv \
-                            Alice_au_pays_des_merveilles-manual.epub
-        unzip -l Alice_au_pays_des_merveilles.epub \
-            | grep -E -o 'OPS/.*([.]html|[.]xhtml|[.]css)$' \
-            | while read f; do
-                 patdiff -keep-whitespace -context 0 -alt-old $f -alt-new $f \
-                         <(unzip -p Alice_au_pays_des_merveilles-conv-manual.epub $f) \
-                         <(unzip -p Alice_au_pays_des_merveilles-manual-conv.epub $f | sed 's/ZZstyle/__style/') || true
+                         <(unzip -p "$1" $f) \
+                         <(unzip -p "$2" $f) || true
               done \
             |& grep -v "No newline at the end" \
             | less -R
