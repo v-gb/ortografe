@@ -62,7 +62,7 @@ let bench =
        Printf.printf "%d: %f\n" i (t2 -. t1)
      done
     )  
-  
+
 let () =
   let module C = Cmdliner in
   let open Cmdliner_bindops in
@@ -113,11 +113,25 @@ let () =
                      ~doc:"a filename, for instance as output by $(mname) dict"))
            in
            let dict, metadata =
-             match rules, dict_file with
-             | _ :: _, Some _ -> failwith "cannot specify both dictionary rules and --dict-file"
-             | [], Some file -> parse_dict (Core.In_channel.read_all file) ()
-             | [], None -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata
-             | (_ :: _ as rules), None -> load_rules rules ~prebuild:false ()
+             (* Maybe we should provide a --builtin-erofa flag or something, to be able to
+                combine the upstream erofa dict with --dict-file. *)
+             let from_rules =
+               match rules with
+               | [] -> None
+               | _ :: _ -> Some (load_rules rules ~prebuild:false ())
+             in
+             let from_dict_file =
+               Option.map (fun file -> parse_dict (Core.In_channel.read_all file) ())
+                 dict_file
+             in
+             match from_rules, from_dict_file with
+             | None, None -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata
+             | Some v, None | None, Some v -> v
+             | Some (f_rules, m_rules), Some (f_dict, _m_dict) ->
+                (fun word ->
+                  match f_dict word with
+                  | Some _ as opt -> opt
+                  | None -> f_rules word), m_rules
            in
            Ortografe.convert_files
              ~options:{ convert_uppercase
