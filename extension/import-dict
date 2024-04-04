@@ -24,7 +24,10 @@ EOF
         #
         # Drop phillipine, as as a game it should be rewritten, but this word is almost
         # likely the adjective for the people (or the country when pluralalized)
-        grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq|philippin'
+        #
+        # Drop eczémateux, as this entry takes precedence over the correct exémateux that
+        # we compute.
+        grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq|philippin|^eczém'
         echo sinophone,sinofone # missing
     } \
         | cat > dict.external-sources.gen.csv
