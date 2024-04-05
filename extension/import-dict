@@ -12,25 +12,28 @@ alter table t rename column "Grafie modifiée" to new;
 select old, new
 from t
 where old != ''
+and old not like 'coordonner'
+and old not like 'héro'
+and old not like 'héroïne'
+and old not like 'héroïq%'
+and old not like '%philippin%'
+and old not like 'eczém%'
+-- The coordonner entry is erroneous. Let our dict generation do the right thing
+--
+-- Drop héro and héroïne to avoid removing the h for the meaning of héroique.
+-- We then make the error of not removing the h for the drug, but oh well, that
+-- seems like a less confusing error to make.
+--
+-- Drop phillipine, as as a game it should be rewritten, but this word is almost
+-- likely the adjective for the people (or the country when pluralalized)
+--
+-- Drop eczémateux, as this entry takes precedence over the correct exémateux that
+-- we compute.
 EOF
     } \
         | tr -d '"' \
         | sed 's/ *([^)]*)//g' \
         | LANG=C sort -u \
-        | {
-        # The coordonner entry is erroneous. Let our dict generation do the right thing
-        #
-        # Drop héro and héroïne to avoid removing the h for the meaning of héroique.
-        # We then make the error of not removing the h for the drug, but oh well, that
-        # seems like a less confusing error to make.
-        #
-        # Drop phillipine, as as a game it should be rewritten, but this word is almost
-        # likely the adjective for the people (or the country when pluralalized)
-        #
-        # Drop eczémateux, as this entry takes precedence over the correct exémateux that
-        # we compute.
-        grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq|philippin|^eczém'
-    } \
         | cat > dict.external-sources.gen.csv
 
     {
