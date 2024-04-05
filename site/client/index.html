@@ -140,6 +140,12 @@
           display:flex;
           flex-direction: column;
       }
+      .no-triangle::marker {
+          content: none;
+      }
+      .no-triangle::-webkit-details-marker {
+          display: none;
+      }
       nav {
           background-color: #F5F5F5;
           .nav-limited-width {
@@ -340,7 +346,7 @@
 
       <section>
         <details>
-          <summary style="list-style: none;"><h3>Support pour d'autres orthographes<span style="text-decoration-line: underline">...</span></h3></summary>
+          <summary class="no-triangle"><h3>Support pour d'autres orthographes<span style="text-decoration-line: underline">...</span></h3></summary>
           <p>Parmi nos outils, voici ceux qui supportent d'autres orthographes que l'orthographe Érofa&#8239;:</p>
           <ul>
             <li style='list-style-type:"\2705&nbsp"'>transcription interactive (voir plus bas)</li>
