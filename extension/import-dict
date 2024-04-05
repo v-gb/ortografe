@@ -28,7 +28,6 @@ EOF
         # Drop eczémateux, as this entry takes precedence over the correct exémateux that
         # we compute.
         grep -E -v 'coordonner|^héro\>|^héroïne\>|^héroïq|philippin|^eczém'
-        echo sinophone,sinofone # missing
     } \
         | cat > dict.external-sources.gen.csv
 

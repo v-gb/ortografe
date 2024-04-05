@@ -18,6 +18,7 @@
  (deps (sandbox always)
    Lexique383-full.gen.tsv
    ../wiktionnaire/min-h.gen.csv
+   ../homemade/lexique-extra.csv
    1990.csv
  )
  (action
@@ -36,9 +37,11 @@
               inner join r on r.post90 = w.word
               where not exists (select 1 from w where r.ortho = w.word)
               "
+        -cmd ".import ../homemade/lexique-extra.csv l"
         -cmd ".mode tab"
         -cmd ".import Lexique383-full.gen.tsv tmp"
         -cmd ".header on"
+        -cmd "insert into tmp(ortho,phon,lemme) select ortho,phon,case when lemme == '' then ortho else lemme end from l"
         ;; transform "à l'aveuglette" into "aveuglette"
         -cmd "update tmp
               set ortho = substring(ortho, 6),
