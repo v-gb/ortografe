@@ -183,9 +183,10 @@ let iter_pure_text ~options src ~f =
          match uncapitalize w with
          | None -> w, (fun x -> x)
          | Some wu ->
-            if mem dict w
-            then "", (fun x -> x)
-            else
+            match dict w with
+            | Some "" -> "", (fun x -> x)
+            | Some _ -> w, (fun x -> x)
+            | None ->
               match
                 if options.convert_uppercase
                 then lowercase w

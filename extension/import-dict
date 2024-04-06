@@ -114,11 +114,10 @@ if [ "${1-part2}" = part2 ]; then
     cp --no-preserve=all dict.external-sources.gen.csv dict.gen.csv
     cat ../data/homemade/dict-erofa-ext.csv >> dict.gen.csv
 
-    # Capitalized words in the dict are treated as exceptions, for
-    # cases when the capitalized version of the word is almost never the common
-    # noun, but is instead a proper noun that we don't want to rewrite
+    # Ensure these proper nouns are not rewritten due to the common noun with the same
+    # spelling.
     for w in Pierre Cannes Rennes Vienne Bordeaux Nivelles; do
-        echo $w,bug-if-displayed
+        echo $w,
     done >> dict.gen.csv
 
     function string_of_file {

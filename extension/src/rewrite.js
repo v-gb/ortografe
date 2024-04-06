@@ -41,12 +41,26 @@ function rewrite_word(table, plurals_in_s, word) {
         //   as well any other form kind of derived words
         // - we have no clue about the meaning of words, so we're going to rewrite
         //   héroine into éroine, or Cannes into Canes, whether it makes sense or not
-        const [ processed_word, postprocess ] =
-              is_capitalized(word)
-              ? (table.has(word) // capitalized words in dict are exceptions
-                 ? [ '', (x) => x ]
-                 : [ uncapitalize(word), capitalize ])
-              : [ word, (x) => x ]
+        let processed_word;
+        let postprocess;
+        if (is_capitalized(word)) {
+            const lookup = table.get(word);
+            if (lookup != null) {
+                if (lookup == "") {
+                    processed_word = '';
+                    postprocess = (x) => x;
+                } else {
+                    processed_word = word;
+                    postprocess = (x) => x;
+                }
+            } else {
+                processed_word = uncapitalize(word);
+                postprocess = capitalize;
+            }
+        } else {
+            processed_word = word;
+            postprocess = (x) => x;
+        }
         let repl = postprocess(table.get(processed_word))
         if (!repl && is_plural(processed_word) && plurals_in_s) {
             repl = postprocess(pluralize(table.get(depluralize(processed_word))))
@@ -365,7 +379,7 @@ function load_dict(options) {
               [ dict_erofa, '/' ];
         for (const line of dict.split(separator)) {
             const [a,b] = line.split(",")
-            if (a && b && a != b) {
+            if (a != null && b != null) {
                 table.set(a, b)
             }
         }

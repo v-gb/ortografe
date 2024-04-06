@@ -6,6 +6,16 @@ The format is :
 - each line has two values separated by a comma. No csv-style quoting is supported.
   The first value is the old spelling, the second value is the new spelling.
 
+  Capitalized words in texts are looked up first as is in the dictionary, then
+  uncapitalized. This allows common nouns to be rewritten when capitalized (in titles for
+  instance), while allowing specific rules for proper nouns.  Furthermore, if a
+  capitalized entry maps to the empty string, the word is left alone (same effect as if
+  you had a no-op entry like "abc,abc", but ensuring that the entry won't be highlighted
+  when highlighting is enabled).
+
+  A dash-separated word is first looked up as a whole in the dictionary, and if it's
+  absent, each component is looked up and rewritten independently.
+
 Optionally, the first line can contain a one-line json value with the following schema:
 
 ```
