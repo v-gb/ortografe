@@ -36,11 +36,9 @@ function rewrite_word(table, plurals_in_s, word) {
         const repl = word.replace("a","X")
         return repl == word ? undefined : repl
     } else {
-        // we take plurals and capitalizations into account, but
-        // - we miss all conjugated verbs (apparaissent isn't rewritten to aparaissent)
-        //   as well any other form kind of derived words
-        // - we have no clue about the meaning of words, so we're going to rewrite
-        //   héroine into éroine, or Cannes into Canes, whether it makes sense or not
+        // We account for plurals and capitalizations, but we can spuriously rewrite or
+        // fail to rewrite homographs, like « Rennes » and « Rennes du Père Noël », or
+        // the two meanings of « héroïne ».
         let processed_word;
         let postprocess;
         if (is_capitalized(word)) {
