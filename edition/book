@@ -85,7 +85,23 @@ case "${1-}" in
 </footer>
 EOF
 )" \
-            --extra-css <(cat <<'EOF'
+            --extra-css <(
+            if true; then
+                # sizes meant for pocket books on lulu.com, along with cover2.svg
+                content_width=8.6cm;
+                content_height=13.7cm;
+                page_width=11.4cm;
+                page_height=18.1cm;
+                margin="1.805cm 1.4cm 2.405cm 1.4cm"
+            else
+                # sizes meant for imprime-ton-livre.fr, along with cover.svg
+                content_width=8.6cm;
+                content_height=13.8cm;
+                page_width=11cm;
+                page_height=18cm;
+                margin="1.8cm 1.2cm 2.4cm 1.2cm"
+            fi
+            cat <<EOF
 __img {
   border: solid 1px blue;
 }
@@ -96,20 +112,20 @@ __img {
 [data-title*="_02.png"] {
   /* lapin chap 1 */
   width: auto;
-  height: calc(0.5 * 13.8cm);
+  height: calc(0.5 * $content_height);
   margin-bottom: 2em;
 }
 [data-title*="_03.png"] {
   /* somehow even with !important, we can override inline styles for the width and height,
      so we have to remove them from the epub */
-  width: calc(0.60 * 8.6cm);
+  width: calc(0.60 * $content_width);
   height: auto;
   margin-bottom: -5px;
   margin-left: -5px;
 }
 [data-title*="_04.png"] {
   /* alice prend la bouteille */
-  width: calc(0.55 * 8.6cm);
+  width: calc(0.55 * $content_width);
   height: auto;
   margin-top: -5px;
   margin-right: -5px;
@@ -124,7 +140,7 @@ __img {
 /* chap habitation du lapin */
 [data-title*="_12.png"] {
   /* main qui prend le lapin */
-  width: calc(0.60 * 8.6cm);
+  width: calc(0.60 * $content_width);
   height: auto;
   margin: -5px 0 -5px -5px;
 }
@@ -138,14 +154,14 @@ __img {
 [data-title*="_05a-1116x1492.jpg"] {
   /* chenille qui fume */
   width: auto;
-  height: calc(0.6 * 13.8cm);
+  height: calc(0.6 * $content_height);
   margin-bottom: 2em;
 }
 
 /* porc et poivre */
 [data-title*="_22.png"] {
   /* cochon dans les bras */
-  width: calc(0.60 * 8.6cm);
+  width: calc(0.60 * $content_width);
   height: auto;
   margin: -5px;
   margin-bottom: -15px;
@@ -158,13 +174,13 @@ __img {
 /* le croquet */
 [data-title*="_28.png"] {
   /* cartes qui se parlent */
-  width: calc(0.60 * 8.6cm);
+  width: calc(0.60 * $content_width);
   height: auto;
   margin-bottom: -15px;
 }
 [data-title*="_30.png"] {
   /* cartes qui se parlent */
-  width: calc(0.60 * 8.6cm);
+  width: calc(0.60 * $content_width);
   height: auto;
   margin-bottom: -5px;
 }
@@ -172,7 +188,7 @@ __img {
 /* histoire de la fausse-tortue */
 [data-title*="_32.png"] {
   /* parle avec la duchesse */
-  width: calc(0.60 * 8.6cm);
+  width: calc(0.60 * $content_width);
   height: auto;
   margin-bottom: -5px;
 }
@@ -180,7 +196,7 @@ __img {
 /* le quadrille de homard */
 [data-title*="_36.png"] {
   /* homard */
-  width: calc(0.65 * 8.6cm);
+  width: calc(0.65 * $content_width);
   height: auto;
   margin-bottom: -15px;
   margin-left: -5px;
@@ -189,7 +205,7 @@ __img {
 /* qui a volé les tartes */
 [data-title*="_38.png"] {
   /* chapelier */
-  width: calc(0.65 * 8.6cm);
+  width: calc(0.65 * $content_width);
   height: auto;
   margin-bottom: -15px;
   margin-left: -10px;
@@ -202,8 +218,8 @@ __img {
 }
 
 @page {
-  size: 11cm 18cm;
-  margin: 1.8cm 1.2cm 2.4cm 1.2cm;
+  size: $page_width $page_height;
+  margin: $margin;
 }
 
 .mw-halign-center {
