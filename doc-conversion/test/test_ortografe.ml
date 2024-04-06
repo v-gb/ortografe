@@ -63,6 +63,7 @@ Pluriels: hommes.
 Capitalisation: Choix.
 Tirets: plouf-européenne
 Majuscules: HISTOIRE.
+Nom propre: pierre Pierre pierre-feuille-ciseau Jean-Pierre.
 " in
   let rewrite1 = Ortografe.pure_text ~options test ~dst:String in
   print_string rewrite1;
@@ -74,7 +75,8 @@ Majuscules: HISTOIRE.
     Pluriels: omes.
     Capitalisation: Chois.
     Tirets: plouf-europ\195\169\195\168ne
-    Majuscules: HISTOIRE. "];
+    Majuscules: HISTOIRE.
+    Nom propre: pi\195\168re Pierre pi\195\168re-feuille-ciseau Jean-Pierre. "];
   (
     let rewrite2 =
       Ortografe.pure_text test ~dst:String
