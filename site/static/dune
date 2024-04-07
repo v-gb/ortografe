@@ -37,7 +37,7 @@
 (copy_files (files %{project_root}/data/wiktionnaire/min.gen.csv.zst))
 
 (copy_files
- (files %{project_root}/extension/store-page/screenshot-1280-800.jpg))
+ (files %{project_root}/extension/store-page/screenshot-1280-800.png))
 
 (rule
  (target chrome.svg)
