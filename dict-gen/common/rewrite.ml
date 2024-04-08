@@ -705,16 +705,20 @@ let _ : rule =
 
 let qua_o__ca_o =
   new_rule'
-    "qua-o/ca-o"
-    "@qualité -> @calité, @quotient -> @cotient"
-    ~prefilter:(fun () -> `Re (Re.alt [ Re.str "qua"; Re.str "quo" ]))
+    "qua-o-u/ca-o-u"
+    "@qualité -> @calité, @quotient -> @cotient, @piqure -> @picure"
+    ~prefilter:(fun () -> `Re (Re.alt [ Re.str "qua"; Re.str "quo"; Re.str "qur"; Re.str "qûr" ]))
     (fun () ->
       let pattern_qua = String.Search_pattern.create "qua" in
       let pattern_quo = String.Search_pattern.create "quo" in
+      let pattern_qur1 = String.Search_pattern.create "qur" in
+      let pattern_qur2 = String.Search_pattern.create "qûr" in
       fun env aligned_row ->
         let aligned_row = ref aligned_row in
         aligned_row := rewrite env !aligned_row ~target:pattern_qua ~repl:"ca";
         aligned_row := rewrite env !aligned_row ~target:pattern_quo ~repl:"co";
+        aligned_row := rewrite env !aligned_row ~target:pattern_qur1 ~repl:"cur";
+        aligned_row := rewrite env !aligned_row ~target:pattern_qur2 ~repl:"cur";
         !aligned_row)
 
 let _ : rule =
