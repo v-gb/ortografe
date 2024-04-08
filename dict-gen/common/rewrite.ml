@@ -723,6 +723,22 @@ let qua_o__ca_o =
 
 let _ : rule =
   new_rule'
+    "que/c"
+    "@magique -> @magic, mais @publiquement, @communique inchangés"
+    ~prefilter:(fun () -> `Re (Re.alt [ Re.str "que" ]))
+    (fun () ->
+      (* Crée des ambigüités pendant la réécriture : "plaque" ou "fabrique" peuvent
+         être réécrits ou pas suivant leurs rôles syntaxiques. *)
+      let pattern_que = String.Search_pattern.create "que" in
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
+        if not (String.is_suffix !aligned_row.row.lemme ~suffix:"quer") then
+          aligned_row := rewrite env !aligned_row ~target:pattern_que ~repl:"c"
+                           ~start:(String.length !aligned_row.row.ortho - 4);
+        !aligned_row)
+
+let _ : rule =
+  new_rule'
     "sc-sch/c-ch"
     "@science -> @cience, @fasciste -> @fachiste, @schéma -> @chéma"
     ~prefilter:(fun () -> `Re (Re.str "sc"))
