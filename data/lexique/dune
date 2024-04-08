@@ -41,7 +41,7 @@
         -cmd ".mode tab"
         -cmd ".import Lexique383-full.gen.tsv tmp"
         -cmd "delete from tmp where exists (select 1 from l where l.ortho = tmp.ortho);"
-        -cmd "insert into tmp(ortho,phon,lemme) select ortho,phon,case when lemme == '' then ortho else lemme end from l"
+        -cmd "insert into tmp(ortho,phon,lemme) select ortho,phon,case when lemme == '' then ortho else lemme end from l where ortho not like '#%'"
         ;; transform "à l'aveuglette" into "aveuglette"
         -cmd "update tmp
               set ortho = substring(ortho, 6),

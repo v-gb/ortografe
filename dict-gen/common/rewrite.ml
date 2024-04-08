@@ -375,7 +375,7 @@ let erofa_preserve =
     "chaldaïque"; "garrick"; "hébertisme"; "hégélianisme"; "hégélien"; "narbonnais"; "sarrois";
     "sarroise"; "siennois"; "siennoise"; "sorbonne"; "sorbonnarde"; "ferry"; "rallye"; "haseki";
     "hobby"; "curry"; "paddy"; "caddy"; "guppy"; "hippy"; "cherry"; "wallaby"; "jenny"; "shimmy";
-    "bobbies"; "scrabble"; "sherry";
+    "bobbies"; "scrabble"; "sherry"; "hermès";
   ]) in
   fun old_ortho ->
   Hash_set.mem (force set) old_ortho

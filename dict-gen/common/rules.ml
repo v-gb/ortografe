@@ -189,6 +189,7 @@ let create () : t =
       then [ "Z", Core ] else [ "g", Core ]);
   new_fixed "guë" [ "gy", Core ];
   new_fixed "gn" [ "N", Core ];
+  new_fixed "ign" [ "N", Surprising ];
   new_fixed "gni" [ "N", Core ];
   new_fixed "ni" [ "N", Core_optional ];
   new_fixed "ng" [ "G", Core ];

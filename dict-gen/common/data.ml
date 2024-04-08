@@ -73,7 +73,7 @@ module Lexique = struct
     Hash_set.of_list (module String) [
         "monsieur"; "gars"; "ok"; "messieurs"; "mme"; "mlle";
         "cool"; "hum"; "job"; "foot"; "führer"; "bye"; "pizza";
-        "oignon"; "oignons"; "business"; "ciao"; "clef"; "yeah";
+        "business"; "ciao"; "clef"; "yeah";
         "football"; "etc"; "toast"; "team"; "lady"; "baby"; "cm";
         "août"; "look"; "gentleman"; "leader"; "hall"; "dealer";
         "steak"; "deal"; "out"; "jet"; "blues"; "manager";
@@ -353,33 +353,16 @@ module Lexique = struct
         "flirtes"; "shootes"; "nietzschéennes"; "magyares"; "surfes"; "drums"; "quintuplés";
         "dominions"; "surfeuses"; "sen"; "basketball"; "callgirl"; "ladys"; "volleyball";
         "callgirls"; "ranchs"; "tennismans"; "cowboy"; "cowboys"; "rugbymans"; "hugh";
+        "giorno"; "mamma"; "bluff"; "nurse"; "pub"; "drugstore"; "muffin"; "by"; "pueblo";
+        "species";
         (* not real words for this purpose *)
         "min"; "com"; "zzz"; "ah"; "oh"; "eh"; "ha"; "peuh"; "pouh"; "houhou"; "hare";
         "hon"; "haha"; "meuh"; "pouah"; "pfft"; "pff"; "hi"; "ohé"; "ouh"; "ouah"; "ho";
         "bah"; "euh"; "hein"; "hep"; "zzzz";
          (* la phonetique est fausse pour ces mots (ou parfois
             la categories grammaticale) *)
-        "télétexte"; "quadruple"; "hermès"; "pacsés"; "succion";
-        "circumnavigation"; "épidémiologique"; "dessaper";
-        "esseulement"; "frankaoui";
-        "quadrupède"; "quadrupède"; "quadrupède"; "quadrupède";
-        "miauleur"; "autocritiquer"; "champignonnière";
-        "confiturière"; "diplômer"; "dépaysé"; "autonomique";
-        "dépaysée"; "dépaysera"; "dépaysés"; "moellons";
-        "préchauffer"; "boyauter"; "encoignure"; "encoignures";
-        "quadrumane"; "quadrupla"; "quadruplait"; "surconsomme";
-        "égaillent"; "égailler"; "égaillèrent"; "égaillée";
-        "égaillées"; "égaillés"; "enchtiber"; "insolent";
-        "violent"; "prévalent"; "oseraient"; "réutilisation";
-        "fielleuses"; "englander"; "râleux"; "remerciâmes";
-        "palle"; "surdimensionné"; "mamma"; "pub"; "bluff"; "nurse";
-        "drugstore"; "muffin"; "oscillographe"; "oscillation"; "by"; "antiémeute";
-        "hyperespace"; "intussusception"; "transsubstantiation";
-        "antirusse"; "équin"; "transsudat"; "quintuplé"; "transsudait";
-        "quinquennat"; "transsudant"; "pueblo"; "chelem"; "corpsard";
-        "transsexuel"; "marchiez"; "flagellant"; "species"; "pâlement";
-        "curant"; "nerver"; "dénervation"; "ecsta"; "ectasie"; "iraquienne";
-        "schproum";
+        "égaillent"; "égailler"; "égaillèrent"; "égaillée"; "égaillées"; "égaillés";
+        "violent"; "prévalent"; "corpsard";
 
         (* l'orthographe est ancienne *)
         "cuiller"; "cafeteria"; "cafeteria"; "artefact"; "bonneterie";
