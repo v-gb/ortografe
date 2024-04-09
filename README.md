@@ -9,7 +9,7 @@ This project contains tools to help with proposed spelling rationalizations for 
   This extension is deployed:
     - [to firefox](https://addons.mozilla.org/fr/firefox/addon/orthographe-rationnelle/) (computer and phone)
     - [to chrome](https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl), and presumably all chromium-based browsers. Chrome doesn't support extensions on Android, but some of the other chromium-based browsers do, so the extension should work there.
-    - [to safari](https://apps.apple.com/us/app/orthographe-rationnelle/id6482850164) (MacOS for now, iOS to follow)
+    - [to safari](https://apps.apple.com/us/app/orthographe-rationnelle/id6482850164) (MacOS and iOS)
     
 - a [website](https://orthographe-rationnelle.info/) that provides an entry point to all
   the tools, and in particular transcribe text and documents interactively without
