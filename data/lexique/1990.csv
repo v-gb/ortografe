@@ -185,7 +185,6 @@ besicles,1,bésicles,NOM,f,p,,besicles
 bizuth,1,bizut,NOM,m,s,,bizuth
 bla-bla,1,blabla,NOM,m,,,bla-bla
 black-out,2,blackout/blackouts,NOM,m,,,black-out
-bleuît,1,bleuit,VER,,,sub:imp:3s;,bleuir
 blue-jean,1,bluejean,NOM,m,s,,blue-jean
 blue-jeans,1,bluejeans,NOM,m,p,,blue-jean
 bonhomie,1,bonhommie,NOM,f,s,,bonhomie
@@ -374,8 +373,6 @@ cloîtrées,1,cloitrées,VER,f,p,par:pas;,cloîtrer
 cloîtrées,1,cloitrées,ADJ,f,p,,cloîtré
 cloîtrés,1,cloitrés,VER,m,p,par:pas;,cloîtrer
 cloîtrés,1,cloitrés,ADJ,m,p,,cloîtré
-codétenu,1,codètenu,NOM,m,s,,codétenu
-codétenus,1,codètenus,NOM,m,p,,codétenu
 coin-coin,1,coincoin,NOM,m,s,,coin-coin
 collette,1,collète,VER,,,imp:pre:2s;ind:pre:3s;,colleter
 combatif,1,combattif,ADJ,m,s,,combatif
@@ -420,7 +417,6 @@ connaîtriez,1,connaitriez,VER,,,cnd:pre:2p;,connaître
 connaîtrions,1,connaitrions,VER,,,cnd:pre:1p;,connaître
 connaîtrons,1,connaitrons,VER,,,ind:fut:1p;,connaître
 connaîtront,1,connaitront,VER,,,ind:fut:3p;,connaître
-conquît,1,conquit,VER,,,sub:imp:3s;,conquérir
 considérera,1,considèrera,VER,,,ind:fut:3s;,considérer
 considérerai,1,considèrerai,VER,,,ind:fut:1s;,considérer
 considéreraient,1,considèreraient,VER,,,cnd:pre:3p;,considérer
@@ -497,8 +493,6 @@ croque-mitaine,1,croquemitaine,NOM,m,s,,croque-mitaine
 croque-monsieur,2,croquemonsieur/croquemonsieurs,NOM,m,,,croque-monsieur
 croque-mort,1,croquemort,NOM,m,s,,croque-mort
 croque-morts,1,croquemorts,NOM,m,p,,croque-mort
-croît,1,croit,NOM,m,s,,croît
-croît,1,croit,VER,,,ind:pre:3s;,croître
 croîtraient,1,croitraient,VER,,,cnd:pre:3p;,croître
 croîtrait,1,croitrait,VER,,,cnd:pre:3s;,croître
 croître,1,croitre,VER,,,inf;,croître
@@ -549,7 +543,6 @@ célébrerais,1,célèbrerais,VER,,,cnd:pre:1s;,célébrer
 célébrerait,1,célèbrerait,VER,,,cnd:pre:3s;,célébrer
 célébrerons,1,célèbrerons,VER,,,ind:fut:1p;,célébrer
 célébreront,1,célèbreront,VER,,,ind:fut:3p;,célébrer
-cévenol,1,cèvenol,NOM,m,s,,cévenol
 decrescendo,1,décrescendo,ADV,,,,decrescendo
 decrescendo,1,décrescendo,NOM,m,s,,decrescendo
 delirium,1,délirium,NOM,m,s,,delirium
@@ -982,7 +975,6 @@ fraîchit,1,fraichit,VER,,,ind:pre:3s;ind:pas:3s;,fraîchir
 frou-frou,1,froufrou,NOM,m,s,,frou-frou
 frous-frous,1,froufrous,NOM,m,p,,frou-frou
 fumerolles,1,fumeroles,NOM,f,p,,fumerolle
-fénelonienne,1,fènelonienne,ADJ,f,s,,fénelonien
 féveroles,1,fèveroles,NOM,f,p,,féverole
 fût,1,fut,NOM,m,s,,fût
 fûts,1,futs,NOM,m,p,,fût
@@ -1180,8 +1172,6 @@ lave-vaisselle,2,lave-vaisselle/lave-vaisselles,NOM,m,,,lave-vaisselle
 laîche,1,laiche,NOM,f,s,,laîche
 laîches,1,laiches,NOM,f,p,,laîche
 leitmotive,1,leitmotivs,NOM,m,p,,leitmotive
-levreau,1,levraut,NOM,m,s,,levreau
-levreaux,1,levrauts,NOM,m,p,,levreau
 libérera,1,libèrera,VER,,,ind:fut:3s;,libérer
 libérerai,1,libèrerai,VER,,,ind:fut:1s;,libérer
 libéreraient,1,libèreraient,VER,,,cnd:pre:3p;,libérer
@@ -1297,11 +1287,6 @@ méconnaîtra,1,méconnaitra,VER,,,ind:fut:3s;,méconnaître
 méconnaître,1,méconnaitre,VER,,,inf;,méconnaître
 méli-mélo,1,mélimélo,NOM,m,s,,méli-mélo
 mélis-mélos,1,mélimélos,NOM,m,p,,méli-mélo
-méprenais,1,mèprenais,VER,,,ind:imp:1s;,méprendre
-méprenait,1,mèprenait,VER,,,ind:imp:3s;,méprendre
-méprenant,1,mèprenant,VER,,,par:pre;,méprendre
-méprenez,1,mèprenez,VER,,,imp:pre:2p;ind:pre:2p;,méprendre
-mépreniez,1,mèpreniez,VER,,,ind:imp:2p;,méprendre
 mû,1,mu,VER,m,s,par:pas;,mouvoir
 mûre,1,mure,NOM,f,s,,mûr
 mûrement,1,murement,ADV,,,,mûrement
@@ -1330,7 +1315,6 @@ mûrissent,1,murissent,VER,,,ind:pre:3p;,mûrir
 mûrisseries,1,murisseries,NOM,f,p,,mûrisserie
 mûrit,1,murit,VER,,,ind:pre:3s;ind:pas:3s;,mûrir
 mûron,1,muron,NOM,m,s,,mûron
-naquît,1,naquit,VER,,,sub:imp:3s;,naître
 naît,1,nait,VER,,,ind:pre:3s;,naître
 naîtra,1,naitra,VER,,,ind:fut:3s;,naître
 naîtrai,1,naitrai,VER,,,ind:fut:1s;,naître
@@ -1750,7 +1734,6 @@ régénérera,1,régénèrera,VER,,,ind:fut:3s;,régénérer
 régénérerait,1,régénèrerait,VER,,,cnd:pre:3s;,régénérer
 réintégrerait,1,réintègrerait,VER,,,cnd:pre:3s;,réintégrer
 réitérera,1,réitèrera,VER,,,ind:fut:3s;,réitérer
-réjouît,1,réjouit,VER,,,sub:imp:3s;,réjouir
 répétera,1,répètera,VER,,,ind:fut:3s;,répéter
 répéterai,1,répèterai,VER,,,ind:fut:1s;,répéter
 répéteraient,1,répèteraient,VER,,,cnd:pre:3p;,répéter
@@ -1770,7 +1753,6 @@ révélerez,1,révèlerez,VER,,,ind:fut:2p;,révéler
 révélerons,1,révèlerons,VER,,,ind:fut:1p;,révéler
 révéleront,1,révèleront,VER,,,ind:fut:3p;,révéler
 révérerait,1,révèrerait,VER,,,cnd:pre:3s;,révérer
-rééchelonnement,1,réèchelonnement,NOM,m,s,,rééchelonnement
 saccharine,1,saccarine,NOM,f,s,,saccharine
 sage-femme,1,sagefemme,NOM,f,s,,sage-femme
 sages-femmes,1,sagefemmes,NOM,f,p,,sage-femme
@@ -1876,11 +1858,6 @@ suraiguës,1,suraigües,ADJ,f,p,,suraigu
 surcoût,1,surcout,NOM,m,s,,surcoût
 surcroît,1,surcroit,NOM,m,s,,surcroît
 surcroîts,1,surcroits,NOM,m,p,,surcroît
-surdévelopper,1,surdèvelopper,VER,,,inf;,surdévelopper
-surdéveloppé,1,surdèveloppé,ADJ,m,s,,surdéveloppé
-surdéveloppée,1,surdèveloppée,ADJ,f,s,,surdéveloppé
-surdéveloppées,1,surdèveloppées,ADJ,f,p,,surdéveloppé
-surdéveloppés,1,surdèveloppés,ADJ,m,p,,surdéveloppé
 surentraînement,1,surentrainement,NOM,m,s,,surentraînement
 surentraîné,1,surentrainé,ADJ,m,s,,surentraîné
 surentraînées,1,surentrainées,VER,f,p,par:pas;,surentraîner
@@ -1891,13 +1868,6 @@ suroît,1,suroit,NOM,m,s,,suroît
 suroîts,1,suroits,NOM,m,p,,suroît
 surpiqûres,1,surpiqures,NOM,f,p,,surpiqûre
 surseoir,1,sursoir,VER,,,inf;,surseoir
-surélevait,1,surèlevait,VER,,,ind:imp:3s;,surélever
-surélever,1,surèlever,VER,,,inf;,surélever
-surélevez,1,surèlevez,VER,,,imp:pre:2p;,surélever
-surélevé,1,surèlevé,VER,m,s,par:pas;,surélever
-surélevée,1,surèlevée,VER,f,s,par:pas;,surélever
-surélevées,1,surèlevées,VER,f,p,par:pas;,surélever
-surélevés,1,surèlevés,VER,m,p,par:pas;,surélever
 sèche-cheveux,2,sèche-cheveu/sèche-cheveux,NOM,m,,,sèche-cheveux
 sèche-linge,2,sèche-linge/sèche-linges,NOM,m,,,sèche-linge
 sèche-mains,2,sèche-main/sèche-mains,NOM,m,,,sèche-mains
@@ -2105,7 +2075,6 @@ zakouski,2,zakouski/zakouskis,NOM,m,,,zakouski
 échevellement,1,échevèlement,NOM,m,s,,échevellement
 énumérerai,1,énumèrerai,VER,,,ind:fut:1s;,énumérer
 énumérerais,1,énumèrerais,VER,,,cnd:pre:1s;,énumérer
-épanouît,1,épanouit,VER,,,sub:imp:3s;,épanouir
 épelle,1,épèle,VER,,,imp:pre:2s;ind:pre:1s;ind:pre:3s;,épeler
 épellent,1,épèlent,VER,,,ind:pre:3p;,épeler
 épellerais,1,épèlerais,VER,,,cnd:pre:1s;,épeler
@@ -2119,7 +2088,6 @@ zakouski,2,zakouski/zakouskis,NOM,m,,,zakouski
 étincellera,1,étincèlera,VER,,,ind:fut:3s;,étinceler
 étiquettent,1,étiquètent,VER,,,ind:pre:3p;,étiqueter
 étouffe-chrétien,2,étouffe-chrétien/étouffe-chrétiens,NOM,m,,,étouffe-chrétien
-évanouît,1,évanouit,VER,,,sub:imp:3s;,évanouir
 événement,1,évènement,NOM,m,s,,événement
 événementiel,1,évènementiel,ADJ,m,s,,événementiel
 événements,1,évènements,NOM,m,p,,événement
