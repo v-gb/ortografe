@@ -721,7 +721,7 @@ let qua_o__ca_o =
         aligned_row := rewrite env !aligned_row ~target:pattern_qur2 ~repl:"cur";
         !aligned_row)
 
-let _ : rule =
+let que__c =
   new_rule'
     "que/c"
     "@magique -> @magic, mais @publiquement, @communique inchangés"
@@ -1288,6 +1288,7 @@ let compose_rules rules ~which_rules =
       if rule.name = emment__ament.name (* avant qua/ca car on crée des qua *)
       then -3
       else if rule.name = qua_o__ca_o.name (* avant qu__q sinon les qua ont été tranformés en qa *)
+           || rule.name = que__c.name
       then -2
       else if rule.name = qu__q.name || rule.name = qu__qou.name
       then -1
