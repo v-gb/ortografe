@@ -75,23 +75,32 @@ let () =
              ~man:[ `S C.Manpage.s_description
                   ; `P "Transcrit le texte du document INPUT_FILE (ou stdin si non
                         spécifié) en OUTPUT_FILE (ou un nom dérivé de INPUT_FILE si non
-                        spécifié, ou stdout). La transcription utilise l'orthographe à moins
-                        qu'une autre orthographe ne soit sélectionnée."
+                        spécifié, ou stdout). La transcription utilise l'orthographe érofa
+                        à moins qu'une autre orthographe ne soit sélectionnée."
                   ; `P "Exemples :"
                   ; `Pre "$(iname) foo.docx"
                   ; `Noblank; `P "(produit foo-conv.docx en orthographe Érofa)"
-                  ; `Pre "$(iname) foo.docx foo-erofa.docx"
+                  ; `Pre "$(iname) foo.docx -o foo-erofa.docx"
                   ; `Pre "$(iname) < ~/fichier.txt"
-                  ; `Pre "$(iname) foo.docx foo-modif.docx --1990 --qu/qou --qu/q"
+                  ; `Pre "$(iname) foo.docx -o foo-modif.docx --1990 --qu/qou --qu/q"
                   ; `Noblank; `P "(transcrit avec les règles spécifiées au lieu des règles Érofa)"
                   ]
              "conv")
-          (let+ arg1 =
-             C.Arg.value (C.Arg.pos 0 (C.Arg.some C.Arg.string) None
+          (let+ args =
+             C.Arg.value (C.Arg.pos_all C.Arg.string []
                             (C.Arg.info ~docv:"INPUT_FILE" []))
-           and+ arg2 =
-             C.Arg.value (C.Arg.pos 1 (C.Arg.some C.Arg.string) None
-                            (C.Arg.info ~docv:"OUTPUT_FILE" []))
+           and+ output =
+             C.Arg.value
+               (C.Arg.opt
+                  (C.Arg.some C.Arg.string)
+                  None
+                  (C.Arg.info ~docv:"OUTPUT_FILE" ["o"] ~doc:"le fichier de sortie"))
+           and+ output_inplace =
+             C.Arg.value
+               (C.Arg.flag
+                  (C.Arg.info
+                     ~doc:"supprime le fichier d'entrée puis le réécrit en sortie. ATTENTION à ne pas perdre vos données"
+                     ["in-place"]))
            and+ convert_uppercase =
              let+ b =
                (* We don't do this in the extension, but some books seems to regularly
@@ -133,16 +142,42 @@ let () =
                   | Some _ as opt -> opt
                   | None -> f_rules word), m_rules
            in
-           Ortografe.convert_files
-             ~options:{ convert_uppercase
-                      ; dict
-                      ; interleaved =
-                          (match Sys.getenv "INTERLEAVED" with
-                           | "false" -> false
-                           | _ | exception Not_found -> true)
-                      ; plurals_in_s = metadata.plurals_in_s ||? true
-                      }
-             arg1 arg2)
+           let convert ~in_ ~out =
+             Ortografe.convert_files
+               ~options:{ convert_uppercase
+                        ; dict
+                        ; interleaved =
+                            (match Sys.getenv "INTERLEAVED" with
+                             | "false" -> false
+                             | _ | exception Not_found -> true)
+                        ; plurals_in_s = metadata.plurals_in_s ||? true
+                        }
+               in_ out
+           in
+           let output =
+             if Option.is_some output
+             then
+               if output_inplace
+               then failwith "can't specify both -o and --in-place"
+               else `File output
+             else
+               if output_inplace
+               then `In_place
+               else `File output
+           in
+           match args with
+           | [] -> convert
+                     ~in_:None
+                     ~out:(match output with
+                           | `In_place -> failwith "--in-place only makes sense with input_files"
+                           | `File opt -> opt)
+           | _ :: _ ->
+              if List.length args > 1 && (match output with `File (Some _) -> true | _ -> false)
+              then failwith "can't specify -o with multiple input files";
+              List.iter (fun arg ->
+                  convert ~in_:(Some arg)
+                    ~out:(match output with `File opt -> opt | `In_place -> Some arg))
+                args)
       ; bench
       ; Dict_gen.gen_cmd "dict"
           ~embedded
