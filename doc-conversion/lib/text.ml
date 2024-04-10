@@ -107,13 +107,16 @@ let string_of_uchars uchars =
 let split_on_first_uchar src ~f =
   (* should probably split on grapheme cluster instead, but it probably doesn't matter
      given NFC normalization *)
-  let utf_decode = String.get_utf_8_uchar src 0 in
-  let src0 = Uchar.utf_decode_uchar utf_decode in
-  match f src0 with
-  | Some repl ->
-     let src0bytes = Uchar.utf_decode_length utf_decode in
-     Some (string_of_uchars repl ^ String.sub src src0bytes (String.length src - src0bytes))
-  | None -> None
+  if String.length src = 0
+  then None
+  else
+    let utf_decode = String.get_utf_8_uchar src 0 in
+    let src0 = Uchar.utf_decode_uchar utf_decode in
+    match f src0 with
+    | Some repl ->
+       let src0bytes = Uchar.utf_decode_length utf_decode in
+       Some (string_of_uchars repl ^ String.sub src src0bytes (String.length src - src0bytes))
+    | None -> None
 
 let depluralize w =
   if String.ends_with w ~suffix:"s"
@@ -202,12 +205,14 @@ let iter_pure_text ~options src ~f =
                  else wl, (fun w -> Option.value (uppercase_as_much_as_possible w) ~default:w)
        in
        match dict wu with
+       | Some "" -> f w
        | Some res -> f (recapitalize res)
        | None ->
           match if options.plurals_in_s then depluralize wu else None with
           | None -> f w
           | Some wu ->
              match dict wu with
+             | Some "" -> f w
              | Some res -> f (recapitalize (pluralize res))
              | None -> f w
     )
