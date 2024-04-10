@@ -118,6 +118,10 @@ let open_channel dp name =
   Dyn_protect.add dp ~finally:(fun () -> Out_channel.close out_ch);
   out_ch
 
+let read_all name =
+  In_channel.with_open_bin name
+    In_channel.input_all
+
 let convert_files ~options src dst =
   Dyn_protect.with_ (fun dp ->
       let src, dst, typ =
@@ -138,7 +142,9 @@ let convert_files ~options src dst =
              | Some new_name -> new_name
              | None -> Filename.remove_extension name ^ "-conv" ^ new_ext
            in
-           In_channel.input_all (open_in name), open_channel dp new_name, typ
+           (* first read, then open for writing, in case input = output *)
+           let str_in = read_all name in
+           str_in, open_channel dp new_name, typ
       in
       convert typ ~options src ~dst:(Channel dst)
     )
