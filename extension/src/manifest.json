@@ -3,7 +3,8 @@
     "name": "Orthographe rationnelle",
     "version": "3.0",
 
-    "description": "Réécrit les pages web de l'orthographe normale à une orthographe rationalisée",
+    "description": "__MSG_extension_description__",
+    "default_locale": "fr",
     "homepage_url": "https://orthographe-rationnelle.info/",
 
     "browser_specific_settings": {

@@ -24,5 +24,10 @@
 
 (rule
  (targets extension.zip extension2.zip (dir src2))
- (deps    (glob_files src/*.{html,js,png,json,svg,dict,csv,tsv}) (sandbox always preserve_file_kind))
+ (deps
+  (glob_files
+    src/*.{html,js,png,json,svg,dict,csv,tsv})
+    src/_locales/fr/messages.json
+    src/_locales/en/messages.json
+  (sandbox always preserve_file_kind))
  (action  (run ./make-extension)))
