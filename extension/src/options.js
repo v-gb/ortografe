@@ -87,8 +87,7 @@ async function set_dict(dict) {
 
 function currently_selected_rules() {
     const [ rules, selection_text ] = dict_gen.currently_selected_rules("load-");
-    document.getElementById("load-checkbox-label").innerText =
-        `Charger la sélection (${selection_text})`;
+    document.getElementById("load-checkbox-label").innerText = selection_text;
     return rules;
 }
 
@@ -322,4 +321,13 @@ if (location.hash === '#popup' && window.screen.width != window.innerWidth) {
     open_options_page_elt.style.display = "none";
 }
 document.documentElement.style.setProperty("--highlight-color", default_highlighting())
+{
+    const classname = browser.i18n.getMessage("classname");
+    const stylesheet = document.styleSheets[0];
+    stylesheet.insertRule(`.fr { display: none; }`, stylesheet.cssRules.length)
+    stylesheet.insertRule(`.${classname} { display: unset; }`, stylesheet.cssRules.length);
+    for (const el of document.querySelectorAll("[placeholder_" + classname + "]")) {
+        el.setAttribute("placeholder", el.getAttribute("placeholder_" + classname))
+    }
+}
 suggest_dict_from_active_tab()

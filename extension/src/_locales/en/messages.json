@@ -1,5 +1,8 @@
 {
   "extension_description": {
-      "message": "Rewrites web pages from the usual spelling to another configurable spelling"
+      "message": "Automatically respells web pages to a configurable spelling"
+  },
+  "classname": {
+    "message": "en"
   }
 }

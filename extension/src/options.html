@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <style>
+      /* the correct language is chosen by tweaking the classes in the javascript */
+      .fr {}
+      .en { display: none }
+
       body {
           font-size: 1rem; /* it seems like 1rem should do nothing, but it's much bigger/better
                               in chrome */
@@ -193,27 +197,45 @@
       <form class="form-onchange">
         <div>
           <input type="checkbox" id="color-checkbox" name="color-checkbox">
-          <label for="color-checkbox">surligner les mots réécrits</label>
+          <label for="color-checkbox">
+            <span class=fr>surligner les mots réécrits</span>
+            <span class=en>highlight rewritten words</span>
+          </label>
         </div>
         <br>
         <div>
-          Comment réécrire :
+          <span>
+            <span class=fr>Comment réécrire :</span>
+            <span class=en>How to rewrite:</span>
+          </span>
           <div>
             <input type="radio" id="rewrite-disable" name="rewrite-radio" value="disable">
-            <label for="rewrite-disable">ne rien réécrire</label>
+            <label for="rewrite-disable">
+              <span class=fr> ne rien réécrire </span>
+              <span class=en> no rewrite </span>
+            </label>
           </div>
           <div>
             <input type="radio" id="rewrite-erofa" name="rewrite-radio" value="erofa">
-            <label for="rewrite-erofa">convertir vers l'orthographe érofa (défaut)</label>
+            <label for="rewrite-erofa">
+              <span class=fr> convertir vers l'orthographe érofa (défaut) </span>
+              <span class=en> convert French to érofa spelling (default) </span>
+            </label>
           </div>
           <div>
             <input type="radio" id="rewrite-rect1990" name="rewrite-radio" value="rect1990">
-            <label for="rewrite-rect1990">convertir vers les rectifications de 1990</label>
+            <label for="rewrite-rect1990">
+              <span class=fr>convertir vers les rectifications de 1990</span>
+              <span class=en>convert French to the 1990 spelling changes</span>
+            </label>
           </div>
           <div>
             <input type="radio" id="rewrite-custom" name="rewrite-radio" value="custom">
-            <label for="rewrite-custom">convertir avec un dictionnaire que vous chargez</label>
-            (actuellement : <span id="dict"></span>)
+            <label for="rewrite-custom">
+              <span class=fr> convertir avec un dictionnaire que vous chargez </span>
+              <span class=en> convert using a dictionary of your choosing </span>
+            </label>
+            (<span class=fr>actuellement : </span><span class=en>currently: </span><span id="dict"></span>)
           </div>
         </div>
       </form>
@@ -221,7 +243,10 @@
       <br>
 
       <div>
-        <span>Charger un dictionnaire :</span>
+        <span>
+          <span class=fr>Charger un dictionnaire :</span>
+          <span class=en>Loading a dictionary:</span>
+        </span>
         <pre id='load_error'></pre>
         <ul id="load-dict-section">
           <li id="load-from-page" style="display:none">
@@ -237,19 +262,28 @@
                  anything callback from running. For more details:
                  https://discourse.mozilla.org/t/webextension-prevent-a-popup-panel-to-hide-itself/17857.
               -->
-            dans la <a href="">page d'options</a>
+            <span>
+              <span class=fr>dans la <a href="">page d'options</a></span>
+              <span class=en>from the <a href="">options page</a></span>
+            </span>
           </li>
           <li class="only-if-large">
             <form class="form-onchange">
-              <label for="load-dict-input" class="btn">choisir un fichier</label>
+              <label for="load-dict-input" class="btn">
+                <span class=fr>choisir un fichier</span>
+                <span class=en>select a file</span>
+              </label>
               <input style="display:none" type="file" id="load-dict-input">
-              (<a href="./dict-format.html" target="_blank">doc du format</a>)
+              (<a href="./dict-format.html" target="_blank"><span class=fr>doc du format</span><span class=en>format doc</span></a>)
             </form>
           </li>
 
           <li class="only-if-large">
             <form id="dict-link-form">
-              <input style="min-width: 15.5em" type="text" id="dict-link" placeholder="lien d'un fichier à télécharger">
+              <input style="min-width: 15.5em" type="text" id="dict-link"
+                     placeholder_fr="lien d'un fichier à télécharger"
+                     placeholder_en="link of file to download"
+                     >
               <input class="dl-icon" type="image" src="download_12181265.png" id="dict-link">
             </form>
           </li>
@@ -257,14 +291,21 @@
           <li class="only-if-large">
             <form class="form-onchange">
               <details id="load-dict-details">
-                <summary>combiner des règles</summary>
-                <span> Notez que ces orthographes ne sont pas des recommendations (ni des
-                  futures recommendations), simplement des possibilités d'expérimentation.
+                <summary>
+                  <span class=fr>combiner des règles</span>
+                  <span class=en>combining rules</span>
+                </summary>
+                <span>
+                  <span class=fr>Notez que ces orthographes ne sont pas des recommendations (ni des
+                    futures recommendations), simplement des possibilités d'expérimentation.
+                  </span>
                 </span>
                 <div>
                   <input style="display:none" type="checkbox" id="load-checkbox" name="load-checkbox">
-                  <label class="btn" for="load-checkbox" id="load-checkbox-label">
-                    Charger la sélection (rien de sélectionné)
+                  <label class="btn" for="load-checkbox">
+                    <span class=fr>Charger la sélection</span>
+                    <span class=en>Load the selection</span>
+                    (<span id="load-checkbox-label"><span class=fr>rien de sélectionné</span><span class=en>empty selection</span></span>)
                   </label>
                   <div style="display:inline-block">
                     <div class="idle" id="floatingCirclesG">
@@ -287,7 +328,10 @@
 
       <form class="form-onchange">
         <details>
-          <summary>Pour débugger</summary>
+          <summary>
+            <span class=fr>Pour débugger</span>
+            <span class=en>To debug<span>
+          </summary>
           <div>
             <input type="checkbox" id="disable-watch-checkbox" name="disable-watch-checkbox">
             <label for="disable-watch-checkbox">désactiver la réécriture quand la page change</label>

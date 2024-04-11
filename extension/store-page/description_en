@@ -1,0 +1,7 @@
+While you browse the internet, this extension automatically respells web pages to a spelling of your choice. This is meant to help understand or evaluate spelling reforms in practice.
+
+The extension ships spelling changes for French, but the functionality works for any language that can express a spelling change as a dictionary mapping old spelling to new spelling.
+
+No text or information about what you browse is sent to anyone or anything.
+
+Source code : <a href="https://github.com/v-gb/ortografe">https://github.com/v-gb/ortografe</a>
