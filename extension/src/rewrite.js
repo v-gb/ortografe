@@ -392,6 +392,38 @@ function load_dict(options) {
     return table
 }
 
+
+function ignoring_concurrent_calls(f) {
+    let processing = false;
+    return async function() {
+        if (processing) { return };
+        processing = true;
+        try {
+            return await f(...arguments);
+        } finally {
+            processing = false;
+        }
+    }
+}
+
+function mirror_and_rewrite(input, dst, options_and_table) {
+    const f = ignoring_concurrent_calls(async () => {
+        // ideally, we´d be a bit smarter and not rewrite everything on
+        // every single keystroke here
+        const [ options, table ] = await options_and_table();
+        dst.textContent = input.value;
+        rewrite_under(options,table,dst);
+        if (input.height < dst.height) {
+            // autogrow the textarea, so if you paste a large text, you end up with
+            // two long texts side by side, instead the textarea with a scrollbar
+            // and the other text with a long paragraph.
+            input.height = dst.height;
+        }
+    })
+    input.oninput = f;
+    return f;
+}
+
 function default_highlighting() {
     // You can check if the user prefers dark mode, and maybe if the site supports dark
     // mode, but you can't really ask "is this site using dark mode now?". So we just
