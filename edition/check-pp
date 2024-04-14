@@ -1,0 +1,31 @@
+#!/bin/bash
+
+sqlite3 -bail > /tmp/z1 <<EOF
+.mode tabs
+.import ../_build/default/data/lexique/Lexique383-full.gen.tsv t
+.mode list
+.output /tmp/z1
+select t.ortho from t where t.lemme = "avoir" and t.cgram like '%VER%' and lemme <> ortho order by ortho;
+.output /tmp/z2
+with z as
+  (select ortho, genre, nombre, lemme from t where cgram like '%VER%' and infover like '%par:pas%')
+select z.ortho, z2.ortho
+  from z
+  join z as z2 on z.lemme = z2.lemme
+where
+  (z.genre = 'f' or z.nombre = 'p')
+  and (z2.genre in ('m', '') and z2.nombre in ('s', ''))
+order by z.ortho, z2.ortho;
+EOF
+part1=$(echo -n '('; (cat /tmp/z1; echo -n "nothingmatches") | tr '\n' '|'; echo -n ')')
+sed=(sed '-r')
+while IFS='|' read -r var invar; do
+    sed+=(-e "s/\\<$part1 $var\\>/\\1 $invar/g")
+done < /tmp/z2
+echo "${sed[@]}" > /tmp/z3
+fnames=$(unzip -l ../edition/Alice_au_pays_des_merveilles-manual.epub | awk '{print $4}' | grep xhtml | sort -V)
+for f in $fnames; do
+    patdiff -context 0 \
+        <(unzip -p ../edition/Alice_au_pays_des_merveilles-manual.epub "$f") \
+        <(unzip -p ../edition/Alice_au_pays_des_merveilles-manual.epub "$f" | "${sed[@]:0:10000}" | sed -r "${sed[@]:10000:10000}")
+done |& less -R
