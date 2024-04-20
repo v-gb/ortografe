@@ -1239,6 +1239,7 @@ let _ : rule option =
           { row = { !aligned_row.row with ortho }; alignment = dummy_search_res }
     }))
 
+let oe_pattern = lazy (String.Search_pattern.create "oe")
 let respell_oe (aligned_row : aligned_row) =
   (* Lexique contient toujours œ écrit oe. On recolle les lettres, pour qu'on puisse
      réécrire à la fois cœur et coeur, par exemple. *)
@@ -1265,7 +1266,20 @@ let respell_oe (aligned_row : aligned_row) =
       |> String.concat
       |> String.chop_suffix_if_exists ~suffix:"$"
     in
-    { row = { aligned_row.row with ortho }; alignment = search_res }
+    let lemme =
+      (* On met à jour le lemme aussi, sinon œufs devient eu en ortograf.net, au lieu
+         de eu+. *)
+      if String.(=)
+           (String.Search_pattern.replace_all (force oe_pattern)
+              ~in_:aligned_row.row.ortho
+              ~with_:"œ")
+           ortho
+      then String.Search_pattern.replace_all (force oe_pattern)
+              ~in_:aligned_row.row.lemme
+              ~with_:"œ"
+      else aligned_row.row.lemme
+    in
+    { row = { aligned_row.row with ortho; lemme }; alignment = search_res }
   else aligned_row
 
 let doc rule = rule.doc
