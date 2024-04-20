@@ -31,8 +31,9 @@
           margin: auto;
       }
       h1 {
-          font-size: 3rem;
+          margin: 1.67em 0;
           font-family: sans-serif;
+          font-size: calc( 1.4em + (5 - 1.4) * ( (100cqw - 400px) / ( 800 - 400) ));;
       }
       h2 {
           font-size: 2.5rem;
@@ -189,7 +190,9 @@
     </nav>
     <main>
       <div class=main-with-margin>
-      <h1 style="text-align:center">Orthographe rationnelle</h1>
+        <h1 style="text-align:center">
+          Une orthographe rationnelle<br>ici et maintenant
+        </h1>
 
       <p>
         Les linguistes de l'<a href="http://erofa.free.fr/">association Érofa</a>
@@ -243,23 +246,14 @@
 
       <section id="outils">
         <h2>Outils de mise en pratique</h2>
-
-        <p>
-          Comme vous avez pu constater plus haut, nous proposons des outils pour utiliser
-          cette proposition de rationalisation.
-        </p>
-
-        <p> Notez que ces outils utilisent des dictionnaires construits à partir de sources
-          dont la licence ne permet que les utilisations <strong>non-commerciales</strong>
-          (<a href="http://erofa.free.fr/index.php?option=com_content&view=article&id=59&Itemid=68">Érofa</a> et <a href="http://www.lexique.org">Lexique</a>).
-        </p>
+        <p>Nous proposons des outils pour utiliser cette proposition de rationalisation, que ce soit pour la lecture ou l'écriture.</p>
       </section>
 
       <section>
         <h3><label for="user-text">Transcription interactive</label></h3>
 
         <noscript>
-          <p><strong>Cet fonctionalité requiert du javascript.</strong></p>
+          <p><strong>Cette fonctionalité requiert du javascript.</strong></p>
         </noscript>
 
         <div class="interactive-transcription">
@@ -269,7 +263,7 @@
       </section>
 
       <section>
-        <h3>Transcription de documents</h3>
+        <h3>Transcription de documents, en ligne</h3>
 
         <form action="/conv" method="post" enctype="multipart/form-data">
           <label class="upload">
@@ -308,7 +302,7 @@
       </section>
 
       <section>
-        <h3>Transcription de documents sur votre ordinateur</h3>
+        <h3>Transcription de documents, sur votre ordinateur</h3>
 
         <p>Téléchargez <a href="/static/ortografe_cli.exe" download="ortografe-cli">le programme de transcription</a>.</p>
 
@@ -406,6 +400,13 @@
           <li>À venir : article scientifique sur une partie du travail ci-dessus</span></li>
           <li><a href="https://github.com/v-gb/ortografe">Code source</a> de cette page</li>
         </ul>
+
+        <p> Finalement, sachez que les outils ci-dessus utilisent des dictionnaires
+            construits à partir de sources dont la licence ne permet que les
+            utilisations <strong>non-commerciales</strong>
+          (<a href="http://erofa.free.fr/index.php?option=com_content&view=article&id=59&Itemid=68">Érofa</a>
+          et <a href="http://www.lexique.org">Lexique</a>).
+        </p>
       </section>
 
       <footer>
