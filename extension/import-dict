@@ -116,7 +116,7 @@ if [ "${1-part2}" = part2 ]; then
 
     # Ensure these proper nouns are not rewritten due to the common noun with the same
     # spelling.
-    for w in Pierre Cannes Rennes Vienne Bordeaux Nivelles; do
+    for w in Pierre Cannes Rennes Vienne Bordeaux Nivelles Sylvain; do
         echo $w,
     done >> dict.gen.csv
 
