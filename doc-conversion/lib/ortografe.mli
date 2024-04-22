@@ -19,7 +19,7 @@ val htmlz : _ convert
 val docx : _ convert
 val epub : _ convert
 val doc : _ convert
-val odt : _ convert
+val opendocument : _ convert
 
 val convert_string : ext:string -> options:options -> string -> (string * string) option
 val convert_files : options:options -> string option -> string option -> unit

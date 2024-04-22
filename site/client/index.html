@@ -270,7 +270,7 @@
 
         <form action="/conv" method="post" enctype="multipart/form-data">
           <label class="upload">
-            <input style="display:none" type="file" name="file" accept=".doc,.docx,.odt,.html,.xhtml,.htmlz,.epub,.txt,.mkd,.md" onchange="form.submit()">
+            <input style="display:none" type="file" name="file" accept=".doc,.docx,.odt,.odp,.html,.xhtml,.htmlz,.epub,.txt,.mkd,.md" onchange="form.submit()">
             choisir un fichier
           </label>
         </form>
@@ -283,11 +283,20 @@
               <img class="icon" src="/static/word.svg" alt="Microsoft Office Word (2019–present).svg" width=1881 height=1750></a>
             Word,
             <a href="https://commons.wikimedia.org/wiki/File:LibreOffice_7.5_Writer_Icon.png">
-              <img class="icon" src="/static/libreoffice.png" alt="LibreOffice 7.5 Writer Icon" width=256 height=256></a>
+              <img class="icon" src="/static/libreoffice_writer.png" alt="LibreOffice 7.5 Writer Icon" width=256 height=256></a>
             LibreOffice,
             <a href="https://commons.wikimedia.org/wiki/File:OOoWriter3logo.png">
-              <img class="icon" src="/static/openoffice.png" alt="OOoWriter 3 logo" width=128 height=128></a>
+              <img class="icon" src="/static/openoffice_writer.png" alt="OOoWriter 3 logo" width=128 height=128></a>
             OpenOffice (.doc, .docx, .odt)
+          </li>
+          <li>
+            fichiers type PowerPoint
+            <a href="https://en.wikipedia.org/wiki/File:LibreOffice_7.5_Impress_Icon.png">
+              <img class="icon" src="/static/libreoffice_impress.png" alt="LibreOffice 7.5 Impress Icon" width=256 height=256></a>
+            LibreOffice,
+            <a href="https://en.wikipedia.org/wiki/File:OOoImpress3logo.png">
+              <img class="icon" src="/static/openoffice_impress.png" alt="OOoImpress 3 logo" width=128 height=128></a>
+            OpenOffice (.odp)
           </li>
           <li>
             <a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg">

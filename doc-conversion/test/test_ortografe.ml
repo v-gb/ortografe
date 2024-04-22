@@ -280,9 +280,9 @@ let%expect_test "odt" = (
     let odt = In_channel.read_all "test.odt" in
     let orig_xml = grab_xml odt in
     let new_xml =
-      grab_xml (Ortografe.odt ~options:{options with interleaved = false} odt ~dst:String) in
+      grab_xml (Ortografe.opendocument ~options:{options with interleaved = false} odt ~dst:String) in
     let new_xml2 =
-      grab_xml (Ortografe.odt ~options odt ~dst:String) in
+      grab_xml (Ortografe.opendocument ~options odt ~dst:String) in
     print_string (diff_strings orig_xml new_xml);
     [%expect {|
     <text:p text:style-name="P3">

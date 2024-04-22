@@ -59,7 +59,7 @@ let html = Html.convert
 let xhtml = Html.convert_xhtml
 let docx = Docx.convert
 let doc = Docx.convert_doc
-let odt = Opendocument.convert
+let opendocument = Opendocument.convert
 
 let epub ?buf ~options src ~dst =
   let buf = buffer buf in
@@ -89,7 +89,7 @@ let of_ext ext =
   | ".htmlz" -> Some (ext, `Htmlz) (* export format on wikisource for instance *)
   | ".docx" -> Some (ext, `Docx)
   | ".doc" -> Some (".docx", `Doc)
-  | ".odt" -> Some (ext, `Odt)
+  | ".odt" | ".odp" -> Some (ext, `Opendocument)
   | ".epub" -> Some (ext, `Epub)
   | _ -> None
 
@@ -100,7 +100,7 @@ let convert typ ~options src ~dst =
   | `Htmlz -> htmlz ~options src ~dst
   | `Docx -> docx ~options src ~dst
   | `Doc -> doc ~options src ~dst
-  | `Odt -> odt ~options src ~dst
+  | `Opendocument -> opendocument ~options src ~dst
   | `Epub -> epub ~options src ~dst
   | `Text -> pure_text ~options src ~dst
 
