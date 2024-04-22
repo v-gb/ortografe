@@ -108,3 +108,21 @@ user_text2.oninput = ignoring_concurrent_calls(async () => {
 })
 
 document.getElementById('mailelt').setAttribute('href', 'mzilto:contzct@orthogrzphe-rztionnelle.info'.replaceAll('z', 'a'))
+
+// indicate which browser is being used, to make it easier for non technical people
+// to know what to click on
+let browser;
+if (/Firefox[/]/.test(navigator.userAgent)) {
+    browser = 'firefox';
+} else if (/Edge[/]/.test(navigator.userAgent)) {
+    browser = 'edge';
+} else if (/Chrom(e|ium)[/]/.test(navigator.userAgent)) {
+    browser = 'chrome';
+} else if (/Safari[/]/.test(navigator.userAgent)) {
+    browser = 'safari';
+}
+if (browser) {
+    for (const elt of document.getElementsByClassName("for-" + browser)) {
+        elt.classList.add('for-active-browser')
+    }
+}
