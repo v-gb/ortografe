@@ -1,4 +1,4 @@
-# Format of the dictionary files
+% Dictionary file format
 
 The format is :
 
@@ -58,7 +58,7 @@ travaille,travaye
 travailler,travayer
 ```
 
-# Asking other people to load your dictionary
+## Asking other people to load your dictionary
 
 If you want to ask people to load a dictionary you provide, you can of course ask them to
 copy a link and paste it into the extension.

@@ -1,4 +1,4 @@
-# Format des règles
+% Format des règles
 
 La zone de texte permet de spécifier des règles de réécriture et d'en générer des dictionnaires. Par exemple la règle de réécriture **eau/ô** veut dire « dans tous les mots (connus), remplace *eau* par *ô*, pourvu que la prononciation soit préservée&nbsp;». Cette règle transformera donc *château* en *châtô*, *caniveau* en *canivô*, etc.
 
