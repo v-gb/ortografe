@@ -16,9 +16,9 @@ val max_size : int ref
 val pure_text : _ convert
 val html : _ convert
 val htmlz : _ convert
-val docx : _ convert
+val officeopenxml : [< `Docx | `Pptx ] -> _ convert
 val epub : _ convert
-val doc : _ convert
+val officeopenxml_old : [< `Doc | `Ppt ] -> _ convert
 val opendocument : _ convert
 
 val convert_string : ext:string -> options:options -> string -> (string * string) option
@@ -35,5 +35,5 @@ module More_markup = More_markup
 val extension_dict1990_gen_csv : string
 module Private : sig
   val grab_from_zip : string -> string -> string
-  val convert_docx_xml : _ convert
+  val convert_officeopenxml : [< `Docx | `Pptx ] -> _ convert
 end

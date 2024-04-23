@@ -57,8 +57,8 @@ let rect1990 = lazy (load_dict Dict.extension_dict1990_gen_csv)
 let pure_text = Text.convert
 let html = Html.convert
 let xhtml = Html.convert_xhtml
-let docx = Officeopenxml.convert
-let doc = Officeopenxml.convert_doc
+let officeopenxml = Officeopenxml.convert
+let officeopenxml_old = Officeopenxml.convert_old
 let opendocument = Opendocument.convert
 
 let epub ?buf ~options src ~dst =
@@ -88,6 +88,8 @@ let of_ext ext =
   | ".xhtml" -> Some (ext, `Xhtml)
   | ".htmlz" -> Some (ext, `Htmlz) (* export format on wikisource for instance *)
   | ".docx" -> Some (ext, `Docx)
+  | ".ppt" -> Some (".pptx", `Ppt)
+  | ".pptx" -> Some (ext, `Pptx)
   | ".doc" -> Some (".docx", `Doc)
   | ".odt" | ".odp" -> Some (ext, `Opendocument)
   | ".epub" -> Some (ext, `Epub)
@@ -98,8 +100,10 @@ let convert typ ~options src ~dst =
   | `Html -> html ~options src ~dst
   | `Xhtml -> xhtml ~options src ~dst
   | `Htmlz -> htmlz ~options src ~dst
-  | `Docx -> docx ~options src ~dst
-  | `Doc -> doc ~options src ~dst
+  | `Docx -> officeopenxml `Docx ~options src ~dst
+  | `Pptx -> officeopenxml `Pptx ~options src ~dst
+  | `Doc -> officeopenxml_old `Doc ~options src ~dst
+  | `Ppt -> officeopenxml_old `Ppt ~options src ~dst
   | `Opendocument -> opendocument ~options src ~dst
   | `Epub -> epub ~options src ~dst
   | `Text -> pure_text ~options src ~dst
@@ -162,5 +166,5 @@ module Private = struct
        match Zipc.Member.kind member with
        | Dir -> "<directory>"
        | File file -> Zipc.File.to_binary_string file |> Core.Result.ok_or_failwith
-  let convert_docx_xml = Officeopenxml.convert_xml
+  let convert_officeopenxml = Officeopenxml.convert_xml
 end

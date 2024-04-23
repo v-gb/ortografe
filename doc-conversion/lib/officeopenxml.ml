@@ -1,6 +1,5 @@
 open Common
 
-let docx_ns = More_markup.docx_ns
 (* This is the spec: http://officeopenxml.com/WPcontentOverview.php.
    I think that:
    - all text is inside w:t nodes
@@ -29,7 +28,7 @@ let drop_squigglies signals =
   Markup.filter (function
       | `Start_element (name, _) ->
          Stack.push stack
-           (not ([%compare.equal: (string * string)] name (docx_ns, "proofErr")));
+           (not ([%compare.equal: (string * string)] name (More_markup.docx_ns, "proofErr")));
          Stack.top_exn stack
       | `End_element ->
          let b = Stack.top_exn stack in
@@ -38,7 +37,7 @@ let drop_squigglies signals =
       | _ -> Stack.top_exn stack
     ) signals
 
-let docx_convert ~buf ~options signal =
+let convert_stream ~doc_ns ~buf ~options signal =
   let open Core in
   let stack = Stack.create () in
   let convert_text src = Text.convert ~buf ~options src ~dst:String in
@@ -51,34 +50,52 @@ let docx_convert ~buf ~options signal =
       | `End_element ->
          let effect =
            match Stack.pop stack with
-           | Some (ns, "p") when String.(=) ns docx_ns -> `Flush
+           | Some (ns, "p") when String.(=) ns doc_ns -> `Flush
            | _ -> `Not_special
          in
          Text.Interleaved.emit_structure state elt effect, Some ()
       | `Text strs when
-             [%compare.equal: (string * string) option] (Stack.top stack) (Some (docx_ns, "t"))
+             [%compare.equal: (string * string) option] (Stack.top stack) (Some (doc_ns, "t"))
         ->
          Text.Interleaved.emit_text state (String.concat strs), Some ()
       | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ ->
          Text.Interleaved.emit_structure state elt `Not_special, Some ()
     ) () signal
 
-let convert_xml ?buf ~options src ~dst =
+let ns = function
+  | `Docx -> More_markup.docx_ns
+  | `Pptx -> "http://schemas.openxmlformats.org/drawingml/2006/main"
+
+let files_to_rewrite = function
+  | `Docx ->
+     (function
+      | "word/document.xml"
+      | "word/footnotes.xml"
+      | "word/endnotes.xml" -> true
+      | _ -> false)
+  | `Pptx ->
+     (fun str ->
+       if Filename.extension str = ".xml"
+       then
+         match Filename.dirname str with
+         | "ppt/slides" -> true
+         | _ -> false
+       else false)
+
+let convert_xml which ?buf ~options src ~dst =
   let buf = buffer buf in
   More_markup.transform ~flavor:`Xml src ~dst ~transform:(fun signals ->
       signals
       |> drop_squigglies
-      |> docx_convert ~buf ~options)
+      |> convert_stream ~doc_ns:(ns which) ~buf ~options)
 
-let convert ?buf ~options src ~dst =
+let convert which ?buf ~options src ~dst =
   let buf = buffer buf in
+  let files_to_rewrite = files_to_rewrite which in
   Zip.map src (fun member contents ->
-      match Zipc.Member.path member with
-      | "word/document.xml"
-      | "word/footnotes.xml"
-      | "word/endnotes.xml" ->
-         Some (convert_xml ~buf ~options (contents ()) ~dst:String)
-      | _ -> None)
+      if files_to_rewrite (Zipc.Member.path member)
+      then Some (convert_xml which ~buf ~options (contents ()) ~dst:String)
+      else None)
   |> write_out dst
 
 let sys_command_exn str =
@@ -86,7 +103,7 @@ let sys_command_exn str =
   if i <> 0
   then failwith (str ^ " exited with code " ^ Int.to_string i)
 
-let convert_doc ?buf ~options src ~dst =
+let convert_old which ?buf ~options src ~dst =
   let buf = buffer buf in
   (* should put a time limit and memory, perhaps with the cgroup exe? *)
   let d = Filename.temp_dir "ortografe" "tmp" in
@@ -94,13 +111,23 @@ let convert_doc ?buf ~options src ~dst =
     ~finally:(fun () ->
       sys_command_exn [%string {|rm -rf -- %{Filename.quote d}|}])
     (fun () ->
-      let doc_path = Filename.concat d "it.doc" in
-      let docx_path = doc_path ^ "x" in
-      Out_channel.with_open_bin doc_path
+      let old_ext =
+        match which with
+        | `Doc -> "doc"
+        | `Ppt -> "ppt"
+      in
+      let new_ext = old_ext ^ "x" in
+      let old_path = Filename.concat d ("it." ^ old_ext) in
+      let new_path = old_path ^ "x" in
+      Out_channel.with_open_bin old_path
         (fun oc -> Out_channel.output_string oc src);
-      sys_command_exn [%string {|cd %{Filename.quote d} && timeout -s SIGKILL 10s bwrap --unshare-all --die-with-parent --new-session --dev-bind / / libreoffice --headless --convert-to docx %{Filename.basename doc_path} >&2|}];
+      sys_command_exn [%string {|cd %{Filename.quote d} && timeout -s SIGKILL 10s bwrap --unshare-all --die-with-parent --new-session --dev-bind / / libreoffice --headless --convert-to %{new_ext} %{Filename.basename old_path} >&2|}];
       let src =
-        In_channel.with_open_bin docx_path (fun ic ->
+        In_channel.with_open_bin new_path (fun ic ->
             In_channel.input_all ic)
       in
-      convert ~buf ~options src ~dst)
+      convert
+        (match which with
+         | `Doc -> `Docx
+         | `Ppt -> `Pptx)
+        ~buf ~options src ~dst)

@@ -163,14 +163,14 @@ let%expect_test "docx" = (
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" mc:Ignorable="w14 wp14 w15"><w:body><w:p><w:pPr><w:pStyle w:val="Normal"/><w:bidi w:val="0"/><w:jc w:val="left"/><w:rPr></w:rPr></w:pPr><w:r><w:rPr></w:rPr><w:t>Allusion choix</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="Normal"/><w:bidi w:val="0"/><w:jc w:val="left"/><w:rPr></w:rPr></w:pPr><w:r><w:rPr></w:rPr></w:r></w:p><w:sectPr><w:type w:val="nextPage"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:left="1134" w:right="1134" w:gutter="0" w:header="0" w:top="1134" w:footer="0" w:bottom="1134"/><w:pgNumType w:fmt="decimal"/><w:formProt w:val="false"/><w:textDirection w:val="lrTb"/></w:sectPr></w:body></w:document> |}];
     let orig_xml = pp_xml (docx_document docx) in
-    let new_xml = pp_xml (docx_document (Ortografe.docx ~options docx ~dst:String)) in
+    let new_xml = pp_xml (docx_document (Ortografe.officeopenxml `Docx ~options docx ~dst:String)) in
     print_string (diff_strings orig_xml new_xml);
     [%expect {|
      <w:t>
 -     Allusion choix
 +     Alusion chois
      </w:t> |}];
-    let new_xml2 = pp_xml (docx_document (Ortografe.docx ~options:{options with interleaved = false} docx ~dst:String)) in
+    let new_xml2 = pp_xml (docx_document (Ortografe.officeopenxml `Docx ~options:{options with interleaved = false} docx ~dst:String)) in
     print_string (diff_strings new_xml new_xml2);
     [%expect {| |}];
 )
@@ -194,7 +194,7 @@ let%expect_test "rewrite through tag noise in docx" = (
     in
     print_string (diff_strings ~context:3
                     (sexp_of_xmlstr text)
-                    (sexp_of_xmlstr (Ortografe.Private.convert_docx_xml
+                    (sexp_of_xmlstr (Ortografe.Private.convert_officeopenxml `Docx
                                        ~options text ~dst:String)));
     [%expect{|
                   (docx:r
@@ -208,7 +208,7 @@ let%expect_test "rewrite through tag noise in docx" = (
     let text = {|<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" mc:Ignorable="w14 wp14"><w:body><w:p w:rsidR="A" w:rsidRDefault="B"><w:pPr><w:spacing w:line="360" w:lineRule="auto"/><w:ind w:left="5670"/><w:jc w:val="both"/><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">M. </w:t></w:r><w:r w:rsidR="C"><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr><w:t>Jacques d</w:t></w:r><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">e </w:t></w:r><w:proofErr w:type="spellStart"/><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="22"/></w:rPr><w:t>Bravil</w:t></w:r><w:proofErr w:type="spellEnd"/></w:p></w:body></w:document>|} in
     print_string (diff_strings ~context:3
                     (sexp_of_xmlstr text)
-                    (sexp_of_xmlstr (Ortografe.Private.convert_docx_xml
+                    (sexp_of_xmlstr (Ortografe.Private.convert_officeopenxml `Docx
                                        ~options text ~dst:String)));
     [%expect{|
                         (docx:rFonts ((docx:ascii Arial) (docx:hAnsi Arial)) ()))
@@ -262,7 +262,7 @@ let%expect_test "doc" = (
        specify the source file type, just use a .docx file as a .doc *)
     let docx = In_channel.read_all "test.docx" in
     let orig_xml = pp_xml (docx_document docx) in
-    let new_xml = pp_xml (docx_document (Ortografe.docx ~options docx ~dst:String)) in
+    let new_xml = pp_xml (docx_document (Ortografe.officeopenxml `Docx ~options docx ~dst:String)) in
     print_string (diff_strings orig_xml new_xml);
     [%expect {|
      <w:t>

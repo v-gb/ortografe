@@ -17,7 +17,7 @@ This project contains tools to help with proposed spelling rationalizations for 
 
 - a [CLI tool](doc-conversion/) that:
 
-    - transcribes text and documents in various formats (pure text, .html, .xhtml, .htmlz, .doc, .docx, .odt, .odp, .epub)
+    - transcribes text and documents in various formats (pure text, .html, .xhtml, .htmlz, .doc, .docx, .odt, .odp, .ppt, .pptx, .epub)
     - creates dictionaries for other kinds of spelling changes (which can be used to convert document, or with the browser extension)
 
 - [data](data/) for this work (it is surprisingly difficult to find structured data)

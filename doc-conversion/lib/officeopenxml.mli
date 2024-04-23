@@ -2,6 +2,6 @@
     since 2007 or so. Not to be confused with OpenDocument, the format used by the
     equivalent open source tools. *)
 
-val convert_xml : _ Common.convert
-val convert : _ Common.convert
-val convert_doc : _ Common.convert
+val convert_xml : [< `Docx | `Pptx ] -> _ Common.convert
+val convert : [< `Docx | `Pptx ] -> _ Common.convert
+val convert_old : [< `Doc | `Ppt ] -> _ Common.convert

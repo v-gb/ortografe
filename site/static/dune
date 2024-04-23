@@ -87,6 +87,10 @@
  (target word.svg)
  (action
   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg")))
+(rule
+ (target powerpoint.svg)
+ (action
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/0/0d/Microsoft_Office_PowerPoint_%282019%E2%80%93present%29.svg")))
 
 ;; https://creativecommons.org/licenses/by-sa/4.0/deed.en
 ;; should be fine with link + note at the bottom
