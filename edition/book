@@ -63,7 +63,12 @@ case "${1-}" in
         root=$(jj workspace root 2> /dev/null || git rev-parse --show-toplevel)
         "$root"/_build/default/doc-conversion/bin/ortografe_cli.exe conv \
                Alice_au_pays_des_merveilles-manual.epub \
-               --erofa --1990 --oe --dict-file=<(echo clef,clé)
+               --erofa --1990 --oe --dict-file=<(
+            echo clef,clé
+            echo complétement,complètement # a l'air de précéder les rectifications de 1990, donc pas listé
+            echo dî,di # le mot "dîner" coupé au milieu
+            echo butta,buta # mot manquant, trop obscure
+        )
         ebook-convert \
             Alice_au_pays_des_merveilles-manual-conv.epub \
             Alice_au_pays_des_merveilles-manual-conv-tmp.pdf \
