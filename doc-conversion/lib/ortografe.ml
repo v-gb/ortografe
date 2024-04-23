@@ -59,7 +59,7 @@ let html = Html.convert
 let xhtml = Html.convert_xhtml
 let docx = Docx.convert
 let doc = Docx.convert_doc
-let odt = Odt.convert
+let odt = Opendocument.convert
 
 let epub ?buf ~options src ~dst =
   let buf = buffer buf in
