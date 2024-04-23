@@ -57,8 +57,8 @@ let rect1990 = lazy (load_dict Dict.extension_dict1990_gen_csv)
 let pure_text = Text.convert
 let html = Html.convert
 let xhtml = Html.convert_xhtml
-let docx = Docx.convert
-let doc = Docx.convert_doc
+let docx = Officeopenxml.convert
+let doc = Officeopenxml.convert_doc
 let opendocument = Opendocument.convert
 
 let epub ?buf ~options src ~dst =
@@ -162,5 +162,5 @@ module Private = struct
        match Zipc.Member.kind member with
        | Dir -> "<directory>"
        | File file -> Zipc.File.to_binary_string file |> Core.Result.ok_or_failwith
-  let convert_docx_xml = Docx.convert_xml
+  let convert_docx_xml = Officeopenxml.convert_xml
 end
