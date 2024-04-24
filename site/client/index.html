@@ -72,6 +72,25 @@
           width: auto;
           vertical-align: sub;
       }
+      .browsers {
+          list-style: none;
+          display: flex;
+          flex-flow: row wrap;
+          gap: 1em;
+          li {
+              max-width: 25em;
+              width: 100%;
+          }
+      }
+      .large-icon {
+          margin-right: calc(0.2 * min(5em, 15%));
+          margin: 3px calc(0.2 * min(5em, 15%)) 3px 3px;
+          float: left;
+          width: calc(min(5em, 15%));
+          height: auto;
+          border-radius:50%;
+          box-shadow: 0 0 5px 4px #b9f4b9;
+      }
       #rules {
           display: flex;
           flex-direction: column;
@@ -148,7 +167,9 @@
           display: none;
       }
       .for-active-browser {
-          font-weight: bold;
+          background-color: #e5fbe5;
+          padding: 3px;
+          border-radius: 6px;
       }
       nav {
           background-color: #F5F5F5;
@@ -328,12 +349,13 @@
         <h3>Transcription des pages internet que vous visitez</h3>
 
         <a href="/static/screenshot-1280-800.png"><img src="/static/screenshot-1280-800.png" alt="Capture d'écran de page Éléphant de Wikipédia en orthographe Érofa" width=1280 height=800 style="max-width:min(35em,100%); height:auto"></a>
-        <p>Lisez en orthographe rationalisée pendant votre navigation, en installation une extension pour votre navigateur internet&#8239;:</p>
-        <ul style="list-style: none">
-          <li><a href="https://commons.wikimedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg"><img class="icon" src="/static/chrome.svg" alt="" width=48 height=48></a> <a href="https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr" class="for-chrome">pour Google Chrome</a>. Sur téléphone, Google Chrome ne supporte malheureusement pas les extensions, nous vous conseillons donc d'utiliser Firefox. </li>
-          <li><a href="https://commons.wikimedia.org/wiki/File:Firefox_logo,_2019.svg"><img class="icon" src="/static/firefox.svg" alt="" width=77 height=79></a> <a href="https://addons.mozilla.org/fr/firefox/addon/orthographe-rationnelle/" class="for-firefox"> pour Firefox </a> (ordinateur et téléphone)</li>
-          <li><a href="https://commons.wikimedia.org/wiki/File:Safari_browser_logo.svg"><img class="icon" src="/static/safari.svg" alt="" width=187 height=186></a> <a href="https://apps.apple.com/us/app/orthographe-rationnelle/id6482850164" class="for-safari"> pour Safari </a> (MacOS et iOS). Si rien ne se passe après avoir installé l'extension, assurez-vous qu'il n'y a pas de petit triangle d'avertissement orange au haut près de la barre d'adresse, ce qui arrive quand l'extension n'a pas la permission d'accéder à la <a href="/static/extension.zip" style="cursor:default; text-decoration:none; color:black">page</a>.</li>
-          <li><a href="https://commons.wikimedia.org/wiki/File:Edge_Logo_2019.svg"><img class="icon" src="/static/edge.svg" alt="" width=720 height=720></a> <a href="https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr" class="for-edge">pour Microsoft Edge</a>, après avoir suivi les <a href="https://www.01net.com/astuces/comment-installer-des-extensions-google-chrome-sur-microsoft-edge-1844564.html">deux premiers points de ces instructions</a></li>
+        <p>Lisez internet en orthographe rationalisée avec une extension pour votre navigateur&#8239;:</p>
+
+        <ul class="browsers">
+          <li class="for-chrome"><a href="https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr"><img class="large-icon" src="/static/chrome.svg" alt="" width=48 height=48></a>Que sur ordinateur. Sur téléphone, Chrome ne supporte pas les extensions, nous vous conseillons donc <a href="https://play.google.com/store/apps/details?id=org.mozilla.firefox">Firefox <img style="vertical-align: unset" class="icon" src="/static/firefox.svg" alt="" width=77 height=79></a>. </li>
+          <li class="for-firefox"><a href="https://addons.mozilla.org/fr/firefox/addon/orthographe-rationnelle/"><img class="large-icon" src="/static/firefox.svg" alt="" width=77 height=79></a>Ordinateur et téléphone.</li>
+          <li class="for-safari"><a href="https://apps.apple.com/us/app/orthographe-rationnelle/id6482850164"><img class="large-icon" src="/static/safari.svg" alt="" width=187 height=186></a> MacOS et iOS. Si l'extension n'a pas d'effet, vérifiez qu'il n'y a pas de triangle d'avertissement orange en haut près de la barre d'<a href="/static/extension.zip" style="cursor:default; text-decoration:none; color:black">adresse</a>.</li>
+          <li class="for-edge"><a href="https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr"><img class="large-icon" src="/static/edge.svg" alt="" width=720 height=720></a> Ordinateur, et peut-être téléphone. Suivez <a href="https://www.01net.com/astuces/comment-installer-des-extensions-google-chrome-sur-microsoft-edge-1844564.html">les deux premiers points de ces instructions</a>, puis cliquez sur l'icône.</li>
         </ul>
       </section>
 
@@ -425,7 +447,7 @@
       </section>
 
       <footer>
-        Vous pouvez retrouver l'origine des diverses icônes utilisées dans cette page en cliquant dessus. Aucunes n'ont été modifiées.
+        Vous pouvez retrouver l'origine des diverses icônes utilisées dans cette page en cliquant dessus, ou sur la page wikipédia du programme quand l'icône sert de bouton. Aucunes n'ont été modifiées.
         Le favicon provient de <a href="https://icons8.com/">icons8</a>.
       </footer>
       </div>
