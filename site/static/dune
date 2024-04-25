@@ -70,11 +70,11 @@
  (action
   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/2/2f/Thunderbird_2023_icon.svg")))
 
-;; public domain
+;; https://creativecommons.org/licenses/by-sa/3.0/deed.en
 (rule
  (target pdf.svg)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg")))
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/e/ec/Pdf_by_mimooh.svg")))
 
 ;; public domain
 (rule
@@ -112,3 +112,15 @@
  (target openoffice_impress.png)
  (action
   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/3/36/OOoImpress3logo.png")))
+
+;; https://creativecommons.org/licenses/by-sa/3.0/deed.en
+(rule
+ (target text_file.svg)
+ (action
+   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/2/23/Text-txt.svg")))
+
+;; LGPL again
+(rule
+ (target internet_globe.svg)
+ (action
+   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f9/Crystal_Clear_app_linneighborhood.svg")))

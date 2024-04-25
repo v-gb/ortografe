@@ -91,6 +91,22 @@
           border-radius:50%;
           box-shadow: 0 0 5px 4px #b9f4b9;
       }
+      .large-icon2 {
+          margin-right: calc(0.2 * min(5em, 15%));
+          margin: 3px calc(0.2 * min(5em, 15%)) 3px 3px;
+          float: left;
+          width: calc(min(5em, 15%));
+          height: auto;
+      }
+      .formats {
+          list-style: none;
+          display: flex;
+          flex-flow: row wrap;
+          li {
+              max-width: 25em;
+              width: 100%;
+          }
+      }
       #rules {
           display: flex;
           flex-direction: column;
@@ -296,43 +312,36 @@
           </label>
         </form>
         <p>Les formats acceptés sont&#8239;:</p>
-        <ul>
-          <li>fichiers textes (.txt, .mkd, .md)
-          <li>sources de pages web (.html, .xhtml, .htmlz)</li>
-          <li>fichiers
-            <a href="https://commons.wikimedia.org/wiki/File:Microsoft_Office_Word_(2019%E2%80%93present).svg">
-              <img class="icon" src="/static/word.svg" alt="Microsoft Office Word (2019–present).svg" width=1881 height=1750></a>
-            Word,
-            <a href="https://commons.wikimedia.org/wiki/File:LibreOffice_7.5_Writer_Icon.png">
-              <img class="icon" src="/static/libreoffice_writer.png" alt="LibreOffice 7.5 Writer Icon" width=256 height=256></a>
-            LibreOffice Writer,
-            <a href="https://commons.wikimedia.org/wiki/File:OOoWriter3logo.png">
-              <img class="icon" src="/static/openoffice_writer.png" alt="OOoWriter 3 logo" width=128 height=128></a>
-            OpenOffice Writer (.doc, .docx, .odt)
+        <ul class=formats>
+          <li>
+            <a href="https://commons.wikimedia.org/wiki/File:Text-txt.svg">
+              <img class="large-icon2" src="/static/text_file.svg" alt="Text file icon" width=822 height=754></a>
+            fichiers textes (.txt, .mkd, .md)
           </li>
           <li>
-            fichiers
+            <a href="https://en.wikipedia.org/wiki/File:Crystal_Clear_app_linneighborhood.svg">
+              <img class="large-icon2" src="/static/internet_globe.svg" alt="Internet Symbol" width=407 height=407></a>
+            sources de pages web (.html, .xhtml, .htmlz)</li>
+          <li>
+            <a href="https://commons.wikimedia.org/wiki/File:Microsoft_Office_Word_(2019%E2%80%93present).svg">
+              <img class="large-icon2" src="/static/word.svg" alt="Microsoft Office Word (2019–present).svg" width=1881 height=1750></a>
+            Word et similaires (.doc, .docx, .odt)
+          </li>
+          <li>
             <a href="https://commons.wikimedia.org/wiki/File:Microsoft_Office_PowerPoint_(2019%E2%80%93present).svg">
-              <img class="icon" src="/static/powerpoint.svg" alt="Microsoft Office PowerPoint (2019–present).svg" width=512 height=476></a>
-            PowerPoint,
-            <a href="https://en.wikipedia.org/wiki/File:LibreOffice_7.5_Impress_Icon.png">
-              <img class="icon" src="/static/libreoffice_impress.png" alt="LibreOffice 7.5 Impress Icon" width=256 height=256></a>
-            LibreOffice Impress,
-            <a href="https://en.wikipedia.org/wiki/File:OOoImpress3logo.png">
-              <img class="icon" src="/static/openoffice_impress.png" alt="OOoImpress 3 logo" width=128 height=128></a>
-            OpenOffice Impress (.ppt, .pptx, .odp)
+              <img class="large-icon2" src="/static/powerpoint.svg" alt="Microsoft Office PowerPoint (2019–present).svg" width=512 height=476></a>
+            PowerPoint et similaires (.ppt, .pptx, .odp)
           </li>
           <li>
             <a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg">
-              <img class="icon" src="/static/epub.svg" alt="Epub logo color.svg" width=600 height=800></a>
+              <img class="large-icon2" src="/static/epub.svg" alt="Epub logo color.svg" width=600 height=800></a>
             livres numériques (.epub), comme ceux de <a href="https://fr.wikisource.org/wiki/Wikisource:Accueil">wikisource</a> plus haut
           </li>
           <li>
-            <a href="https://commons.wikimedia.org/wiki/File:PDF_file_icon.svg">
-              <img class="icon" alt="PDF file icon" src="/static/pdf.svg" width=213 height=262></a>
-            fichiers PDF : pas directement supporté <br>
-          Si vous avez le fichier original utilisé pour créer le PDF, transcrivez ça, le résultat sera nettement meilleur. <br>
-          Si vous n'avez pas le fichier original, vous pouvez transformer le fichier PDF en fichier Word (par exemple avec <a href="https://www.adobe.com/acrobat/online/pdf-to-word.html">Adobe</a> ou <a href="https://tools.pdf24.org/en/pdf-to-word">Pdf24</a>), puis soumettre le fichier Word ici.
+            <a href="https://commons.wikimedia.org/wiki/File:Pdf_by_mimooh.svg">
+              <img class="large-icon2" alt="PDF file icon" src="/static/pdf.svg" width=544 height=580></a>
+            Pas supporté directement.
+          Soumettez soit le fichier original (préférable), ou un fichier Word recréé depuis le PDF (voir <a href="https://www.adobe.com/acrobat/online/pdf-to-word.html">Adobe</a> ou <a href="https://tools.pdf24.org/en/pdf-to-word">Pdf24</a>).
           </li>
         </ul>
       </section>
