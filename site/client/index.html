@@ -72,11 +72,11 @@
           width: auto;
           vertical-align: sub;
       }
-      .browsers {
+      .image-list {
           list-style: none;
           display: flex;
           flex-flow: row wrap;
-          gap: 1em;
+          gap: 0.5em;
           li {
               max-width: 25em;
               width: 100%;
@@ -96,15 +96,6 @@
           float: left;
           width: calc(min(5em, 15%));
           height: auto;
-      }
-      .formats {
-          list-style: none;
-          display: flex;
-          flex-flow: row wrap;
-          li {
-              max-width: 25em;
-              width: 100%;
-          }
       }
       #rules {
           display: flex;
@@ -311,7 +302,7 @@
           </label>
         </form>
         <p>Les formats acceptés sont&#8239;:</p>
-        <ul class=formats>
+        <ul class="image-list">
           <li>
             <a href="https://commons.wikimedia.org/wiki/File:Text-txt.svg">
               <img class="large-icon" src="/static/text_file.svg" alt="Text file icon" width=822 height=754></a>
@@ -359,7 +350,7 @@
         <a href="/static/screenshot-1280-800.png"><img src="/static/screenshot-1280-800.png" alt="Capture d'écran de page Éléphant de Wikipédia en orthographe Érofa" width=1280 height=800 style="max-width:min(35em,100%); height:auto"></a>
         <p>Lisez internet en orthographe rationalisée avec une extension pour votre navigateur&#8239;:</p>
 
-        <ul class="browsers">
+        <ul class="image-list">
           <li class="for-chrome"><a href="https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr"><img class="large-icon clickable-icon-round" src="/static/chrome.svg" alt="" width=48 height=48></a>Que sur ordinateur. Sur téléphone, Chrome ne supporte pas les extensions, nous vous conseillons donc <a href="https://play.google.com/store/apps/details?id=org.mozilla.firefox">Firefox <img style="vertical-align: unset" class="icon" src="/static/firefox.svg" alt="" width=77 height=79></a>. </li>
           <li class="for-firefox"><a href="https://addons.mozilla.org/fr/firefox/addon/orthographe-rationnelle/"><img class="large-icon clickable-icon-round" src="/static/firefox.svg" alt="" width=77 height=79></a>Ordinateur et téléphone.</li>
           <li class="for-safari"><a href="https://apps.apple.com/us/app/orthographe-rationnelle/id6482850164"><img class="large-icon clickable-icon-round" src="/static/safari.svg" alt="" width=187 height=186></a> MacOS et iOS. Si l'extension n'a pas d'effet, vérifiez qu'il n'y a pas de triangle d'avertissement orange en haut près de la barre d'<a href="/static/extension.zip" style="cursor:default; text-decoration:none; color:black">adresse</a>.</li>
@@ -370,16 +361,14 @@
       <section>
         <h3>Vérificateurs d'orthographe</h3>
 
-        <p>Afin de pouvoir écrire en orthographe Érofa sans que votre ordinateur ne
-           veuille vous corriger en permanence (en soulignant en rouge), vous pouvez
-           enseigner l'orthographe Érofa&#8239;:
+        <p>Pour éviter les soulignages rouges intempestifs, installez nos extensions pour
+           que les outils suivant reconnaissent l'orthographe Érofa&#8239;:
         </p>
-        <ul style="list-style: none">
-          <li><a href="https://commons.wikimedia.org/wiki/File:Firefox_logo,_2019.svg"><img class="icon" src="/static/firefox.svg" alt="" width=77 height=79></a> <a href="https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/">à Firefox</a> (navigateur internet, vérification non supportée sur téléphones)</li>
-          <li><a href="https://commons.wikimedia.org/wiki/File:Thunderbird_2023_icon.svg"><img class="icon" src="/static/thunderbird.svg" alt="" width=512 height=512></a> <a href="https://addons.thunderbird.net/fr/thunderbird/addon/corecteur-ortografe-simpl-thun/">à Thunderbird</a> (app d'emails/agenda/contacts)</li>
-          <li><a href="https://commons.wikimedia.org/wiki/File:OOoWriter3logo.png">
-              <img class="icon" src="/static/openoffice_writer.png" alt="OOoWriter 3 logo" width=128 height=128></a>
-            <a href="https://extensions.openoffice.org/de/projectrelease/correction-en-orthographe-simplifiee-du-francais-100">à OpenOffice</a> (suite bureautique)</li>
+        <ul class="image-list">
+          <li><a href="https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/"><img class="large-icon clickable-icon-round" src="/static/firefox.svg" alt="" width=77 height=79></a>navigateur Firefox (non supporté sur téléphones)</li>
+          <li><a href="https://addons.thunderbird.net/fr/thunderbird/addon/corecteur-ortografe-simpl-thun/"><img class="large-icon clickable-icon-round" src="/static/thunderbird.svg" alt="" width=512 height=512></a> messagerie Thunderbird</li>
+          <li><a href="https://extensions.openoffice.org/de/projectrelease/correction-en-orthographe-simplifiee-du-francais-100">
+              <img class="large-icon clickable-icon-box" src="/static/openoffice_writer.png" alt="OOoWriter 3 logo" width=128 height=128></a> suite bureautique OpenOffice</li>
         </ul>
       </section>
 
