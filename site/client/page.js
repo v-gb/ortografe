@@ -107,7 +107,9 @@ user_text2.oninput = ignoring_concurrent_calls(async () => {
     }
 })
 
-document.getElementById('mailelt').setAttribute('href', 'mzilto:contzct@orthogrzphe-rztionnelle.info'.replaceAll('z', 'a'))
+for (const elt of document.getElementsByClassName('mailelt')) {
+    elt.setAttribute('href', 'mzilto:contzct@orthogrzphe-rztionnelle.info'.replaceAll('z', 'a'))
+}
 
 // indicate which browser is being used, to make it easier for non technical people
 // to know what to click on

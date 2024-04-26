@@ -237,8 +237,8 @@
       <books></books>
 
       <p class="note">
-        Notez que la transcription est automatique, et fait quelques fois des erreurs.
-        Notez également que ces changements sont bâtis sur les rectifications de 1990, qui sont donc (en partie) appliquées.
+        Notez que la transcription est automatique, et peut faire des erreurs.
+        Notez également qu'Érofa est bâtie sur les rectifications de 1990, qui sont donc appliquées.
       </p>
 
       <section id="regles">
@@ -289,7 +289,7 @@
         </noscript>
 
         <div class="interactive-transcription">
-          <textarea id="user-text" class="user-text">Babar a une mémoire exceptionnelle, car c'est un élé...</textarea>
+          <textarea id="user-text" class="user-text">Babar a une mémoire exceptionnelle, car c'est un éléph</textarea>
           <div id="converted-text" class="converted-text notranscribe"></div>
         </div>
       </section>
@@ -306,15 +306,6 @@
         <p>Les formats acceptés sont&#8239;:</p>
         <ul class="image-list">
           <li>
-            <a href="https://commons.wikimedia.org/wiki/File:Text-txt.svg">
-              <img class="large-icon" src="/static/text_file.svg" alt="Text file icon" width=822 height=754></a>
-            fichiers textes (.txt, .mkd, .md)
-          </li>
-          <li>
-            <a href="https://en.wikipedia.org/wiki/File:Crystal_Clear_app_linneighborhood.svg">
-              <img class="large-icon" src="/static/internet_globe.svg" alt="Internet Symbol" width=407 height=407></a>
-            sources de pages web (.html, .xhtml, .htmlz)</li>
-          <li>
             <a href="https://commons.wikimedia.org/wiki/File:Microsoft_Office_Word_(2019%E2%80%93present).svg">
               <img class="large-icon" src="/static/word.svg" alt="Microsoft Office Word (2019–present).svg" width=1881 height=1750></a>
             Word et similaires (.doc, .docx, .odt)
@@ -325,17 +316,27 @@
             PowerPoint et similaires (.ppt, .pptx, .odp)
           </li>
           <li>
-            <a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg">
-              <img class="large-icon" src="/static/epub.svg" alt="Epub logo color.svg" width=600 height=800></a>
-            livres numériques (.epub), comme ceux de <a href="https://fr.wikisource.org/wiki/Wikisource:Accueil">wikisource</a> plus haut
+            <a href="https://commons.wikimedia.org/wiki/File:Text-txt.svg">
+              <img class="large-icon" src="/static/text_file.svg" alt="Text file icon" width=822 height=754></a>
+            fichiers textes (.txt, .mkd, .md)
           </li>
           <li>
             <a href="https://commons.wikimedia.org/wiki/File:Pdf_by_mimooh.svg">
               <img class="large-icon" alt="PDF file icon" src="/static/pdf.svg" width=544 height=580></a>
             Pas supporté directement.
-          Soumettez soit le fichier original (préférable), ou un fichier Word recréé depuis le PDF (voir <a href="https://www.adobe.com/acrobat/online/pdf-to-word.html">Adobe</a> ou <a href="https://tools.pdf24.org/en/pdf-to-word">Pdf24</a>).
+          Soumettez soit le fichier dont est tiré le PDF (préférable), ou un fichier Word recréé depuis le PDF (voir <a href="https://www.adobe.com/acrobat/online/pdf-to-word.html">Adobe</a> ou <a href="https://tools.pdf24.org/en/pdf-to-word">Pdf24</a>).
           </li>
+          <li>
+            <a href="https://commons.wikimedia.org/wiki/File:Epub_logo_color.svg">
+              <img class="large-icon" src="/static/epub.svg" alt="Epub logo color.svg" width=600 height=800></a>
+            livres numériques (.epub), comme ceux de <a href="https://fr.wikisource.org/wiki/Wikisource:Accueil">wikisource</a> plus haut
+          </li>
+          <li>
+            <a href="https://en.wikipedia.org/wiki/File:Crystal_Clear_app_linneighborhood.svg">
+              <img class="large-icon" src="/static/internet_globe.svg" alt="Internet Symbol" width=407 height=407></a>
+            sources de pages web (.html, .xhtml, .htmlz)</li>
         </ul>
+        <p><a class='mailelt'>Contactez-nous</a> si quelque chose ne marche pas bien !</p>
       </section>
 
       <section>
@@ -363,7 +364,7 @@
       <section>
         <h3>Vérificateurs d'orthographe</h3>
 
-        <p>Pour éviter les soulignages rouges intempestifs, installez nos extensions pour
+        <p>Pour éviter les soulignages rouges intempestifs, nous fournissons des extensions pour
            que les outils suivant reconnaissent l'orthographe Érofa&#8239;:
         </p>
         <ul class="image-list">
@@ -375,13 +376,26 @@
       </section>
 
       <section>
+        <h3>Claviers</h3>
+        <p>Un clavier virtuel pour écrire en orthographe Érofa sur téléphone est en cours
+          d'étude.  Mais même sans, la plupart des claviers s'adaptent à votre orthographe
+          après avoir tapé les mots quelques fois en orthographe Érofa.
+        </p>
+
+        <p>Sur ordinateur, si vous utilisez actuellement sous Ubuntu un clavier QWERTY
+           américain sans accès aux accents, nous vous suggérons la disposition de clavier
+          «&nbsp;French (US)&nbsp;» (seule AltGr change, et permet d'écrire accents,
+          cédilles, guillemets français, etc). </p>
+      </section>
+
+      <section>
         <details>
           <summary class="no-triangle"><h3>Support pour d'autres orthographes<span style="text-decoration-line: underline">...</span></h3></summary>
           <p>Parmi nos outils, voici ceux qui supportent d'autres orthographes que l'orthographe Érofa&#8239;:</p>
           <ul>
             <li style='list-style-type:"\2705&nbsp"'>transcription interactive (voir plus bas)</li>
-            <li style='list-style-type:"\2705&nbsp"'>transcription de documents (voir plus bas)</li>
-            <li style='list-style-type:"\2705&nbsp"'>transcription de documents sur votre ordinateur (voir <code>--help</code>)</li>
+            <li style='list-style-type:"\2705&nbsp"'>transcription de documents, en ligne (voir plus bas)</li>
+            <li style='list-style-type:"\2705&nbsp"'>transcription de documents, sur votre ordinateur (voir <code>--help</code>)</li>
             <li style='list-style-type:"\2705&nbsp"'>transcription de pages que vous visitez (voir les options de l'extension)</li>
             <li style='list-style-type:"\274C&nbsp"'>vérificateurs d'orthographe</li>
           </ul>
@@ -431,8 +445,8 @@
               <li><a href="/static/erofa-texte.pdf#page=17">explications de l'histoire de l'orthographe et pourquoi cette réforme</a> (26 pages)</li>
               <li><a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">tous les articles précédents, plus une liste des mots modifiés</a></li>
             </ul>
-          <li>Rejoignez l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme !</li>
-          <li><a id='mailelt'>Contactez-nous</a> si vous avez des problèmes, questions ou suggestions !</li>
+          <li><a href="http://erofa.free.fr/index.php?option=com_content&view=article&id=56&Itemid=67">Rejoignez</a> l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme !</li>
+          <li><a class='mailelt'>Contactez-nous</a> si vous avez des problèmes, questions ou suggestions !</li>
           <li>À venir : article scientifique sur une partie du travail ci-dessus</span></li>
           <li><a href="https://github.com/v-gb/ortografe">Code source</a> de cette page</li>
         </ul>
