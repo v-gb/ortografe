@@ -4,13 +4,19 @@ type tree = Ortografe.More_markup.tree [@@deriving sexp_of]
 
 let trees = Ortografe.More_markup.trees
 
-let trees_of_string src : tree list =
-  Markup.parse_html
-    (Markup.string src)
-  |> Markup.signals
-  |> Markup.trim
-  |> trees
-  |> Markup.to_list
+let trees_of_string ?(attrs = []) src : tree list =
+  let trees =
+    Markup.parse_html
+      (Markup.string src)
+    |> Markup.signals
+    |> Markup.trim
+    |> trees
+    |> Markup.to_list
+  in
+  match trees with
+  | `Element (a, attrs', children) :: rest ->
+     `Element (a, attrs @ attrs', children) :: rest
+  | _ -> trees
 
 let string_of_trees trees =
   List.map trees ~f:(fun tree ->
@@ -51,8 +57,11 @@ let rec rewrite ~books_html = function
        |> List.hd_exn
      in
      [ initial; new_node ]
-  | `Element ((_, "books"), _, _) ->
-     trees_of_string books_html
+  | `Element ((_, "books"), attrs, _) ->
+     (match trees_of_string books_html with
+      | `Element (a, attrs', z) :: rest ->
+         `Element (a, attrs @ attrs', z) :: rest
+      | z -> z)
   | `Element ((_, "rules"), _, _) ->
      let l = force Dict_gen_common.Dict_gen.all in
      List.filter_map l ~f:(fun rule ->

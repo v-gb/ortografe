@@ -109,3 +109,9 @@
  (target internet_globe.svg)
  (action
    (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f9/Crystal_Clear_app_linneighborhood.svg")))
+
+;; will point to youtube video, so no issue of license here
+(rule
+ (target hoedt_piron.jpg)
+ (action
+   (run curl -o %{target} -sS "https://img.youtube.com/vi/5YO7Vg1ByA8/mqdefault.jpg")))
