@@ -64,18 +64,32 @@ let extract_zip ~data ~dst =
 mkdir -p %{Sys.quote dst} && unzip -q %{Sys.quote tmp} -d %{Sys.quote dst} && rm -f %{Sys.quote tmp}
 |}]
 
-let make_the_html_mobile_friendly html =
-  String.substr_replace_first
-    html
-    ~pattern:"<head>"
-    ~with_:{|<head><meta name="viewport" content="width=device-width, initial-scale=1"/>|}
+let make_the_html_mobile_friendly =
+  let re = lazy (Re.(compile (seq [ str "<body"; shortest (rep any); str ">" ]))) in
+  fun ~url html ->
+  let html =
+    String.substr_replace_first
+      html
+      ~pattern:"<head>"
+      ~with_:{|<head><meta name="viewport" content="width=device-width, initial-scale=1"/>|};
+  in
+  Re.replace (force re) html
+    ~f:(fun group ->
+      let source =
+        match which_source ~url:(Uri.of_string url) with
+        | `Wikisource -> "de wikisource"
+        | `Gutenberg -> "du projet Gutenberg"
+      in
+      Re.Group.get group 0
+      ^ [%string {|<h3>voir le <a href="%{url}">texte original</a> %{source}</h3>|}])
 
 let options = lazy { Ortografe.convert_uppercase = true
                    ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa)
                    ; interleaved = true
                    ; plurals_in_s = true 
                    }
-let convert_wikisource epub ~dst =
+
+let convert_wikisource epub ~url ~dst =
    (* Sometimes you see headings that are uppercase in the source, instead by using
       text-transform or font-variant, so just convert those. *)
   let epub = Ortografe.epub epub ~dst:String ~options:(Lazy.force options) in
@@ -88,7 +102,7 @@ let convert_wikisource epub ~dst =
         match Filename.basename (Zipc.Member.path member) with
         | f when String.is_suffix f ~suffix:".html"
                  || String.is_suffix f ~suffix:".xhtml"
-          -> Some (make_the_html_mobile_friendly (contents ()))
+          -> Some (make_the_html_mobile_friendly ~url (contents ()))
         | "main.css" ->
            Some (contents () ^ {|
 body {
@@ -110,7 +124,7 @@ p {
   extract_zip ~data:epub_conv ~dst;
   epub_conv
 
-let convert_gutenberg zip ~dst =
+let convert_gutenberg zip ~url ~dst =
   let data = Ortografe.htmlz zip ~dst:String ~options:(Lazy.force options) in
   let new_data =
     Ortografe.map_zip data
@@ -121,15 +135,14 @@ let convert_gutenberg zip ~dst =
         match Filename.basename (Zipc.Member.path member) with
         | f when String.is_suffix f ~suffix:".html"
                  || String.is_suffix f ~suffix:".xhtml"
-          -> Some (make_the_html_mobile_friendly (contents ()))
+          -> Some (make_the_html_mobile_friendly ~url (contents ()))
         | _ -> None)
   in
   extract_zip ~data:new_data ~dst;
   new_data
 
 let convert url ~root ~title =
-  let url = Uri.of_string url in
-  let source = which_source ~url in
+  let source = which_source ~url:(Uri.of_string url) in
   let data =
     try In_channel.read_all (dl_path ~root ~title ~source)
     with e -> raise_s [%sexp (e : exn)
@@ -138,8 +151,8 @@ let convert url ~root ~title =
   in
   let dst = conv_path ~title in
   match source with
-  | `Wikisource -> convert_wikisource data ~dst
-  | `Gutenberg -> convert_gutenberg data ~dst
+  | `Wikisource -> convert_wikisource data ~url ~dst
+  | `Gutenberg -> convert_gutenberg data ~url ~dst
 
 let books =
   (* Dracula would be nice, but it will be in the public domain in 2026, I think
@@ -197,9 +210,9 @@ let guess_main_file ~url ~data =
                   (url : string),
                   ~~(files : string list)]
 
-let html_li ~url ~author ~title ~main_file =
+let html_li ~url:_ ~author ~title ~main_file =
   let rel_url = Dream.to_path ([ "static"; "books"; title ] @ String.split main_file ~on:'/') in
-  [%string {|<li><cite><a href="%{rel_url}">%{title}</a></cite> %{author} (voir le <a href="%{url}">texte initial</a>)</li>|}]
+  [%string {|<li><cite><a href="%{rel_url}">%{title}</a></cite> %{author} </li>|}]
   ^ "\n"
 
 let convert_all ~root =
