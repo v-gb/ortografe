@@ -92,11 +92,12 @@
  (action
   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/0/0d/Microsoft_Office_PowerPoint_%282019%E2%80%93present%29.svg")))
 
-;; LGPL?? I guess just link + note at the bottom is going to have to do
+;; https://creativecommons.org/licenses/by-sa/4.0/deed.en
+;; should be fine with link + note at the bottom
 (rule
- (target openoffice_writer.png)
+ (target libreoffice_writer.png)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f8/OOoWriter3logo.png")))
+  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/4/45/LibreOffice_7.5_Writer_Icon.png")))
 
 ;; https://creativecommons.org/licenses/by-sa/3.0/deed.en
 (rule
