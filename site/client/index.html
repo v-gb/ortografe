@@ -141,11 +141,15 @@
           gap:0.3em;
           margin-left: 0.7em;
       }
-      .books li:not(:last-child) {
-          margin-bottom: 2px;
-      }
-      .books li {
+      .books {
+          padding-left: 0;
           list-style-type: none;
+          display: flex;
+          flex-flow: row wrap;
+          column-gap: 1.5em;
+          row-gap: 0.6em;
+          justify-content: center;
+          text-align:center;
       }
 
       a:link, a:visited {
@@ -232,7 +236,7 @@
 
         <p>Visionnez <a href="https://www.youtube.com/watch?v=5YO7Vg1ByA8">ce très bon sketch</a> si vous trouvez l'orthographe déjà parfaitement raisonnable ! Vous serez peut-être moins surs après.</p>
 
-      <p><strong> Sinon, allez voir à quoi ressemble le résultat dans les textes suivant avant de lire ce que font les règles&nbsp;! </strong></p>
+      <p>Sinon, <strong> allez voir à quoi ça ressemble dans les textes suivant avant de lire les règles&nbsp;! </strong></p>
 
       <books></books>
 
