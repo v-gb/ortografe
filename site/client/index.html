@@ -83,10 +83,12 @@
           }
       }
       .clickable-icon-round {
+          padding: 2px;
           border-radius:50%;
           box-shadow: 0 0 5px 4px #b9f4b9;
       }
       .clickable-icon-box {
+          padding: 2px;
           border-radius: 3px;
           box-shadow: 0 0 5px 4px #b9f4b9;
       }
@@ -120,7 +122,6 @@
           margin-bottom: 0em;
       }
       .upload {
-          display: block;
           background-color: #e5fbe5;
           border: 1.5px solid;
           border-radius: 4px;
@@ -128,6 +129,7 @@
           font-family: Graphik,-apple-system,system-ui,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
           font-size: 1.10rem;
           padding: 6px 8px;
+          margin-right: 0.5em;
           text-align: center;
           text-transform: none;
           width: fit-content;
@@ -306,6 +308,9 @@
             <input style="display:none" type="file" name="file" accept=".doc,.docx,.odt,.odp,.ppt,.pptx,.html,.xhtml,.htmlz,.epub,.txt,.mkd,.md" onchange="form.submit()">
             choisir un fichier
           </label>
+          <span style="font-size: 0.7em">
+            (ça ne marche pas? <a class='mailelt'>dites-le nous</a>)
+          </span>
         </form>
         <p>Les formats acceptés sont&#8239;:</p>
         <ul class="image-list">
@@ -334,7 +339,6 @@
             <img class="large-icon" src="/static/internet_globe.svg" alt="Internet Symbol" width=407 height=407>
             sources de pages web (.html, .xhtml, .htmlz)</li>
         </ul>
-        <p><a class='mailelt'>Contactez-nous</a> si quelque chose ne marche pas bien !</p>
       </section>
 
       <section>
