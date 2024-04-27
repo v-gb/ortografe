@@ -61,13 +61,27 @@ case "${1-}" in
             Alice_au_pays_des_merveilles.epub \
             Alice_au_pays_des_merveilles-manual.epub
         root=$(jj workspace root 2> /dev/null || git rev-parse --show-toplevel)
-        "$root"/_build/default/doc-conversion/bin/ortografe_cli.exe conv \
+        "$root"/_build/default/doc-conversion/bin/ortografe_cli.exe export \
                Alice_au_pays_des_merveilles-manual.epub \
+               -o /dev/stdout \
+            | sed -e 's/très-/très /g' \
+                  -e 's/Très-/Très /g' \
+                  -e "s/grand’chose/grand-chose/g" \
+                  -e "s/grand’/grand/g" \
+                  -e "s/que hier/qu’hier/g" \
+            | "$root"/_build/default/doc-conversion/bin/ortografe_cli.exe import \
+                     Alice_au_pays_des_merveilles-manual.epub \
+                     -o Alice_au_pays_des_merveilles-manual-conv1.epub
+        "$root"/_build/default/doc-conversion/bin/ortografe_cli.exe conv \
+               Alice_au_pays_des_merveilles-manual-conv1.epub \
+               -o Alice_au_pays_des_merveilles-manual-conv.epub \
                --erofa --1990 --oe --dict-file=<(
             echo clef,clé
             echo complétement,complètement # a l'air de précéder les rectifications de 1990, donc pas listé
             echo dî,di # le mot "dîner" coupé au milieu
             echo butta,buta # mot manquant, trop obscure
+            echo pélerin,pèlerin # changement qui a lieu naturellement
+            echo cuiller,cuillère # changement qui a lieu naturellement
         )
         ebook-convert \
             Alice_au_pays_des_merveilles-manual-conv.epub \
@@ -267,6 +281,6 @@ EOF
                          )
         qpdf Alice_au_pays_des_merveilles-manual-conv-tmp.pdf --pages . 2-z -- \
              Alice_au_pays_des_merveilles-manual-conv.pdf
-        rm -f Alice_au_pays_des_merveilles-manual-conv.epub
+        # rm -f Alice_au_pays_des_merveilles-manual-conv{,1}.epub
         rm -f Alice_au_pays_des_merveilles-manual-conv-tmp.pdf
 esac

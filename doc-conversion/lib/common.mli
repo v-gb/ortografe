@@ -3,6 +3,7 @@
 type 'a out =
   | Channel : Out_channel.t -> unit out
   | String : string out
+  | Ignore : unit out
 val write_out : 'a out -> string -> 'a
 val markup_output : 'a out -> (char, Markup.sync) Markup.stream -> 'a
 

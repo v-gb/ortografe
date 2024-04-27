@@ -10,19 +10,21 @@ type options =
 type 'a out =
   | Channel : Out_channel.t -> unit out
   | String : string out
+  | Ignore : unit out
 type 'a convert = ?buf:Buffer.t -> options:options -> string -> dst:'a out -> 'a
 val max_size : int ref
 
 val pure_text : _ convert
-val html : _ convert
+val html : ?convert_text:(string -> string) -> _ convert
 val htmlz : _ convert
 val officeopenxml : [< `Docx | `Pptx ] -> _ convert
-val epub : _ convert
+val epub : ?convert_text:(string -> string) -> _ convert
 val officeopenxml_old : [< `Doc | `Ppt ] -> _ convert
 val opendocument : _ convert
 
 val convert_string : ext:string -> options:options -> string -> (string * string) option
 val convert_files : options:options -> string option -> string option -> unit
+val ext_conv : string option -> string option -> [< `Extract | `Insert of string option ] -> unit
 
 val map_zip
     : string

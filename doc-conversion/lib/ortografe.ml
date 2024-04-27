@@ -31,6 +31,7 @@ module More_markup = More_markup
 type 'a out = 'a Common.out =
   | Channel : Out_channel.t -> unit out
   | String : string out
+  | Ignore : unit out
 
 type options = Common.options =
   { convert_uppercase : bool
@@ -61,7 +62,7 @@ let officeopenxml = Officeopenxml.convert
 let officeopenxml_old = Officeopenxml.convert_old
 let opendocument = Opendocument.convert
 
-let epub ?buf ~options src ~dst =
+let epub ?convert_text ?buf ~options src ~dst =
   let buf = buffer buf in
   Zip.map src (fun member contents ->
       (* The xhtml is the bulk of the pages, but in principle, we
@@ -69,7 +70,7 @@ let epub ?buf ~options src ~dst =
       match Filename.extension (Zipc.Member.path member) with
       | ".xhtml" | ".html" -> (* in principle we'd need to read the root file to know how
                                  to interpret the various files. *)
-         Some (xhtml ~buf ~options (contents ()) ~dst:String)
+         Some (xhtml ?convert_text ~buf ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 
@@ -95,17 +96,17 @@ let of_ext ext =
   | ".epub" -> Some (ext, `Epub)
   | _ -> None
 
-let convert typ ~options src ~dst =
+let convert ?convert_text typ ~options src ~dst =
   match typ with
-  | `Html -> html ~options src ~dst
-  | `Xhtml -> xhtml ~options src ~dst
+  | `Html -> html ?convert_text ~options src ~dst
+  | `Xhtml -> xhtml ?convert_text ~options src ~dst
   | `Htmlz -> htmlz ~options src ~dst
   | `Docx -> officeopenxml `Docx ~options src ~dst
   | `Pptx -> officeopenxml `Pptx ~options src ~dst
   | `Doc -> officeopenxml_old `Doc ~options src ~dst
   | `Ppt -> officeopenxml_old `Ppt ~options src ~dst
   | `Opendocument -> opendocument ~options src ~dst
-  | `Epub -> epub ~options src ~dst
+  | `Epub -> epub ?convert_text ~options src ~dst
   | `Text -> pure_text ~options src ~dst
 
 let convert_string ~ext ~options src =
@@ -126,32 +127,91 @@ let read_all name =
   In_channel.with_open_bin name
     In_channel.input_all
 
+let src_dst_typ src dst ~dyn_protect:dp =
+  match src with
+  | None ->
+     In_channel.input_all In_channel.stdin,
+     (match dst with
+      | None -> Out_channel.stdout
+      | Some new_name -> open_channel dp new_name),
+     `Text
+  | Some name ->
+     let new_ext, typ =
+       let ext = (Filename.extension name) in
+       Option.value (of_ext (Filename.extension name)) ~default:(ext, `Text)
+     in
+     let new_name =
+       match dst with
+       | Some new_name -> new_name
+       | None -> Filename.remove_extension name ^ "-conv" ^ new_ext
+     in
+     (* first read, then open for writing, in case input = output *)
+     let str_in = read_all name in
+     str_in, open_channel dp new_name, typ
+
 let convert_files ~options src dst =
-  Dyn_protect.with_ (fun dp ->
-      let src, dst, typ =
-        match src with
-        | None ->
-           In_channel.input_all In_channel.stdin,
-           (match dst with
-            | None -> Out_channel.stdout
-            | Some new_name -> open_channel dp new_name),
-           `Text
-        | Some name ->
-           let new_ext, typ =
-             let ext = (Filename.extension name) in
-             Option.value (of_ext (Filename.extension name)) ~default:(ext, `Text)
-           in
-           let new_name =
-             match dst with
-             | Some new_name -> new_name
-             | None -> Filename.remove_extension name ^ "-conv" ^ new_ext
-           in
-           (* first read, then open for writing, in case input = output *)
-           let str_in = read_all name in
-           str_in, open_channel dp new_name, typ
-      in
+  Dyn_protect.with_ (fun dyn_protect ->
+      let src, dst, typ = src_dst_typ src dst ~dyn_protect in
       convert typ ~options src ~dst:(Channel dst)
     )
+
+let string_of_sexp_always_quote_avoid_escapes =
+  let rec print_sexp buf = function
+    | Sexplib.Sexp.Atom s ->
+       (* Do the least amount of escaping possible (well except for newlines),
+          so we can trivially rewrite strings with sed from the outside without
+          having to parse strings. *)
+       Buffer.add_string buf "\"";
+       if String.exists (function '"' | '\\' | '\n' -> true | _ -> false) s
+       then String.iter (function
+                | '"' -> Buffer.add_string buf "\\\""
+                | '\\' -> Buffer.add_string buf "\\\\"
+                | '\n' -> Buffer.add_string buf "\\n"
+                | c -> Buffer.add_char buf c) s
+       else Buffer.add_string buf s;
+       Buffer.add_string buf "\""
+    | List l ->
+       Buffer.add_string buf "(";
+       List.iter (print_sexp buf) l;
+       Buffer.add_string buf ")";
+  in
+  fun sexp ->
+  let b = Buffer.create 100 in
+  print_sexp b sexp;
+  Buffer.contents b
+
+let ext_conv src dst inex =
+  Dyn_protect.with_ (fun dyn_protect ->
+      let src, dst, typ = src_dst_typ src dst ~dyn_protect in
+      let convert_text =
+        match inex with
+        | `Extract ->
+           (fun s ->
+             output_string dst
+               (string_of_sexp_always_quote_avoid_escapes (Atom s) ^ "\n");
+             "")
+        | `Insert f ->
+           let strs =
+             (match f with
+             | None -> In_channel.input_all In_channel.stdin
+             | Some f -> read_all f)
+             |> Sexplib.Sexp.of_string_many
+             |> List.to_seq
+             |> Queue.of_seq
+           in
+           (fun _s -> Base.string_of_sexp (Queue.pop strs))
+      in
+      let options =
+        { convert_uppercase = true
+        ; interleaved = true
+        ; plurals_in_s = true
+        ; dict = (fun x -> Some x)
+        }
+      in
+      match inex with
+      | `Extract -> convert ~convert_text typ src ~dst:Ignore ~options
+      | `Insert _ -> convert ~convert_text typ src ~dst:(Channel dst) ~options
+  )
 
 let max_size = Zip.max_size
 let map_zip = Zip.map

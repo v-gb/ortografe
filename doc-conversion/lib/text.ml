@@ -219,6 +219,7 @@ let iter_pure_text ~options src ~f =
 
 let convert (type a) ?buf ~options src ~(dst : a out) : a =
   match dst with
+  | Ignore -> ()
   | String ->
      let b = buffer buf ~n:(String.length src) in
      iter_pure_text ~options src ~f:(Buffer.add_string b);

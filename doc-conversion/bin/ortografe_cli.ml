@@ -63,6 +63,8 @@ let bench =
      done
     )  
 
+let ext_conv src dst which = Ortografe.ext_conv src dst which
+
 let () =
   let module C = Cmdliner in
   let open Cmdliner_bindops in
@@ -70,6 +72,36 @@ let () =
     C.Cmd.group
       (C.Cmd.info (Filename.basename Sys.executable_name))
       [ C.Cmd.v
+          (C.Cmd.info
+             ~doc:"(expérimental) récupère le texte d'un document"
+             "extract")
+          (let+ args =
+             C.Arg.value (C.Arg.pos_all C.Arg.string []
+                            (C.Arg.info ~docv:"INPUT_FILE" []))
+           and+ output =
+             C.Arg.value
+               (C.Arg.opt
+                  (C.Arg.some C.Arg.string)
+                  None
+                  (C.Arg.info ~docv:"OUTPUT_FILE" ["o"] ~doc:"le fichier de sortie"))
+           in
+           ext_conv (List.nth_opt args 0) output `Extract)
+      ; C.Cmd.v
+          (C.Cmd.info
+             ~doc:"(expérimental) réinsère le texte de l'entrée standard dans le document donné"
+             "insert")
+          (let+ args =
+             C.Arg.value (C.Arg.pos_all C.Arg.string []
+                            (C.Arg.info ~docv:"INPUT_FILE" []))
+           and+ output =
+             C.Arg.value
+               (C.Arg.opt
+                  (C.Arg.some C.Arg.string)
+                  None
+                  (C.Arg.info ~docv:"OUTPUT_FILE" ["o"] ~doc:"le fichier de sortie"))
+           in
+           ext_conv (List.nth_opt args 0) output (`Insert None))
+      ; C.Cmd.v
           (C.Cmd.info
              ~doc:"transcrit des documents vers l'orthographe Érofa (ou autre)"
              ~man:[ `S C.Manpage.s_description

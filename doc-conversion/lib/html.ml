@@ -1,12 +1,11 @@
 open! Common
 
-let html_transform ~buf ~options signal =
+let html_transform ~convert_text signal =
   (* maybe we should check the tag ns for the xhtml case *)
   let notranslate_pattern = Core.String.Search_pattern.create "notranslate" in
   let notranscribe_pattern = Core.String.Search_pattern.create "notranscribe" in
   let stack = Core.Stack.create () in
   let hide_current = ref false in
-  let convert_text src = Text.convert ~buf ~options src ~dst:String in
   Markup.map (fun elt ->
       (match elt with
        | `Start_element ((_, tag), attributes) ->
@@ -34,10 +33,20 @@ let html_transform ~buf ~options signal =
       else elt)
     signal
 
-let convert ?buf ~options src ~dst =
-  let buf = Common.buffer buf in
-  More_markup.transform ~flavor:`Html src ~dst ~transform:(html_transform ~buf ~options)
+let convert ?convert_text ?buf ~options src ~dst =
+  let convert_text =
+    convert_text
+    ||?
+      let buf = Common.buffer buf in
+      fun src -> Text.convert ~buf ~options src ~dst:String
+  in
+  More_markup.transform ~flavor:`Html src ~dst ~transform:(html_transform ~convert_text)
 
-let convert_xhtml ?buf ~options src ~dst =
-  let buf = Common.buffer buf in
-  More_markup.transform ~flavor:`Xml src ~dst ~transform:(html_transform ~buf ~options)
+let convert_xhtml ?convert_text ?buf ~options src ~dst =
+  let convert_text =
+    convert_text
+    ||?
+      let buf = Common.buffer buf in
+      fun src -> Text.convert ~buf ~options src ~dst:String
+  in
+  More_markup.transform ~flavor:`Xml src ~dst ~transform:(html_transform ~convert_text)
