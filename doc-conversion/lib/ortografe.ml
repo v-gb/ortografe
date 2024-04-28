@@ -88,6 +88,7 @@ let htmlz ?convert_text ?buf ~options src ~dst =
 
 let of_ext ext =
   match String.lowercase_ascii ext with
+  | ".txt" | ".md" | ".mkd" -> Some (ext, `Text)
   | ".html" -> Some (ext, `Html)
   | ".xhtml" -> Some (ext, `Xhtml)
   | ".htmlz" -> Some (ext, `Htmlz) (* export format on wikisource for instance *)
@@ -113,11 +114,7 @@ let convert ?convert_text typ ~options src ~dst =
   | `Text -> pure_text ?convert_text ~options src ~dst
 
 let convert_string ~ext ~options src =
-  match
-    match String.lowercase_ascii ext with
-    | ".txt" | ".md" | ".mkd" -> Some (ext, `Text)
-    | _ -> of_ext ext
-  with
+  match of_ext ext with
   | None -> None
   | Some (ext, typ) -> Some (ext, convert typ ~options src ~dst:String)
 
@@ -138,19 +135,19 @@ let src_dst_typ src dst ~dyn_protect:dp =
       | None -> Out_channel.stdout
       | Some new_name -> open_channel dp new_name),
      `Text
-  | Some name ->
-     let new_ext, typ =
-       let ext = (Filename.extension name) in
-       Option.value (of_ext (Filename.extension name)) ~default:(ext, `Text)
+  | Some src_name ->
+     let dst_ext, typ =
+       let ext = (Filename.extension src_name) in
+       of_ext (Filename.extension src_name) ||? (ext, `Text)
      in
-     let new_name =
+     let dst_name =
        match dst with
        | Some new_name -> new_name
-       | None -> Filename.remove_extension name ^ "-conv" ^ new_ext
+       | None -> Filename.remove_extension src_name ^ "-conv" ^ dst_ext
      in
      (* first read, then open for writing, in case input = output *)
-     let str_in = read_all name in
-     str_in, open_channel dp new_name, typ
+     let src_str = read_all src_name in
+     src_str, open_channel dp dst_name, typ
 
 let convert_files ~options src dst =
   Dyn_protect.with_ (fun dyn_protect ->
