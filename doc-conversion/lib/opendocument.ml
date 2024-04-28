@@ -1,12 +1,11 @@
 open Common
 
-let odt_transform ~buf ~options signal =
+let odt_transform ~convert_text signal =
   (* spec: http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1415130_253892949 *)
   (* this won't work in many cases, due to words being split up by document structure *)
   let text_ns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0" in
   let open Core in
   let stack = Stack.create () in
-  let convert_text src = Text.convert ~buf ~options src ~dst:String in
   Markup.map (fun elt ->
       match elt with
       | `Start_element (ns_tag, _) ->
@@ -30,14 +29,14 @@ let odt_transform ~buf ~options signal =
       | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ -> elt
     ) signal
 
-let odt_transform_interleaved ~buf ~options signal =
+let odt_transform_interleaved ~convert_text signal =
   let text_ns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0" in
   let open Core in
   let stack = Stack.create () in
   let state =
     Text.Interleaved.create
       ~embed:(fun s -> `Text [s])
-      ~convert:(fun s -> Text.convert ~buf ~options s ~dst:String)
+      ~convert:convert_text
   in
   Markup.transform (fun () elt ->
       match elt with
@@ -67,8 +66,13 @@ let odt_transform_interleaved ~buf ~options signal =
          Text.Interleaved.emit_structure state elt `Not_special, Some ()
     ) () signal
 
-let convert ?buf ~options src ~dst =
+let convert ?convert_text ?buf ~options src ~dst =
   let buf = buffer buf in
+  let convert_text =
+    match convert_text with
+    | Some f -> f
+    | None -> fun src -> Text.convert ~buf ~options src ~dst:String
+  in
   Zip.map src (fun member contents ->
       match Zipc.Member.path member with
       | "content.xml"
@@ -76,8 +80,8 @@ let convert ?buf ~options src ~dst =
          Some (More_markup.transform ~flavor:`Xml
                  ~transform:(
                    if options.interleaved
-                   then odt_transform_interleaved ~buf ~options
-                   else odt_transform ~buf ~options)
+                   then odt_transform_interleaved ~convert_text
+                   else odt_transform ~convert_text)
                  (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst

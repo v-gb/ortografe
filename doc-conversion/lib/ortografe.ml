@@ -55,7 +55,10 @@ let load_dict str =
 
 let erofa = lazy (load_dict Dict.extension_dict_gen_csv)
 let rect1990 = lazy (load_dict Dict.extension_dict1990_gen_csv)
-let pure_text = Text.convert
+let pure_text ?convert_text ?buf ~options src ~dst =
+  match convert_text with
+  | Some f -> write_out dst (f src)
+  | None -> Text.convert ?buf ~options src ~dst
 let html = Html.convert
 let xhtml = Html.convert_xhtml
 let officeopenxml = Officeopenxml.convert
@@ -74,12 +77,12 @@ let epub ?convert_text ?buf ~options src ~dst =
       | _ -> None)
   |> write_out dst
 
-let htmlz ?buf ~options src ~dst =
+let htmlz ?convert_text ?buf ~options src ~dst =
   let buf = buffer buf in
   Zip.map src (fun member contents ->
       match Filename.extension (Zipc.Member.path member) with
       | ".html" ->
-         Some (html ~buf ~options (contents ()) ~dst:String)
+         Some (html ?convert_text ~buf ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 
@@ -100,14 +103,14 @@ let convert ?convert_text typ ~options src ~dst =
   match typ with
   | `Html -> html ?convert_text ~options src ~dst
   | `Xhtml -> xhtml ?convert_text ~options src ~dst
-  | `Htmlz -> htmlz ~options src ~dst
-  | `Docx -> officeopenxml `Docx ~options src ~dst
-  | `Pptx -> officeopenxml `Pptx ~options src ~dst
-  | `Doc -> officeopenxml_old `Doc ~options src ~dst
-  | `Ppt -> officeopenxml_old `Ppt ~options src ~dst
-  | `Opendocument -> opendocument ~options src ~dst
+  | `Htmlz -> htmlz ?convert_text ~options src ~dst
+  | `Docx -> officeopenxml `Docx ?convert_text ~options src ~dst
+  | `Pptx -> officeopenxml `Pptx ?convert_text ~options src ~dst
+  | `Doc -> officeopenxml_old `Doc ?convert_text ~options src ~dst
+  | `Ppt -> officeopenxml_old `Ppt ?convert_text ~options src ~dst
+  | `Opendocument -> opendocument ?convert_text ~options src ~dst
   | `Epub -> epub ?convert_text ~options src ~dst
-  | `Text -> pure_text ~options src ~dst
+  | `Text -> pure_text ?convert_text ~options src ~dst
 
 let convert_string ~ext ~options src =
   match

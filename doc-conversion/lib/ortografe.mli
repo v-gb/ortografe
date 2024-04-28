@@ -14,13 +14,13 @@ type 'a out =
 type 'a convert = ?buf:Buffer.t -> options:options -> string -> dst:'a out -> 'a
 val max_size : int ref
 
-val pure_text : _ convert
+val pure_text : ?convert_text:(string -> string) -> _ convert
 val html : ?convert_text:(string -> string) -> _ convert
-val htmlz : _ convert
-val officeopenxml : [< `Docx | `Pptx ] -> _ convert
+val htmlz : ?convert_text:(string -> string) -> _ convert
+val officeopenxml : [< `Docx | `Pptx ] -> ?convert_text:(string -> string) -> _ convert
 val epub : ?convert_text:(string -> string) -> _ convert
-val officeopenxml_old : [< `Doc | `Ppt ] -> _ convert
-val opendocument : _ convert
+val officeopenxml_old : [< `Doc | `Ppt ] -> ?convert_text:(string -> string) -> _ convert
+val opendocument : ?convert_text:(string -> string) -> _ convert
 
 val convert_string : ext:string -> options:options -> string -> (string * string) option
 val convert_files : options:options -> string option -> string option -> unit
@@ -37,5 +37,5 @@ module More_markup = More_markup
 val extension_dict1990_gen_csv : string
 module Private : sig
   val grab_from_zip : string -> string -> string
-  val convert_officeopenxml : [< `Docx | `Pptx ] -> _ convert
+  val convert_officeopenxml : [< `Docx | `Pptx ] -> ?convert_text:(string -> string) -> _ convert
 end

@@ -37,10 +37,9 @@ let drop_squigglies signals =
       | _ -> Stack.top_exn stack
     ) signals
 
-let convert_stream ~doc_ns ~buf ~options signal =
+let convert_stream ~convert_text ~doc_ns signal =
   let open Core in
   let stack = Stack.create () in
-  let convert_text src = Text.convert ~buf ~options src ~dst:String in
   let state = Text.Interleaved.create ~embed:(fun s -> `Text [s]) ~convert:convert_text in
   Markup.transform (fun () elt ->
       match elt with
@@ -82,19 +81,24 @@ let files_to_rewrite = function
          | _ -> false
        else false)
 
-let convert_xml which ?buf ~options src ~dst =
+let convert_xml which ?convert_text ?buf ~options src ~dst =
   let buf = buffer buf in
+  let convert_text =
+    match convert_text with
+    | Some f -> f
+    | None -> fun src -> Text.convert ~buf ~options src ~dst:String
+  in
   More_markup.transform ~flavor:`Xml src ~dst ~transform:(fun signals ->
       signals
       |> drop_squigglies
-      |> convert_stream ~doc_ns:(ns which) ~buf ~options)
+      |> convert_stream ~convert_text ~doc_ns:(ns which))
 
-let convert which ?buf ~options src ~dst =
+let convert which ?convert_text ?buf ~options src ~dst =
   let buf = buffer buf in
   let files_to_rewrite = files_to_rewrite which in
   Zip.map src (fun member contents ->
       if files_to_rewrite (Zipc.Member.path member)
-      then Some (convert_xml which ~buf ~options (contents ()) ~dst:String)
+      then Some (convert_xml ?convert_text which ~buf ~options (contents ()) ~dst:String)
       else None)
   |> write_out dst
 
@@ -103,7 +107,7 @@ let sys_command_exn str =
   if i <> 0
   then failwith (str ^ " exited with code " ^ Int.to_string i)
 
-let convert_old which ?buf ~options src ~dst =
+let convert_old which ?convert_text ?buf ~options src ~dst =
   let buf = buffer buf in
   (* should put a time limit and memory, perhaps with the cgroup exe? *)
   let d = Filename.temp_dir "ortografe" "tmp" in
@@ -126,7 +130,7 @@ let convert_old which ?buf ~options src ~dst =
         In_channel.with_open_bin new_path (fun ic ->
             In_channel.input_all ic)
       in
-      convert
+      convert ?convert_text
         (match which with
          | `Doc -> `Docx
          | `Ppt -> `Pptx)
