@@ -1,6 +1,6 @@
 let embedded : Dict_gen_common.Dict_gen.embedded =
   { data_lexique_Lexique383_gen_tsv = Ortografe_embedded.data_lexique_Lexique383_gen_tsv
-  ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv }  
+  ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv }
 
 let parse_dict str =
   let lookup, metadata =
@@ -31,7 +31,7 @@ let load_rules rules ~prebuild =
            (`Embedded embedded)
        in
        parse_dict (Buffer.contents b)
-     )  
+     )
 
 let bench =
   let module C = Cmdliner in
@@ -61,46 +61,91 @@ let bench =
        let t2 = Sys.time () in
        Printf.printf "%d: %f\n" i (t2 -. t1)
      done
-    )  
+    )
 
 let ext_conv src dst which = Ortografe.ext_conv src dst which
 
 let () =
   let module C = Cmdliner in
   let open Cmdliner_bindops in
+  let arg_option arg info = C.Arg.opt (C.Arg.some arg) None info in
+  let output_file =
+    C.Arg.value
+      (arg_option C.Arg.string
+         (C.Arg.info ~docv:"OUTPUT_FILE" ["o"] ~doc:"le fichier de sortie"))
+  in
+  let output_file_maybe_in_place =
+    let+ output = output_file
+    and+ output_inplace =
+      C.Arg.value
+        (C.Arg.flag
+           (C.Arg.info
+              ~doc:"supprime le fichier d'entrée puis le réécrit en sortie. ATTENTION à ne pas perdre vos données"
+              ["in-place"]))
+    in
+    if Option.is_some output
+    then
+      if output_inplace
+      then failwith "can't specify both -o and --in-place"
+      else `File output
+    else
+      if output_inplace
+      then `In_place
+      else `File output
+  in
+  let one_input_file =
+    C.Arg.value (C.Arg.pos 0 (C.Arg.some C.Arg.string) None
+                   (C.Arg.info ~docv:"INPUT_FILE" []))
+  in
   let cmd =
     C.Cmd.group
       (C.Cmd.info (Filename.basename Sys.executable_name))
       [ C.Cmd.v
           (C.Cmd.info
-             ~doc:"(expérimental) récupère le texte d'un document"
+             ~doc:"extrait le texte d'un document"
+             ~man:[ `S C.Manpage.s_description
+                  ; `P "Extrait le texte du document INPUT_FILE (ou stdin si non
+                        spécifié) sous forme d'une liste de chaines, et l'imprime dans
+                        OUTPUT_FILE. Les chaines de OUTPUT_FILE peuvent ensuite être modifiées
+                        de façon quelconque (mais en préservant leur nombres), puis être réinsérées
+                        dans INPUT_FILE à l'aide de $(iname) insert.
+
+                        Cela permet de réécrire le texte d'un document de façon arbitraire."
+                  ; `P "Exemple :"
+                  ; `Pre "$(iname) foo.docx \\ "
+                  ; `Noblank; `Pre "  | sed \"s/aujourd'hui/hui/g\" \\ "
+                  ; `Noblank; `Pre "  | $(mname) insert foo.doc -o foo2.docx"
+                  ; `Noblank; `P "(copie foo.docx en foo2.docx en changeant « aujourd'hui » en « hui »)"
+                  ]
              "extract")
-          (let+ args =
-             C.Arg.value (C.Arg.pos_all C.Arg.string []
-                            (C.Arg.info ~docv:"INPUT_FILE" []))
-           and+ output =
-             C.Arg.value
-               (C.Arg.opt
-                  (C.Arg.some C.Arg.string)
-                  None
-                  (C.Arg.info ~docv:"OUTPUT_FILE" ["o"] ~doc:"le fichier de sortie"))
+          (let+ input = one_input_file
+           and+ output = output_file
            in
-           ext_conv (List.nth_opt args 0) output `Extract)
+           ext_conv input output `Extract)
       ; C.Cmd.v
           (C.Cmd.info
-             ~doc:"(expérimental) réinsère le texte de l'entrée standard dans le document donné"
+             ~doc:"insère du texte dans un document"
+             ~man:[ `S C.Manpage.s_description
+                  ; `P "Remplace le texte du document INPUT_FILE (ou stdin si non
+                        spécifié) par le texte de TEXT_INPUT_FILE (ou stdin si non
+                        spécifié) et écrit le résultat dans OUTPUT_FILE.
+                        Voir l'aide de $(mname) extract pour un exemple d'utilisation."
+                  ]
              "insert")
-          (let+ args =
-             C.Arg.value (C.Arg.pos_all C.Arg.string []
-                            (C.Arg.info ~docv:"INPUT_FILE" []))
-           and+ output =
+          (let+ input = one_input_file
+           and+ output = output_file_maybe_in_place
+           and+ text_input =
              C.Arg.value
-               (C.Arg.opt
-                  (C.Arg.some C.Arg.string)
-                  None
-                  (C.Arg.info ~docv:"OUTPUT_FILE" ["o"] ~doc:"le fichier de sortie"))
+               (arg_option C.Arg.string
+                  (C.Arg.info ~docv:"TEXT_INPUT_FILE" ["i"] ~doc:"le fichier de texte"))
            in
-           ext_conv (List.nth_opt args 0) output (`Insert None))
+           if Option.is_none input && Option.is_none text_input
+           then failwith "must specify either INPUT_FILE or TEXT_INPUT_FILE, otherwise they'd both be read from stdin";
+           ext_conv input
+             (match output with
+              | `File opt -> opt
+              | `In_place -> Some (input ||? failwith "--in-place only makes sense with an INPUT_FILE"))
+             (`Insert text_input))
       ; C.Cmd.v
           (C.Cmd.info
              ~doc:"transcrit des documents vers l'orthographe Érofa (ou autre)"
@@ -121,18 +166,7 @@ let () =
           (let+ args =
              C.Arg.value (C.Arg.pos_all C.Arg.string []
                             (C.Arg.info ~docv:"INPUT_FILE" []))
-           and+ output =
-             C.Arg.value
-               (C.Arg.opt
-                  (C.Arg.some C.Arg.string)
-                  None
-                  (C.Arg.info ~docv:"OUTPUT_FILE" ["o"] ~doc:"le fichier de sortie"))
-           and+ output_inplace =
-             C.Arg.value
-               (C.Arg.flag
-                  (C.Arg.info
-                     ~doc:"supprime le fichier d'entrée puis le réécrit en sortie. ATTENTION à ne pas perdre vos données"
-                     ["in-place"]))
+           and+ output = output_file_maybe_in_place
            and+ convert_uppercase =
              let+ b =
                (* We don't do this in the extension, but some books seems to regularly
@@ -186,22 +220,11 @@ let () =
                         }
                in_ out
            in
-           let output =
-             if Option.is_some output
-             then
-               if output_inplace
-               then failwith "can't specify both -o and --in-place"
-               else `File output
-             else
-               if output_inplace
-               then `In_place
-               else `File output
-           in
            match args with
            | [] -> convert
                      ~in_:None
                      ~out:(match output with
-                           | `In_place -> failwith "--in-place only makes sense with input_files"
+                           | `In_place -> failwith "--in-place only makes sense with INPUT_FILEs"
                            | `File opt -> opt)
            | _ :: _ ->
               if List.length args > 1 && (match output with `File (Some _) -> true | _ -> false)
