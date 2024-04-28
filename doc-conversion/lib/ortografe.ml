@@ -86,6 +86,22 @@ let htmlz ?convert_text ?buf ~options src ~dst =
       | _ -> None)
   |> write_out dst
 
+let known_exts =
+  [ ".txt"
+  ; ".md"
+  ; ".mkd"
+  ; ".html"
+  ; ".xhtml"
+  ; ".htmlz"
+  ; ".docx"
+  ; ".ppt"
+  ; ".pptx"
+  ; ".doc"
+  ; ".odt"
+  ; ".odp"
+  ; ".epub"
+  ]
+
 let of_ext ext =
   match String.lowercase_ascii ext with
   | ".txt" | ".md" | ".mkd" -> Some (ext, `Text)
@@ -127,18 +143,26 @@ let read_all name =
   In_channel.with_open_bin name
     In_channel.input_all
 
-let src_dst_typ src dst ~dyn_protect:dp =
+let src_dst_typ ?src_type src dst ~dyn_protect:dp =
+  let src_type =
+    Option.map (fun src_type ->
+        of_ext src_type ||? failwith "unknown file type %{src_type}")
+      src_type
+  in
   match src with
   | None ->
      In_channel.input_all In_channel.stdin,
      (match dst with
       | None -> Out_channel.stdout
       | Some new_name -> open_channel dp new_name),
-     `Text
+     (Option.map snd src_type ||? `Text)
   | Some src_name ->
      let dst_ext, typ =
-       let ext = (Filename.extension src_name) in
-       of_ext (Filename.extension src_name) ||? (ext, `Text)
+       src_type
+       ||? (of_ext (Filename.extension src_name)
+            ||?
+              let exts = "{" ^ String.concat "|" known_exts ^ "}" in
+              failwith [%string "%{src_name} isn't a supported file format. You might want to pass --type %{exts} to treat the file as a supported file format"])
      in
      let dst_name =
        match dst with
@@ -149,9 +173,9 @@ let src_dst_typ src dst ~dyn_protect:dp =
      let src_str = read_all src_name in
      src_str, open_channel dp dst_name, typ
 
-let convert_files ~options src dst =
+let convert_files ?src_type ~options src dst =
   Dyn_protect.with_ (fun dyn_protect ->
-      let src, dst, typ = src_dst_typ src dst ~dyn_protect in
+      let src, dst, typ = src_dst_typ ?src_type src dst ~dyn_protect in
       convert typ ~options src ~dst:(Channel dst)
     )
 
@@ -180,9 +204,9 @@ let string_of_sexp_always_quote_avoid_escapes =
   print_sexp b sexp;
   Buffer.contents b
 
-let ext_conv src dst inex =
+let ext_conv ?src_type src dst inex =
   Dyn_protect.with_ (fun dyn_protect ->
-      let src, dst, typ = src_dst_typ src dst ~dyn_protect in
+      let src, dst, typ = src_dst_typ ?src_type src dst ~dyn_protect in
       let convert_text =
         match inex with
         | `Extract ->

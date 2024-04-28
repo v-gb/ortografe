@@ -63,7 +63,7 @@ let bench =
      done
     )
 
-let ext_conv src dst which = Ortografe.ext_conv src dst which
+let ext_conv ?src_type src dst which = Ortografe.ext_conv ?src_type src dst which
 
 let () =
   let module C = Cmdliner in
@@ -93,6 +93,11 @@ let () =
       then `In_place
       else `File output
   in
+  let input_type =
+    C.Arg.value
+      (arg_option C.Arg.string
+         (C.Arg.info ~docv:"TYPE" ["type"] ~doc:"comment traiter le fichier. --type txt veut dire traiter le fichier comme un .txt même s'il n'est pas nommé .txt"))
+  in
   let one_input_file =
     C.Arg.value (C.Arg.pos 0 (C.Arg.some C.Arg.string) None
                    (C.Arg.info ~docv:"INPUT_FILE" []))
@@ -119,9 +124,10 @@ let () =
                   ]
              "extract")
           (let+ input = one_input_file
+           and+ input_type = input_type
            and+ output = output_file
            in
-           ext_conv input output `Extract)
+           ext_conv ?src_type:input_type input output `Extract)
       ; C.Cmd.v
           (C.Cmd.info
              ~doc:"insère du texte dans un document"
@@ -133,6 +139,7 @@ let () =
                   ]
              "insert")
           (let+ input = one_input_file
+           and+ input_type = input_type
            and+ output = output_file_maybe_in_place
            and+ text_input =
              C.Arg.value
@@ -141,7 +148,7 @@ let () =
            in
            if Option.is_none input && Option.is_none text_input
            then failwith "must specify either INPUT_FILE or TEXT_INPUT_FILE, otherwise they'd both be read from stdin";
-           ext_conv input
+           ext_conv ?src_type:input_type input
              (match output with
               | `File opt -> opt
               | `In_place -> Some (input ||? failwith "--in-place only makes sense with an INPUT_FILE"))
@@ -166,6 +173,7 @@ let () =
           (let+ args =
              C.Arg.value (C.Arg.pos_all C.Arg.string []
                             (C.Arg.info ~docv:"INPUT_FILE" []))
+           and+ input_type = input_type
            and+ output = output_file_maybe_in_place
            and+ convert_uppercase =
              let+ b =
@@ -218,6 +226,7 @@ let () =
                              | _ | exception Not_found -> true)
                         ; plurals_in_s = metadata.plurals_in_s ||? true
                         }
+               ?src_type:input_type
                in_ out
            in
            match args with
