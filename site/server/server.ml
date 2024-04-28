@@ -320,7 +320,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                    in
                    (match rest with
                    | ["file", [ fname, fcontents ] ] ->
-                      let fname = Option.value fname ~default:"unnamed.txt" in
+                      let fname = fname ||? "unnamed.txt" in
                       let ext = Filename.extension fname in
                       Dream.log "upload ext:%S size:%s rules:%s" ext
                         (hum_size_of_bytes (String.length fcontents))

@@ -6,8 +6,8 @@ module Unix = Z
 let which_source ~url =
   match
     Uri.host url
-    |> Core.Option.value_exn
-    |> Core.String.split ~on:'.'
+    |> Option.value_exn
+    |> String.split ~on:'.'
     |> List.rev
   with
   | _ :: "wikisource" :: _ -> `Wikisource

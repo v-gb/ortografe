@@ -195,14 +195,14 @@ let iter_pure_text ~options src ~f =
                 then lowercase w
                 else None
               with
-              | None -> wu, (fun w -> Option.value (capitalize w) ~default:w)
+              | None -> wu, (fun w -> capitalize w ||? w)
               | Some wl ->
                  if
                    match capitalize wl with
                    | None -> false
                    | Some c -> mem dict c
                  then "", (fun x -> x)
-                 else wl, (fun w -> Option.value (uppercase_as_much_as_possible w) ~default:w)
+                 else wl, (fun w -> uppercase_as_much_as_possible w ||? w)
        in
        match dict wu with
        | Some "" -> f w
