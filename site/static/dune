@@ -1,7 +1,7 @@
 (copy_files (files %{project_root}/extension/{extension,extension2}.zip))
 (rule (action (copy %{project_root}/extension/dict.gen.csv erofa.csv)))
 (rule (action (copy %{project_root}/extension/dict1990.gen.csv rect1990.csv)))
-(copy_files (files ../client/{*.js,privacy.html}))
+(copy_files (files ../client/{*.js,privacy.html,index2.html}))
 (copy_files (files %{project_root}/data/lexique/Lexique383.gen.tsv))
 (copy_files (files %{project_root}/dict-gen/js/dict_gen.bc.js))
 (copy_files (files %{project_root}/extension/src/{{rewrite,dict}.js,rules-format.html}))
