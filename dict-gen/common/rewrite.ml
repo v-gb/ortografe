@@ -806,6 +806,25 @@ let _ : rule =
 
 let _ : rule =
   new_rule'
+    "gn/ni"
+    "@compagnon -> @companion, mais @compagne -> @companye"
+    ~prefilter:(fun () -> `Re (Re.str "gn"))
+    (fun () ->
+      let pattern_gne = String.Search_pattern.create "gne" in
+      let pattern_gni = String.Search_pattern.create "gni" in
+      let pattern_gn = String.Search_pattern.create "gn" in
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
+        aligned_row := rewrite env !aligned_row ~target:pattern_gne ~repl:"nye";
+        aligned_row := rewrite env !aligned_row ~target:pattern_gni ~repl:"nyi";
+        aligned_row := rewrite env !aligned_row ~target:pattern_gn
+                         ~repl:(if String.is_suffix !aligned_row.row.lemme ~suffix:"gner"
+                                then "ny"
+                                else "ni");
+        !aligned_row)
+
+let _ : rule =
+  new_rule'
     "ez/es"
     "@mangez -> @mangés"
     ~prefilter:(fun () -> `Re (Re.str "ez"))

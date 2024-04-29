@@ -192,6 +192,10 @@ let create () : t =
   new_fixed "ign" [ "N", Surprising ];
   new_fixed "gni" [ "N", Core ];
   new_fixed "ni" [ "N", Core_optional ];
+  (* ces 3 règles sont pour faire marcher la réécriture gn/ni. *)
+  new_fixed "ini" [ "iN", Core_optional ];
+  new_fixed "iny" [ "iN", Core_optional ];
+  new_fixed "ny" [ "N", Core_optional ];
   new_fixed "ng" [ "G", Core ];
 
   (* L qui fait /j/
