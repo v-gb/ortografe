@@ -1,0 +1,5 @@
+(library
+ (name ppx_list_include)
+ (kind ppx_deriver)
+ (libraries ppxlib)
+ (preprocess (pps ppxlib.metaquot)))
