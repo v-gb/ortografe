@@ -226,10 +226,9 @@ let convert_all ~root =
   in
   let html_fragment =
     String.concat_lines
-      (List.concat
-         [ [ "<ul class=books>" ]
-         ; lis
-         ; [ "</ul>"]
-         ])
+      [ "<ul class=books>"
+      ; +lis
+      ; "</ul>"
+      ]
   in
   Out_channel.write_all "books.html" ~data:html_fragment

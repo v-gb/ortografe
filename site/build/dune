@@ -13,5 +13,5 @@
    re
    uri
  )
- (preprocess (pps ppx_jane lwt_ppx ppx_lazy_option_op))
+ (preprocess (pps ppx_jane lwt_ppx ppx_lazy_option_op ppx_list_include))
  )
