@@ -331,3 +331,34 @@ document.documentElement.style.setProperty("--highlight-color", default_highligh
     }
 }
 suggest_dict_from_active_tab()
+
+function download(filename, text) {
+    // https://ourcodeworld.com/articles/read/189/how-to-create-a-file-and-generate-a-download-with-javascript-in-the-browser-without-a-server
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    try {
+        element.click();
+    } finally {
+        document.body.removeChild(element);
+    }
+}
+
+document.getElementById("download-dict").addEventListener("click", async (e) => {
+    // make it possible to download the computed dictionaries, as an easy way to let
+    // people combine generated dictionaries and custom ones. It'd be nice to have
+    // direct support for that, but the UI questions are unclear, and it seems sensible
+    // to give people the option to look at what's generated anyway.
+    e.preventDefault();
+    with_exn_in_dom("load_error", async () => {
+        const { custom_dict } = (await browser.storage.local.get('custom_dict'));
+        if (custom_dict?.data) {
+            const text = JSON.stringify(custom_dict.meta) + "\n" + custom_dict.data;
+            download("dict", text);
+        } else {
+            throw new Error(`rien à télécharger (pas de dictionnaire perso)`);
+        }
+    })
+})
