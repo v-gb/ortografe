@@ -5,8 +5,7 @@ module Unix = Z
 
 let which_source ~url =
   match
-    Uri.host url
-    |> Option.value_exn
+    (Uri.host url ||? failwith (Uri.to_string url))
     |> String.split ~on:'.'
     |> List.rev
   with
@@ -84,7 +83,21 @@ let make_the_html_mobile_friendly =
       ^ [%string {|<h3>voir le <a href="%{url}">texte original</a> %{source}</h3>|}])
 
 let options = lazy { Ortografe.convert_uppercase = true
-                   ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa)
+                   ; dict =
+                       (let dict = Lazy.force Ortografe.erofa in
+                        function
+                        (* modernize archaisms in frankenstein, as the edition is quite old
+                           and people could get confused and think we made a mistake, or érofa
+                           is removing silent t's *)
+                        | "savans" -> Some "savants"
+                        | "momens" -> Some "moments"
+                        | "instrumens" -> Some "instruments"
+                        | "étudians" -> Some "étudiants"
+                        | "suffisans" -> Some "sufisants"
+                        | "sentimens" -> Some "sentiments"
+                        | "excellens" -> Some "excélents"
+                        | "appartemens" -> Some "apartements"
+                        | s -> Stdlib.Hashtbl.find_opt dict s)
                    ; interleaved = true
                    ; plurals_in_s = true 
                    }
@@ -147,7 +160,7 @@ let convert url ~root ~title =
     try In_channel.read_all (dl_path ~root ~title ~source)
     with e -> raise_s [%sexp (e : exn)
                      , "hint: you might need to run "
-                     , (Sys.concat_quoted [ (Sys.get_argv ()).(0); "download-all" ] : string)]
+                     , (Sys.concat_quoted [ "_build/default/site/build/build.exe"; "download-all" ] : string)]
   in
   let dst = conv_path ~title in
   match source with
@@ -169,11 +182,11 @@ let books =
   [ "Pensées", None, "de Marc Aurèle", "https://fr.wikisource.org/wiki/Pens%C3%A9es_de_Marc-Aur%C3%A8le_(Couat)/01"
   ; "Le Misanthrope", None, "de Molière", "https://fr.wikisource.org/wiki/Le_Misanthrope/%C3%89dition_Louandre,_1910/Acte_I"
   ; "Alice au pays des merveilles", None, "de Lewis Carroll", "https://fr.wikisource.org/wiki/Alice_au_pays_des_merveilles/1"
-  ; "Poil de Carotte", None, "de Jules Renard", "https://fr.wikisource.org/wiki/Poil_de_Carotte/01"
+  ; "Le Chat botté", None, "de Charles Perrault", "https://fr.wikisource.org/wiki/Contes_de_Perrault_(%C3%A9d._1902)/Le_ma%C3%AEtre_Chat_ou_le_Chat_bott%C3%A9"
   ; "Les Fleurs du mal", None, "de Charles Baudelaire", "https://www.gutenberg.org/ebooks/6099"
   ; "Fables, La cigale et la fourmi", Some "La cigale et la fourmi", "de Jean de La Fontaine", "https://fr.wikisource.org/wiki/Fables_de_La_Fontaine_(%C3%A9d._1874)/La_Cigale_et_la_Fourmi"
   ; "Fables, Le corbeau et le renard", Some "Le corbeau et le renard", "de Jean de La Fontaine", "https://fr.wikisource.org/wiki/Fables_de_La_Fontaine_(%C3%A9d._1874)/Le_Corbeau_et_le_Renard"
-  ; "Les Voyages de Gulliver", None, "de Jonathan Swift", "https://fr.wikisource.org/wiki/Les_Voyages_de_Gulliver/Voyage_%C3%A0_Lilliput/I"
+  ; "Frankenstein, ou le Prométhée moderne", Some "Frankenstein", "de Mary Shelley", "https://fr.wikisource.org/wiki/Frankenstein,_ou_le_Prom%C3%A9th%C3%A9e_moderne_(trad._Saladin)/8"
   ; "Les Misérables", None, "de Victor Hugo", "https://fr.wikisource.org/wiki/Les_Mis%C3%A9rables/Tome_1/Livre_1/01"
   ; "Cyrano de Bergerac", None, "d'Edmond Rostand", "https://fr.wikisource.org/wiki/Cyrano_de_Bergerac_(Rostand)/Acte_I"
   (* ; "Madame Bovary", None, "de Gustave Flaubert", "https://fr.wikisource.org/wiki/Madame_Bovary/Premi%C3%A8re_partie/1"
@@ -210,9 +223,9 @@ let guess_main_file ~url ~data =
                   (url : string),
                   ~~(files : string list)]
 
-let html_li ~url:_ ~author ~title ~main_file =
+let html_li ~url:_ ~author ~user_title ~title ~main_file =
   let rel_url = Dream.to_path ([ "static"; "books"; title ] @ String.split main_file ~on:'/') in
-  [%string {|<li><cite><a href="%{rel_url}">%{title}</a></cite> <br>%{author} </li>|}]
+  [%string {|<li><cite><a href="%{rel_url}">%{user_title}</a></cite> <br>%{author} </li>|}]
   ^ "\n"
 
 let convert_all ~root =
@@ -221,7 +234,7 @@ let convert_all ~root =
     List.map books ~f:(fun (title, user_title, author, url) ->
         let new_data = convert ~root ~title url in
         let main_file = guess_main_file ~url ~data:new_data in
-        html_li ~url ~author ~title:(user_title ||? title) ~main_file
+        html_li ~url ~author ~user_title:(user_title ||? title) ~title ~main_file
       )
   in
   let html_fragment =
