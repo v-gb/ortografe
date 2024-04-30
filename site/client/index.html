@@ -207,6 +207,24 @@
               text-decoration-line: underline;
           }
       }
+
+      .aller-plus-loin hr {
+          width: 70%;
+          border: 0.1px solid #f4f4f4;
+      }
+      .aller-plus-loin {
+          list-style-type: none;
+          padding-left: 0;
+      }
+      .rejoignez:visited, .rejoignez:link {
+          text-decoration-line: none;
+      }
+      .rejoignez {
+          border-radius: 4px;
+          background-color: #e5fbe5;
+          border: 1.5px solid;
+          padding: 1px 4px;
+      }
     </style>
   </head>
   <body>
@@ -448,35 +466,43 @@
       <section id="aller-plus-loin">
         <h2>Aller plus loin</h2>
 
-        <ul>
-          <li>Plus d'information sur l'orthographe proposée (très lisible sans être expert)
+        <ul class="aller-plus-loin">
+          <li>Pour plus d'information sur l'orthographe proposée (très lisible sans être expert)
             <ul>
-              <li><a href="/static/erofa-texte.pdf#page=47">les consonnes doubles</a> (sept pages)</li>
-              <li><a href="/static/erofa-texte.pdf#page=55">les x finaux</a> (quatre pages)</li>
-              <li><a href="/static/erofa-texte.pdf#page=59">les lettres grecques et similaires</a> (onze pages)</li>
-              <li><a href="/static/erofa-texte.pdf#page=17">explications de l'histoire de l'orthographe et pourquoi cette réforme</a> (26 pages)</li>
-              <li><a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">tous les articles précédents, plus une liste des mots modifiés</a></li>
+              <li><a href="/static/erofa-texte.pdf#page=47">Les consonnes doubles</a> (sept pages)</li>
+              <li><a href="/static/erofa-texte.pdf#page=55">Les x finaux</a> (quatre pages)</li>
+              <li><a href="/static/erofa-texte.pdf#page=59">Les lettres grecques et similaires</a> (onze pages)</li>
+              <li><a href="/static/erofa-texte.pdf#page=17">Explications de l'histoire de l'orthographe et pourquoi cette réforme</a> (26 pages)</li>
+              <li><a href="http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf">Tous les articles précédents, plus une liste des mots modifiés</a></li>
             </ul>
-          <li><a href="http://erofa.free.fr/index.php?option=com_content&view=article&id=56&Itemid=67">Rejoignez</a> l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme !</li>
-          <li><a class='mailelt'>Contactez-nous</a> si vous avez des problèmes, questions ou suggestions !</li>
-          <li>À venir : article scientifique sur une partie du travail ci-dessus</li>
-          <li><a href="https://github.com/v-gb/ortografe">Code source</a> de cette page</li>
+            <hr>
+          <li><a class="rejoignez" href="http://erofa.free.fr/index.php?option=com_content&view=article&id=56&Itemid=67">Rejoignez</a> l'<a href="http://erofa.free.fr/">association Érofa</a> qui propose cette réforme !
+            <hr>
+          </li>
+          <li>
+            <a class='mailelt'>Contactez-nous</a> si vous avez des problèmes, questions ou suggestions !
+            <hr>
+          </li>
           <li>
             <details>
-              <summary><b>Licences</b> et mentions légales</summary>
-              <p> Les outils de cette page utilisent des dictionnaires construits
-                à partir d'Érofa (<a href="http://erofa.free.fr/index.php?option=com_content&view=article&id=59&Itemid=68">utilisation non-commerciale</a>), de <a href="http://www.lexique.org">Lexique</a> (la licence dit utilisation non-commerciale, mais les auteurs permettent l'utilisation dans ce site), du <a href="https://dumps.wikimedia.org/legal.html">wiktionnaire</a> (toute utilisation).
-              </p>
+              <summary>Licences et mentions légales</summary>
+              <div style="padding-left: 2em">
+                <p> Les outils de cette page utilisent des dictionnaires construits
+                  à partir d'Érofa (<a href="http://erofa.free.fr/index.php?option=com_content&view=article&id=59&Itemid=68">utilisation non-commerciale</a>), de <a href="http://www.lexique.org">Lexique</a> (la licence dit utilisation non-commerciale, mais les auteurs permettent l'utilisation dans ce site), du <a href="https://dumps.wikimedia.org/legal.html">wiktionnaire</a> (toute utilisation).
+                </p>
 
-              <p>Vous pouvez retrouver l'origine des icônes utilisées dans cette page sur la page
-                wikipédia dudit programme ou format. Les quelques cas plus dures sont <a href="https://commons.wikimedia.org/wiki/File:Text-txt.svg">fichier texte</a>, <a href="https://commons.wikimedia.org/wiki/File:Pdf_by_mimooh.svg">pdf</a>, <a href="https://en.wikipedia.org/wiki/File:Crystal_Clear_app_linneighborhood.svg">globe internet</a>. Aucunes n'ont été modifiées.
-              </p>
-              <p>
-                Le favicon provient de <a href="https://icons8.com/">icons8</a>.
-              </p>
-              
+                <p>Vous pouvez retrouver l'origine des icônes utilisées dans cette page sur la page
+                  wikipédia dudit programme ou format. Les quelques cas plus dures sont <a href="https://commons.wikimedia.org/wiki/File:Text-txt.svg">fichier texte</a>, <a href="https://commons.wikimedia.org/wiki/File:Pdf_by_mimooh.svg">pdf</a>, <a href="https://en.wikipedia.org/wiki/File:Crystal_Clear_app_linneighborhood.svg">globe internet</a>. Aucunes n'ont été modifiées.
+                </p>
+                <p>
+                  Le favicon provient de <a href="https://icons8.com/">icons8</a>.
+                </p>
+              </div>
             </details>
+            <hr>
           </li>
+          <li>Pour les développeurs, voici le <a href="https://github.com/v-gb/ortografe">code source</a> de cette page et de ses outils.<hr></li>
+          <li>À venir : article scientifique sur une partie du travail ci-dessus.</li>
         </ul>
       </section>
       </div>
