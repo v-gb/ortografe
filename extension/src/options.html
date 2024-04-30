@@ -104,6 +104,10 @@
           --highlight-color: #b9f4b9;
       }
 
+      #deselect:hover {
+          cursor: pointer;
+      }
+
       @keyframes highlight {
           from { background-color: var(--highlight-color); }
           to {}
@@ -306,7 +310,7 @@
                     <span class=fr>Charger la sélection</span>
                     <span class=en>Load the selection</span>
                     (<span id="load-checkbox-label"><span class=fr>rien de sélectionné</span><span class=en>empty selection</span></span>)
-                  </label>
+                  </label> <span id="deselect">❌</span>
                   <div style="display:inline-block">
                     <div class="idle" id="floatingCirclesG">
                       <div class="f_circleG" id="frotateG_01"></div>

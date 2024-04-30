@@ -5,7 +5,7 @@ if (typeof browser == "undefined") {
 const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language', 'debug_lang_test'];
 const all_fields = ['disable'].concat(fields);
 
-async function display_dict_preview(highlight) {
+async function display_dict_preview(restore) {
     const { custom_dict } = (await browser.storage.local.get('custom_dict'));
     const elt = document.getElementById("dict");
     if (custom_dict?.data) {
@@ -24,7 +24,21 @@ async function display_dict_preview(highlight) {
                 dict_link.value = custom_dict.meta.src
             }
         }
-        if (highlight) {
+        if (restore) {
+            if (custom_dict?.meta?.desc) {
+                const desc = custom_dict.meta.desc;
+                for (const bit of desc.split(" ")) {
+                    // We manually ensure that the only ids starting with "checkbox-" are the
+                    // ones we want to target, to avoid the (very unlikely) possibility of
+                    // checking the wrong boxes.
+                    const elt = document.getElementById("checkbox-" + bit);
+                    if (elt) {
+                        elt.checked = true;
+                    }
+                }
+                currently_selected_rules();
+            }
+        } else {
             elt.classList.remove('highlight')
             void elt.offsetWidth; // trigger reflow, so the animation restarts
             elt.classList.add('highlight')
@@ -86,8 +100,9 @@ async function set_dict(dict) {
 }
 
 function currently_selected_rules() {
-    const [ rules, selection_text ] = dict_gen.currently_selected_rules("load-");
+    const [ rules, selection_text, nonempty ] = dict_gen.currently_selected_rules("checkbox-");
     document.getElementById("load-checkbox-label").innerText = selection_text;
+    document.getElementById("deselect").style.display = nonempty ? "unset" : "none";
     return rules;
 }
 
@@ -114,7 +129,7 @@ async function load_dict_from_disk(e) {
             const file = e.target.files.item(0);
             set_dict(parse_dict(await file.text()));
             document.getElementById("load_error").innerText = "";
-            await display_dict_preview(true);
+            await display_dict_preview(false);
         } catch (e) {
             document.getElementById("load_error").innerText = "error importing file " + e.toString();
         }
@@ -123,16 +138,15 @@ async function load_dict_from_disk(e) {
 
 async function load_dict_from_computation(e) {
     try {
-        const target = e.target.id.substring("load-".length);
         const rules = currently_selected_rules();
-        if (target == 'checkbox') {
+        if (e.target.id == 'load-checkbox') {
             const elt = document.getElementById("floatingCirclesG");
             if (elt.classList.contains("idle")) {
                 elt.classList.remove("idle");
                 try {
                     const dict = await compute_dict(rules);
                     set_dict(parse_dict(dict));
-                    await display_dict_preview(true);
+                    await display_dict_preview(false);
                 } finally {
                     elt.classList.add("idle");
                 }
@@ -162,7 +176,7 @@ async function form_change(e) {
     // console.log("target", e.target)
     if (e.target.id == 'load-dict-input') {
         await load_dict_from_disk(e)
-    } else if (e.target.id.startsWith("load-")) {
+    } else if (e.target.id.startsWith("checkbox-") || e.target.id == "load-checkbox") {
         await load_dict_from_computation(e)
     } else {
         await save_options()
@@ -201,7 +215,7 @@ async function restoreOptions() {
         }
         document.getElementById("rewrite-" + options.rewrite).checked = true;
         add_rule_selection_ui();
-        await display_dict_preview(false);
+        await display_dict_preview(true);
     } catch (e) {
         // exceptions get swallowed in firefox, making them undebuggable, so just include
         // them in the page itself
@@ -233,7 +247,7 @@ async function download_dict(link) {
     }
     const dict = await response.text();
     set_dict(parse_dict(dict, link));
-    await display_dict_preview(true);
+    await display_dict_preview(false);
 }
 
 async function with_exn_in_dom(id, f) {
@@ -361,4 +375,11 @@ document.getElementById("download-dict").addEventListener("click", async (e) => 
             throw new Error(`rien à télécharger (pas de dictionnaire perso)`);
         }
     })
+})
+
+document.getElementById("deselect").addEventListener("click", (e) => {
+    for (const elt of document.querySelectorAll('input[id^="checkbox-"]:checked')) {
+        elt.checked = false;
+    }
+    currently_selected_rules();
 })

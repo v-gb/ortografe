@@ -61,14 +61,17 @@ let currently_selected_rules id_prefix =
     else List.map selected_rules ~f:Dict_gen_common.Dict_gen.name
          |> String.concat ~sep:" "
   in
-  Jv.of_list Fn.id [Jv.Id.to_jv selected_rules; Jv.of_string selection_text]
+  let selection_is_nonempty = not (List.is_empty selected_rules) in
+  Jv.of_list Fn.id [ Jv.Id.to_jv selected_rules
+                   ; Jv.of_string selection_text
+                   ; Jv.of_bool selection_is_nonempty ]
 
 let rules () =
   let rules = Lazy.force Dict_gen_common.Dict_gen.all in
   Jv.of_list (fun rule ->
       Jv.obj [| "name", Jv.of_string (Dict_gen_common.Dict_gen.name rule)
               ; "html", Jv.of_string (Dict_gen_common.Dict_gen.html rule
-                                        ~id_prefix:"load-" ~name_prefix:"load-")
+                                        ~id_prefix:"checkbox-" ~name_prefix:"load-")
              |]) rules
 
 let fetch url =
