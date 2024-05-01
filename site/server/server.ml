@@ -313,46 +313,54 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                 match%lwt Dream.multipart ~csrf:false request with
                 | `Ok l ->
                    let rules, rest =
-                     List.partition_map (fun (name, _ as pair) ->
-                         match Dict_gen_common.Dict_gen.of_name name with
-                         | Some rule -> Left rule
-                         | None -> Right pair) l
+                     List.partition_map (fun (name, values as pair) ->
+                         match name with
+                         | "custom" ->
+                            (match values with
+                             | (_, value) :: _ ->
+                                Left (Dict_gen_common.Dict_gen.custom_rule value)
+                             | _ -> Left None)
+                         | _ ->
+                            match Dict_gen_common.Dict_gen.of_name_builtin name with
+                            | Some rule -> Left (Some rule)
+                            | None -> Right pair) l
                    in
+                   let rules = List.filter_map Fun.id rules in
                    (match rest with
-                   | ["file", [ fname, fcontents ] ] ->
-                      let fname = fname ||? "unnamed.txt" in
-                      let ext = Filename.extension fname in
-                      Dream.log "upload ext:%S size:%s rules:%s" ext
-                        (hum_size_of_bytes (String.length fcontents))
-                        (String.concat "," (List.map Dict_gen_common.Dict_gen.name rules));
-                      let dict, plurals_in_s =
-                        match rules with
-                        | [] ->
-                           Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
-                        | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
-                           Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), None
-                        | _ ->
-                          let dict, metadata = (Lazy.force staged) rules in
-                          dict, metadata.plurals_in_s
-                      in
-                      (match Ortografe.convert_string ~ext fcontents
-                               ~options:{ convert_uppercase = true
-                                        ; dict
-                                        ; interleaved = true
-                                        ; plurals_in_s = plurals_in_s ||? true }
-                       with
-                       | exception e -> respond_error_text (`Status 422) (Base.Exn.to_string e)
-                       | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
-                       | Some (new_ext, new_body) ->
-                          let new_fname = Filename.remove_extension fname ^ "-conv" ^ new_ext in
-                          Dream.respond
-                            ~headers:
-                            (Dream.mime_lookup new_fname
-                             @ [ "Content-Disposition",
-                                 Printf.sprintf "attachment; filename=\"%s\"" (Dream.to_percent_encoded new_fname) ])
-                            new_body
-                      )
-                   | _ -> respond_error_text `Bad_Request "")
+                    | ["file", [ fname, fcontents ] ] ->
+                       let fname = fname ||? "unnamed.txt" in
+                       let ext = Filename.extension fname in
+                       Dream.log "upload ext:%S size:%s rules:%s" ext
+                         (hum_size_of_bytes (String.length fcontents))
+                         (String.concat "," (List.map Dict_gen_common.Dict_gen.name rules));
+                       let dict, plurals_in_s =
+                         match rules with
+                         | [] ->
+                            Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
+                         | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
+                            Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), None
+                         | _ ->
+                            let dict, metadata = (Lazy.force staged) rules in
+                            dict, metadata.plurals_in_s
+                       in
+                       (match Ortografe.convert_string ~ext fcontents
+                                ~options:{ convert_uppercase = true
+                                         ; dict
+                                         ; interleaved = true
+                                         ; plurals_in_s = plurals_in_s ||? true }
+                        with
+                        | exception e -> respond_error_text (`Status 422) (Base.Exn.to_string e)
+                        | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
+                        | Some (new_ext, new_body) ->
+                           let new_fname = Filename.remove_extension fname ^ "-conv" ^ new_ext in
+                           Dream.respond
+                             ~headers:
+                             (Dream.mime_lookup new_fname
+                              @ [ "Content-Disposition",
+                                  Printf.sprintf "attachment; filename=\"%s\"" (Dream.to_percent_encoded new_fname) ])
+                             new_body
+                       )
+                    | _ -> respond_error_text `Bad_Request "")
                 | _ -> respond_error_text `Bad_Request ""
            )
        ; Dream.get "/" (from_filesystem static_root "index.html")

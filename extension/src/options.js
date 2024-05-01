@@ -109,6 +109,11 @@ function currently_selected_rules() {
 function add_rule_selection_ui() {
     // The html is static, meaning the possible values are shipped in the extension.
     document.getElementById("load-dict-details").innerHTML = dict_gen.html_fragment();
+    document.getElementById("checkbox-custom").addEventListener("input", (e) => {
+        with_exn_in_dom("load_error", async () => {
+            currently_selected_rules();
+        })
+    })
 }
 
 async function compute_dict(rules) {

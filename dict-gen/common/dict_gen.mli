@@ -23,11 +23,19 @@ type values =
 
 type rule
 type rules = rule list
-val all : rule list Lazy.t
+
+val all_builtin : rule list Lazy.t
 val name : rule -> string
-val of_name : string -> rule option
+val of_name_builtin : string -> rule option
 val doc : rule -> string
-val all_html : id_prefix:string -> name_prefix:string -> ?checked:(rule -> bool) -> unit -> string
+val all_html
+    : url_prefix:string
+    -> id_prefix:string
+    -> name_prefix:string
+    -> ?checked:(rule -> bool)
+    -> unit
+    -> string
+val custom_rule : string -> rule option
 
 type 'a json =
   [> `Assoc of (string * 'a json) list

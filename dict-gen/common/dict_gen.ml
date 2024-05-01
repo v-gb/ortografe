@@ -114,33 +114,52 @@ type values =
 
 (* This type must be serializable, because in javascript, it's passed from regular
    javascript to a webworker. As a result, we can't have [`Rewrite of Rewrite.rule]. *)
-type rule = [ `Oe | `Rect1990 | `Rewrite of string ]
+type rule = [ `Oe | `Rect1990 | `Rewrite of [ `Builtin of string
+                                            | `Custom of (string * string) list ] ]
 [@@deriving compare]
+
 type rules = rule list
 
-let rewrite_rule_by_name =
+let custom_rule s =
+  (* we should probably normalize to NFC *)
+  match
+    String.prefix s 1000 (* reduce the chance of server problems *)
+    |> String.split ~on:' '
+    |> List.filter ~f:(String.(<>) "")
+    |> List.filter_map ~f:(String.lsplit2 ~on:'/')
+    |> List.filter ~f:(function ("", _) -> false | _ -> true)
+    |> (fun l -> List.take l 100 (* reduce the chance of server problems *))
+  with
+  | [] -> None
+  | _ :: _ as l -> Some (`Rewrite (`Custom l))
+
+let rewrite_rule_by_name_builtin =
   lazy (
-      List.map (force Rewrite.all)
+      List.map (force Rewrite.all_builtin)
         ~f:(fun r -> Rewrite.name r, r)
       |> Map.of_alist_exn (module String))
-let all = lazy (`Oe
+let all_builtin = lazy (`Oe
                 :: `Rect1990
-                :: List.map ~f:(fun r -> `Rewrite (Rewrite.name r))
-                     (force Rewrite.all))
+                :: List.map ~f:(fun r -> `Rewrite (`Builtin (Rewrite.name r)))
+                     (force Rewrite.all_builtin))
 
-let name = function
-  | `Rewrite name -> name
+let name : rule -> _ = function
+  | `Rewrite (`Builtin name) -> name
+  | `Rewrite (`Custom l) -> Rewrite.name (Rewrite.custom_rule l)
   | `Oe -> "oe"
   | `Rect1990 -> "1990"
-let of_name =
+let of_name_builtin =
   let tbl =
     lazy (Hashtbl.of_alist_exn (module String)
-            (List.map (force all) ~f:(fun rule -> name rule, rule)))
+            (List.map (force all_builtin) ~f:(fun rule -> name rule, rule)))
   in
   fun n -> Hashtbl.find (force tbl) n
 
 let doc = function
-  | `Rewrite name -> Rewrite.doc (Map.find_exn (force rewrite_rule_by_name) name)
+  | `Rewrite (`Builtin name) ->
+     Rewrite.doc (Map.find_exn (force rewrite_rule_by_name_builtin) name)
+  | `Rewrite (`Custom l) ->
+     Rewrite.doc (Rewrite.custom_rule l)
   | `Oe -> "Corriger les @oe en @œ, comme @coeur -> @cœur"
   | `Rect1990 -> "Appliquer les rectifications de 1990"
 let html_doc =
@@ -169,19 +188,29 @@ let html_doc =
          in
          [%string "<a href=\"%{url}\">%{display_url}</a>"])
 
-let html ~id_prefix ~name_prefix ?(checked = false) rule =
-  let checked = if checked then " checked" else "" in
-  String.strip [%string {|
-<input type="checkbox" id="%{id_prefix ^ name rule}" name="%{name_prefix ^ name rule}"%{checked}>
-<label for="%{id_prefix ^ name rule}"><span><strong>%{name rule}</strong> %{html_doc rule}</span></label>
+let all_html ~url_prefix ~id_prefix ~name_prefix?(checked = Fn.const false) () =
+  let builtin =
+    List.map (force all_builtin) ~f:(fun rule ->
+        let checked = if checked rule then " checked" else "" in
+        String.strip [%string {|
+<div>
+  <input type="checkbox" id="%{id_prefix ^ name rule}" name="%{name_prefix ^ name rule}"%{checked}>
+  <label for="%{id_prefix ^ name rule}"><span><strong>%{name rule}</strong> %{html_doc rule}</span></label>
+</div>
+|}])
+    |> String.concat
+  in
+  let custom =
+    let name = "custom" in
+    [%string {|
+<div>
+  <input type="text" id="%{id_prefix ^ name}" name="%{name_prefix ^ name}"
+    placeholder="eaux/ôs eau/ô, par exemple">
+  <a style="background-color: #1e90ff; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;" href="%{url_prefix}rules-format.html" target="_blank">?</a>
+</div> 
 |}]
-
-let all_html ~id_prefix ~name_prefix?(checked = Fn.const false) () =
-  List.map (force all) ~f:(fun rule ->
-      let html = html rule ~id_prefix ~name_prefix ~checked:(checked rule) in
-      [%string "<div>%{html}</div>\n"]
-    )
-  |> String.concat
+  in
+  builtin ^ custom
 
 let time ~profile name f =
   if profile then (
@@ -239,14 +268,21 @@ let json_of_metadata t =
        ])
 
 let interpret_rules rules =
-  let rules = if List.is_empty rules then [ `Rewrite "erofa"; `Rect1990; `Oe ] else rules in
-  let has_erofa = List.mem rules (`Rewrite "erofa") ~equal:[%compare.equal: rule] in
+  let erofa = `Builtin "erofa" in
+  let rules =
+    if List.is_empty rules
+    then [ `Rewrite erofa; `Rect1990; `Oe ]
+    else rules
+  in
+  let has_erofa = List.mem rules (`Rewrite erofa) ~equal:[%compare.equal: rule] in
   let rewrite_rules, oe, rect1990 =
     let oe = ref false in
     let rect1990 = ref false in
     let rules =
       List.filter_map rules ~f:(function
-          | `Rewrite s -> Some (Map.find_exn (force rewrite_rule_by_name) s)
+          | `Rewrite (`Builtin s) ->
+             Some (Map.find_exn (force rewrite_rule_by_name_builtin) s)
+          | `Rewrite (`Custom l) -> Some (Rewrite.custom_rule l)
           | `Oe -> oe := true; None
           | `Rect1990 -> rect1990 := true; None)
     in

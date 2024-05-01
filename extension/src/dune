@@ -15,6 +15,9 @@
 (rule
  (target dict-format.html)
  (action  (run pandoc -s %{dep:dict-format.md} -o %{target})))
+(rule
+ (target rules-format.html)
+ (action  (run pandoc -s %{dep:rules-format.md} -o %{target})))
 
 ;; by default, dune ignores all directories that start with an underscore \o/
 (dirs :standard _locales)

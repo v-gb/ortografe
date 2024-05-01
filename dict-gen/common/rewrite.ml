@@ -115,7 +115,7 @@ let rewrite_e_double_consonants =
     let phon' = String.concat [ left_phon; e_phon; right_phon ] in
     ortho', phon'
   in
-  fun env (aligned_row : aligned_row) ->
+  fun ~filter env (aligned_row : aligned_row) ->
     let aligned_row = ref aligned_row in
     let keep_going = ref true in
     while !keep_going; do
@@ -123,11 +123,12 @@ let rewrite_e_double_consonants =
       let aligned_row1 = !aligned_row in
       let rec loop k : Rules.path_elt list -> _ = function
         | ({ graphem = "e"; phonem = ("e" | "E"); _ } as p1)
-          :: ({ graphem = ("bb" | "nn" | "mm" | "ll" | "tt" | "pp" | "ff" | "rr" | "cc" | "dd")
+          :: ({ graphem = ("bb" | "nn" | "mm" | "ll" | "tt" | "pp" | "ff" | "rr" | "cc" | "dd" as consonants)
               ; phonem
               ; _ } as p2)
           :: rest
              when String.length phonem =$ 1
+               && filter consonants.[0]
           ->
            let ortho2, phon2 =
              rebuild_section
@@ -137,8 +138,9 @@ let rewrite_e_double_consonants =
            (match keep_if_plausible_phon_opt env aligned_row1 ortho2 phon2 with
             | Some aligned_row2 -> aligned_row := aligned_row2; keep_going := true
             | None -> loop (k + 2) rest)
-        | ({ graphem = ("enn" | "emm")
-           ; phonem = ("en" | "En" | "em" | "Em"); j; _ } as p1) :: rest ->
+        | ({ graphem = ("enn" | "emm"  as consonants)
+           ; phonem = ("en" | "En" | "em" | "Em"); j; _ } as p1) :: rest
+             when filter consonants.[1] ->
            let consonant = p1.graphem#:(1,2) in
            let left_phon = String.prefix aligned_row1.row.phon j in
            let right_phon = consonant ^ String.drop_prefix aligned_row1.row.phon (p1.j + String.length p1.phonem) in
@@ -396,7 +398,7 @@ type f1 =
   { rules : Rules.t
   ; compute : aligned_row -> aligned_row
   }
-type f = Rules. t -> f1
+type f = Rules.t -> f1
 
 type rule =
   { name : string
@@ -406,12 +408,11 @@ type rule =
   ; supports_repeated_rewrites : bool
   ; plurals_in_s : bool
   }
-type rules = rule list
 
-let all = ref []
+let all_builtin = ref []
 let new_rule ?(supports_repeated_rewrites = true) ?(plurals_in_s = true) name doc ~prefilter f =
   let rule = { name; doc; f; prefilter; supports_repeated_rewrites; plurals_in_s } in
-  all := rule :: !all;
+  all_builtin := rule :: !all_builtin;
   rule
 let new_rule' ?supports_repeated_rewrites name ?plurals_in_s doc ~prefilter f =
   new_rule name
@@ -620,7 +621,7 @@ let erofa_rule rules =
                        | _ -> None)
         );
         if bits land bit_pattern_all_double_consonants <>$ 0 then (
-          aligned_row := rewrite_e_double_consonants env !aligned_row;
+          aligned_row := rewrite_e_double_consonants ~filter:(fun _ -> true) env !aligned_row;
           List.iter patterns_double_consonants ~f:(fun (bit, target, repl) ->
               if bits land (1 lsl bit) <>$ 0 then
                 aligned_row := rewrite env !aligned_row ~target ~repl);
@@ -1306,8 +1307,56 @@ let doc rule = rule.doc
 let name rule = rule.name
 let supports_repeated_rewrites rule = rule.supports_repeated_rewrites
 let plurals_in_s rule = rule.plurals_in_s
-let all = lazy (List.rev !all)
+let all_builtin = lazy (List.rev !all_builtin)
 
+let custom_rule from_tos =
+  (* Not sure if the code would support empty patterns, so prevent that
+     in case it could cause a problem of some kind (infinite loop, say). *)
+  List.iter from_tos ~f:(fun (from, _) ->
+      assert (String.(<>) from ""));
+  let name =
+    List.map from_tos ~f:(fun (from, to_) -> from ^ "/" ^ to_)
+    |> String.concat ~sep:" "
+  in
+  { name
+  ; doc = ""
+  ; prefilter =
+      (fun () ->
+        `Re (Re.alt (List.map from_tos ~f:(fun (from, _) -> Re.str from))))
+  ; f = (fun rules ->
+    let env = { rules; accept = Fn.const true } in
+    let e_double_consonants, from_tos =
+      List.partition_map from_tos ~f:(fun (from, to_) ->
+          if String.length from =$ 3
+          && String.length to_ =$ 2
+          && Char.(=) from.[0] 'e'
+          && Char.(=) to_.[0] 'E'
+          && Char.(=) from.[1] from.[2]
+          && Char.(=) from.[1] to_.[1]
+          then First from.[1]
+          else Second (String.Search_pattern.create from, to_))
+    in
+    let e_double_consonants =
+      let set = Set.of_list (module Char) e_double_consonants in
+      if Set.is_empty set then None else Some (Set.mem set)
+    in
+    { rules
+    ; compute =
+        fun aligned_row ->
+        let aligned_row = ref aligned_row in
+        List.iter from_tos ~f:(fun (from, to_) ->
+            aligned_row := rewrite env !aligned_row ~target:from ~repl:to_);
+        (match e_double_consonants with
+         | None -> ()
+         | Some filter ->
+            aligned_row := rewrite_e_double_consonants ~filter env !aligned_row);
+        !aligned_row
+    })
+  ; supports_repeated_rewrites = true
+  ; plurals_in_s = true
+  }
+
+type rules = rule list
 type stats =
   { total : int
   ; considered : int

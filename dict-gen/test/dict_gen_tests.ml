@@ -38,9 +38,13 @@ let embedded : Dict_gen_common.Dict_gen.embedded =
 let convert ~rules ~which_dict str =
   let rules =
     List.map rules
-      ~f:(fun elt ->
-        Dict_gen_common.Dict_gen.of_name elt
-        ||? failwith ("can't find " ^ elt))
+      ~f:(function
+        | `Custom c ->
+           Dict_gen_common.Dict_gen.custom_rule c
+           ||? failwith ("empty custom rule " ^ c)
+        | `Builtin b ->
+           Dict_gen_common.Dict_gen.of_name_builtin b
+           ||? failwith ("can't find " ^ b))
   in
   let dict, metadata =
     match which_dict with
@@ -87,7 +91,7 @@ oe: oedipien oedipienne
 cas difficile: chariot chariotage
 |} in
   let check_and_compare rules = check_and_compare str rules in
-  let () = check_and_compare [ "erofa" ] in
+  let () = check_and_compare [ `Builtin "erofa" ] in
   [%expect {|
     rien: rien
     érofa: ritme aparaitre
@@ -96,7 +100,7 @@ cas difficile: chariot chariotage
     oe: oedipien oedipiène
     œ: œdipien œdipiène
     cas dificile: chariot chariotage |}];
-  let () = check_and_compare [ "erofa"; "1990" ] in
+  let () = check_and_compare [ `Builtin "erofa"; `Builtin "1990" ] in
   [%expect {|
     rien: rien
     érofa: ritme aparaitre
@@ -105,7 +109,7 @@ cas difficile: chariot chariotage
     oe: oedipien oedipiène
     œ: œdipien œdipiène
     cas dificile: chariot chariotage |}];
-  let () = check_and_compare [ "erofa"; "oe" ] in
+  let () = check_and_compare [ `Builtin "erofa"; `Builtin "oe" ] in
   [%expect {|
     rien: rien
     érofa: ritme aparaitre
@@ -114,7 +118,7 @@ cas difficile: chariot chariotage
     oe: œdipien œdipiène
     œ: œdipien œdipiène
     cas dificile: chariot chariotage |}];
-  let () = check_and_compare [ "erofa"; "1990"; "oe" ] in
+  let () = check_and_compare [ `Builtin "erofa"; `Builtin "1990"; `Builtin "oe" ] in
   [%expect {|
     rien: rien
     érofa: ritme aparaitre
@@ -123,7 +127,7 @@ cas difficile: chariot chariotage
     oe: œdipien œdipiène
     œ: œdipien œdipiène
     cas dificile: chariot chariotage |}];
-  let () = check_and_compare [ "1990" ] in
+  let () = check_and_compare [ `Builtin "1990" ] in
   [%expect {|
     rien: rien
     érofa: rythme apparaitre
@@ -132,7 +136,7 @@ cas difficile: chariot chariotage
     oe: oedipien oedipienne
     œ: œdipien œdipienne
     cas difficile: charriot charriotage |}];
-  let () = check_and_compare [ "oe" ] in
+  let () = check_and_compare [ `Builtin "oe" ] in
   [%expect {|
     rien: rien
     érofa: rythme apparaitre
@@ -141,7 +145,7 @@ cas difficile: chariot chariotage
     oe: œdipien œdipienne
     œ: œdipien œdipienne
     cas difficile: chariot chariotage |}];
-  let () = check_and_compare [ "1990"; "oe" ] in
+  let () = check_and_compare [ `Builtin "1990"; `Builtin "oe" ] in
   [%expect {|
     rien: rien
     érofa: rythme apparaitre
@@ -150,4 +154,18 @@ cas difficile: chariot chariotage
     oe: œdipien œdipienne
     œ: œdipien œdipienne
     cas difficile: charriot charriotage |}];
+  ()
+
+let%expect_test _ =
+  check_and_compare {|
+château
+châteaux
+souriceau
+coeur
+|} [ `Custom "eau/ô â/a"; `Builtin "oe" ];
+  [%expect {|
+    chatô
+    chatôx
+    souriceau
+    cœur |}];
   ()

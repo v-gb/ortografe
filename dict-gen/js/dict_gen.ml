@@ -44,10 +44,11 @@ let generate ?profile embedded rules =
 let get_element_by_id id =
   Jv.call (Jv.get Jv.global "document") "getElementById" [| Jv.of_jstr id |]
 
+type selected_rules = Dict_gen_common.Dict_gen.rules
 let currently_selected_rules id_prefix =
-  let rules = Lazy.force Dict_gen_common.Dict_gen.all in
-  let selected_rules =
-    List.filter rules ~f:(fun rule ->
+  let builtin = Lazy.force Dict_gen_common.Dict_gen.all_builtin in
+  let selected_builtins =
+    List.filter builtin ~f:(fun rule ->
         Jv.get
           (get_element_by_id
              (Jstr.of_string
@@ -55,6 +56,14 @@ let currently_selected_rules id_prefix =
           "checked"
         |> Jv.to_bool)
   in
+  let custom_rule =
+    Jv.get
+      (get_element_by_id (Jstr.of_string (id_prefix ^ "custom")))
+      "value"
+    |> Jv.to_string
+    |> Dict_gen_common.Dict_gen.custom_rule
+  in
+  let selected_rules : selected_rules = Option.to_list custom_rule @ selected_builtins in
   let selection_text =
     if List.is_empty selected_rules
     then "rien de sélectionné"
@@ -62,12 +71,12 @@ let currently_selected_rules id_prefix =
          |> String.concat ~sep:" "
   in
   let selection_is_nonempty = not (List.is_empty selected_rules) in
-  Jv.of_list Fn.id [ Jv.Id.to_jv (selected_rules : Dict_gen_common.Dict_gen.rules)
+  Jv.of_list Fn.id [ Jv.Id.to_jv selected_rules
                    ; Jv.of_string selection_text
                    ; Jv.of_bool selection_is_nonempty ]
 
 let html_fragment () =
-  Dict_gen_common.Dict_gen.all_html ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
+  Dict_gen_common.Dict_gen.all_html ~url_prefix:"/" ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
   |> Jv.of_string
 
 let fetch url =
@@ -117,7 +126,7 @@ let generate_in_worker path (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules
    * animate, which we kind of want it to, since the a 2s of waiting is on the longer
    * side. *)
   let path = Jv.to_string path in
-  let rules = (Stdlib.Obj.magic : Jv.t -> Dict_gen_common.Dict_gen.rules) rules in
+  let rules = (Stdlib.Obj.magic : Jv.t -> selected_rules) rules in
   let n = Jv.to_int n in
   let profile = Jv.to_bool profile in
   Fut.to_promise

@@ -4,7 +4,7 @@
 (copy_files (files ../client/{*.js,privacy.html}))
 (copy_files (files %{project_root}/data/lexique/Lexique383.gen.tsv))
 (copy_files (files %{project_root}/dict-gen/js/dict_gen.bc.js))
-(copy_files (files %{project_root}/extension/src/{rewrite,dict}.js))
+(copy_files (files %{project_root}/extension/src/{{rewrite,dict}.js,rules-format.html}))
 (copy_files (files %{project_root}/edition/{Alice_au_pays_des_merveilles.epub,Alice_au_pays_des_merveilles-manual.epub}))
 (rule
   (target dict.js.gz)

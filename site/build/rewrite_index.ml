@@ -64,7 +64,9 @@ let rec rewrite ~books_html = function
       | z -> z)
   | `Element ((_, "rules"), _, _) ->
      Dict_gen_common.Dict_gen.all_html
-       ~name_prefix:"" ~id_prefix:"conv-"
+       ~url_prefix:"/static/"
+       ~name_prefix:""
+       ~id_prefix:"conv-"
        ~checked:(fun r -> String.(=) (Dict_gen_common.Dict_gen.name r) "1990")
        ()
      |> trees_of_string
