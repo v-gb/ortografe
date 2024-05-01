@@ -112,6 +112,8 @@ type values =
   ; lexique : Data.Lexique.t
   }
 
+(* This type must be serializable, because in javascript, it's passed from regular
+   javascript to a webworker. As a result, we can't have [`Rewrite of Rewrite.rule]. *)
 type rule = [ `Oe | `Rect1990 | `Rewrite of string ]
 [@@deriving compare]
 type rules = rule list
