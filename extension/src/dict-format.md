@@ -21,8 +21,9 @@ Optionally, the first line can contain a one-line json value with the following 
 ```
 {
   desc : string,
-  // A short description that shows up in the extension's options page. If
-  // omitted, a description is created based on the dictionary.
+  // A short description that shows up in the extension's options
+  // page. If omitted, a description is created based on the
+  // dictionary.
 
   lang : string,
   // which pages should the dictionary be used for. "fr" if omitted.
@@ -30,18 +31,19 @@ Optionally, the first line can contain a one-line json value with the following 
   // for possible values
 
   supports_repeated_rewrites : bool,
-  // Defaults to true. The extension handles dynamic pages by rewriting the whole
-  // page periodically. This can cause issues for dictionaries that are not
-  // idempotent, dictionaries that rewrite `a` into `b`, and `b` into `c`, causing
-  // the word `a` in the page to be rewritten as `c`. Dictionaries that have this
-  // problem can choose to disable rewrite, if the loss of functionality is worth
-  // reducing the confusion.
+  // Defaults to true. The extension handles dynamic pages by
+  // rewriting the whole page periodically. This can cause issues for
+  // dictionaries that are not idempotent, dictionaries that rewrite
+  // `a` into `b`, and `b` into `c`, causing // the word `a` in the
+  // page to be rewritten as `c`. Dictionaries that have this problem
+  // can choose to disable rewrite, if the loss of functionality is
+  // worth reducing the confusion.
 
   plurals_in_s : bool,
-  // Defaults to true. When set, the extension assumes that if a word from the page,
-  // say "pains", is missing from the dictionary but "pain" is in the dictionary,
-  // then "pains" should be rewritten to whatever "pain" gets rewritten to, plus a
-  // trailing "s".
+  // Defaults to true. When set, the extension assumes that if a word
+  // from the page, say "pains", is missing from the dictionary but
+  // "pain" is in the dictionary, then "pains" should be rewritten to
+  // whatever "pain" gets rewritten to, plus a trailing "s".
 }
 ```
 
