@@ -114,6 +114,8 @@ type values =
 
 type rule = [ `Oe | `Rect1990 | `Rewrite of string ]
 [@@deriving compare]
+type rules = rule list
+
 let rewrite_rule_by_name =
   lazy (
       List.map (force Rewrite.all)

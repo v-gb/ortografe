@@ -62,7 +62,7 @@ let currently_selected_rules id_prefix =
          |> String.concat ~sep:" "
   in
   let selection_is_nonempty = not (List.is_empty selected_rules) in
-  Jv.of_list Fn.id [ Jv.Id.to_jv selected_rules
+  Jv.of_list Fn.id [ Jv.Id.to_jv (selected_rules : Dict_gen_common.Dict_gen.rules)
                    ; Jv.of_string selection_text
                    ; Jv.of_bool selection_is_nonempty ]
 
@@ -121,7 +121,7 @@ let generate_in_worker path (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules
    * animate, which we kind of want it to, since the a 2s of waiting is on the longer
    * side. *)
   let path = Jv.to_string path in
-  let rules = (Stdlib.Obj.magic : Jv.t -> Dict_gen_common.Dict_gen.rule list) rules in
+  let rules = (Stdlib.Obj.magic : Jv.t -> Dict_gen_common.Dict_gen.rules) rules in
   let n = Jv.to_int n in
   let profile = Jv.to_bool profile in
   Fut.to_promise

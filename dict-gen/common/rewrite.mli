@@ -7,6 +7,7 @@ val erofa_preserve : string -> bool
 val load_skip : unit -> (Data.Lexique.row -> bool)
 
 type rule
+type rules = rule list
 val doc : rule -> string
 val name : rule -> string
 val erofa : rule
@@ -18,9 +19,9 @@ type stats [@@deriving sexp_of]
 val gen
     :  ?fix_oe:bool
     -> ?not_understood:[ `Raise | `Call of (Sexplib.Sexp.t -> unit) | `Ignore ]
-    -> rules: rule list
+    -> rules: rules
     -> Data.Lexique.t
     -> (string -> string -> unit)
     -> stats
 
-val staged_gen : ?fix_oe:bool -> rules: rule list -> unit -> (Data.Lexique.row -> string)
+val staged_gen : ?fix_oe:bool -> rules: rules -> unit -> (Data.Lexique.row -> string)

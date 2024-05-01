@@ -22,6 +22,7 @@ type values =
   }
 
 type rule
+type rules = rule list
 val all : rule list Lazy.t
 val name : rule -> string
 val of_name : string -> rule option
@@ -35,7 +36,7 @@ type 'a json =
 
 val gen
     :  ?profile:bool
-    -> rules:rule list
+    -> rules:rules
     -> all:bool
     -> output:(string -> unit)
     -> json_to_string: (_ json -> string)
@@ -55,7 +56,7 @@ val parse : string -> json_of_string:(string -> _ json) -> (string -> string opt
 
 val staged_gen
     : [< `Embedded of embedded | `Values of values ]
-  -> (rule list
+  -> (rules
       -> (string -> string option) * metadata)
 
 val time : profile:bool -> string -> (unit -> 'a) -> 'a

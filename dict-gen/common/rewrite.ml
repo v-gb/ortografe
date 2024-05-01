@@ -406,6 +406,7 @@ type rule =
   ; supports_repeated_rewrites : bool
   ; plurals_in_s : bool
   }
+type rules = rule list
 
 let all = ref []
 let new_rule ?(supports_repeated_rewrites = true) ?(plurals_in_s = true) name doc ~prefilter f =
