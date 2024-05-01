@@ -176,6 +176,13 @@ let html ~id_prefix ~name_prefix ?(checked = false) rule =
 <label for="%{id_prefix ^ name rule}"><span><strong>%{name rule}</strong> %{html_doc rule}</span></label>
 |}]
 
+let all_html ~id_prefix ~name_prefix?(checked = Fn.const false) () =
+  List.map (force all) ~f:(fun rule ->
+      let html = html rule ~id_prefix ~name_prefix ~checked:(checked rule) in
+      [%string "<div>%{html}</div>\n"]
+    )
+  |> String.concat
+
 let time ~profile name f =
   if profile then (
     let t1 = Stdlib.Sys.time () in

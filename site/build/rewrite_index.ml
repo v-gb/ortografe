@@ -63,15 +63,10 @@ let rec rewrite ~books_html = function
          `Element (a, attrs @ attrs', z) :: rest
       | z -> z)
   | `Element ((_, "rules"), _, _) ->
-     let l = force Dict_gen_common.Dict_gen.all in
-     List.filter_map l ~f:(fun rule ->
-         let html =
-           Dict_gen_common.Dict_gen.html ~name_prefix:"" ~id_prefix:"conv-"
-             ~checked:(String.(=) (Dict_gen_common.Dict_gen.name rule) "1990")
-             rule
-         in
-         Some [%string "<div>%{html}</div>\n"])
-     |> String.concat
+     Dict_gen_common.Dict_gen.all_html
+       ~name_prefix:"" ~id_prefix:"conv-"
+       ~checked:(fun r -> String.(=) (Dict_gen_common.Dict_gen.name r) "1990")
+       ()
      |> trees_of_string
   | `Element (name, attrs, children) ->
      [ `Element (name, attrs, List.concat_map children ~f:(rewrite ~books_html)) ]

@@ -66,13 +66,9 @@ let currently_selected_rules id_prefix =
                    ; Jv.of_string selection_text
                    ; Jv.of_bool selection_is_nonempty ]
 
-let rules () =
-  let rules = Lazy.force Dict_gen_common.Dict_gen.all in
-  Jv.of_list (fun rule ->
-      Jv.obj [| "name", Jv.of_string (Dict_gen_common.Dict_gen.name rule)
-              ; "html", Jv.of_string (Dict_gen_common.Dict_gen.html rule
-                                        ~id_prefix:"checkbox-" ~name_prefix:"load-")
-             |]) rules
+let html_fragment () =
+  Dict_gen_common.Dict_gen.all_html ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
+  |> Jv.of_string
 
 let fetch url =
   let open Fut.Result_syntax in
@@ -147,6 +143,6 @@ let () =
     Js_of_ocaml.Js.export "dict_gen"
       (Js_of_ocaml.Js.Unsafe.inject
          (Jv.obj [| "generate", Jv.callback ~arity:6 generate_in_worker
-                  ; "rules", Jv.callback ~arity:1 rules
+                  ; "html_fragment", Jv.callback ~arity:1 html_fragment
                   ; "currently_selected_rules", Jv.callback ~arity:1 currently_selected_rules
             |]))

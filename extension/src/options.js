@@ -107,14 +107,8 @@ function currently_selected_rules() {
 }
 
 function add_rule_selection_ui() {
-    const rules = dict_gen.rules();
-    const load_dict_details = document.getElementById("load-dict-details");
-    for (const rule of rules) {
-        const newnode = document.createElement("div");
-        // The html is static, meaning the possible values are shipped in the extension.
-        newnode.innerHTML = rule.html;
-        load_dict_details.appendChild(newnode);
-    }
+    // The html is static, meaning the possible values are shipped in the extension.
+    document.getElementById("load-dict-details").innerHTML = dict_gen.html_fragment();
 }
 
 async function compute_dict(rules) {
