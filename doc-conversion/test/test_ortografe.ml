@@ -248,8 +248,7 @@ let%expect_test "epub" = (
       []{#ch001.xhtml}
 
       ::: {#ch001.xhtml#orthographe .section .level1 number=\"1\"}
-      Ortografe {number=\"1\"}
-      =========
+      # Ortografe {number=\"1\"}
 
       Alusion, chois.
       :::"];
