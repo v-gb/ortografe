@@ -1,10 +1,12 @@
-.PHONY: all all-w serve
+.PHONY: all all-w serve serves
 all:
 	opam exec -- dune build --trace-file _build/trace ./server_all.exe @default @runtest
 all-w:
 	opam exec -- dune build --trace-file _build/trace -w ./server_all.exe @default @runtest
 serve:
 	opam exec -- dune exec --trace-file _build/trace -w -- ./server_all.exe serve -p 8081
+serves:
+	opam exec -- dune exec --trace-file _build/trace -w -- ./server_all.exe serve -p 8081 --tls
 
 .PHONY: build-container run-container fly-deploy
 build-container:
