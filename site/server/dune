@@ -12,5 +12,9 @@
    core_unix.sys_unix
    uri
  )
+ (foreign_stubs
+  (language c)
+  (names glibc))
+ (link_flags :standard -ccopt -Wl,--wrap=fmod)
  (preprocess (pps ppx_jane lwt_ppx ppx_lazy_option_op))
  )
