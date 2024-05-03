@@ -1,0 +1,32 @@
+#!/bin/bash
+
+src="$1" # https://fr.wikisource.org/wiki/Fables_de_La_Fontaine_(%C3%A9d._1874)
+conv="${src%.*}"-conv.epub
+dst="${src%.*}"-conv.pdf
+$(jj workspace root)/_build/default/doc-conversion/bin/ortografe_cli.exe conv "$src" --alfonic --dict-file <(
+    echo c,s
+    echo emprunteuse,äprütœ̂z
+    echo monsieur,mœ̂sjœ̂
+    echo Turquie,Turci
+    echo quelqu,cèlc
+    echo Jupiter,Jupitèr
+    echo Jupin,Jupï
+    echo troyen,trwayï
+    echo rochefoucauld,rohfwcô
+    echo Simonide,Simonid
+    echo Pollux,Polucs
+    echo ésope,ézop
+    echo Caucase,Côcaz
+    echo Wikisource,Wiciswrs
+)
+ebook-convert \
+    "$conv" "$dst" \
+    --pdf-default-font-size=15 \
+    --pdf-use-document-margins \
+    --extra-css <(cat <<EOF
+@page {
+  size: 12cm 19cm;
+  margin: 1cm 0.5cm 1cm 0.5cm;
+}
+EOF
+)
