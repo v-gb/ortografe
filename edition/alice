@@ -39,12 +39,6 @@ case "${1-}" in
         ;;
     *)
         # Améliorations possibles :
-        # - le epub n'a pas la couverture
-        #   cette page https://fr.wikisource.org/wiki/Page:Lewis_Caroll_-_Alice_au_pays_des_merveilles,_traduction_Henri_Bu%C3%A9.djvu/3
-        #   serait mieux que la page qui sert actuellement de couverture
-        #   dimensions: 11x18 x2 + dos de 9mm + 3-5mm de bord
-        #     110+9+110+4*2 -> 237. 0, 4, 114, 123, 233, 237
-        #     180+4*2 -> 188. 0, 4, 184, 188.
         # - la page des matiere ne montre pas les numéros de page
         server=http://localhost:8081
         server=https://orthographe-rationnelle.info
