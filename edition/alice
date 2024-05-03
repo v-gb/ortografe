@@ -42,6 +42,7 @@ case "${1-}" in
         # - la page des matiere ne montre pas les numéros de page
         server=http://localhost:8081
         server=https://orthographe-rationnelle.info
+        format=lulu # or imprime-ton-livre
         if ! [ -f Alice_au_pays_des_merveilles.epub ]; then
             # the original, but since it's mutable, we pin the version
             url='https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Alice_au_pays_des_merveilles'
@@ -77,18 +78,30 @@ case "${1-}" in
             echo pélerin,pèlerin # changement qui a lieu naturellement
             echo cuiller,cuillère # changement qui a lieu naturellement
         )
-        ebook-convert \
-            Alice_au_pays_des_merveilles-manual-conv.epub \
-            Alice_au_pays_des_merveilles-manual-conv.pdf \
-            --pdf-page-numbers \
-            --pdf-use-document-margins \
-            --pdf-default-font-size=16 \
-            --pdf-page-number-map='n < 11 ? 0 : n - 11 + 1' \
-            --remove-paragraph-spacing \
-            --remove-paragraph-spacing-indent-size=-1 \
-            --pdf-hyphenate $(true pour le chapitre 1, image du rideau) \
-            --pdf-no-cover \
-            --pdf-footer-template "$(cat <<EOF
+        for side in left right; do
+            # We really need offset margins, otherwise the bits of sentences towards
+            # the fold are hard to read.
+            # @page :left or :right are treated as @page, so we can't force separate
+            # inner/outer margins this way.
+            # calibre provides --pdf-odd-even-offset, which works (although you HAVE
+            # TO use an offset that's smaller than the margin, otherwise the setting
+            # is ignored entirely), but lulu.com doesn't accept such pdfs.
+            # So we resort to generating two pdfs, one with the left-page margins
+            # for all pages, one with right-page margins for all pages, and then we
+            # made a new pdf from the left pages with left page margins + right pages
+            # with right page margins.
+            ebook-convert \
+                Alice_au_pays_des_merveilles-manual-conv.epub \
+                Alice_au_pays_des_merveilles-manual-conv-$side.pdf \
+                --pdf-page-numbers \
+                --pdf-use-document-margins \
+                --pdf-default-font-size=16 \
+                --pdf-page-number-map='n - 11 + 1' \
+                --remove-paragraph-spacing \
+                --remove-paragraph-spacing-indent-size=-1 \
+                --pdf-hyphenate $(true pour le chapitre 1, image du rideau) \
+                --pdf-no-cover \
+                --pdf-footer-template "$(cat <<EOF
 <footer>
     <div style="margin: auto; font-size: smaller"></div>
     <script>
@@ -99,23 +112,33 @@ case "${1-}" in
 </footer>
 EOF
 )" \
-            --extra-css <(
-            if true; then
-                # sizes meant for pocket books on lulu.com, along with cover2.svg
-                content_width=8.6cm;
-                content_height=13.7cm;
-                page_width=11.4cm;
-                page_height=18.1cm;
-                margin="1.805cm 1.4cm 2.405cm 1.4cm"
-            else
-                # sizes meant for imprime-ton-livre.fr, along with cover.svg
-                content_width=8.6cm;
-                content_height=13.8cm;
-                page_width=11cm;
-                page_height=18cm;
-                margin="1.8cm 1.2cm 2.4cm 1.2cm"
-            fi
-            cat <<EOF
+                --extra-css <(
+                if [ "$format" = lulu ]; then
+                    # sizes meant for pocket books on lulu.com, along with cover2.svg
+                    content_width=8.2cm;
+                    content_height=13.7cm;
+                    page_width=11.4cm;
+                    page_height=18.1cm;
+                    large_margin='1.9cm'
+                    small_margin='1.3cm'
+                    left_margin=$(if [ $side = left ]
+                                  then echo $small_margin
+                                  else echo $large_margin
+                                  fi)
+                    right_margin=$(if [ $side = right ]
+                                  then echo $small_margin
+                                  else echo $large_margin
+                                  fi)
+                    margin="1.805cm $right_margin 2.405cm $left_margin"
+                else
+                    # sizes meant for imprime-ton-livre.fr, along with cover.svg
+                    content_width=8.6cm;
+                    content_height=13.8cm;
+                    page_width=11cm;
+                    page_height=18cm;
+                    margin="1.8cm 1.2cm 2.4cm 1.2cm"
+                fi
+                cat <<EOF
 __img {
   border: solid 1px blue;
 }
@@ -273,6 +296,15 @@ a {
 }
 */
 EOF
-                         )
+            ) &
+        done
+        wait
+        wait
+        qpdf --empty \
+             --collate \
+             --pages Alice_au_pays_des_merveilles-manual-conv-right.pdf 1-z:odd \
+                     Alice_au_pays_des_merveilles-manual-conv-left.pdf 1-z:even \
+             -- Alice_au_pays_des_merveilles-manual-conv.pdf
         # rm -f Alice_au_pays_des_merveilles-manual-conv{,1}.epub
+        ;;
 esac
