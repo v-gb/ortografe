@@ -79,7 +79,7 @@ case "${1-}" in
         )
         ebook-convert \
             Alice_au_pays_des_merveilles-manual-conv.epub \
-            Alice_au_pays_des_merveilles-manual-conv-tmp.pdf \
+            Alice_au_pays_des_merveilles-manual-conv.pdf \
             --pdf-page-numbers \
             --pdf-use-document-margins \
             --pdf-default-font-size=16 \
@@ -87,6 +87,7 @@ case "${1-}" in
             --remove-paragraph-spacing \
             --remove-paragraph-spacing-indent-size=-1 \
             --pdf-hyphenate $(true pour le chapitre 1, image du rideau) \
+            --pdf-no-cover \
             --pdf-footer-template "$(cat <<EOF
 <footer>
     <div style="margin: auto; font-size: smaller"></div>
@@ -273,8 +274,5 @@ a {
 */
 EOF
                          )
-        qpdf Alice_au_pays_des_merveilles-manual-conv-tmp.pdf --pages . 2-z -- \
-             Alice_au_pays_des_merveilles-manual-conv.pdf
         # rm -f Alice_au_pays_des_merveilles-manual-conv{,1}.epub
-        rm -f Alice_au_pays_des_merveilles-manual-conv-tmp.pdf
 esac
