@@ -24,7 +24,6 @@ let list_literal e =
            match e with
            | [%expr +[%e? e]] ->
               (match extract_list_literal e with
-              | [], None -> (cur, acc)
               | rev_l, None -> (List.rev_append rev_l cur, acc)
               | rev_l, Some tail -> (List.rev rev_l, tail :: add_list_literal (cur, acc)))
            | _ -> (e :: cur, acc))
