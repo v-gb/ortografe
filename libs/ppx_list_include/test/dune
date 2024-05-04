@@ -1,0 +1,5 @@
+(library
+ (name test_ppx_list_include)
+ (inline_tests (deps (sandbox always)))
+ (libraries base)
+ (preprocess (pps ppx_list_include ppx_inline_test ppx_assert)))
