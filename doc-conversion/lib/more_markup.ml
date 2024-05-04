@@ -67,16 +67,14 @@ open Common
 let transform ~transform ~flavor src ~dst =
   (* https://v3.ocaml.org/p/markup/latest/doc/Markup/index.html
      Note: no implicit closing of tags *)
-  let z =
-    (match flavor with
-     | `Xml -> Markup.parse_xml (Markup.string src)
-     | `Html -> Markup.parse_html (Markup.string src))
-    |> Markup.signals
-    |> transform
-  in
   (match flavor with
-   | `Xml -> Markup.write_xml z
-   | `Html -> Markup.write_html z)
+   | `Xml -> Markup.parse_xml (Markup.string src)
+   | `Html -> Markup.parse_html (Markup.string src))
+  |> Markup.signals
+  |> transform
+  |> (match flavor with
+      | `Xml -> Markup.write_xml __
+      | `Html -> Markup.write_html __)
   |> markup_output dst
 
 let text_elt ~convert_text = function

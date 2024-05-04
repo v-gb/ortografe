@@ -9,7 +9,7 @@
    uutf
    zipc
  )
- (preprocess (pps ppx_jane ppx_lazy_option_op))
+ (preprocess (pps ppx_jane ppx_lazy_option_op ppx_partial))
 )
 
 (rule

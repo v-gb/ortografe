@@ -11,4 +11,5 @@
                   ppx_sexp_value
                   ppx_string
                   ppx_uchar_literal
-                  ppx_lazy_option_op)))
+                  ppx_lazy_option_op
+                  ppx_partial)))

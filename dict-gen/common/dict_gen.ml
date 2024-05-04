@@ -128,7 +128,7 @@ let custom_rule s =
     |> List.filter ~f:(String.(<>) "")
     |> List.filter_map ~f:(String.lsplit2 ~on:'/')
     |> List.filter ~f:(function ("", _) -> false | _ -> true)
-    |> (fun l -> List.take l 100 (* reduce the chance of server problems *))
+    |> List.take __ 100 (* reduce the chance of server problems *)
   with
   | [] -> None
   | _ :: _ as l -> Some (`Rewrite (`Custom l))
