@@ -10,12 +10,14 @@ function async_lazy(f) {
 
 const user_text = document.getElementById('user-text')
 const converted_text = document.getElementById('converted-text')
-const process = mirror_and_rewrite(user_text, converted_text, async_lazy(async () => {
-    const options = {color:true, trivial:false, background_color:'#b9f4b9'}
-    const table = load_dict(options);
-    return [ options, table ]
-}));
-process();
+if (user_text) {
+    const process = mirror_and_rewrite(user_text, converted_text, async_lazy(async () => {
+        const options = {color:true, trivial:false, background_color:'#b9f4b9'}
+        const table = load_dict(options);
+        return [ options, table ]
+    }));
+    process();
+}
 
 // https://stackoverflow.com/questions/16839698/jquery-getscript-alternative-in-native-javascript
 const getScript = url => new Promise((resolve, reject) => {
@@ -45,35 +47,37 @@ const lazy_dict_gen = async_lazy(async () => {
     await getScript("/static/dict_gen.bc.js");
     return dict_gen;
 })
-mirror_and_rewrite(user_text2, converted_text2, async () => {
-    const dict_gen = await lazy_dict_gen();
-    while (true) {
-        // loop to ensure we reach a fixpoint if the selection changes while we compute a
-        // dictionary
-        const [ rules, selection_text ] = dict_gen.currently_selected_rules("conv-");
-        if (selection_text == cache2?.selection_text) {
-            break;
-        } else {
-            // ideally, we would generate the dictionary on demand, like we do when
-            // converting docs but that code works on text, not the dom, and can't
-            // highlight things.
-            [ cache2.dict, cache2.stats ] =
-                await dict_gen.generate("/static", "/static/Lexique383.gen.tsv",
-                                        "/static/rect1990.csv", rules, 1, false);
-            cache2.selection_text = selection_text;
-            cache2.table = null;
+if (user_text2) {
+    mirror_and_rewrite(user_text2, converted_text2, async () => {
+        const dict_gen = await lazy_dict_gen();
+        while (true) {
+            // loop to ensure we reach a fixpoint if the selection changes while we compute a
+            // dictionary
+            const [ rules, selection_text ] = dict_gen.currently_selected_rules("conv-");
+            if (selection_text == cache2?.selection_text) {
+                break;
+            } else {
+                // ideally, we would generate the dictionary on demand, like we do when
+                // converting docs but that code works on text, not the dom, and can't
+                // highlight things.
+                [ cache2.dict, cache2.stats ] =
+                    await dict_gen.generate("/static", "/static/Lexique383.gen.tsv",
+                                            "/static/rect1990.csv", rules, 1, false);
+                cache2.selection_text = selection_text;
+                cache2.table = null;
+            }
         }
-    }
-    const options = {color:true, trivial:false, background_color:'#b9f4b9',
-                     rewrite: 'custom', custom_dict: cache2.dict}
-    if (cache2?.table == undefined) {
-        cache2.table = load_dict(options);
-    }
-    // hopefully there can be no "context switch" at the place where the caller
-    // awaits this return, because that would introduce a (very tight) race condition
-    // that could theorically cause an input change to be missed.
-    return [ options, cache2.table ]
-})
+        const options = {color:true, trivial:false, background_color:'#b9f4b9',
+                         rewrite: 'custom', custom_dict: cache2.dict}
+        if (cache2?.table == undefined) {
+            cache2.table = load_dict(options);
+        }
+        // hopefully there can be no "context switch" at the place where the caller
+        // awaits this return, because that would introduce a (very tight) race condition
+        // that could theorically cause an input change to be missed.
+        return [ options, cache2.table ]
+    })
+}
 
 for (const elt of document.getElementsByClassName('mailelt')) {
     elt.setAttribute('href', 'mzilto:contzct@orthogrzphe-rztionnelle.info'.replaceAll('z', 'a'))
