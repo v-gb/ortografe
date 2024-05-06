@@ -11,6 +11,6 @@
  (modules client_bin))
 
 (rule
- (target index2.html)
+ (target index.html)
  (deps client_bin.exe client_lib.cmxs)
  (action (run ./client_bin.exe)))

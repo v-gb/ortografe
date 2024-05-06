@@ -87,4 +87,4 @@ let rewrite index_html books_html =
   |> trees_of_string
   |> List.concat_map ~f:(rewrite ~books_html:(In_channel.read_all books_html))
   |> string_of_trees
-  |> Out_channel.write_all "index.html" ~data:__
+  |> Out_channel.write_all (Filename.basename index_html) ~data:__

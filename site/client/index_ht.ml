@@ -953,7 +953,7 @@ let main () : node =
 
 let () =
   Out_channel.write_all
-    "index2.html"
+    "index.html"
     ~data:(
       "<!DOCTYPE html>\n" ^
         (main ()
