@@ -204,9 +204,13 @@ let all_html ~url_prefix ~id_prefix ~name_prefix?(checked = Fn.const false) () =
     let name = "custom" in
     [%string {|
 <div>
-  <input type="text" id="%{id_prefix ^ name}" name="%{name_prefix ^ name}"
-    placeholder="eaux/ôs eau/ô, par exemple">
+  Autres changements
   <a style="background-color: #1e90ff; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;" href="%{url_prefix}rules-format.html" target="_blank">?</a>
+  :
+  <input type="text" id="%{id_prefix ^ name}" name="%{name_prefix ^ name}"
+    placeholder="eaux/ôs eau/ô, par exemple"
+    style="min-width:min(100%,30em)"
+  >
 </div> 
 |}]
   in
