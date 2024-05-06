@@ -443,7 +443,7 @@ let section_transcription_interactive () =
 
 let email_link children = elt "a" ~attrs:["class", "mailelt"] children
 
-let submit_file ?(prefix = []) () =
+let submit_file f =
   let upload_css = {|
   background-color: #e5fbe5;
   border: 1.5px solid;
@@ -462,25 +462,24 @@ let submit_file ?(prefix = []) () =
            ; "method", "post"
            ; "enctype", "multipart/form-data"
            ]
-    [ +prefix
-    ; elt "label"
-        ~cl:upload_css
-        [ leafelt "input"
-            ~cl:"display:none"
-            [ "type", "file"
-            ; "name", "file"
-            ; "accept", ".doc,.docx,.odt,.odp,.ppt,.pptx,.html,.xhtml,.htmlz,\
-                         .epub,.txt,.mkd,.md"
-            ; "onchange", "form.submit()"
-            ]
-        ; text "choisir un fichier"
-        ]
-    ; span ~cl:"font-size: 0.7em; "
-        [ text "(ça ne marche pas ? "
-        ; email_link [ text "dites-le nous" ]
-        ; text ")"
-        ]
-    ]
+    (f [ elt "label"
+           ~cl:upload_css
+           [ leafelt "input"
+               ~cl:"display:none"
+               [ "type", "file"
+               ; "name", "file"
+               ; "accept", ".doc,.docx,.odt,.odp,.ppt,.pptx,.html,.xhtml,.htmlz,\
+                            .epub,.txt,.mkd,.md"
+               ; "onchange", "form.submit()"
+               ]
+           ; text "choisir un fichier"
+           ]
+       ; span ~cl:"font-size: 0.7em; "
+           [ text "(ça ne marche pas ? "
+           ; email_link [ text "dites-le nous" ]
+           ; text ")"
+           ]
+       ])
 
 let image_list' l =
   let large_icon = "
@@ -510,7 +509,7 @@ let image_list l =
 let section_transcription_en_ligne () =
   section
     [ h3 [ text "Transcription de documents, en ligne" ]
-    ; submit_file ()
+    ; submit_file Fn.id
     ; p [ text "Les formats acceptés sont :" ]
     ; image_list
         [ (fun ~cl ->
@@ -749,8 +748,7 @@ let section_autres_orthographes () =
         ; p [ text "Notez que ces autres orthographes ne sont pas des recommendations \
                     (ni des futures recommendations), simplement des possibilités \
                     d'expérimentation." ]
-        ; submit_file
-            ~prefix:
+        ; submit_file (fun button ->
               [ +(Dict_gen_common.Dict_gen.all_html
                     ~url_prefix:"/static/"
                     ~name_prefix:""
@@ -760,8 +758,8 @@ let section_autres_orthographes () =
                     ()
                   |> nodes_of_string)
               ; br
-              ]
-            ()
+              ; +button
+              ])
         ; br
         ; interactive_transcription
             ~id_textarea:"user-text2"
