@@ -700,7 +700,7 @@ let section_verificateurs () =
         ; [ "style", "display:none" ]
         , (fun ~cl ->
           a ~href:libreoffice_link
-            [ img ~cl:(cl ^ clickable_icon_box) "/static/libreoffice_writer.svg"
+            [ img ~cl:(cl ^ clickable_icon_box) "/static/libreoffice_writer.png"
                 [ "alt", ""; "width", "128"; "height", "128" ]])
         , [ text "suite bureautique LibreOffice" ]
         ]
