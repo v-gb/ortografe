@@ -3,9 +3,13 @@
 
 (rule
  (deps
-   (sandbox always)
-   (:lexique %{project_root}/data/lexique/Lexique383.gen.tsv))
- (action (with-stdout-to ortografe_embedded.ml
+  (sandbox always)
+  (:lexique %{project_root}/data/lexique/Lexique383.gen.tsv)
+  (:erofa %{project_root}/extension/dict.gen.csv)
+  (:rect1990 %{project_root}/extension/dict1990.gen.csv))
+ (action (with-stdout-to data.ml
           (run bash
                -euo pipefail
-               -c "echo -n 'let data_lexique_Lexique383_gen_tsv = {|'; cat %{lexique}; echo '|}';"))))
+               -c "echo -n 'let extension_dict_gen_csv = {|'; cat %{erofa}; echo '|}';
+                   echo -n 'let extension_dict1990_gen_csv = {|'; cat %{rect1990}; echo '|}';
+                   echo -n 'let data_lexique_Lexique383_gen_tsv = {|'; cat %{lexique}; echo '|}';"))))

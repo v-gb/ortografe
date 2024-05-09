@@ -182,7 +182,7 @@ let transcribe ~cl (elt : node) =
      string_of_trees new_children
      |> Ortografe.html
           ~options:{ convert_uppercase = false
-                   ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa)
+                   ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa)
                    ; interleaved = true
                    ; plurals_in_s = true
           }

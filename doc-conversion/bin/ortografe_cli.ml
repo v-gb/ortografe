@@ -1,6 +1,6 @@
 let embedded : Dict_gen_common.Dict_gen.embedded =
   { data_lexique_Lexique383_gen_tsv = Ortografe_embedded.data_lexique_Lexique383_gen_tsv
-  ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv }
+  ; extension_dict1990_gen_csv = Ortografe_embedded.extension_dict1990_gen_csv }
 
 let parse_dict str =
   let lookup, metadata =
@@ -13,9 +13,9 @@ let no_metadata = Dict_gen_common.Dict_gen.no_metadata
 let load_rules rules ~prebuild =
   match rules with
   | [] ->
-     (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata)
+     (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa), no_metadata)
   | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
-     (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), no_metadata)
+     (fun () -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.rect1990), no_metadata)
   | _ ->
      if not prebuild
      then
@@ -209,7 +209,7 @@ let () =
                  dict_file
              in
              match from_rules, from_dict_file with
-             | None, None -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), no_metadata
+             | None, None -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa), no_metadata
              | Some v, None | None, Some v -> v
              | Some (f_rules, m_rules), Some (f_dict, _m_dict) ->
                 (fun word ->

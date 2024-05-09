@@ -42,19 +42,6 @@ type options = Common.options =
 
 type 'a convert = 'a Common.convert
 
-let load_dict str =
-  let l = String.split_on_char '\n' str in
-  let h = Hashtbl.create 25000 in
-  List.iter (fun str ->
-      match String.split_on_char ',' str with
-      | [] | [""] -> ()
-      | [ a; b ] ->
-         Hashtbl.replace h a b
-      | _ -> failwith ("wtf " ^ str)) l;
-  h
-
-let erofa = lazy (load_dict Dict.extension_dict_gen_csv)
-let rect1990 = lazy (load_dict Dict.extension_dict1990_gen_csv)
 let pure_text ?convert_text ?buf ~options src ~dst =
   match convert_text with
   | Some f -> write_out dst (f src)
@@ -240,7 +227,6 @@ let ext_conv ?src_type src dst inex =
 let max_size = Zip.max_size
 let map_zip = Zip.map
 
-let extension_dict1990_gen_csv = Dict.extension_dict1990_gen_csv
 module Private = struct
   let grab_from_zip src name =
     let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in

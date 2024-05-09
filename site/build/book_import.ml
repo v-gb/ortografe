@@ -84,7 +84,7 @@ let make_the_html_mobile_friendly =
 
 let options = lazy { Ortografe.convert_uppercase = true
                    ; dict =
-                       (let dict = Lazy.force Ortografe.erofa in
+                       (let dict = Lazy.force Ortografe_embedded.erofa in
                         function
                         (* modernize archaisms in frankenstein, as the edition is quite old
                            and people could get confused and think we made a mistake, or érofa

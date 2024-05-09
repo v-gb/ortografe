@@ -48,7 +48,7 @@ let rec rewrite ~books_html = function
        ("<p class=transcribe-result>" ^ string_of_trees new_children ^ "</p>")
        |> Ortografe.html
             ~options:{ convert_uppercase = false
-                     ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa)
+                     ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa)
                      ; interleaved = true
                      ; plurals_in_s = true
                      }

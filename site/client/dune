@@ -1,12 +1,12 @@
 (library
  (name client_lib)
- (libraries core dict_gen_common markup ortografe re)
+ (libraries core dict_gen_common markup ortografe ortografe_embedded re)
  (modules :standard \ client_bin)
  (preprocess (pps ppx_string ppx_list_include ppx_partial ppx_sexp_value ppx_lazy_option_op)))
 
 (executable
  (name client_bin)
- (libraries core dict_gen_common dynlink markup ortografe re)
+ (libraries core dict_gen_common dynlink markup ortografe ortografe_embedded re)
  (link_flags :standard -linkall)
  (modules client_bin))
 

@@ -32,7 +32,7 @@ let diff_strings ?(context = 1) str1 str2 =
 
 let embedded : Dict_gen_common.Dict_gen.embedded =
   { data_lexique_Lexique383_gen_tsv = Ortografe_embedded.data_lexique_Lexique383_gen_tsv
-  ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv
+  ; extension_dict1990_gen_csv = Ortografe_embedded.extension_dict1990_gen_csv
   }  
   
 let convert ~rules ~which_dict str =

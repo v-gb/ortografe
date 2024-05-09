@@ -8,6 +8,7 @@
    core_unix
    core_unix.sys_unix
    ortografe
+   ortografe_embedded
    patience_diff
  )
  (preprocess (pps ppx_jane)))

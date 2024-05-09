@@ -1,5 +1,3 @@
-val erofa : (string, string) Hashtbl.t Lazy.t
-val rect1990 : (string, string) Hashtbl.t Lazy.t
 type options =
   { convert_uppercase : bool
   ; dict : string -> string option
@@ -34,7 +32,6 @@ val map_zip
 module More_markup = More_markup
   
 (**/**)
-val extension_dict1990_gen_csv : string
 module Private : sig
   val grab_from_zip : string -> string -> string
   val convert_officeopenxml : [< `Docx | `Pptx ] -> ?convert_text:(string -> string) -> _ convert

@@ -201,7 +201,7 @@ let from_filesystem root path request =
 
 let embedded : Dict_gen_common.Dict_gen.embedded =
   { data_lexique_Lexique383_gen_tsv = Ortografe_embedded.data_lexique_Lexique383_gen_tsv
-  ; extension_dict1990_gen_csv = Ortografe.extension_dict1990_gen_csv
+  ; extension_dict1990_gen_csv = Ortografe_embedded.extension_dict1990_gen_csv
   }  
 
 let define_client_ip : Dream.middleware =
@@ -336,9 +336,9 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                        let dict, plurals_in_s =
                          match rules with
                          | [] ->
-                            Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.erofa), None
+                            Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa), None
                          | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
-                            Stdlib.Hashtbl.find_opt (Lazy.force Ortografe.rect1990), None
+                            Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.rect1990), None
                          | _ ->
                             let dict, metadata = (Lazy.force staged) rules in
                             dict, metadata.plurals_in_s

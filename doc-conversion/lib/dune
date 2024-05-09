@@ -11,14 +11,3 @@
  )
  (preprocess (pps ppx_jane ppx_lazy_option_op ppx_partial))
 )
-
-(rule
- (deps
-   (sandbox always)
-   (:erofa %{project_root}/extension/dict.gen.csv)
-   (:rect1990 %{project_root}/extension/dict1990.gen.csv))
- (action (with-stdout-to dict.ml
-          (run bash
-               -euo pipefail
-               -c "echo -n 'let extension_dict_gen_csv = {|'; cat %{erofa}; echo '|}';
-                   echo -n 'let extension_dict1990_gen_csv = {|'; cat %{rect1990}; echo '|}';"))))
