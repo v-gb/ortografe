@@ -17,3 +17,9 @@
    %{project_root}/dict-gen/test/.dict_gen_tests.inline-tests/inline_test_runner_dict_gen_tests.exe
  )
  (action (copy site/server/server.exe server_all.exe)))
+
+(rule
+ (target flow.svg)
+ (deps (sandbox))
+ (mode promote)
+ (action (run dot -Tsvg %{dep:flow.dot} -o %{target})))

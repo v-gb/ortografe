@@ -59,3 +59,7 @@ $ make all-w
 ```
 
 Please open an issue if you want to build this repository, but can't!
+
+# How data flows
+
+![](flow.svg)
