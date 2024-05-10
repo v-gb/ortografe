@@ -119,7 +119,7 @@ let convert ?convert_text typ ~options src ~dst =
 let convert_string ~ext ~options src =
   match of_ext ext with
   | None -> None
-  | Some (ext, typ) -> Some (ext, convert typ ~options src ~dst:String)
+  | Some (ext, typ) -> Some (`ext ext, convert typ ~options src ~dst:String)
 
 let open_channel dp name =
   let out_ch = Out_channel.open_bin name in

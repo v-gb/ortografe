@@ -20,7 +20,7 @@ val epub : ?convert_text:(string -> string) -> _ convert
 val officeopenxml_old : [< `Doc | `Ppt ] -> ?convert_text:(string -> string) -> _ convert
 val opendocument : ?convert_text:(string -> string) -> _ convert
 
-val convert_string : ext:string -> options:options -> string -> (string * string) option
+val convert_string : ext:string -> options:options -> string -> ([ `ext of string ] * string) option
 val convert_files : ?src_type:string -> options:options -> string option -> string option -> unit
 val ext_conv : ?src_type:string -> string option -> string option -> [< `Extract | `Insert of string option ] -> unit
 
