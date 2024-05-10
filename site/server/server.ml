@@ -186,7 +186,8 @@ let from_filesystem root path request =
        the screenshot and the data (mostly for the clients to avoid downloading
        large stuff over and over in the last case). *)
     match path with
-    | "dict.js" | "dict_gen.bc.js" -> true
+    | "dict.js" -> true
+    | _ when String.ends_with path ~suffix:".bc.js" -> true
     | _ ->
        match Filename.extension path with
        | ".png" | ".svg" | ".jpg" | ".csv" | ".tsv" -> true
