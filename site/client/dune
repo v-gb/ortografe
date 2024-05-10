@@ -12,5 +12,9 @@
 
 (rule
  (target index.html)
- (deps client_bin.exe client_lib.cmxs)
+ (deps
+  (sandbox always)
+   ../static/books.html
+   client_bin.exe
+   client_lib.cmxs)
  (action (run ./client_bin.exe)))
