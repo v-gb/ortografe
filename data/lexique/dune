@@ -64,7 +64,21 @@
                       when ortho like 'h%'
                       then
                         case
-                        when ortho like 'hai%' or ortho like 'haï%' then 't'
+                        when ortho like 'hai%'
+                          or ortho like 'haï%'
+                          or ortho like 'hach%'
+                          or ortho like 'handicap%'
+                          or ortho like 'hargn%'
+                          or ortho like 'hant%'
+                          or ortho like 'hât%'
+                          or ortho like 'harna%'
+                          or ortho like 'hiérarc%'
+                          or ortho like 'harass%'
+                          or ortho like 'hêtrai%'
+                          or ortho like 'hideu%'
+                          or ortho like 'hockey%'
+                          or ortho like 'hulul%'
+                        then 't'
                         when coalesce(w_lemme.h_aspire, w.h_aspire, 'true') = 'true' then 't'
                         else 'f'
                         end
@@ -78,3 +92,4 @@
                 and ortho not like '%ñ%'
                 and ortho not like '%ã%'
               order by cast (freqfilms2 as real) desc"))))
+
