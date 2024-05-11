@@ -430,7 +430,7 @@ let section_regles () =
     ; p ~cl:"font-size: 0.8em;"
         [ text "Érofa propose également une "
         ; a ~href:"http://www.participepasse.info/"
-            [ text "règle sur l'accord du participe passé avec avoir" ]
+            [ text "règle sur l'accord du participe passé" ]
         ; text ", qui est recommandée par plusieurs instances francophones \
                 compétentes, mais les outils de ce site ne peuvent pas l'appliquer."
         ]
