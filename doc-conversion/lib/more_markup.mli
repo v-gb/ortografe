@@ -2,6 +2,8 @@
 
 val docx_ns : string
 
+val concat_map : ('a -> 'b list) -> ('a, 'sync) Markup.stream -> ('b, 'sync) Markup.stream
+
 type name = Markup.name [@@deriving equal, sexp_of]
 type 'a node = 'a Markup.node [@@deriving sexp_of]
 

@@ -38,11 +38,11 @@ let odt_transform_interleaved ~convert_text signal =
       ~embed:(fun s -> `Text [s])
       ~convert:convert_text
   in
-  Markup.transform (fun () elt ->
+  More_markup.concat_map (fun elt ->
       match elt with
       | `Start_element (ns_tag, _) ->
          Stack.push stack ns_tag;
-         Text.Interleaved.emit_structure state elt `Not_special, Some ()
+         Text.Interleaved.emit_structure state elt `Not_special
       | `End_element ->
          let effect =
            match Stack.pop stack with
@@ -50,7 +50,7 @@ let odt_transform_interleaved ~convert_text signal =
            | Some (ns, ("s" | "tab" | "line-break")) when String.(=) ns text_ns -> `Space
            | _ -> `Not_special
          in
-         Text.Interleaved.emit_structure state elt effect, Some ()
+         Text.Interleaved.emit_structure state elt effect
       | `Text strs when (
         let ns, tag = Stack.top_exn stack in
         match tag with
@@ -61,10 +61,10 @@ let odt_transform_interleaved ~convert_text signal =
           -> String.(=) ns text_ns
         | _ -> false
       ) ->
-         Text.Interleaved.emit_text state (String.concat strs), Some ()
+         Text.Interleaved.emit_text state (String.concat strs)
        | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ ->
-         Text.Interleaved.emit_structure state elt `Not_special, Some ()
-    ) () signal
+         Text.Interleaved.emit_structure state elt `Not_special
+    ) signal
 
 let convert ?convert_text ?buf ~options src ~dst =
   let buf = buffer buf in

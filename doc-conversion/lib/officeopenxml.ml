@@ -41,25 +41,25 @@ let convert_stream ~convert_text ~doc_ns signal =
   let open Core in
   let stack = Stack.create () in
   let state = Text.Interleaved.create ~embed:(fun s -> `Text [s]) ~convert:convert_text in
-  Markup.transform (fun () elt ->
+  More_markup.concat_map (fun elt ->
       match elt with
       | `Start_element (ns_tag, _) ->
          Stack.push stack ns_tag;
-         Text.Interleaved.emit_structure state elt `Not_special, Some ()
+         Text.Interleaved.emit_structure state elt `Not_special
       | `End_element ->
          let effect =
            match Stack.pop stack with
            | Some (ns, "p") when String.(=) ns doc_ns -> `Flush
            | _ -> `Not_special
          in
-         Text.Interleaved.emit_structure state elt effect, Some ()
+         Text.Interleaved.emit_structure state elt effect
       | `Text strs when
              [%compare.equal: (string * string) option] (Stack.top stack) (Some (doc_ns, "t"))
         ->
-         Text.Interleaved.emit_text state (String.concat strs), Some ()
+         Text.Interleaved.emit_text state (String.concat strs)
       | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ ->
-         Text.Interleaved.emit_structure state elt `Not_special, Some ()
-    ) () signal
+         Text.Interleaved.emit_structure state elt `Not_special
+    ) signal
 
 let ns = function
   | `Docx -> More_markup.docx_ns

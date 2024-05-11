@@ -1,5 +1,9 @@
 open Core
 
+let concat_map f t =
+  Markup.transform (fun () a ->
+      f a, Some ()) () t
+
 let docx_ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
 type name = string * string [@@deriving equal]
