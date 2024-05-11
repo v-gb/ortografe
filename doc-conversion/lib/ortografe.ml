@@ -52,24 +52,22 @@ let officeopenxml = Officeopenxml.convert
 let officeopenxml_old = Officeopenxml.convert_old
 let opendocument = Opendocument.convert
 
-let epub ?convert_text ?buf ~options src ~dst =
-  let buf = buffer buf in
+let epub ?convert_text ~options src ~dst =
   Zip.map src (fun member contents ->
       (* The xhtml is the bulk of the pages, but in principle, we
          could rewrite more stuff: content.opf, toc.ncx *)
       match Filename.extension (Zipc.Member.path member) with
       | ".xhtml" | ".html" -> (* in principle we'd need to read the root file to know how
                                  to interpret the various files. *)
-         Some (xhtml ?convert_text ~buf ~options (contents ()) ~dst:String)
+         Some (xhtml ?convert_text ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 
-let htmlz ?convert_text ?buf ~options src ~dst =
-  let buf = buffer buf in
+let htmlz ?convert_text ~options src ~dst =
   Zip.map src (fun member contents ->
       match Filename.extension (Zipc.Member.path member) with
       | ".html" ->
-         Some (html ?convert_text ~buf ~options (contents ()) ~dst:String)
+         Some (html ?convert_text ~options (contents ()) ~dst:String)
       | _ -> None)
   |> write_out dst
 

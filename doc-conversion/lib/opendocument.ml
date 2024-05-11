@@ -66,12 +66,13 @@ let odt_transform_interleaved ~convert_text signal =
          Text.Interleaved.emit_structure state elt `Not_special
     ) signal
 
-let convert ?convert_text ?buf ~options src ~dst =
-  let buf = buffer buf in
+let convert ?convert_text ~options src ~dst =
   let convert_text =
     match convert_text with
     | Some f -> f
-    | None -> fun src -> Text.convert ~buf ~options src ~dst:String
+    | None ->
+       let buf = buffer None in
+       fun src -> Text.convert ~buf ~options src ~dst:String
   in
   Zip.map src (fun member contents ->
       match Zipc.Member.path member with

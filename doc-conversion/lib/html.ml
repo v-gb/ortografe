@@ -33,20 +33,20 @@ let html_transform ~convert_text signal =
       else elt)
     signal
 
-let convert ?convert_text ?buf ~options src ~dst =
+let convert ?convert_text ~options src ~dst =
   let convert_text =
     convert_text
     ||?
-      let buf = Common.buffer buf in
+      let buf = Common.buffer None in
       fun src -> Text.convert ~buf ~options src ~dst:String
   in
   More_markup.transform ~flavor:`Html src ~dst ~transform:(html_transform ~convert_text)
 
-let convert_xhtml ?convert_text ?buf ~options src ~dst =
+let convert_xhtml ?convert_text ~options src ~dst =
   let convert_text =
     convert_text
     ||?
-      let buf = Common.buffer buf in
+      let buf = Common.buffer None in
       fun src -> Text.convert ~buf ~options src ~dst:String
   in
   More_markup.transform ~flavor:`Xml src ~dst ~transform:(html_transform ~convert_text)

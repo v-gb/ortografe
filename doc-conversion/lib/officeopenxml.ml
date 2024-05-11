@@ -81,24 +81,24 @@ let files_to_rewrite = function
          | _ -> false
        else false)
 
-let convert_xml which ?convert_text ?buf ~options src ~dst =
-  let buf = buffer buf in
+let convert_xml which ?convert_text ~options src ~dst =
   let convert_text =
     match convert_text with
     | Some f -> f
-    | None -> fun src -> Text.convert ~buf ~options src ~dst:String
+    | None ->
+       let buf = buffer None in
+       fun src -> Text.convert ~buf ~options src ~dst:String
   in
   More_markup.transform ~flavor:`Xml src ~dst ~transform:(fun signals ->
       signals
       |> drop_squigglies
       |> convert_stream ~convert_text ~doc_ns:(ns which))
 
-let convert which ?convert_text ?buf ~options src ~dst =
-  let buf = buffer buf in
+let convert which ?convert_text ~options src ~dst =
   let files_to_rewrite = files_to_rewrite which in
   Zip.map src (fun member contents ->
       if files_to_rewrite (Zipc.Member.path member)
-      then Some (convert_xml ?convert_text which ~buf ~options (contents ()) ~dst:String)
+      then Some (convert_xml ?convert_text which ~options (contents ()) ~dst:String)
       else None)
   |> write_out dst
 
@@ -107,8 +107,7 @@ let sys_command_exn str =
   if i <> 0
   then failwith (str ^ " exited with code " ^ Int.to_string i)
 
-let convert_old which ?convert_text ?buf ~options src ~dst =
-  let buf = buffer buf in
+let convert_old which ?convert_text ~options src ~dst =
   (* should put a time limit and memory, perhaps with the cgroup exe? *)
   let d = Filename.temp_dir "ortografe" "tmp" in
   Fun.protect
@@ -134,4 +133,4 @@ let convert_old which ?convert_text ?buf ~options src ~dst =
         (match which with
          | `Doc -> `Docx
          | `Ppt -> `Pptx)
-        ~buf ~options src ~dst)
+        ~options src ~dst)

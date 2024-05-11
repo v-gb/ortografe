@@ -1,6 +1,6 @@
 (** Converts text between spelling based on the given options *)
 
-val convert : _ Common.convert
+val convert : ?buf:Buffer.t -> _ Common.convert
 
 module Interleaved : sig
   (** This is a generalization of convert that allows one to provide interleaved text and

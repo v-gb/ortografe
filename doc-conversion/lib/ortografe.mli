@@ -9,10 +9,10 @@ type 'a out =
   | Channel : Out_channel.t -> unit out
   | String : string out
   | Ignore : unit out
-type 'a convert = ?buf:Buffer.t -> options:options -> string -> dst:'a out -> 'a
+type 'a convert = options:options -> string -> dst:'a out -> 'a
 val max_size : int ref
 
-val pure_text : ?convert_text:(string -> string) -> _ convert
+val pure_text : ?convert_text:(string -> string) -> ?buf:Buffer.t -> _ convert
 val html : ?convert_text:(string -> string) -> _ convert
 val htmlz : ?convert_text:(string -> string) -> _ convert
 val officeopenxml : [< `Docx | `Pptx ] -> ?convert_text:(string -> string) -> _ convert
