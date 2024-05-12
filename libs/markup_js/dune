@@ -1,0 +1,4 @@
+(library
+ (name markup_js)
+ (libraries markup brr)
+ (preprocess (pps ppx_partial ppx_lazy_option_op)))
