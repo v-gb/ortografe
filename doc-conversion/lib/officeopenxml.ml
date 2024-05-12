@@ -111,18 +111,23 @@ let sys_command_exn str =
   then failwith (str ^ " exited with code " ^ Int.to_string i)
 
 let convert_old which ?convert_text ~options src ~dst =
+  let old_ext =
+    match which with
+    | `Doc -> "doc"
+    | `Ppt -> "ppt"
+  in
+  let new_ext = old_ext ^ "x" in
+  (match Stdlib.Sys.backend_type with
+  | Native | Bytecode -> ()
+  | Other _ ->
+     failwith [%string "Les fichiers « .%{old_ext} » ne sont pas supportés ici. Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."]
+  );
   (* should put a time limit and memory, perhaps with the cgroup exe? *)
   let d = Filename.temp_dir "ortografe" "tmp" in
   Fun.protect
     ~finally:(fun () ->
       sys_command_exn [%string {|rm -rf -- %{Filename.quote d}|}])
     (fun () ->
-      let old_ext =
-        match which with
-        | `Doc -> "doc"
-        | `Ppt -> "ppt"
-      in
-      let new_ext = old_ext ^ "x" in
       let old_path = Filename.concat d ("it." ^ old_ext) in
       let new_path = old_path ^ "x" in
       Out_channel.with_open_bin old_path

@@ -13,20 +13,31 @@ let convert_string dict_contents =
   in
   fun ~filename file_contents ->
   let `ext new_ext, new_text =
-    Ortografe.convert_string
-      ~ext:(Stdlib.Filename.extension filename)
-      ~options:{ convert_uppercase = true
-               ; dict
-               ; interleaved = true
-               ; plurals_in_s = metadata.plurals_in_s ||? true
-               ; impl =
-                   { parse = (fun ~flavor src ->
-                       Fun (Markup_js.parse ~flavor src))
-                   ; print = Ortografe.markup_print_impl.print
-                   }
-      }
-      file_contents
-    ||? failwith ("type de fichier non supporté: " ^ filename)
+    try
+      Ortografe.convert_string
+        ~ext:(Stdlib.Filename.extension filename)
+        ~options:{ convert_uppercase = true
+                 ; dict
+                 ; interleaved = true
+                 ; plurals_in_s = metadata.plurals_in_s ||? true
+                 ; impl =
+                     { parse = (fun ~flavor src ->
+                         Fun (Markup_js.parse ~flavor src))
+                     ; print = Ortografe.markup_print_impl.print
+                     }
+        }
+        file_contents
+      ||? failwith ("type de fichier non supporté: " ^ filename)
+    with e ->
+      (* The "Failure" special-case is to avoid escaping utf8. We'd need the
+         Sexp.to_string functions we have elsewhere here as well. Although ideally, the
+         conversion of ocaml exception into javascript exceptions would be more
+         general, not a hack like here. *)
+      (match e with
+       | Failure s -> s
+       | _ -> Exn.to_string e)
+      |> Jstr.of_string
+      |> Jv.throw
   in
   Stdlib.Filename.remove_extension filename ^ "-conv" ^ new_ext,
   new_text
