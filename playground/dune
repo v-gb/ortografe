@@ -1,0 +1,17 @@
+(executable
+ (name x)
+ (libraries base brr brrex js_of_ocaml)
+ (js_of_ocaml (flags --source-map-inline --pretty))
+ (preprocess (pps ppx_sexp_conv))
+ (modes js))
+
+(rule
+ (target foo.html)
+ (deps x.bc.js)
+ (action (bash "
+{
+echo '<html><head><script>';
+cat x.bc.js
+echo '</script></head></html>'
+} > foo.html
+")))
