@@ -1,7 +1,20 @@
 external js_expr : string -> 'a = "caml_js_expr"
 let throw e =
   (js_expr "((exn) => { throw exn })" : Jv.Error.t -> _) e
-             
+
+let fut_to_promise'
+    : ok:('a -> Jv.t) -> error:('b -> Jv.t) -> ('a, 'b) Fut.result -> Jv.Promise.t
+  = fun ~ok ~error f ->
+  Jv.Promise.bind (Jv.get (Obj.magic f) "fut")
+    (function
+     | Ok v -> Jv.Promise.resolve (ok v)
+     | Error e -> Jv.Promise.reject (error e))
+
+let fut_to_promise
+    : 'a. ok:('a -> Jv.t) -> 'a Fut.or_error -> Jv.Promise.t
+  = fun ~ok f ->
+  fut_to_promise' ~ok ~error:Jv.of_error f
+  
 let is_array jv =
   Jv.call (Jv.get Jv.global "Array") "isArray" [| jv |]
   |> Jv.to_bool

@@ -100,7 +100,7 @@ let with_exn_in_dom_async id (f : unit -> 'a Fut.or_error) : 'a Fut.or_error =
   })|} : Jstr.t -> Jv.t -> Jv.t)
     id (Jv.callback ~arity:1
           (fun () ->
-            Fut.to_promise ~ok:Fn.id (f ())))
+            Brrex.fut_to_promise ~ok:Fn.id (f ())))
   |> Fut.of_promise ~ok:Fn.id
 
 let convert_file_handle_errors id dict_content =
