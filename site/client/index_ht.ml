@@ -451,7 +451,7 @@ let section_transcription_interactive () =
 
 let email_link children = elt "a" ~attrs:["class", "mailelt"] children
 
-let submit_file f =
+let submit_file ?replace_onchange ?(attrs = []) f =
   let upload_css = {|
   background-color: #e5fbe5;
   border: 1.5px solid;
@@ -469,6 +469,7 @@ let submit_file f =
     ~attrs:[ "action", "/conv"
            ; "method", "post"
            ; "enctype", "multipart/form-data"
+           ; +attrs
            ]
     (f [ elt "label"
            ~cl:upload_css
@@ -478,7 +479,9 @@ let submit_file f =
                ; "name", "file"
                ; "accept", ".doc,.docx,.odt,.odp,.ppt,.pptx,.html,.xhtml,.htmlz,\
                             .epub,.txt,.mkd,.md"
-               ; "onchange", "form.submit()"
+               ; +match replace_onchange with
+                  | None -> [ "onchange", "form.submit()" ]
+                  | Some l -> l
                ]
            ; text "choisir un fichier"
            ]
@@ -954,6 +957,10 @@ let main () : node =
             ; section_autres_orthographes ()
             ; section_donnees ()
             ; section_aller_plus_loin ()
+            ; submit_file
+                ~attrs:["id", "doc-conv"; "style", "display: none"]
+                ~replace_onchange:["id", "doc-conv-button"]
+                (fun z -> [ div ~attrs:["id", "doc-conv-button-error"] []; +z ])
             ]
         ]
     ]

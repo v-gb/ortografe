@@ -167,7 +167,9 @@ let actual_from_system root disk_path _request =
 let from_filesystem root path request =
   let disk_path, response_headers =
     match path with
-    | "Lexique383.gen.tsv" | "dict.js" ->
+    | "Lexique383.gen.tsv"
+    | "dict.js"
+    | "ortografe_js.bc.js" ->
        if
          List.exists (fun s ->
              String.split_on_char ',' s

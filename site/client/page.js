@@ -79,6 +79,28 @@ if (user_text2) {
     })
 }
 
+const lazy_doc_conversion = async_lazy(async () => {
+    await getScript("/static/doc_conversion.bc.js");
+    return doc_conversion;
+})
+const lazy_conv = async_lazy(async () => {
+    const doc_conversion = await lazy_doc_conversion();
+    return doc_conversion.convert('doc-conv-button-error',
+                                  'alice,saucissonette\nlapin,lapinou\nanimaux,animals\n')
+})
+const doc_conv_button = document.getElementById('doc-conv-button')
+if (doc_conv_button) {
+    doc_conv_button.addEventListener("change", async (e) => {
+        // problem: can't send the same file twice ! Should unset the data or something.
+        e.preventDefault();
+        const conv = await lazy_conv();
+        await conv(e.target.files.item(0))
+    })
+    function doc_conv() {
+        document.getElementById('doc-conv').style.display = 'unset'
+    }
+}
+
 for (const elt of document.getElementsByClassName('mailelt')) {
     elt.setAttribute('href', 'mzilto:contzct@orthogrzphe-rztionnelle.info'.replaceAll('z', 'a'))
 }
