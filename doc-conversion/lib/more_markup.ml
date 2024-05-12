@@ -1,8 +1,26 @@
 open Core
 
-let concat_map f t =
-  Markup.transform (fun () a ->
-      f a, Some ()) () t
+let map f = function
+  | Common.Markup s -> Common.Markup (Markup.map f s)
+  | Fun producer -> Fun (fun k -> producer (fun a -> k (f a)))
+
+let filter f = function
+  | Common.Markup s -> Common.Markup (Markup.filter f s)
+  | Fun producer -> Fun (fun k -> producer (fun a -> if f a then k a))
+
+let concat_map f = function
+  | Common.Markup s -> Common.Markup (Markup.transform (fun () a -> f a, Some ()) () s)
+  | Fun producer -> Fun (fun k -> producer (fun a -> List.iter ~f:k (f a)))
+
+let duplicate = function
+  | Common.Markup s ->
+     let l = Markup.to_list s in
+     Common.Markup (Markup.of_list l), Common.Markup (Markup.of_list l)
+  | Fun producer ->
+     let r = ref [] in
+     producer (fun x -> r := x :: !r);
+     let l = List.rev !r in
+     Fun (List.iter ~f:__ l), Fun (List.iter ~f:__ l)
 
 let docx_ns = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
@@ -68,18 +86,22 @@ let trees signals =
 
 open Common
 
-let transform ~transform ~flavor src ~dst =
+let transform (type a) ~impl ~transform ~flavor src ~(dst : a out) : a =
   (* https://v3.ocaml.org/p/markup/latest/doc/Markup/index.html
      Note: no implicit closing of tags *)
-  (match flavor with
-   | `Xml -> Markup.parse_xml (Markup.string src)
-   | `Html -> Markup.parse_html (Markup.string src))
-  |> Markup.signals
-  |> transform
-  |> (match flavor with
-      | `Xml -> Markup.write_xml __
-      | `Html -> Markup.write_html __)
-  |> markup_output dst
+  let yield =
+    impl.parse ~flavor src
+    |> transform
+    |> impl.print ~flavor
+  in
+  match dst with
+  | Ignore -> yield ignore ignore
+  | String ->
+     let b = Common.buffer None in
+     yield (Buffer.add_char b) (Buffer.add_string b);
+     Buffer.contents b
+  | Channel ch ->
+     yield (Out_channel.output_char ch) (Out_channel.output_string ch)
 
 let text_elt ~convert_text = function
   | `Text strs -> `Text (List.map ~f:convert_text strs)

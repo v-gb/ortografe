@@ -3,6 +3,7 @@
  (libraries
    core
    markup
+   markup_print
    uucp
    uunf
    uuseg

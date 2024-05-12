@@ -51,6 +51,7 @@ let rec rewrite ~books_html = function
                      ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa)
                      ; interleaved = true
                      ; plurals_in_s = true
+                     ; impl = Ortografe.markup_impl
                      }
             ~dst:String
        |> trees_of_string

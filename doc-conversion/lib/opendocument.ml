@@ -6,7 +6,7 @@ let odt_transform ~convert_text signal =
   let text_ns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0" in
   let open Core in
   let stack = Stack.create () in
-  Markup.map (fun elt ->
+  More_markup.map (fun elt ->
       match elt with
       | `Start_element (ns_tag, _) ->
          Stack.push stack ns_tag;
@@ -78,7 +78,9 @@ let convert ?convert_text ~options src ~dst =
       match Zipc.Member.path member with
       | "content.xml"
       | "styles.xml" (* contains header/footer *) ->
-         Some (More_markup.transform ~flavor:`Xml
+         Some (More_markup.transform
+                 ~impl:options.impl
+                 ~flavor:`Xml
                  ~transform:(
                    if options.interleaved
                    then odt_transform_interleaved ~convert_text

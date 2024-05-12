@@ -25,7 +25,7 @@ let drop_squigglies signals =
    *)
   let open Core in
   let stack = Stack.of_list [true] in
-  Markup.filter (function
+  More_markup.filter (function
       | `Start_element (name, _) ->
          Stack.push stack
            (not ([%compare.equal: (string * string)] name (More_markup.docx_ns, "proofErr")));
@@ -89,7 +89,10 @@ let convert_xml which ?convert_text ~options src ~dst =
        let buf = buffer None in
        fun src -> Text.convert ~buf ~options src ~dst:String
   in
-  More_markup.transform ~flavor:`Xml src ~dst ~transform:(fun signals ->
+  More_markup.transform
+    ~impl:options.impl
+    ~flavor:`Xml src ~dst
+    ~transform:(fun signals ->
       signals
       |> drop_squigglies
       |> convert_stream ~convert_text ~doc_ns:(ns which))

@@ -1,8 +1,20 @@
+type 'a stream = 'a Common.stream =
+  | Markup of ('a, Markup.sync) Markup.stream
+  | Fun of (('a -> unit) -> unit)
+
+type impl =
+  { parse : flavor:[ `Xml | `Html ] -> string -> Markup.signal stream
+  ; print : flavor:[ `Xml | `Html ] -> Markup.signal stream -> (char -> unit) -> (string -> unit) -> unit
+  }
+val markup_impl : impl
+val markup_print_impl : impl
+
 type options =
   { convert_uppercase : bool
   ; dict : string -> string option
   ; interleaved : bool
   ; plurals_in_s : bool
+  ; impl : impl
   }
 
 type 'a out =
@@ -30,6 +42,7 @@ val map_zip
       -> string
 
 module More_markup = More_markup
+module Common = Common
   
 (**/**)
 module Private : sig

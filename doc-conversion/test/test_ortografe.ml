@@ -1,12 +1,5 @@
 open Core
 
-let options =
-  { Ortografe.convert_uppercase = false
-  ; dict = Stdlib.Hashtbl.find_opt (force Ortografe_embedded.erofa)
-  ; interleaved = true
-  ; plurals_in_s = true
-  }
-
 let pp_xml src =
   Markup.parse_xml
     (Markup.string src)
@@ -52,6 +45,32 @@ let diff_strings ?(context = 1) str1 str2 =
     List.rev !b
     |> List.map ~f:(fun (sign, s) -> sign ^ s ^ "\n")
     |> String.concat
+
+let options =
+  { Ortografe.convert_uppercase = false
+  ; dict = Stdlib.Hashtbl.find_opt (force Ortografe_embedded.erofa)
+  ; interleaved = true
+  ; plurals_in_s = true
+  ; impl =
+      { parse = Ortografe.markup_impl.parse
+      ; print = (fun ~flavor stream _out_char out_str ->
+        let stream1, stream2 = Ortografe.More_markup.duplicate stream in
+        let print stream f =
+          let buf = Ortografe.Common.buffer None in
+          f ~flavor stream (Buffer.add_char buf) (Buffer.add_string buf);
+          Buffer.contents buf
+        in
+        let r1 = print stream1 Ortografe.markup_impl.print in
+        let r2 = print stream2 Ortografe.markup_print_impl.print in
+        if String.(<>) r1 r2
+        then
+          print_s
+            [%sexp "markup printer and custom fork print differently"
+            , `raw (diff_strings r1 r2 : string)
+            , `hum (diff_strings (pp_xml r1) (pp_xml r2) : string)];
+        out_str r1)
+      }
+  }
 
 let%expect_test "pure text" = (
   let test = "

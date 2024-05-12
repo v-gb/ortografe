@@ -57,6 +57,7 @@ let bench =
                        | "false" -> false
                        | _ | exception Not_found -> true)
                   ; plurals_in_s = metadata.plurals_in_s ||? true
+                  ; impl = Ortografe.markup_impl
          }
          arg1 (Some "/dev/null");
        let t2 = Sys.time () in
@@ -226,6 +227,7 @@ let () =
                              | "false" -> false
                              | _ | exception Not_found -> true)
                         ; plurals_in_s = metadata.plurals_in_s ||? true
+                        ; impl = Ortografe.markup_impl
                         }
                ?src_type:input_type
                in_ out
