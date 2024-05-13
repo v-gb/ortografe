@@ -1,0 +1,4 @@
+(rule
+ (targets gboard-1990-1000.zip gboard-erofa-1000.zip)
+ (deps (sandbox))
+ (action (run ./generate-dict)))

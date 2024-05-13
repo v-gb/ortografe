@@ -713,6 +713,19 @@ let section_verificateurs () =
 let section_claviers () =
   section
     [ h3 [ text "Claviers" ]
+    ; div ~cl:"display: none"
+        (* Avec gboard, le fait qu'on ne puisse pas supprimer les entrées de façon
+           simple limite l'utilisation aux orthographes qu'on veut utiliser
+           permanennement, ce n'est pas vraiment utilisable pour érofa où au mieux un
+           utilisateur voudrait passer d'une orthographe à l'autre. *)
+        [ p [ a ~href:"/static/gboard-1990-1000.zip"
+                [ text "Dictionnaire 1990 pour gboard" ]
+            ; text " "
+            ; a ~href:"/static/gboard-erofa-1000.zip"
+                [ text "Dictionnaire Érofa pour gboard" ]
+            ]
+        ; a ~href:"https://www.reddit.com/r/gboard/comments/z89a3f/how_to_empty_user_dictionary/" [ text "seule méthode pour supprimer les entrées :(" ]
+        ]
     ; p [ text "Un clavier virtuel pour écrire en orthographe Érofa sur téléphone est \
                 en cours d'étude. Mais même sans, la plupart des claviers s'adaptent à \
                 votre orthographe après avoir tapé les mots quelques fois en \

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e -u -o pipefail
+
+function body {
+    sqlite3 -bail <<EOF
+.mode tabs
+.import ../data/lexique/Lexique383.gen.tsv l
+
+.mode csv
+create table d(old,new);
+.import $1 d
+
+.mode tabs
+select * from
+(select distinct '', d.new, 'fr-FR'
+ from l
+ inner join d on l.ortho = d.old
+ order by l.ROWID
+ limit $2) z
+order by 2;
+EOF
+}
+
+for name in 1990 erofa; do
+    if [ $name = 1990 ]; then
+        file=../extension/dict1990.gen.csv
+    else
+        file=../extension/dict.gen.csv
+    fi
+    size=1000
+    {
+        echo "# Gboard Dictionary version:1"
+        echo ""
+        body $file $size
+    } > dictionary.txt
+    zip -q gboard-$name-$size.zip dictionary.txt
+done
