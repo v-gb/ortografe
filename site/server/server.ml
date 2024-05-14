@@ -367,7 +367,14 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                     | _ -> respond_error_text `Bad_Request "")
                 | _ -> respond_error_text `Bad_Request ""
            )
-       ; Dream.get "/" (from_filesystem static_root "index.html")
+       ; Dream.get "/" (fun request ->
+             match Dream.header request "Host" with
+             | Some "ortografe-server.fly.dev" ->
+                (* Try to compel google search into showing the address below instead
+                   of the address above. *)
+                Dream.redirect ~code:308 request
+                  "https://orthographe-rationnelle.info"
+             | _ -> from_filesystem static_root "index.html" request)
        ; Dream.get "/static/**" (Dream.static ~loader:from_filesystem static_root)
        ]
 
