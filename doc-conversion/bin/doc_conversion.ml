@@ -1,9 +1,6 @@
 open Base
    
 external js_expr : string -> 'a = "caml_js_expr"
-let or_throw = function
-  | Ok v -> v
-  | Error e -> Brrex.throw e
 
 let convert_string dict_contents =
   let dict_contents = Jv.to_string dict_contents in
@@ -54,7 +51,7 @@ let download ~filename text =
                | `Jstr str ->
                   (Jstr.append
                      (Jstr.v "data:text/plain;charset=utf-8,")
-                     (or_throw (Brr.Uri.encode str)))
+                     (Brrex.or_throw (Brr.Uri.encode str)))
                | `Str str ->
                   (Jstr.append
                      (Jstr.v "data:text/plain;base64,")

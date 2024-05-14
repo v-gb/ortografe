@@ -118,7 +118,11 @@ let rpc : type q r.
     let* event = Brr.Ev.next Brr_io.Message.Ev.message
                    (Brr_webworkers.Worker.as_target worker) in
     Brr_webworkers.Worker.terminate worker;
-    Fut.return (Brr_io.Message.Ev.data (Brr.Ev.as_type event) : (r, Jv.Error.t) Result.t)
+    Fut.return
+      (Brrex.or_throw
+         (Brr_io.Message.Ev.data
+            (Brr.Ev.as_type event)
+          : ((r, Jv.Error.t) Result.t, Jv.Error.t) Result.t))
   )
 
 let generate_in_worker path (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n : Jv.t) profile =
@@ -129,7 +133,7 @@ let generate_in_worker path (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules
   let rules = (Stdlib.Obj.magic : Jv.t -> selected_rules) rules in
   let n = Jv.to_int n in
   let profile = Jv.to_bool profile in
-  Fut.to_promise
+  Brrex.fut_to_promise
     ~ok:(fun (dict, duration) -> Jv.of_jv_list [ Jv.of_string dict ; Jv.of_string duration ])
     (rpc
        ~local:(n = 0)
@@ -142,12 +146,14 @@ let () =
   if Brr_webworkers.Worker.ami ()
   then
     let open Fut.Syntax in
-    Fut.await
+    Brrex.fut_await
       (let* event = Brr.Ev.next Brr_io.Message.Ev.message Brr.G.target in
        let data = Brr_io.Message.Ev.data (Brr.Ev.as_type event) in
        match data with
        | `On_message data -> on_message data ~k:Jv.repr)
-      (fun res -> Brr_webworkers.Worker.G.post (res : (Jv.t, Jv.Error.t) Result.t))
+      (fun res ->
+        Brr_webworkers.Worker.G.post
+          (res : ((Jv.t, Jv.Error.t) Result.t, Jv.Error.t) Result.t))
   else
     Js_of_ocaml.Js.export "dict_gen"
       (Js_of_ocaml.Js.Unsafe.inject
