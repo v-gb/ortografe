@@ -259,9 +259,9 @@ let logger = function
      in
      let client =
        let s = Dream.client request in
-       match String.lsplit2 s ~on:':' with
-       | None -> s
-       | Some p -> fst p
+       match String.split s ~on:':' with
+       | [ host; _port ] -> host
+       | _ -> s (* ipv6 probably *)
      in
      Stdlib.prerr_endline [%string "%{ofday} %{method_} %{id#Int} %{client} %{Dream.target request}  %{user_agent}"];
      Stdlib.flush stderr;
