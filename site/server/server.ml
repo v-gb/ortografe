@@ -166,18 +166,18 @@ let actual_from_system root disk_path _request =
 
 let from_filesystem root path request =
   let disk_path, response_headers =
-    match path with
-    | "Lexique383.gen.tsv"
-    | "dict.js"
-    | "ortografe_js.bc.js" ->
-       if
-         List.exists (fun s ->
-             String.split_on_char ',' s
-             |> List.exists (fun s -> String.trim s = "gzip"))
-           (Dream.headers request "Accept-Encoding")
-       then path ^ ".gz", [("Content-Encoding", "gzip")] @ Dream.mime_lookup path
-       else path, []
-    | _ -> path, []
+    let has_compressed_version =
+      match path with
+      | "Lexique383.gen.tsv" | "dict.js" -> true
+      | _ -> String.ends_with path ~suffix:".bc.js"
+    in
+    if has_compressed_version
+    && List.exists (fun s ->
+           String.split_on_char ',' s
+           |> List.exists (fun s -> String.trim s = "gzip"))
+         (Dream.headers request "Accept-Encoding")
+    then path ^ ".gz", [("Content-Encoding", "gzip")] @ Dream.mime_lookup path
+    else path, []
   in
   let%lwt response =
     (if true then actual_from_system else Dream.from_filesystem)

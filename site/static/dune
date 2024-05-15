@@ -8,9 +8,13 @@
 (copy_files (files %{project_root}/extension/src/{{rewrite,dict}.js,rules-format.html}))
 (copy_files (files %{project_root}/keyboard/*.zip))
 (copy_files (files %{project_root}/edition/{Alice_au_pays_des_merveilles.epub,Alice_au_pays_des_merveilles-manual.epub}))
+
 (rule
   (target dict.js.gz)
   (action  (run gzip -f -n -k %{dep:dict.js})))
+(rule
+  (target dict_gen.bc.js.gz)
+  (action  (run gzip -f -n -k %{dep:dict_gen.bc.js})))
 (rule
   (target doc_conversion.bc.js.gz)
   (action  (run gzip -f -n -k %{dep:doc_conversion.bc.js})))
