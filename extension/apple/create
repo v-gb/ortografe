@@ -1,0 +1,27 @@
+#!/bin/zsh
+set -e -u -o pipefail
+
+function build {
+    cd ~/Downloads
+    curl -s -S https://orthographe-rationnelle.info/static/extension.zip -o extension.zip
+    curl -s -S https://orthographe-rationnelle.info/static/manual.diff -o manual.diff
+    rm -rf extension app
+    unzip -q -d extension extension.zip
+    mkdir app
+    cd app
+    # annoyingly, xcrun is nondeterministic, it generates fresh stuff everytime
+    # (and also put comments with the current user/time in some files)
+    xcrun safari-web-extension-converter ../extension
+    patch -V none -p0 < ../manual.diff
+}
+
+function extract_manual_diff {
+    # $1, $2: two directories containing the outputs of xcrun above, to diff,
+    # ignoring all the unstable nonsense
+    # The \t is necessary for the patch command above to work despite the spaces
+    # in the filenames.
+    (cd "$1"; find . -type f; cd ../"$2"; find . -type f) | sort -u | grep -v '\([.]png$\)\|\([.]swift$\)' | while read f; do diff -N --label "$f"$'\t2000-01-01 00:00:00' --label "$f"$'\t2000-01-01 00:00:00' -u <(cat "$1/$f" | LANG=C sed -e 's/3C[A-F0-9]*/ZZZ/g') <(cat "$2/$f" | LANG=C sed -e 's/3C[A-F0-9]*/ZZZ/g'); done 2>&1 > manual.diff
+    # can send data back via base64 + pastebin + check digest. ctxt.io seems ok.
+}
+
+build

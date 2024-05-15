@@ -1,0 +1,181 @@
+--- ./Orthographe rationnelle/Orthographe rationnelle.xcodeproj/project.pbxproj	2000-01-01 00:00:00
++++ ./Orthographe rationnelle/Orthographe rationnelle.xcodeproj/project.pbxproj	2000-01-01 00:00:00
+@@ -693,6 +693,7 @@
+ 			buildSettings = {
+ 				CODE_SIGN_STYLE = Automatic;
+ 				CURRENT_PROJECT_VERSION = 1;
++				DEVELOPMENT_TEAM = X3N6RHMK72;
+ 				GENERATE_INFOPLIST_FILE = YES;
+ 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+ 				INFOPLIST_KEY_CFBundleDisplayName = "Orthographe rationnelle Extension";
+@@ -723,6 +724,7 @@
+ 			buildSettings = {
+ 				CODE_SIGN_STYLE = Automatic;
+ 				CURRENT_PROJECT_VERSION = 1;
++				DEVELOPMENT_TEAM = X3N6RHMK72;
+ 				GENERATE_INFOPLIST_FILE = YES;
+ 				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+ 				INFOPLIST_KEY_CFBundleDisplayName = "Orthographe rationnelle Extension";
+@@ -757,9 +759,11 @@
+ 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+ 				CODE_SIGN_STYLE = Automatic;
+ 				CURRENT_PROJECT_VERSION = 1;
++				DEVELOPMENT_TEAM = X3N6RHMK72;
+ 				GENERATE_INFOPLIST_FILE = YES;
+ 				INFOPLIST_FILE = "iOS (App)/Info.plist";
+ 				INFOPLIST_KEY_CFBundleDisplayName = "Orthographe rationnelle";
++				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+ 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+ 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+ 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+@@ -770,7 +774,7 @@
+ 					"$(inherited)",
+ 					"@executable_path/Frameworks",
+ 				);
+-				MARKETING_VERSION = 1.0;
++				MARKETING_VERSION = 2.7;
+ 				OTHER_LDFLAGS = (
+ 					"-framework",
+ 					SafariServices,
+@@ -794,9 +798,11 @@
+ 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+ 				CODE_SIGN_STYLE = Automatic;
+ 				CURRENT_PROJECT_VERSION = 1;
++				DEVELOPMENT_TEAM = X3N6RHMK72;
+ 				GENERATE_INFOPLIST_FILE = YES;
+ 				INFOPLIST_FILE = "iOS (App)/Info.plist";
+ 				INFOPLIST_KEY_CFBundleDisplayName = "Orthographe rationnelle";
++				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+ 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+ 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+ 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+@@ -807,7 +813,7 @@
+ 					"$(inherited)",
+ 					"@executable_path/Frameworks",
+ 				);
+-				MARKETING_VERSION = 1.0;
++				MARKETING_VERSION = 2.7;
+ 				OTHER_LDFLAGS = (
+ 					"-framework",
+ 					SafariServices,
+@@ -830,6 +836,7 @@
+ 				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/Orthographe rationnelle.entitlements";
+ 				CODE_SIGN_STYLE = Automatic;
+ 				CURRENT_PROJECT_VERSION = 1;
++				DEVELOPMENT_TEAM = X3N6RHMK72;
+ 				ENABLE_HARDENED_RUNTIME = YES;
+ 				GENERATE_INFOPLIST_FILE = YES;
+ 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+@@ -861,6 +868,7 @@
+ 				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/Orthographe rationnelle.entitlements";
+ 				CODE_SIGN_STYLE = Automatic;
+ 				CURRENT_PROJECT_VERSION = 1;
++				DEVELOPMENT_TEAM = X3N6RHMK72;
+ 				ENABLE_HARDENED_RUNTIME = YES;
+ 				GENERATE_INFOPLIST_FILE = YES;
+ 				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+@@ -893,12 +901,15 @@
+ 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+ 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+ 				CODE_SIGN_ENTITLEMENTS = "macOS (App)/Orthographe rationnelle.entitlements";
++				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+ 				CODE_SIGN_STYLE = Automatic;
+ 				CURRENT_PROJECT_VERSION = 1;
++				DEVELOPMENT_TEAM = X3N6RHMK72;
+ 				ENABLE_HARDENED_RUNTIME = YES;
+ 				GENERATE_INFOPLIST_FILE = YES;
+ 				INFOPLIST_FILE = "macOS (App)/Info.plist";
+ 				INFOPLIST_KEY_CFBundleDisplayName = "Orthographe rationnelle";
++				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+ 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+ 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+ 				LD_RUNPATH_SEARCH_PATHS = (
+@@ -906,7 +917,7 @@
+ 					"@executable_path/../Frameworks",
+ 				);
+ 				MACOSX_DEPLOYMENT_TARGET = 10.14;
+-				MARKETING_VERSION = 1.0;
++				MARKETING_VERSION = 2.7;
+ 				OTHER_LDFLAGS = (
+ 					"-framework",
+ 					SafariServices,
+@@ -928,12 +939,15 @@
+ 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+ 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+ 				CODE_SIGN_ENTITLEMENTS = "macOS (App)/Orthographe rationnelle.entitlements";
++				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+ 				CODE_SIGN_STYLE = Automatic;
+ 				CURRENT_PROJECT_VERSION = 1;
++				DEVELOPMENT_TEAM = X3N6RHMK72;
+ 				ENABLE_HARDENED_RUNTIME = YES;
+ 				GENERATE_INFOPLIST_FILE = YES;
+ 				INFOPLIST_FILE = "macOS (App)/Info.plist";
+ 				INFOPLIST_KEY_CFBundleDisplayName = "Orthographe rationnelle";
++				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+ 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+ 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+ 				LD_RUNPATH_SEARCH_PATHS = (
+@@ -941,7 +955,7 @@
+ 					"@executable_path/../Frameworks",
+ 				);
+ 				MACOSX_DEPLOYMENT_TARGET = 10.14;
+-				MARKETING_VERSION = 1.0;
++				MARKETING_VERSION = 2.7;
+ 				OTHER_LDFLAGS = (
+ 					"-framework",
+ 					SafariServices,
+--- ./Orthographe rationnelle/Orthographe rationnelle.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist	2000-01-01 00:00:00
++++ ./Orthographe rationnelle/Orthographe rationnelle.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist	2000-01-01 00:00:00
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
++<plist version="1.0">
++<dict>
++	<key>IDEDidComputeMac32BitWarning</key>
++	<true/>
++</dict>
++</plist>
+--- ./Orthographe rationnelle/Orthographe rationnelle.xcodeproj/xcuserdata/user935576.xcuserdatad/xcschemes/xcschememanagement.plist	2000-01-01 00:00:00
++++ ./Orthographe rationnelle/Orthographe rationnelle.xcodeproj/xcuserdata/user935576.xcuserdatad/xcschemes/xcschememanagement.plist	2000-01-01 00:00:00
+@@ -0,0 +1,19 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
++<plist version="1.0">
++<dict>
++	<key>SchemeUserState</key>
++	<dict>
++		<key>Orthographe rationnelle (iOS).xcscheme_^#shared#^_</key>
++		<dict>
++			<key>orderHint</key>
++			<integer>1</integer>
++		</dict>
++		<key>Orthographe rationnelle (macOS).xcscheme_^#shared#^_</key>
++		<dict>
++			<key>orderHint</key>
++			<integer>0</integer>
++		</dict>
++	</dict>
++</dict>
++</plist>
+--- ./Orthographe rationnelle/iOS (Extension)/Info.plist	2000-01-01 00:00:00
++++ ./Orthographe rationnelle/iOS (Extension)/Info.plist	2000-01-01 00:00:00
+@@ -4,6 +4,8 @@
+ <dict>
+ 	<key>NSExtension</key>
+ 	<dict>
++		<key>ITSAppUsesNonExemptEncryption</key>
++		<string>NO</string>
+ 		<key>NSExtensionPointIdentifier</key>
+ 		<string>com.apple.Safari.web-extension</string>
+ 		<key>NSExtensionPrincipalClass</key>
+--- ./Orthographe rationnelle/macOS (Extension)/Info.plist	2000-01-01 00:00:00
++++ ./Orthographe rationnelle/macOS (Extension)/Info.plist	2000-01-01 00:00:00
+@@ -2,6 +2,8 @@
+ <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+ <plist version="1.0">
+ <dict>
++	<key>ITSAppUsesNonExemptEncryption</key>
++	<false/>
+ 	<key>NSExtension</key>
+ 	<dict>
+ 		<key>NSExtensionPointIdentifier</key>

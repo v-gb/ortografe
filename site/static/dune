@@ -43,6 +43,8 @@
 
 (copy_files
  (files %{project_root}/extension/store-page/screenshot-1280-800.png))
+(rule (action (copy %{project_root}/extension/apple/create apple-create)))
+(rule (action (copy %{project_root}/extension/apple/manual.diff manual.diff)))
 
 (rule
  (target chrome.svg)
