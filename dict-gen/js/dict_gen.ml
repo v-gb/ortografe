@@ -142,6 +142,29 @@ let generate_in_worker path (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules
        (lexique_url, dict1990_url, rules, profile)
        (fun arg -> `On_message arg))
 
+let staged_generate =
+  Jv.callback ~arity:2
+    (fun lexique_url dict1990_url ->
+      Brrex.fut_to_promise
+        ~ok:Fn.id
+        (let open Fut.Result_syntax in
+         let* embedded =
+           let* data_lexique_Lexique383_gen_tsv = fetch lexique_url in
+           let* extension_dict1990_gen_csv = fetch dict1990_url in
+           Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
+                  ; extension_dict1990_gen_csv
+             }
+         in
+         let next_stage = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
+         Fut.ok (
+             Jv.callback ~arity:1 (fun (x : selected_rules) ->
+                 let f, _meta = next_stage x in
+                 Jv.callback ~arity:1 (fun jstr ->
+                     Jv.of_option
+                       ~none:Jv.null
+                       Jv.of_string
+                       (f (Jv.to_string jstr)))))))
+
 let () =
   if Brr_webworkers.Worker.ami ()
   then
@@ -158,6 +181,7 @@ let () =
     Js_of_ocaml.Js.export "dict_gen"
       (Js_of_ocaml.Js.Unsafe.inject
          (Jv.obj [| "generate", Jv.callback ~arity:6 generate_in_worker
+                  ; "staged_generate", staged_generate
                   ; "html_fragment", Jv.callback ~arity:1 html_fragment
                   ; "currently_selected_rules", Jv.callback ~arity:1 currently_selected_rules
             |]))

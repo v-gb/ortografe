@@ -784,13 +784,12 @@ let section_autres_orthographes () =
               ; br
               ; +button
               ])
+            ~attrs:["id", "form-conv"]
         ; br
         ; interactive_transcription
             ~id_textarea:"user-text2"
             ~id_converted_text:"converted-text2"
-            ~initial_text:(`Placeholder
-                             "Quand vous changez les règles ci-dessus, tapez quelque \
-                              chose ici pour mettre le texte à jour")
+            ~initial_text:(`Placeholder "Tapez le texte à transcrire ici.")
         ]
     ]
 
