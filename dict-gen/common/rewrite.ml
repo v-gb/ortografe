@@ -945,6 +945,7 @@ let _ : rule =
          keep_if_plausible env aligned_row new_ortho)
 
 let dummy_search_res : Rules.search_res = { path = []; surprise = 0 }
+
 let _ : rule list =
   let pluriel_en_plus = true in
   let e_accente_unique =
@@ -1102,9 +1103,12 @@ let _ : rule =
     "les règles de https://alfonic.org/"
     ~prefilter:(fun () -> `All)
     (fun () ->
-       (* problème :
-          - je ne vois de mention des liaisons dans les règles
-        *)
+      (* problèmes :
+         - il faudrait écrire les liaisons dans le mot qui suit
+           « des hôtes » -> « dé z-ot »
+         - il faudrait supprimer les apostrophes, qui ne sont pas utilisées pour
+           les apocopes mais à la place indiquent les e qui doivent être prononcés
+           dans les vers *)
       let graphem_by_phonem =
         Hashtbl.of_alist_exn (module Uchar)
           [ !!"a", "a" (* pas de â dans lexique *)
