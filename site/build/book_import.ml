@@ -45,22 +45,19 @@ let download_from_gutenberg url =
   let id = Filename.basename (Uri.path url) in
   Hyper.get [%string "https://www.gutenberg.org/cache/epub/%{id}/pg%{id}-h.zip"]
 
-let download url ~books_tmp ~title =
+let download ~before url ~books_tmp ~title =
   let url = Uri.of_string url in
   let source = which_source ~url in
   let path = dl_path ~books_tmp ~title ~source in
   if not (Sys_unix.file_exists_exn path) then (
     (* make it easier to do queries one by one, because they throttle so much *)
+    before ();
     let data =
       match source with
       | `Wikisource -> download_from_wikisource url
       | `Gutenberg -> download_from_gutenberg url
     in
     mkdir_and_write_all (dl_path ~books_tmp ~title ~source) ~data;
-    Printf.eprintf "waiting\n%!";
-    (* wikisource seem to be very aggressive about returning "429 Too Many Requests". Even 10s
-       of pause is not enough. *)
-    Unix.sleepf 60.;
   )
 
 let extract_zip ~data ~dst =
@@ -213,9 +210,18 @@ let download_all ~root =
       Sys_unix.command_exn
         [%string "tar -xf %{Sys.quote books_tar} -C %{Sys.quote books_tmp}"];
       
+      let first_wait = ref true in
       List.iter books ~f:(fun (title, _user_title, _author, url) ->
           Printf.eprintf "importing %s\n%!" title;
-          download ~books_tmp ~title url;
+          download ~before:(fun () ->
+              if not !first_wait then (
+                Printf.eprintf "waiting\n%!";
+                (* wikisource seem to be very aggressive about returning "429 Too Many
+                   Requests". Even 10s of pause is not enough. *)
+                Unix.sleepf 60.
+              );
+              first_wait := false)
+            ~books_tmp ~title url
         );
 
       (* https://reproducible-builds.org/docs/archives/ *)
