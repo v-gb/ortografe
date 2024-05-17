@@ -571,18 +571,40 @@ let section_transcription_en_ligne () =
 let section_transcription_locale () =
   section
     [ h3 [ text "Transcription de documents, sur votre ordinateur" ]
-    ; p [ text "Téléchargez "
-        ; a ~href:"/static/ortografe_cli.exe" ~attrs:["download", "ortografe-cli"]
-            [ text "le programme de transcription" ]
-        ; text "."
-        ]
-    ; p [ text "Notez que c'est un programme pour Linux, et sans interface graphique, \
-                seulement à la ligne de commande. Pour Windows, il est possible que \
-                cela marche sous "
-        ; a ~href:"https://learn.microsoft.com/fr-fr/windows/wsl/install"
-            [ text "WSL" ]
-        ; text ". Il est peut-être possible de compiler ce programme pour MacOS et \
-                Windows, à partir du dépôt source indiqué plus bas."
+    ; p [ text "Ce n'est utilisable que par les développeurs, actuellement." ]
+    ; image_list
+        [ (fun ~cl ->
+            img "/static/linux.svg" ~cl
+              [ "alt", "Le manchot Tux, mascote de Linux"
+              ; "width", "506"
+              ; "height", "600"
+          ])
+        , [ text "Téléchargez "
+          ; a ~href:"/static/ortografe_cli.exe" ~attrs:["download", "ortografe-cli"]
+              [ text "le programme de transcription" ]
+          ; text " à la ligne de commande (pas d'interface graphique)."
+          ]
+        ; (fun ~cl ->
+            img ~cl "/static/microsoft.svg"
+              [ "alt", "Logo de Microsoft" (* le logo de windows n'est pas reconnaissable,
+                                              on utilise celui de microsoft à la place *)
+              ; "width", "512"
+              ; "height", "512"
+              ])
+        , [ text "Pas disponible, mais la version linux marche probablement avec "
+          ; a ~href:"https://learn.microsoft.com/fr-fr/windows/wsl/install"
+              [ text "WSL" ]
+          ; text "."
+          ]
+        ; (fun ~cl ->
+          img ~cl "/static/apple.svg"
+            [ "alt", "Logo d'Apple" (* pas de logo pour macos => apple *)
+            ; "width", "814"
+            ; "height", "1000"
+            ])
+        , [ text "Pas disponible, mais probablement compilable à partir du dépôt source \
+                  indiqué plus bas."
+          ]
         ]
     ]
 
