@@ -39,7 +39,9 @@ case "${1-}" in
         ;;
     *)
         # Améliorations possibles :
-        # - la page des matiere ne montre pas les numéros de page
+        # - la page des matières ne montre pas les numéros de page
+        # - le poème du chapitre 2 a des coupures de lignes
+        # - le texte de la tranche pourrait être remonté de 1mm (ou 2mm peut-être)
         server=http://localhost:8081
         server=https://orthographe-rationnelle.info
         format=lulu # or imprime-ton-livre
