@@ -20,6 +20,6 @@
 
 (rule
  (target flow.svg)
- (deps (sandbox))
+ (deps (sandbox always))
  (mode promote)
  (action (run dot -Tsvg %{dep:flow.dot} -o %{target})))

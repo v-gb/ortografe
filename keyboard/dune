@@ -1,4 +1,9 @@
 (rule
  (targets gboard-1990-1000.zip gboard-erofa-1000.zip)
- (deps (sandbox))
+ (deps
+  (sandbox always)
+   ../data/lexique/Lexique383.gen.tsv
+   ../extension/dict1990.gen.csv
+   ../extension/dict.gen.csv
+ )
  (action (run ./generate-dict)))
