@@ -1,7 +1,7 @@
 (rule
  (target OA-dictionnaire-EROFA.pdf)
  (deps)
- (action (run curl -sS -O http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf)))
+ (action (run curl --fail-with-body -sS -O http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf)))
 
 ;; add spurious dependencies to server.exe, so we can
 ;; make dune exec server.exe build the runtime deps of

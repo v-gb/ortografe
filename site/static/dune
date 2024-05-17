@@ -54,7 +54,7 @@
  (target chrome.svg)
  (action
    ;; licence is public domain, so nothing more to do
-   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg")))
+   (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg")))
 
 (rule
  (target firefox.svg)
@@ -67,63 +67,63 @@
 (rule
  (target safari.svg)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg")))
 
 ;; MIT
 (rule
  (target edge.svg)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f6/Edge_Logo_2019.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f6/Edge_Logo_2019.svg")))
 
 ;; MPL2, same as firefox
 (rule
  (target thunderbird.svg)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/2/2f/Thunderbird_2023_icon.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/2/2f/Thunderbird_2023_icon.svg")))
 
 ;; https://creativecommons.org/licenses/by-sa/3.0/deed.en
 (rule
  (target pdf.svg)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/e/ec/Pdf_by_mimooh.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/e/ec/Pdf_by_mimooh.svg")))
 
 ;; public domain
 (rule
  (target epub.svg)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f2/Epub_logo_color.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f2/Epub_logo_color.svg")))
 
 ;; public domain
 (rule
  (target word.svg)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg")))
 (rule
  (target powerpoint.svg)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/0/0d/Microsoft_Office_PowerPoint_%282019%E2%80%93present%29.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/0/0d/Microsoft_Office_PowerPoint_%282019%E2%80%93present%29.svg")))
 
 ;; https://creativecommons.org/licenses/by-sa/4.0/deed.en
 ;; should be fine with link + note at the bottom
 (rule
  (target libreoffice_writer.png)
  (action
-  (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/4/45/LibreOffice_7.5_Writer_Icon.png")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/4/45/LibreOffice_7.5_Writer_Icon.png")))
 
 ;; https://creativecommons.org/licenses/by-sa/3.0/deed.en
 (rule
  (target text_file.svg)
  (action
-   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/2/23/Text-txt.svg")))
+   (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/2/23/Text-txt.svg")))
 
 ;; LGPL again
 (rule
  (target internet_globe.svg)
  (action
-   (run curl -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f9/Crystal_Clear_app_linneighborhood.svg")))
+   (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f9/Crystal_Clear_app_linneighborhood.svg")))
 
 ;; will point to youtube video, so no issue of license here
 (rule
  (target hoedt_piron.jpg)
  (action
-   (run curl -o %{target} -sS "https://img.youtube.com/vi/5YO7Vg1ByA8/mqdefault.jpg")))
+   (run curl --fail-with-body -o %{target} -sS "https://img.youtube.com/vi/5YO7Vg1ByA8/mqdefault.jpg")))

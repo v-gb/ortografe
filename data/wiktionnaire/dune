@@ -10,7 +10,7 @@ if [ -f min-computed.gen.csv ]; then
 else
   server=https://ortografe-server.fly.dev
   # server=http://localhost:8081
-  curl -sS \"$server/static/min.gen.csv.zst\" | unzstd > %{target}
+  curl --fail-with-body -sS \"$server/static/min.gen.csv.zst\" | unzstd > %{target}
 fi
 ")))
 
