@@ -1,7 +1,7 @@
 (copy_files (files %{project_root}/extension/{extension,extension2}.zip))
 (rule (action (copy %{project_root}/extension/dict.gen.csv erofa.csv)))
 (rule (action (copy %{project_root}/extension/dict1990.gen.csv rect1990.csv)))
-(copy_files (files ../client/{*.js,privacy.html,index.html}))
+(copy_files (files ../client/{*.js,*.html}))
 (copy_files (files %{project_root}/data/lexique/Lexique383.gen.tsv))
 (copy_files (files %{project_root}/dict-gen/js/dict_gen.bc.js))
 (copy_files (files %{project_root}/doc-conversion/bin/doc_conversion.bc.js))
@@ -24,11 +24,6 @@
 
 (copy_files (files %{project_root}/doc-conversion/bin/ortografe_cli.exe))
 (copy_files (files %{project_root}/erofa-texte.pdf))
-(rule
- (targets index_old.html)
- (action (run ../build/build.exe rewrite-index
-              %{dep:../client/index_old.html}
-              %{dep:books.html})))
 
 (rule
  (target books.tar)

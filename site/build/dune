@@ -5,7 +5,6 @@
    cmdliner_bindops
    core
    core_unix.sys_unix
-   dict_gen_common
    dream
    hyper
    ortografe

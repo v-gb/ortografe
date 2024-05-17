@@ -13,13 +13,6 @@ let main () =
                   (C.Arg.info ~docv:"path to books.tar" []))
            in
            Book_import.convert_all ~books_tar)
-      ; C.Cmd.v (C.Cmd.info "rewrite-index")
-          (let+ arg1 =
-             C.Arg.required (C.Arg.pos 0 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"index.html" []))
-            and+ arg2 =
-             C.Arg.required (C.Arg.pos 1 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"books.html" []))
-           in
-           Rewrite_index.rewrite arg1 arg2)
       ]
   in
   exit (C.Cmd.eval cmd)
