@@ -31,11 +31,26 @@
               %{dep:books.html})))
 
 (rule
- (targets (dir books) books.html)
- (deps    (glob_files %{project_root}/dl.gen/*) (sandbox always))
+ (target books.tar)
+ (deps
+  (sandbox always)
+  (glob_files books_local.tar))
  (action
-  (setenv DUNEROOT %{project_root}
-   (run ../build/build.exe convert-all))))
+  ;; wikisource heavily throttles downloads. So we cache the books on the server, such
+  ;; that builds from scratch just work. It also has the advantage of ensuring the data
+  ;; is fixed instead of evolving depending on when you downloaded.
+   (bash "
+set -e -u -o pipefail
+if [ -f books_local.tar ]; then
+  cp books_local.tar %{target}
+else
+  curl --fail-with-body -o %{target} -sS https://orthographe-rationnelle.info/static/books.tar
+fi")))
+
+(rule
+ (targets (dir books) books.html)
+ (deps    (sandbox always))
+ (action (run ../build/build.exe convert-all %{dep:books.tar})))
 
 (rule
  (targets erofa-texte.pdf)

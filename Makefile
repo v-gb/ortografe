@@ -37,9 +37,7 @@ first-install:
 	@ echo "[32mignore complaints about missing fields below, opam is being silly, and it doesn't prevent the command from working[39m"
 	opam exec -- opam install --locked --deps-only ./ortografe.opam --yes
 	mkdir -p _build
-	# build only the extension, as building everything implies grabbing
-	# stuff from wikisource, which is a problem and is thus not automatic
-	opam exec -- dune build extension/extension2.zip
+	make all-w
 	@ echo "[32mExtensions built at _build/default/extension/*.zip ![39m"
 
 .PHONY: tarball

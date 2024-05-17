@@ -5,10 +5,14 @@ let main () =
     C.Cmd.group (C.Cmd.info "build")
       [ C.Cmd.v (C.Cmd.info "download-all")
           (let+ () = return () in
-           Book_import.download_all ~root:(Sys.getenv "DUNEROOT"))
+           Book_import.download_all ~root:(Core.Sys.getenv_exn "DUNEROOT"))
       ; C.Cmd.v (C.Cmd.info "convert-all")
-          (let+ () = return () in
-           Book_import.convert_all ~root:(Sys.getenv "DUNEROOT"))
+          (let+ books_tar =
+             C.Arg.required
+               (C.Arg.pos 0 (C.Arg.some C.Arg.string) None
+                  (C.Arg.info ~docv:"path to books.tar" []))
+           in
+           Book_import.convert_all ~books_tar)
       ; C.Cmd.v (C.Cmd.info "rewrite-index")
           (let+ arg1 =
              C.Arg.required (C.Arg.pos 0 (C.Arg.some C.Arg.string) None (C.Arg.info ~docv:"index.html" []))

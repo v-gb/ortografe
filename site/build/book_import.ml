@@ -3,6 +3,13 @@ module Z = Unix
 open Core
 module Unix = Z
 
+let delete_dir s = Sys_unix.command_exn [%string "rm -rf -- %{Sys.quote s}"]
+let with_tempdir ?temp_dir a b ~f =
+  let dir = Stdlib.Filename.temp_dir ?temp_dir a b in
+  Exn.protect
+    ~finally:(fun () -> delete_dir dir)
+    ~f:(fun () -> f dir)
+
 let which_source ~url =
   match
     (Uri.host url ||? failwith (Uri.to_string url))
@@ -17,8 +24,8 @@ let suf = function
   | `Wikisource -> ".epub"
   | `Gutenberg -> ".zip"
 
-let dl_path ~root ~title ~source =
-  root ^/ "dl.gen" ^/ (title ^ suf source)
+let dl_path ~books_tmp ~title ~source =
+  books_tmp ^/ (title ^ suf source)
 let conv_path ~title = "books" ^/ title
 let conv_basedir = "books"
 
@@ -38,10 +45,10 @@ let download_from_gutenberg url =
   let id = Filename.basename (Uri.path url) in
   Hyper.get [%string "https://www.gutenberg.org/cache/epub/%{id}/pg%{id}-h.zip"]
 
-let download url ~root ~title =
+let download url ~books_tmp ~title =
   let url = Uri.of_string url in
   let source = which_source ~url in
-  let path = dl_path ~root ~title ~source in
+  let path = dl_path ~books_tmp ~title ~source in
   if not (Sys_unix.file_exists_exn path) then (
     (* make it easier to do queries one by one, because they throttle so much *)
     let data =
@@ -49,7 +56,7 @@ let download url ~root ~title =
       | `Wikisource -> download_from_wikisource url
       | `Gutenberg -> download_from_gutenberg url
     in
-    mkdir_and_write_all (dl_path ~root ~title ~source) ~data;
+    mkdir_and_write_all (dl_path ~books_tmp ~title ~source) ~data;
     Printf.eprintf "waiting\n%!";
     (* wikisource seem to be very aggressive about returning "429 Too Many Requests". Even 10s
        of pause is not enough. *)
@@ -155,12 +162,12 @@ let convert_gutenberg zip ~url ~dst =
   extract_zip ~data:new_data ~dst;
   new_data
 
-let convert url ~root ~title =
+let convert url ~books_tmp ~title =
   let source = which_source ~url:(Uri.of_string url) in
   let data =
-    try In_channel.read_all (dl_path ~root ~title ~source)
+    try In_channel.read_all (dl_path ~books_tmp ~title ~source)
     with e -> raise_s [%sexp (e : exn)
-                     , "hint: you might need to run "
+                     , "hint: you may need to run "
                      , (Sys.concat_quoted [ "_build/default/site/build/build.exe"; "download-all" ] : string)]
   in
   let dst = conv_path ~title in
@@ -197,10 +204,24 @@ let books =
   ]
 
 let download_all ~root =
-  List.iter books ~f:(fun (title, _user_title, _author, url) ->
-    Printf.eprintf "importing %s\n%!" title;
-    download ~root ~title url;
-  )
+  with_tempdir "books" "" ~f:(fun books_tmp ->
+      (* We accumulate new entries into our tarballs without ever cleaning anything.
+         Which seems better, in case of back and forth, or for building older revisions.
+      *)
+      let books_tar = root ^/ "_build/default/site/static/books.tar" in
+      let books_local_tar = root ^/ "site/static/books_local.tar" in
+      Sys_unix.command_exn
+        [%string "tar -xf %{Sys.quote books_tar} -C %{Sys.quote books_tmp}"];
+      
+      List.iter books ~f:(fun (title, _user_title, _author, url) ->
+          Printf.eprintf "importing %s\n%!" title;
+          download ~books_tmp ~title url;
+        );
+
+      (* https://reproducible-builds.org/docs/archives/ *)
+      Sys_unix.command_exn
+        [%string "tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner -cf %{Sys.quote books_local_tar} -C %{books_tmp} ."]
+    )
 
 let guess_main_file ~url ~data =
   let files =
@@ -229,20 +250,25 @@ let html_li ~url:_ ~author ~user_title ~title ~main_file =
   [%string {|<li><cite><a href="%{rel_url}">%{user_title}</a></cite> <br>%{author} </li>|}]
   ^ "\n"
 
-let convert_all ~root =
-  Sys_unix.command_exn [%string "rm -rf %{Sys.quote conv_basedir}"];
-  let lis =
-    List.map books ~f:(fun (title, user_title, author, url) ->
-        let new_data = convert ~root ~title url in
-        let main_file = guess_main_file ~url ~data:new_data in
-        html_li ~url ~author ~user_title:(user_title ||? title) ~title ~main_file
-      )
-  in
-  let html_fragment =
-    String.concat_lines
-      [ "<ul class=books>"
-      ; +lis
-      ; "</ul>"
-      ]
-  in
-  Out_channel.write_all "books.html" ~data:html_fragment
+let convert_all ~books_tar =
+  with_tempdir "books" "" ~f:(fun books_tmp ->
+      Sys_unix.command_exn
+        [%string "tar -xf %{Sys.quote books_tar} -C %{Sys.quote books_tmp}"];
+
+      delete_dir conv_basedir;
+      let lis =
+        List.map books ~f:(fun (title, user_title, author, url) ->
+            let new_data = convert ~books_tmp ~title url in
+            let main_file = guess_main_file ~url ~data:new_data in
+            html_li ~url ~author ~user_title:(user_title ||? title) ~title ~main_file
+          )
+      in
+      let html_fragment =
+        String.concat_lines
+          [ "<ul class=books>"
+          ; +lis
+          ; "</ul>"
+          ]
+      in
+      Out_channel.write_all "books.html" ~data:html_fragment
+    )
