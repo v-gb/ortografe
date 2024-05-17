@@ -909,13 +909,16 @@ let section_aller_plus_loin () =
 let head () =
   [ leafelt "meta" ["name", "viewport"; "content", "width=device-width, initial-scale=1"]
   ; leafelt "meta" ["charset", "utf-8"]
-  (* proving ownership of the sites to bing and google search *)
-  ; leafelt "meta"
+  (* proving ownership for search engine consoles *)
+  ; leafelt "meta" (* bing *)
       [ "name", "msvalidate.01"
       ; "content", "528A9A3C7E6F9E5C349FB47AB8447469" ]
-  ; leafelt "meta"
+  ; leafelt "meta" (* gsearch for https://ortografe-server.fly.dev *)
       [ "name", "google-site-verification"
       ; "content", "cium7Nf85Z4I0Wj9O3Ck5ZwwkUzUQ_h_cwcwJHEUug8" ]
+  ; leafelt "meta" (* gsearch for https://orthographe-rationnelle.info *)
+      [ "name", "google-site-verification"
+      ; "content", "Bv_wuz7zTmy7xlz2yedr5Zsjub8_AIQKH_HpSNmcqSU" ]
   ; elt "title" [ text "Orthographe rationnelle" ]
   ; leafelt "meta" [ "name", "description"
                    ; "content", "Outils pour utiliser l'orthographe rationalisée du \
