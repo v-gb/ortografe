@@ -295,14 +295,15 @@ let logger = function
          Stdlib.flush stderr;
          Lwt.fail exn)
 
-let redirect request path =
+let redirect handler request =
   match Dream.header request "Host" with
-  | Some "ortografe-server.fly.dev" ->
-     (* Try to compel google search into showing the address below instead
-                   of the address above. *)
-     Some (Dream.redirect ~code:308 request
-             ("https://orthographe-rationnelle.info" ^ path))
-  | _ -> None
+  | Some ( "ortografe-server.fly.dev"
+         | "www.orthographe-rationnelle.info" ) ->
+     (* Try to compel google search into showing the address below instead of the
+        addresses above. *)
+     Dream.redirect ~code:308 request
+       ("https://orthographe-rationnelle.info" ^ Dream.target request)
+  | _ -> handler request
 
 let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
   let staged = lazy (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded)) in
@@ -315,6 +316,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
   @@ (if log
       then logger `Short
       else Fun.id)
+  @@ redirect
   @@ Dream.router
        [ Dream.post "/conv" (fun request ->
              match%lwt limit_body_size ~max_size:max_input_size request with
@@ -376,14 +378,8 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                     | _ -> respond_error_text `Bad_Request "")
                 | _ -> respond_error_text `Bad_Request ""
            )
-       ; Dream.get "/" (fun request ->
-             match redirect request "" with
-             | Some r -> r
-             | None -> from_filesystem static_root "index.html" request)
-       ; Dream.get "/regles/alfonic" (fun request ->
-             match redirect request "/regles/alfonic" with
-             | Some r -> r
-             | None -> from_filesystem static_root "regles_alfonic.html" request)
+       ; Dream.get "/" (from_filesystem static_root "index.html")
+       ; Dream.get "/regles/alfonic" (from_filesystem static_root "regles_alfonic.html")
        ; Dream.get "/static/**" (Dream.static ~loader:from_filesystem static_root)
        ]
 
