@@ -490,7 +490,6 @@ module Index = struct
 
   let section_transcription_interactive () =
     section
-      (* why the label in the original file? *)
       [ h3 [ text "Transcription interactive" ]
       ; elt "noscript"
           [ p [ strong [ text "Cette fonctionalité requiert du javascript." ] ] ]
