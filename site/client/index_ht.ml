@@ -152,10 +152,136 @@ module General_purpose = struct
     leafelt "script" [ "src", src; +(if defer then [ "defer", ""] else []) ]
   let style txt = elt "style" [ text txt ]
 
+  let html ~lang ~head ?body_style ~body () =
+    let body = elt ?cl:body_style "body" body in
+    let scripts =
+      fold_node body ~init:[] ~f:(fun acc node -> List.rev_append node.scripts acc)
+      |> List.rev
+      |> Set.stable_dedup_list (module String)
+    in
+    let classes =
+      let module M = struct
+          type t = string * string
+          let sexp_of_t _ = failwith "asd"
+          let compare (c1, v1) (c2, v2) =
+            let c = String.compare c1 c2 in
+            if c = 0 && String.(<>) v1 v2
+            then raise_s [%sexp "clash between classes",
+                          (v1 : string), (v2 : string)];
+            c
+          include (val Comparator.make ~sexp_of_t ~compare)
+        end in
+      fold_node body ~init:[] ~f:(fun acc node -> List.rev_append node.classes acc)
+      |> List.rev
+      |> Set.stable_dedup_list (module M)
+    in
+    elt "html" ~attrs:["lang", lang ]
+      [ elt "head"
+          [ +head
+          ; +List.map scripts ~f:(fun src -> script src ~defer:true)
+          ; +match classes with
+             | [] -> []
+             | _ -> [ style (classes
+                             |> List.map ~f:(fun (class_, value) ->
+                                    [%string ".%{class_} { %{value} }"])
+                             |> String.concat ~sep:"\n") ]
+          ]
+      ; body
+      ]
+
   let _ = comment
 end
 
 open General_purpose
+
+let html ~head ?body_style ~body () =
+  html ~lang:"fr" ~head ?body_style ~body ()
+
+let head ~root ~attrs ~title ~description () =
+  [ leafelt "meta" ["name", "viewport"; "content", "width=device-width, initial-scale=1"]
+  ; leafelt "meta" ["charset", "utf-8"]
+  (* proving ownership for search engine consoles *)
+  ; +if root
+     then
+       [ leafelt "meta" (* bing *)
+           [ "name", "msvalidate.01"
+           ; "content", "528A9A3C7E6F9E5C349FB47AB8447469" ]
+       ; leafelt "meta" (* gsearch for https://ortografe-server.fly.dev *)
+           [ "name", "google-site-verification"
+           ; "content", "cium7Nf85Z4I0Wj9O3Ck5ZwwkUzUQ_h_cwcwJHEUug8" ]
+       ; leafelt "meta" (* gsearch for https://orthographe-rationnelle.info *)
+           [ "name", "google-site-verification"
+           ; "content", "Bv_wuz7zTmy7xlz2yedr5Zsjub8_AIQKH_HpSNmcqSU" ]
+       ]
+     else []
+  ; elt "title" [ text title ]
+  ; leafelt "meta" [ "name", "description"; "content", description ]
+  (* It would be good to have the open-graph stuff
+   *  https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML *)
+  ; leafelt "link" [ "rel", "icon"; "href", "/static/favicon.png" ]
+  ; +attrs
+  ; style {|
+/* https://www.joshwcomeau.com/css/custom-css-reset/ */
+input, button, textarea, select {
+  font: inherit;
+}
+
+a:link, a:visited {
+  color: #106410;
+  text-underline-offset: 1.5px;
+}
+
+.for-active-browser {
+  background-color: #e5fbe5;
+  padding: 3px;
+  border-radius: 6px;
+}
+|}
+  ]
+
+let navbar l =
+  let a = a ~cl:"display: block;
+                 margin: 0;
+                 padding: 20px 20px 20px;
+                 &:link, &:visited {
+                 font-family: sans-serif;
+                 color: inherit;
+                 text-decoration: unset;
+                 }
+                 &:hover {
+                 text-decoration-line: underline;
+                 }
+                 "
+  in
+  elt "nav" ~cl:"background-color: #F5F5F5;"
+    [ div ~cl:"max-width: 55em; margin: auto; "
+        [ list `ul ~cl:"margin: 0;
+                        padding: 0;
+                        list-style-type: none;
+                        font-size: 1.1em;
+                        font-weight: bold;
+                        display:flex;
+                        flex-direction: row;"
+            (List.map l ~f:(fun (href, content) -> [ a ~href content ]))
+        ]
+    ]
+
+
+let h1 ?cl children = h1 ~cl:(
+  (cl ||? "") ^ "
+  margin: 1.67em 0;
+  font-family: sans-serif;
+  font-size: calc( 1.4em + (5 - 1.4) * ( (100cqw - 400px) / ( 800 - 400) ));
+") children
+
+let h2 children = h2 ~cl:"
+  font-size: 2.5rem;
+  font-family: sans-serif;
+" children
+
+let h3 children = h3 ~cl:"
+  font-size: 1.3rem;
+" children
 
 module Index = struct
   let regles_ref, regles_def = id "regles"
@@ -194,87 +320,11 @@ module Index = struct
     | _ -> assert false
   let and_transcribe ~cl elt = [ elt; transcribe ~cl elt ]
 
-  let h1 ?cl children = h1 ~cl:(
-    (cl ||? "") ^ "
-    margin: 1.67em 0;
-    font-family: sans-serif;
-    font-size: calc( 1.4em + (5 - 1.4) * ( (100cqw - 400px) / ( 800 - 400) ));
-  ") children
-
-  let h2 children = h2 ~cl:"
-    font-size: 2.5rem;
-    font-family: sans-serif;
-  " children
-
-  let h3 children = h3 ~cl:"
-    font-size: 1.3rem;
-  " children
-
-  let html ~lang ~head ?body_style ~body () =
-    let body = elt ?cl:body_style "body" body in
-    let scripts =
-      fold_node body ~init:[] ~f:(fun acc node -> List.rev_append node.scripts acc)
-      |> List.rev
-      |> Set.stable_dedup_list (module String)
-    in
-    let classes =
-      let module M = struct
-          type t = string * string
-          let sexp_of_t _ = failwith "asd"
-          let compare (c1, v1) (c2, v2) =
-            let c = String.compare c1 c2 in
-            if c = 0 && String.(<>) v1 v2
-            then raise_s [%sexp "clash between classes",
-                          (v1 : string), (v2 : string)];
-            c
-          include (val Comparator.make ~sexp_of_t ~compare)
-        end in
-      fold_node body ~init:[] ~f:(fun acc node -> List.rev_append node.classes acc)
-      |> List.rev
-      |> Set.stable_dedup_list (module M)
-    in
-    elt "html" ~attrs:["lang", lang]
-      [ elt "head"
-          [ +head
-          ; +List.map scripts ~f:(fun src -> script src ~defer:true)
-          ; +match classes with
-             | [] -> []
-             | _ -> [ style (classes
-                             |> List.map ~f:(fun (class_, value) ->
-                                 [%string ".%{class_} { %{value} }"])
-                             |> String.concat ~sep:"\n") ]
-          ]
-      ; body
-      ]
-
   let navbar () =
-    let a = a ~cl:"display: block;
-                   margin: 0;
-                   padding: 20px 20px 20px;
-                   &:link, &:visited {
-                     font-family: sans-serif;
-                     color: inherit;
-                     text-decoration: unset;
-                   }
-                   &:hover {
-                     text-decoration-line: underline;
-                   }
-                   "
-    in
-    elt "nav" ~cl:"background-color: #F5F5F5;"
-      [ div ~cl:"max-width: 55em; margin: auto; "
-          [ list `ul ~cl:"margin: 0;
-                          padding: 0;
-                          list-style-type: none;
-                          font-size: 1.1em;
-                          font-weight: bold;
-                          display:flex;
-                          flex-direction: row;"
-              [ [ a ~href:regles_ref [ text "Règles" ] ]
-              ; [ a ~href:outils_ref [ text "Outils" ] ]
-              ; [ a ~href:aller_plus_loin_ref [ text "Aller plus loin" ] ]
-              ]
-          ]
+    navbar
+      [ regles_ref, [ text "Règles" ]
+      ; outils_ref, [ text "Outils" ]
+      ; aller_plus_loin_ref, [ text "Aller plus loin" ]
       ]
 
   let introduction () =
@@ -930,51 +980,20 @@ module Index = struct
       ]
 
   let head () =
-    [ leafelt "meta" ["name", "viewport"; "content", "width=device-width, initial-scale=1"]
-    ; leafelt "meta" ["charset", "utf-8"]
-    (* proving ownership for search engine consoles *)
-    ; leafelt "meta" (* bing *)
-        [ "name", "msvalidate.01"
-        ; "content", "528A9A3C7E6F9E5C349FB47AB8447469" ]
-    ; leafelt "meta" (* gsearch for https://ortografe-server.fly.dev *)
-        [ "name", "google-site-verification"
-        ; "content", "cium7Nf85Z4I0Wj9O3Ck5ZwwkUzUQ_h_cwcwJHEUug8" ]
-    ; leafelt "meta" (* gsearch for https://orthographe-rationnelle.info *)
-        [ "name", "google-site-verification"
-        ; "content", "Bv_wuz7zTmy7xlz2yedr5Zsjub8_AIQKH_HpSNmcqSU" ]
-    ; elt "title" [ text "Orthographe rationnelle" ]
-    ; leafelt "meta" [ "name", "description"
-                     ; "content", "Outils pour utiliser l'orthographe rationalisée du \
-                                   français Érofa. Ou d'autres orthographes, comme celle \
-                                   des rectifications de 1990." ]
-    (* It would be good to have the open-graph stuff
-     *  https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML *)
-    ; leafelt "link" [ "rel", "icon"; "href", "/static/favicon.png" ]
-    ; script "/static/dict.js" ~defer:true
-    ; script "/static/rewrite.js" ~defer:true
-    ; script "/static/page.js" ~defer:true
-    ; style {|
-/* https://www.joshwcomeau.com/css/custom-css-reset/ */
-input, button, textarea, select {
-  font: inherit;
-}
-
-a:link, a:visited {
-  color: #106410;
-  text-underline-offset: 1.5px;
-}
-
-.for-active-browser {
-  background-color: #e5fbe5;
-  padding: 3px;
-  border-radius: 6px;
-}
-|}
-    ]
+    head
+      ~root:true
+      ~title:"Orthographe rationnelle"
+      ~description:"Outils pour utiliser l'orthographe rationalisée du \
+                    français Érofa. Ou d'autres orthographes, comme celle \
+                    des rectifications de 1990."
+      ~attrs:[ script "/static/dict.js" ~defer:true
+             ; script "/static/rewrite.js" ~defer:true
+             ; script "/static/page.js" ~defer:true
+             ]
+      ()
 
   let main () : node =
     html
-      ~lang:"fr"
       ~head:(head ())
       ~body_style:"margin: 0; font-size: 1.1rem; line-height: 1.3;"
       ~body:
@@ -1009,18 +1028,18 @@ a:link, a:visited {
           ]
       ]
       ()
-
-  let f () =
-    Out_channel.write_all
-      "index.html"
-      ~data:(
-        "<!DOCTYPE html>\n" ^
-          (main ()
-           |> Markup.from_tree __.html
-           |> Markup.pretty_print
-           |> Markup.write_html
-           |> Markup.to_string))
 end
 
 let () =
-  Index.f ()
+  List.iter
+    [ "index.html", Index.main () ]
+    ~f:(fun (filename, node) ->
+      Out_channel.write_all
+        filename
+        ~data:(
+          "<!DOCTYPE html>\n" ^
+            (node
+             |> Markup.from_tree __.html
+             |> Markup.pretty_print
+             |> Markup.write_html
+             |> Markup.to_string)))
