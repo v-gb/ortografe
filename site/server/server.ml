@@ -295,6 +295,15 @@ let logger = function
          Stdlib.flush stderr;
          Lwt.fail exn)
 
+let redirect request path =
+  match Dream.header request "Host" with
+  | Some "ortografe-server.fly.dev" ->
+     (* Try to compel google search into showing the address below instead
+                   of the address above. *)
+     Some (Dream.redirect ~code:308 request
+             ("https://orthographe-rationnelle.info" ^ path))
+  | _ -> None
+
 let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
   let staged = lazy (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded)) in
   Ortografe.max_size := max_input_size * 2; (* xml can be quite large when decompressed *)
@@ -368,13 +377,13 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                 | _ -> respond_error_text `Bad_Request ""
            )
        ; Dream.get "/" (fun request ->
-             match Dream.header request "Host" with
-             | Some "ortografe-server.fly.dev" ->
-                (* Try to compel google search into showing the address below instead
-                   of the address above. *)
-                Dream.redirect ~code:308 request
-                  "https://orthographe-rationnelle.info"
-             | _ -> from_filesystem static_root "index.html" request)
+             match redirect request "" with
+             | Some r -> r
+             | None -> from_filesystem static_root "index.html" request)
+       ; Dream.get "/regles/alfonic" (fun request ->
+             match redirect request "/regles/alfonic" with
+             | Some r -> r
+             | None -> from_filesystem static_root "regles_alfonic.html" request)
        ; Dream.get "/static/**" (Dream.static ~loader:from_filesystem static_root)
        ]
 

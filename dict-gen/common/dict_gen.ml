@@ -162,6 +162,10 @@ let doc = function
      Rewrite.doc (Rewrite.custom_rule l)
   | `Oe -> "Corriger les @oe en @œ, comme @coeur -> @cœur"
   | `Rect1990 -> "Appliquer les rectifications de 1990"
+let problems = function
+  | `Rewrite (`Builtin name) ->
+     Rewrite.problems (Map.find_exn (force rewrite_rule_by_name_builtin) name)
+  | `Rewrite (`Custom _) | `Oe | `Rect1990 -> []
 let html_doc =
   let re =
     lazy (

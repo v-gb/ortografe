@@ -8,6 +8,7 @@ val load_skip : unit -> (Data.Lexique.row -> bool)
 
 type rule
 val doc : rule -> string
+val problems : rule -> string list
 val name : rule -> string
 val erofa : rule
 val all_builtin : rule list Lazy.t

@@ -403,6 +403,7 @@ type f = Rules.t -> f1
 type rule =
   { name : string
   ; doc : string
+  ; problems : string list
   ; f : f
   ; prefilter : unit -> [ `Re of Re.t | `All ]
   ; supports_repeated_rewrites : bool
@@ -410,14 +411,15 @@ type rule =
   }
 
 let all_builtin = ref []
-let new_rule ?(supports_repeated_rewrites = true) ?(plurals_in_s = true) name doc ~prefilter f =
-  let rule = { name; doc; f; prefilter; supports_repeated_rewrites; plurals_in_s } in
+let new_rule ?(supports_repeated_rewrites = true) ?(plurals_in_s = true) ?(problems = []) name doc ~prefilter f =
+  let rule = { name; doc; problems; f; prefilter; supports_repeated_rewrites; plurals_in_s } in
   all_builtin := rule :: !all_builtin;
   rule
-let new_rule' ?supports_repeated_rewrites name ?plurals_in_s doc ~prefilter f =
+let new_rule' ?supports_repeated_rewrites name ?plurals_in_s ?problems doc ~prefilter f =
   new_rule name
     ?supports_repeated_rewrites
     ?plurals_in_s
+    ?problems
     doc
     ~prefilter
     (fun rules ->
@@ -1101,14 +1103,15 @@ let _ : rule =
     ~plurals_in_s:false
     "alfonic"
     "les règles de https://alfonic.org/"
+    ~problems:
+     [ "Les liaisons se sont pas écrites."
+     ; "Les apostrophes ne sont pas supprimées dans les apocopes (« j'aime »)."
+     ; "Les cas difficiles pour tout outil : la prononciation des vers (« le lion » ou \
+        « le liyon »), des homophones (« les poules couvent au couvent »), les mots \
+        manquants du lexique de l'outil."
+     ]
     ~prefilter:(fun () -> `All)
     (fun () ->
-      (* problèmes :
-         - il faudrait écrire les liaisons dans le mot qui suit
-           « des hôtes » -> « dé z-ot »
-         - il faudrait supprimer les apostrophes, qui ne sont pas utilisées pour
-           les apocopes mais à la place indiquent les e qui doivent être prononcés
-           dans les vers *)
       let graphem_by_phonem =
         Hashtbl.of_alist_exn (module Uchar)
           [ !!"a", "a" (* pas de â dans lexique *)
@@ -1308,6 +1311,7 @@ let respell_oe (aligned_row : aligned_row) =
   else aligned_row
 
 let doc rule = rule.doc
+let problems rule = rule.problems
 let name rule = rule.name
 let supports_repeated_rewrites rule = rule.supports_repeated_rewrites
 let plurals_in_s rule = rule.plurals_in_s
@@ -1324,6 +1328,7 @@ let custom_rule from_tos =
   in
   { name
   ; doc = ""
+  ; problems = []
   ; prefilter =
       (fun () ->
         `Re (Re.alt (List.map from_tos ~f:(fun (from, _) -> Re.str from))))

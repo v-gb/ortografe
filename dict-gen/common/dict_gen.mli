@@ -27,7 +27,9 @@ type rules = rule list
 val all_builtin : rule list Lazy.t
 val name : rule -> string
 val of_name_builtin : string -> rule option
+val html_doc : rule -> string
 val doc : rule -> string
+val problems : rule -> string list
 val all_selection_html
     : url_prefix:string
     -> id_prefix:string

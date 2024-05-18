@@ -95,7 +95,7 @@ if (user_text2) {
         return [ options, cache2.table ]
     })
     if (dictionary_is_lazy) {
-        document.getElementById('form-conv').addEventListener("change", () => {
+        document.getElementById('form-conv')?.addEventListener("change", () => {
             if (converted_text2.childNodes.length > 0) {
                 // Avoid downloading all the stuff if the user hasn't typed in the
                 // textarea yet. Maybe a better point of view would be: if

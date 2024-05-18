@@ -266,13 +266,11 @@ let navbar l =
         ]
     ]
 
-
 let h1 ?cl children = h1 ~cl:(
-  (cl ||? "") ^ "
-  margin: 1.67em 0;
-  font-family: sans-serif;
-  font-size: calc( 1.4em + (5 - 1.4) * ( (100cqw - 400px) / ( 800 - 400) ));
-") children
+  "margin: 1.67em 0;
+   font-family: sans-serif;
+   font-size: calc( 1.4em + (5 - 1.4) * ( (100cqw - 400px) / ( 800 - 400) ));
+" ^ (cl ||? "")) children
 
 let h2 children = h2 ~cl:"
   font-size: 2.5rem;
@@ -567,55 +565,58 @@ module Index = struct
   let image_list l =
     image_list' (List.map l ~f:(fun (img, desc) -> ([], img, desc)))
 
+  let format_acceptes () =
+    image_list
+      [ (fun ~cl ->
+          img "/static/word.svg" ~cl
+            [ "alt", "Microsoft Office Word (2019–present).svg"
+            ; "width", "1881" (* can we go and compute this? *)
+            ; "height", "1750"
+        ])
+      , [ text "Word et similaires (.doc, .docx, .odt)" ]
+      ; (fun ~cl ->
+          img "/static/powerpoint.svg" ~cl
+            [ "alt", "Microsoft Office PowerPoint (2019–present).svg"
+            ; "width", "512"
+            ; "height", "476"
+        ])
+      , [ text "PowerPoint et similaires (.ppt, .pptx, .odp)" ]
+      ; (fun ~cl ->
+        img "/static/text_file.svg" ~cl
+          [ "alt", "Text file icon"; "width", "822"; "height", "754" ])
+      , [ text "fichiers textes (.txt, .mkd, .md)" ]
+      ; (fun ~cl ->
+        img "/static/pdf.svg" ~cl
+          [ "alt", "PDF file icon"; "width", "544"; "height", "580" ])
+      , [ text "Pas supporté directement. Soumettez soit le fichier dont est tiré le \
+                PDF (préférable), ou un fichier Word recréé depuis le PDF (voir "
+        ; a ~href:"https://www.adobe.com/acrobat/online/pdf-to-word.html"
+            [ text "Adobe" ]
+        ; text " ou "
+        ; a ~href:"https://tools.pdf24.org/en/pdf-to-word"
+            [ text "Pdf24" ]
+        ; text ")."
+        ]
+      ; (fun ~cl ->
+        img "/static/epub.svg" ~cl
+          [ "alt", "Epub logo color.svg"; "width", "600"; "height", "800"])
+      , [ text "livres numériques (.epub), comme ceux de "
+        ; a ~href:"https://fr.wikisource.org/wiki/Wikisource:Accueil"
+            [ text "wikisource" ]
+        ; text " plus haut"
+        ]
+      ; (fun ~cl ->
+        img "/static/internet_globe.svg" ~cl
+          ["alt", "Internet Symbol"; "width", "407"; "height", "407" ])
+      , [ text "sources de pages web (.html, .xhtml, .htmlz)" ]
+      ]
+
   let section_transcription_en_ligne () =
     section
       [ h3 [ text "Transcription de documents, en ligne" ]
       ; submit_file Fn.id
       ; p [ text "Les formats acceptés sont :" ]
-      ; image_list
-          [ (fun ~cl ->
-              img "/static/word.svg" ~cl
-                [ "alt", "Microsoft Office Word (2019–present).svg"
-                ; "width", "1881" (* can we go and compute this? *)
-                ; "height", "1750"
-                ])
-          , [ text "Word et similaires (.doc, .docx, .odt)" ]
-          ; (fun ~cl ->
-              img "/static/powerpoint.svg" ~cl
-                [ "alt", "Microsoft Office PowerPoint (2019–present).svg"
-                ; "width", "512"
-                ; "height", "476"
-                ])
-          , [ text "PowerPoint et similaires (.ppt, .pptx, .odp)" ]
-          ; (fun ~cl ->
-            img "/static/text_file.svg" ~cl
-              [ "alt", "Text file icon"; "width", "822"; "height", "754" ])
-          , [ text "fichiers textes (.txt, .mkd, .md)" ]
-          ; (fun ~cl ->
-            img "/static/pdf.svg" ~cl
-              [ "alt", "PDF file icon"; "width", "544"; "height", "580" ])
-          , [ text "Pas supporté directement. Soumettez soit le fichier dont est tiré le \
-                    PDF (préférable), ou un fichier Word recréé depuis le PDF (voir "
-            ; a ~href:"https://www.adobe.com/acrobat/online/pdf-to-word.html"
-                [ text "Adobe" ]
-            ; text " ou "
-            ; a ~href:"https://tools.pdf24.org/en/pdf-to-word"
-                [ text "Pdf24" ]
-            ; text ")."
-            ]
-          ; (fun ~cl ->
-            img "/static/epub.svg" ~cl
-              [ "alt", "Epub logo color.svg"; "width", "600"; "height", "800"])
-          , [ text "livres numériques (.epub), comme ceux de "
-            ; a ~href:"https://fr.wikisource.org/wiki/Wikisource:Accueil"
-                [ text "wikisource" ]
-            ; text " plus haut"
-            ]
-          ; (fun ~cl ->
-            img "/static/internet_globe.svg" ~cl
-              ["alt", "Internet Symbol"; "width", "407"; "height", "407" ])
-          , [ text "sources de pages web (.html, .xhtml, .htmlz)" ]
-          ]
+      ; format_acceptes ()
       ]
 
   let section_transcription_locale () =
@@ -1029,9 +1030,85 @@ module Index = struct
       ()
 end
 
+module Regles_alfonic = struct
+  let main () : node =
+    let rules_set = Set.of_list (module String) [ "alfonic" ] in
+    let rules =
+      force Dict_gen_common.Dict_gen.all_builtin
+      |> List.filter ~f:(fun rule ->
+           Set.mem rules_set (Dict_gen_common.Dict_gen.name rule))
+    in
+    assert (List.length rules = 1);
+    let rules_str =
+      List.map rules ~f:Dict_gen_common.Dict_gen.name
+      |> String.concat ~sep:" "
+    in
+    html
+      ~head:(head
+               ~root:false
+               ~title:("Orthographe rationnelle -- " ^ rules_str)
+               ~description:("Outils de conversion en " ^ rules_str)
+               ~attrs:[ script "/static/rewrite.js" ~defer:true
+                      ; script "/static/page.js" ~defer:true
+                      ]
+               ())
+      ~body_style:"margin: 0; font-size: 1.1rem; line-height: 1.3;"
+      ~body:
+      [ navbar
+          [ "/", [ text "Accueil" ] ]
+      ; elt "main" ~cl:"max-width: 55em; margin: auto;"
+          [ div ~cl:"margin: 0 8px 8px 8px;"
+              [ h1 ~cl:"text-align:center; margin-top: 1em; margin-bottom: 1em;"
+                  [ text "Orthographe rationnelle" ]
+              ; p [ text "Les outils de cette page appliquent les règles :" ]
+              ; list `ul
+                  (List.map (if false then [] else rules) ~f:(fun rule ->
+                       [ strong [ text (Dict_gen_common.Dict_gen.name rule) ]
+                       ; text ", "
+                       ; +nodes_of_string (Dict_gen_common.Dict_gen.html_doc rule)
+                       ; br
+                       ; +match Dict_gen_common.Dict_gen.problems rule with
+                          | [] -> []
+                          | _ :: _ as problems ->
+                             [ text "Problèmes connus :"
+                             ; list `ul (List.map problems ~f:(fun s -> [ text s ]))
+                             ]
+                  ]))
+              ; section
+                  [ h3 [ text "Transcription interactive" ]
+                  ; Index.interactive_transcription
+                      ~id_textarea:"user-text2"
+                      ~id_converted_text:"converted-text2"
+                      ~initial_text:(`Placeholder "Tapez le texte à transcrire ici.")
+                  ]
+              ; section
+                  [ h3 [ text "Transcription de documents, en ligne" ]
+                  ; Index.submit_file (fun button ->
+                        [ div ~cl:"display: none"
+                            (Dict_gen_common.Dict_gen.all_selection_html
+                               ~url_prefix:"/static/"
+                               ~name_prefix:""
+                               ~id_prefix:"conv-"
+                               ~checked:(fun r ->
+                                 Set.mem rules_set (Dict_gen_common.Dict_gen.name r))
+                               ()
+                             |> nodes_of_string)
+                        ; +button
+                      ])
+                  ; p [ text "Les formats acceptés sont :" ]
+                  ; Index.format_acceptes ()
+                  ]
+              ]
+          ]
+      ]
+      ()
+end
+
 let () =
   List.iter
-    [ "index.html", Index.main () ]
+    [ "index.html", Index.main ()
+    ; "regles_alfonic.html", Regles_alfonic.main ()
+    ]
     ~f:(fun (filename, node) ->
       Out_channel.write_all
         filename
