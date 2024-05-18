@@ -845,7 +845,7 @@ module Index = struct
                       (ni des futures recommendations), simplement des possibilités \
                       d'expérimentation." ]
           ; submit_file (fun button ->
-                [ +(Dict_gen_common.Dict_gen.all_html
+                [ +(Dict_gen_common.Dict_gen.all_selection_html
                       ~url_prefix:"/static/"
                       ~name_prefix:""
                       ~id_prefix:"conv-"

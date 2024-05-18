@@ -76,7 +76,8 @@ let currently_selected_rules id_prefix =
                    ; Jv.of_bool selection_is_nonempty ]
 
 let html_fragment () =
-  Dict_gen_common.Dict_gen.all_html ~url_prefix:"/" ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
+  Dict_gen_common.Dict_gen.all_selection_html
+    ~url_prefix:"/" ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
   |> Jv.of_string
 
 let fetch url =

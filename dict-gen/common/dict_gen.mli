@@ -28,7 +28,7 @@ val all_builtin : rule list Lazy.t
 val name : rule -> string
 val of_name_builtin : string -> rule option
 val doc : rule -> string
-val all_html
+val all_selection_html
     : url_prefix:string
     -> id_prefix:string
     -> name_prefix:string

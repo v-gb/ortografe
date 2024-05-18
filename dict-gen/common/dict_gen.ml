@@ -188,7 +188,8 @@ let html_doc =
          in
          [%string "<a href=\"%{url}\">%{display_url}</a>"])
 
-let all_html ~url_prefix ~id_prefix ~name_prefix?(checked = Fn.const false) () =
+let all_selection_html
+      ~url_prefix ~id_prefix ~name_prefix?(checked = Fn.const false) () =
   let builtin =
     List.map (force all_builtin) ~f:(fun rule ->
         let checked = if checked rule then " checked" else "" in
