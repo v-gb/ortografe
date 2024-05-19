@@ -6,4 +6,4 @@
    ../extension/dict1990.gen.csv
    ../extension/dict.gen.csv
  )
- (action (run ./generate-dict)))
+ (action (run ./gen-gboard)))
