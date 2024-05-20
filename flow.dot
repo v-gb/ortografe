@@ -2,19 +2,20 @@ digraph {
     subgraph cluster_legend {
         label="Légende"
         rank=same;
-        zz[label="jaune=données générées pendant le build" style=filled fillcolor="lightyellow"];
-        zz2[label="vert=javascript" shape=box style=filled fillcolor="lightgreen"];
-        zz3[label="bleu=ocaml" shape=box style=filled fillcolor="lightblue"];
+        legda[label="jaune=données générées pendant le build" style=filled fillcolor="lightyellow"];
+        legjs[label="vert=javascript" shape=box style=filled fillcolor="lightgreen"];
+        legoc3[label="bleu=ocaml" shape=box style=filled fillcolor="lightblue"];
     }
     subgraph cluster_inputs {
         label="Sources externes de données sur le français";
         style=dashed;
         rank=same;
+        keyboardinit[label="dictionnaire HeliBoard\nfrançais" URL="https://github.com/Helium314/HeliBoard/" style=filled fillcolor=lightyellow]
         "recto-verso"[URL="https://uclouvain.be/recto-verso/essaie-recto.html" style=filled fillcolor=lightyellow];
         lexique[label="lexique.org" URL="http://lexique.org" style=filled fillcolor=lightyellow];
         wiktionnaire[label="wiktionnaire" URL="https://fr.wiktionary.org/" style=filled fillcolor=lightyellow];
         "DOR Érofa"[URL="https://gitlab.com/erofa/coorte/-/blob/main/DOR/DOR.csv" style=filled fillcolor=lightyellow];
-        zz3->"DOR Érofa"[style=invis];
+        legjs->"recto-verso"[style=invis];
     }
     "h aspirés"[style=filled fillcolor=lightyellow];
     "dictionnaire 1990"[style=filled fillcolor=lightyellow];
@@ -23,6 +24,7 @@ digraph {
     dictgen[label="génération de dictionnaires\ndict-gen/" shape=box style=filled fillcolor="lightgreen:lightblue"];
     cli[label="CLI\ndoc-conversion/bin/" shape=box style=filled fillcolor="lightblue"];
     serveur[label="serveur\nsite/server/" shape=box style=filled fillcolor="lightblue"];
+    keyboard[label="dictionnaire HeliBoard\nfrançais Érofa" style=filled fillcolor=lightyellow]
     subgraph outputs {
         rank=same;
         webextension[label="extension web\nextension/" URL="https://addons.mozilla.org/fr/firefox/addon/orthographe-rationnelle/" shape=box style=filled fillcolor="lightgreen"];
@@ -43,4 +45,6 @@ digraph {
     dictgen -> { client serveur cli };
     cli -> serveur [label=inclus];
     serveur -> client [label=rpc];
+
+    { cli keyboardinit } -> keyboard -> serveur;
 }
