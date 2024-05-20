@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# things that could be improved :
+#
+# - we may want to have direct suport for the format, instead of treating it like text.
+#   Currently we risk rewriting part of the structure, like "description". This doesn't
+#   seem to happen with erofa, but it would with other kinds of spelling changes.
+#
+# - We could end up with double entries because prix and pris get rewritten in the same
+#   entry. Conversely, we could want to split héroïne into both éroïne and héroïne. Unsure
+#   if these really cause problems in practice.
+#
+# - There are a number of corrections for coeur->cœur, which now become identity
+#   corrections. It might be better to drop these entirely, but they are not clearly
+#   hurting either so far.
+#
+# - It might be useful to have spelling suggestions from old spellings to new spellings,
+#   to ease the transition.
+
+gunzip < main_fr.combined.gz \
+    | ../doc-conversion/bin/ortografe_cli.exe conv -o heliboard_erofa.combined
+java -jar ./dicttool_aosp.jar makedict \
+     -s heliboard_erofa.combined \
+     -d heliboard_erofa.dict \
+     > /dev/null

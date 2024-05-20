@@ -1,3 +1,4 @@
+;; gboard
 (rule
  (targets gboard-1990-1000.zip gboard-erofa-1000.zip)
  (deps
@@ -7,3 +8,24 @@
    ../extension/dict.gen.csv
  )
  (action (run ./gen-gboard)))
+
+;; heliboard
+;; download as separate rules so that iterating on the script doesn't
+;; cause repeated downloads
+(rule
+ (targets dicttool_aosp.jar)
+ (action (run curl --fail-with-body -sS -O https://raw.githubusercontent.com/remi0s/aosp-dictionary-tools/1e69dd2c04258e5e9e04bfb13b46faccf6a435b0/dicttool_aosp.jar)))
+
+(rule
+ (targets main_fr.combined.gz)
+ (action (run curl --fail-with-body -sS -O https://codeberg.org/Helium314/aosp-dictionaries/raw/commit/0ec0417ef8baa8f4504aead129214ecfdf26ba28/wordlists/main_fr.combined.gz)))
+
+(rule
+ (targets heliboard_erofa.dict)
+ (deps
+  (sandbox always)
+   dicttool_aosp.jar
+   main_fr.combined.gz
+   %{project_root}/doc-conversion/bin/ortografe_cli.exe
+ )
+ (action (run ./gen-heliboard)))

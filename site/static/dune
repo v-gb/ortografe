@@ -6,7 +6,7 @@
 (copy_files (files %{project_root}/dict-gen/js/dict_gen.bc.js))
 (copy_files (files %{project_root}/doc-conversion/bin/doc_conversion.bc.js))
 (copy_files (files %{project_root}/extension/src/{{rewrite,dict}.js,rules-format.html}))
-(copy_files (files %{project_root}/keyboard/*.zip))
+(copy_files (files %{project_root}/keyboard/*.{zip,dict}))
 (copy_files (files %{project_root}/edition/{Alice_au_pays_des_merveilles.epub,Alice_au_pays_des_merveilles-manual.epub}))
 
 (rule

@@ -797,17 +797,54 @@ module Index = struct
     section
       [ h3 [ text "Claviers" ]
       ; div ~attrs:[exp_hidden_class]
+          [ p [ text "La plupart des claviers virtuels pour téléphone s'adaptent à \
+                      votre orthographe : après avoir tapé les mots quelques fois en \
+                      orthographe Érofa, ces orthographes vont seront proposés." ]
+          ; p [ text "Mais pour ne pas avoir à apprendre toute l'orthographe à votre \
+                      clavier, et aussi pour que vous puissiez choisir quand écrire en \
+                      Érofa, nous vous proposons un dictionnaire pour le clavier \
+                      HeliBoard. Voici les étapes pour l'utiliser :" ]
+          ; list `ol
+              [ [ text "Installez "
+                ; a ~href:"https://f-droid.org/"
+                    [ text "F-Droid" ]
+                ; text " (un catalogue d'applications comme le Play Store)."
+                ]
+              ; [ text "Installez "
+                ; a ~href:"https://f-droid.org/fr/packages/helium314.keyboard"
+                    [ text "HeliBoard" ]
+                ; text " (le clavier virtuel à utiliser), puis suivez ses instructions \
+                        pour l'activer."
+                ]
+              ; [ a ~href:"/static/heliboard_erofa.dict"
+                    [ text "Téléchargez" ]
+                ; text " le dictionnaire français Érofa pour HeliBoard."
+                ]
+              ; [ text "Allez dans les paramètres du clavier, « Langues & Dispositions \
+                        », « français », cliquez sur « Dictionnaires + », « Ajouter »,
+                        taper « erofa » dans la barre de recherche, puis sélectionnez « \
+                        heliboard_erofa.dict »."
+                ]
+              ; [ text "Testez le clavier où vous voulez (par exemple Messages, WhatsApp, GMail)." ]
+              ; [ text "Quand vous voulez repasser en orthographe usuelle, quand le \
+                        clavier est visible, cliquer sur l'icône de clavier en bas à \
+                        droite et sélectionnez votre ancien clavier (si vous ne savez \
+                        pas lequel c'est, c'est probablement Gboard). Et pour repasser \
+                        en Érofa, même manipulation, mais sélectionnez HeliBoard." ]
+              ]
           (* Avec gboard, le fait qu'on ne puisse pas supprimer les entrées de façon
              simple limite l'utilisation aux orthographes qu'on veut utiliser
              permanennement, ce n'est pas vraiment utilisable pour érofa où au mieux un
              utilisateur voudrait passer d'une orthographe à l'autre. *)
-          [ p [ a ~href:"/static/gboard-1990-1000.zip"
-                  [ text "Dictionnaire 1990 pour gboard" ]
-              ; text " "
-              ; a ~href:"/static/gboard-erofa-1000.zip"
-                  [ text "Dictionnaire Érofa pour gboard" ]
+          ; p [ text "Truc pas prêt" ]
+          ; list `ul [
+                [ a ~href:"/static/gboard-1990-1000.zip"
+                    [ text "Dictionnaire 1990 pour gboard" ] ]
+              ; [ a ~href:"/static/gboard-erofa-1000.zip"
+                    [ text "Dictionnaire Érofa pour gboard" ]
+                ]
+              ; [ a ~href:"https://www.reddit.com/r/gboard/comments/z89a3f/how_to_empty_user_dictionary/" [ text "seule méthode pour supprimer les entrées :(" ] ]
               ]
-          ; a ~href:"https://www.reddit.com/r/gboard/comments/z89a3f/how_to_empty_user_dictionary/" [ text "seule méthode pour supprimer les entrées :(" ]
           ]
       ; p [ text "Un clavier virtuel pour écrire en orthographe Érofa sur téléphone est \
                   en cours d'étude. Mais même sans, la plupart des claviers s'adaptent à \
