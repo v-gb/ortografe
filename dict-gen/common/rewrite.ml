@@ -1104,7 +1104,7 @@ let _ : rule =
     "alfonic"
     "les règles de https://alfonic.org/"
     ~problems:
-     [ "Les liaisons se sont pas écrites."
+     [ "Les liaisons ne sont pas écrites."
      ; "Les apostrophes ne sont pas supprimées dans les apocopes (« j'aime »)."
      ; "Les cas difficiles pour tout outil : la prononciation des vers (« le lion » ou \
         « le liyon »), des homophones (« les poules couvent au couvent »), les mots \
