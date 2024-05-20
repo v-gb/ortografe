@@ -26,9 +26,8 @@ digraph {
     subgraph outputs {
         rank=same;
         webextension[label="extension web\nextension/" URL="https://addons.mozilla.org/fr/firefox/addon/orthographe-rationnelle/" shape=box style=filled fillcolor="lightgreen"];
-        client[label="client orthographe-rationnelle.info\nsite/client/" URL="https://orthographe-rationnelle.info" shape=box style=filled fillcolor="lightgreen"];
+        client[label="client\northographe-rationnelle.info\nsite/client/" URL="https://orthographe-rationnelle.info" shape=box style=filled fillcolor="lightgreen"];
     }
-
 
     wiktionnaire -> "h aspirés";
 
@@ -40,9 +39,8 @@ digraph {
     dictgen -> webextension;
     dicterofa -> { webextension cli serveur };
 
-    conv -> { serveur cli };
-    dictgen -> { serveur cli };
+    conv -> { client serveur cli };
+    dictgen -> { client serveur cli };
     cli -> serveur [label=inclus];
-    conv -> client;
     serveur -> client [label=rpc];
 }
