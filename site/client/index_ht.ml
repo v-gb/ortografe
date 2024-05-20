@@ -236,8 +236,18 @@ a:link, a:visited {
   padding: 3px;
   border-radius: 6px;
 }
+
+.exp-hidden {
+  display: none;
+}
+.exp-shown {
+  background-color: #ffecce;
+  border-radius: 4px;
+}
 |}
   ]
+let exp_hidden = "exp-hidden"
+let exp_hidden_class = "class", exp_hidden
 
 let navbar l =
   let a = a ~cl:"display: block;
@@ -786,7 +796,7 @@ module Index = struct
   let section_claviers () =
     section
       [ h3 [ text "Claviers" ]
-      ; div ~cl:"display: none"
+      ; div ~attrs:[exp_hidden_class]
           (* Avec gboard, le fait qu'on ne puisse pas supprimer les entrées de façon
              simple limite l'utilisation aux orthographes qu'on veut utiliser
              permanennement, ce n'est pas vraiment utilisable pour érofa où au mieux un
@@ -1021,7 +1031,7 @@ module Index = struct
               ; section_donnees ()
               ; section_aller_plus_loin ()
               ; submit_file
-                  ~attrs:["id", "doc-conv"; "style", "display: none"]
+                  ~attrs:["id", "doc-conv"; exp_hidden_class ]
                   ~replace_onchange:["id", "doc-conv-button"]
                   (fun z -> [ div ~attrs:["id", "doc-conv-button-error"] []; +z ])
               ]

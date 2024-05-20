@@ -149,3 +149,10 @@ if (browser) {
         elt.classList.add('for-active-browser')
     }
 }
+
+if ((new URL(window.location)).searchParams.get("exp")) {
+    for (const elt of Array.from(document.getElementsByClassName('exp-hidden'))) {
+        elt.classList.remove('exp-hidden')
+        elt.classList.add('exp-shown')
+    }
+}
