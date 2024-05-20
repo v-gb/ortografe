@@ -91,14 +91,16 @@ module General_purpose = struct
       lazy (
           let thin_nbws = "\u{202F}" in
           let alist =
-            List.map
-              [ " :"
-              ; " ?"
-              ; " !"
-              ; "« "
-              ; " »"
-              ] ~f:(fun s ->
-                s, String.substr_replace_all s ~pattern:" " ~with_:thin_nbws)
+            [ +List.map
+                 [ " :"
+                 ; " ?"
+                 ; " !"
+                 ; "« "
+                 ; " »"
+                 ] ~f:(fun s ->
+                   s, String.substr_replace_all s ~pattern:" " ~with_:thin_nbws)
+            ; "->", "→"
+            ]
           in
           let table = Hashtbl.of_alist_exn (module String) alist in
           let re = Re.(compile (alt (List.map alist ~f:(fun (s, _) -> str s)))) in
@@ -820,12 +822,30 @@ module Index = struct
                     [ text "Téléchargez" ]
                 ; text " le dictionnaire français Érofa pour HeliBoard."
                 ]
-              ; [ text "Allez dans les paramètres du clavier, « Langues & Dispositions \
-                        », « français », cliquez sur « Dictionnaires + », « Ajouter »,
-                        taper « erofa » dans la barre de recherche, puis sélectionnez « \
-                        heliboard_erofa.dict »."
+              ; [ text "Utilisez ce dictionnaire :"
+                ; list `ol
+                    [ [ text "Allez dans les paramètres du clavier" ]
+                    ; [ text "-> « Langues & Dispositions »" ]
+                    ; [ text "-> « français »" ]
+                    ; [ text "-> « Dictionnaires + »"]
+                    ; [ text "-> « Ajouter »" ]
+                    ; [ text "taper « erofa » dans la barre de recherche" ]
+                    ; [ text "sélectionnez « heliboard_erofa.dict »" ]
+                    ]
                 ]
-              ; [ text "Testez le clavier où vous voulez (par exemple Messages, WhatsApp, GMail)." ]
+              ; [ text "Testez le clavier où vous voulez (par exemple Messages, \
+                        WhatsApp, GMail)." ]
+              ; [ text "(optionnel) Pour éviter le soulignage rouge des mots en \
+                        orthographe Érofa :"
+                ; list `ol
+                    [ [ text "allez dans les « Paramètres » d'Android" ]
+                    ; [ text "-> « Système »" ]
+                    ; [ text "-> « Clavier »" ]
+                    ; [ text "-> « Correcteur orthographique »" ]
+                    ; [ text "-> « Correcteur par défaut »" ]
+                    ; [ text "puis choisissez HeliBoard." ]
+                    ]
+                ]
               ; [ text "Quand vous voulez repasser en orthographe usuelle, quand le \
                         clavier est visible, cliquer sur l'icône de clavier en bas à \
                         droite et sélectionnez votre ancien clavier (si vous ne savez \

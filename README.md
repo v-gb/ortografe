@@ -20,6 +20,8 @@ This project contains tools to help with proposed spelling rationalizations for 
     - transcribes text and documents in various formats (pure text, .html, .xhtml, .htmlz, .doc, .docx, .odt, .odp, .ppt, .pptx, .epub)
     - creates dictionaries for other kinds of spelling changes (which can be used to convert document, or with the browser extension)
 
+- [dictionaries](keyboard/) for virtual keyboards on phones, so it's convenient to write in these adjusted spellings
+
 - [data](data/) for this work (it is surprisingly difficult to find structured data)
 
 We may add more tools in the future.
