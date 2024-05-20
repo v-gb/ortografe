@@ -796,86 +796,97 @@ module Index = struct
       ]
 
   let section_claviers () =
-    section
-      [ h3 [ text "Claviers" ]
-      ; div ~attrs:[exp_hidden_class]
-          [ p [ text "La plupart des claviers virtuels pour téléphone s'adaptent à \
-                      votre orthographe : après avoir tapé les mots quelques fois en \
-                      orthographe Érofa, ces orthographes vont seront proposés." ]
-          ; p [ text "Mais pour ne pas avoir à apprendre toute l'orthographe à votre \
-                      clavier, et aussi pour que vous puissiez choisir quand écrire en \
-                      Érofa, nous vous proposons un dictionnaire pour le clavier \
-                      HeliBoard. Voici les étapes pour l'utiliser :" ]
-          ; list `ol
-              [ [ text "Installez "
-                ; a ~href:"https://f-droid.org/"
-                    [ text "F-Droid" ]
-                ; text " (un catalogue d'applications comme le Play Store)."
-                ]
-              ; [ text "Installez "
-                ; a ~href:"https://f-droid.org/fr/packages/helium314.keyboard"
-                    [ text "HeliBoard" ]
-                ; text " (le clavier virtuel à utiliser), puis suivez ses instructions \
-                        pour l'activer."
-                ]
-              ; [ a ~href:"/static/heliboard_erofa.dict"
-                    [ text "Téléchargez" ]
-                ; text " le dictionnaire français Érofa pour HeliBoard."
-                ]
-              ; [ text "Utilisez ce dictionnaire :"
+    [ section ~attrs:[exp_hidden_class]
+        [ h3 [ text "Clavier pour téléphone" ]
+        ; p [ text "La plupart des claviers virtuels pour téléphone s'adaptent à votre \
+                    orthographe : après avoir tapé les mots quelques fois en \
+                    orthographe Érofa, ces orthographes vont seront proposés. Mais pour \
+                    ne pas avoir à apprendre toute l'orthographe à votre clavier, et \
+                    aussi pour que vous puissiez choisir quand écrire en Érofa, nous \
+                    vous proposons un dictionnaire pour le clavier HeliBoard pour \
+                    Android."
+            ; elt "details"
+                [ elt "summary"
+                    [ text "Instructions pour l'utiliser." ]
                 ; list `ol
-                    [ [ text "Allez dans les paramètres du clavier" ]
-                    ; [ text "-> « Langues & Dispositions »" ]
-                    ; [ text "-> « français »" ]
-                    ; [ text "-> « Dictionnaires + »"]
-                    ; [ text "-> « Ajouter »" ]
-                    ; [ text "taper « erofa » dans la barre de recherche" ]
-                    ; [ text "sélectionnez « heliboard_erofa.dict »" ]
+                    [ [ text "Installez "
+                      ; a ~href:"https://f-droid.org/"
+                          [ text "F-Droid" ]
+                      ; text " (un catalogue d'applications comme le Play Store)."
+                      ]
+                    ; [ text "Installez "
+                      ; a ~href:"https://f-droid.org/fr/packages/helium314.keyboard"
+                          [ text "HeliBoard" ]
+                      ; text " (le clavier virtuel), puis suivez ses instructions pour \
+                              l'activer."
+                      ]
+                    ; [ a ~href:"/static/heliboard_erofa.dict"
+                          [ text "Téléchargez" ]
+                      ; text " le dictionnaire français Érofa pour HeliBoard."
+                      ]
+                    ; [ text "Utilisez ce dictionnaire :"
+                      ; list `ol
+                          [ [ text "Allez dans les paramètres d'HeliBoard" ]
+                          ; [ text "-> « Langues & Dispositions »" ]
+                          ; [ text "-> « français »" ]
+                          ; [ text "-> « Dictionnaires + »"]
+                          ; [ text "-> « Ajouter »" ]
+                          ; [ text "tapez « erofa » dans la barre de recherche" ]
+                          ; [ text "sélectionnez « heliboard_erofa.dict »" ]
+                          ]
+                      ]
+                    ; [ text "Testez le clavier où vous voulez (par exemple Messages, \
+                              WhatsApp, GMail)." ]
+                    ; [ text "(optionnel) Pour éviter le soulignage rouge des mots en \
+                              orthographe Érofa :"
+                      ; list `ol
+                          [ [ text "allez dans les « Paramètres » d'Android" ]
+                          ; [ text "-> « Système »" ]
+                          ; [ text "-> « Clavier »" ]
+                          ; [ text "-> « Correcteur orthographique »" ]
+                          ; [ text "-> « Correcteur par défaut »" ]
+                          ; [ text "puis choisissez HeliBoard." ]
+                          ]
+                      ]
                     ]
-                ]
-              ; [ text "Testez le clavier où vous voulez (par exemple Messages, \
-                        WhatsApp, GMail)." ]
-              ; [ text "(optionnel) Pour éviter le soulignage rouge des mots en \
-                        orthographe Érofa :"
-                ; list `ol
-                    [ [ text "allez dans les « Paramètres » d'Android" ]
-                    ; [ text "-> « Système »" ]
-                    ; [ text "-> « Clavier »" ]
-                    ; [ text "-> « Correcteur orthographique »" ]
-                    ; [ text "-> « Correcteur par défaut »" ]
-                    ; [ text "puis choisissez HeliBoard." ]
-                    ]
-                ]
-              ; [ text "Quand vous voulez repasser en orthographe usuelle, quand le \
+                ; text "Quand vous voulez repasser en orthographe usuelle, quand le \
                         clavier est visible, cliquer sur l'icône de clavier en bas à \
                         droite et sélectionnez votre ancien clavier (si vous ne savez \
                         pas lequel c'est, c'est probablement Gboard). Et pour repasser \
-                        en Érofa, même manipulation, mais sélectionnez HeliBoard." ]
-              ]
-          (* Avec gboard, le fait qu'on ne puisse pas supprimer les entrées de façon
-             simple limite l'utilisation aux orthographes qu'on veut utiliser
-             permanennement, ce n'est pas vraiment utilisable pour érofa où au mieux un
-             utilisateur voudrait passer d'une orthographe à l'autre. *)
-          ; p [ text "Truc pas prêt" ]
-          ; list `ul [
-                [ a ~href:"/static/gboard-1990-1000.zip"
-                    [ text "Dictionnaire 1990 pour gboard" ] ]
-              ; [ a ~href:"/static/gboard-erofa-1000.zip"
-                    [ text "Dictionnaire Érofa pour gboard" ]
+                        en Érofa, même manipulation, mais sélectionnez HeliBoard."
                 ]
-              ; [ a ~href:"https://www.reddit.com/r/gboard/comments/z89a3f/how_to_empty_user_dictionary/" [ text "seule méthode pour supprimer les entrées :(" ] ]
+            ]
+        (* Avec gboard, le fait qu'on ne puisse pas supprimer les entrées de façon
+           simple limite l'utilisation aux orthographes qu'on veut utiliser
+           permanennement, ce n'est pas vraiment utilisable pour érofa où au mieux un
+           utilisateur voudrait passer d'une orthographe à l'autre. *)
+        ; p [ text "Truc pas prêt" ]
+        ; list `ul [
+              [ a ~href:"/static/gboard-1990-1000.zip"
+                  [ text "Dictionnaire 1990 pour gboard" ] ]
+            ; [ a ~href:"/static/gboard-erofa-1000.zip"
+                  [ text "Dictionnaire Érofa pour gboard" ]
               ]
-          ]
-      ; p [ text "Un clavier virtuel pour écrire en orthographe Érofa sur téléphone est \
-                  en cours d'étude. Mais même sans, la plupart des claviers s'adaptent à \
-                  votre orthographe après avoir tapé les mots quelques fois en \
-                  orthographe Érofa."
-          ]
-      ; p [ text "Sur ordinateur, si vous utilisez actuellement un clavier QWERTY \
-                  américain sans accès aux accents, sous Ubuntu nous vous suggérons la \
-                  disposition de clavier « French (US) » (seule AltGr change, et permet \
-                  d'écrire accents, cédilles, guillemets français, etc)." ]
-      ]
+            ; [ a ~href:"https://www.reddit.com/r/gboard/comments/z89a3f/how_to_empty_user_dictionary/" [ text "seule méthode pour supprimer les entrées :(" ] ]
+            ]
+        ]
+    ; section
+        [ h3 [ text "Clavier pour téléphone" ]
+        ; p [ text "Un clavier virtuel pour écrire en orthographe Érofa sur téléphone \
+                    est en cours d'étude. Mais même sans, la plupart des claviers \
+                    s'adaptent à votre orthographe après avoir tapé les mots quelques \
+                    fois en orthographe Érofa."
+            ]
+        ]
+    ; section
+        [ h3 [ text "Clavier pour ordinateur" ]
+        ; p [ text "Les accents sont plus fréquents avec l'orthographe Érofa. Pour les \
+                    rares personnes qui utilisent un clavier QWERTY américain sans \
+                    accès aux accents, sous Ubuntu nous vous suggérons la disposition \
+                    de clavier « French (US) » (seule AltGr change, et permet d'écrire \
+                    tous les signes du français, sans touches mortes)." ]
+        ]
+    ]
 
   let summary_unstyled children =
     elt "summary"
@@ -907,6 +918,7 @@ module Index = struct
                ; works, [ text "transcription de pages que vous visitez (voir les options \
                                 de l'extension)" ]
                ; doesnt_work, [ text "vérificateurs d'orthographe" ]
+               ; exp_hidden_class :: doesnt_work, [ text "clavier pour téléphone" ]
                ]
               )
           ; p [ text "Notez que ces autres orthographes ne sont pas des recommendations \
@@ -1083,7 +1095,7 @@ module Index = struct
               ; section_transcription_locale ()
               ; section_transcription_pages ()
               ; section_verificateurs ()
-              ; section_claviers ()
+              ; +section_claviers ()
               ; section_autres_orthographes ()
               ; section_donnees ()
               ; section_aller_plus_loin ()
