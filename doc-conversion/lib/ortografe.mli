@@ -36,6 +36,8 @@ val convert_string : ext:string -> options:options -> string -> ([ `ext of strin
 val convert_files : ?src_type:string -> options:options -> string option -> string option -> unit
 val ext_conv : ?src_type:string -> string option -> string option -> [< `Extract | `Insert of string option ] -> unit
 
+val mimetype_by_ext : string -> string option
+
 val map_zip
     : string
       -> (Zipc.Member.t -> (unit -> string) -> string option)

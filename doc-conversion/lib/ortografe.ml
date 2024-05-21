@@ -112,20 +112,23 @@ let htmlz ?convert_text ~options src ~dst =
   |> write_out dst
 
 let known_exts =
-  [ ".txt"
-  ; ".md"
-  ; ".mkd"
-  ; ".html"
-  ; ".xhtml"
-  ; ".htmlz"
-  ; ".docx"
-  ; ".ppt"
-  ; ".pptx"
-  ; ".doc"
-  ; ".odt"
-  ; ".odp"
-  ; ".epub"
+  [ ".txt", "text/plain"
+  ; ".md", "text/x-markdown"
+  ; ".mkd", "text/x-markdown"
+  ; ".html", "text/html"
+  ; ".xhtml", "application/xhtml+xml"
+  ; ".htmlz", "application/octet-stream"
+  ; ".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ; ".ppt", "application/vnd.ms-powerpoint"
+  ; ".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+  ; ".doc", "application/msword"
+  ; ".odt", "application/vnd.oasis.opendocument.text"
+  ; ".odp", "application/vnd.oasis.opendocument.presentation"
+  ; ".epub", "application/epub+zip"
   ]
+let mimetype_by_ext =
+  let tbl = lazy (Hashtbl.of_seq (List.to_seq known_exts)) in
+  fun str -> Hashtbl.find_opt (Lazy.force tbl) str
 
 let of_ext ext =
   match String.lowercase_ascii ext with
@@ -167,7 +170,7 @@ let open_channel dp name =
 let read_all name =
   In_channel.with_open_bin name
     In_channel.input_all
-
+  
 let src_dst_typ ?src_type src dst ~dyn_protect:dp =
   let src_type =
     Option.map (fun src_type ->
@@ -186,7 +189,7 @@ let src_dst_typ ?src_type src dst ~dyn_protect:dp =
        src_type
        ||? (of_ext (Filename.extension src_name)
             ||?
-              let exts = "{" ^ String.concat "|" known_exts ^ "}" in
+              let exts = "{" ^ String.concat "|" (List.map fst known_exts) ^ "}" in
               failwith [%string "%{src_name} isn't a supported file format. You might want to pass --type %{exts} to treat the file as a supported file format"])
      in
      let dst_name =
