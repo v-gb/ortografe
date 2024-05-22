@@ -131,7 +131,7 @@ for (const elt of document.getElementsByClassName('mailelt')) {
 let browser;
 if (/Firefox[/]/.test(navigator.userAgent)) {
     browser = 'firefox';
-} else if (/Edge[/]/.test(navigator.userAgent)) {
+} else if (/Edg(e|)[/]/.test(navigator.userAgent)) {
     browser = 'edge';
 } else if (/Chrom(e|ium)[/]/.test(navigator.userAgent)) {
     browser = 'chrome';

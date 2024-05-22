@@ -254,7 +254,7 @@ let logger = function
        | None -> user_agent
        | Some (_, s) ->
           match String.rsplit2 s ~on:'/' with
-          | Some (("Safari" | "Firefox" | "Chrome"), _) -> s
+          | Some (("Safari" | "Firefox" | "Chrome" | "Edg"), _) -> s
           | _ -> user_agent
      in
      let client =
