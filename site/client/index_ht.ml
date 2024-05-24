@@ -968,8 +968,9 @@ module Index = struct
       ~attrs:[aller_plus_loin_def]
       [ h2 [ text "Aller plus loin" ]
       ; list `ul ~cl:"list-style-type: none; padding-left: 0;"
-          [ [ text "Pour plus d'information sur l'orthographe proposée (très lisible sans \
-                    être expert)"
+          [ [ p ~cl:"margin-top: 0; margin-bottom: 0.2em"
+                [ text "Pour plus d'information sur l'orthographe proposée (très \
+                        lisible sans être expert) :" ]
             ; list `ul
                 [ [ a ~href:"/static/erofa-texte.pdf#page=47"
                       [ text "Les consonnes doubles" ]
