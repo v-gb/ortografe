@@ -43,6 +43,23 @@ else
 fi")))
 
 (rule
+ (target orthographe-qui-a-peur-de-la-reforme.epub)
+ (deps
+  (sandbox always)
+  (glob_files orthographe-qui-a-peur-de-la-reforme_local.epub))
+ (action
+  ;; This epub is technically freely available, but you still need an account
+  ;; some library website to get it, so store it and distribute it ourselves to
+  ;; remove the annoying hoops.
+   (bash "
+set -e -u -o pipefail
+if [ -f orthographe-qui-a-peur-de-la-reforme_local.epub ]; then
+  cp orthographe-qui-a-peur-de-la-reforme_local.epub %{target}
+else
+  curl --fail-with-body -o %{target} -sS https://orthographe-rationnelle.info/static/orthographe-qui-a-peur-de-la-reforme.epub
+fi")))
+
+(rule
  (targets (dir books) books.html)
  (deps    (sandbox always))
  (action (run ../build/build.exe convert-all %{dep:books.tar})))

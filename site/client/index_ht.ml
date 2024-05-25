@@ -191,6 +191,11 @@ module General_purpose = struct
       ; body
       ]
 
+  let details ?cl ?summary_cl summary body =
+    elt ?cl "details"
+      (elt ?cl:summary_cl "summary" summary :: body)
+  let cite ?cl body = elt ?cl "cite" body
+
   let _ = comment
 end
 
@@ -805,10 +810,9 @@ module Index = struct
                     aussi pour que vous puissiez choisir quand écrire en Érofa, nous \
                     vous proposons un dictionnaire pour le clavier HeliBoard pour \
                     Android."
-            ; elt "details"
-                [ elt "summary"
-                    [ text "Instructions pour l'utiliser." ]
-                ; list `ol
+            ; details
+                [ text "Instructions pour l'utiliser." ]
+                [ list `ol
                     [ [ text "Installez "
                       ; a ~href:"https://f-droid.org/"
                           [ text "F-Droid" ]
@@ -888,62 +892,60 @@ module Index = struct
         ]
     ]
 
-  let summary_unstyled children =
-    elt "summary"
-          ~cl:"
+  let details__summary_unstyled summary body =
+    details
+      ~summary_cl:"
 &::marker { content: none; }
 &::-webkit-details-marker { display: none; }
 "
-    children
+      summary
+      body
 
   let section_autres_orthographes () =
-    section
-      [ elt "details"
-          [ summary_unstyled
-              [ h3 [ text "Support pour d'autres orthographes"
-                   ; span ~cl:"text-decoration-line: underline" [ text "…" ]
-                  ]
-              ]
-          ; p [ text "Parmi nos outils, voici ceux qui supportent d'autres orthographes \
-                      que l'orthographe Érofa:" ]
-          ; list' `ul
-              (let works = [ "style", "list-style-type:\"\\2705\u{A0}\"" ] in
-               let doesnt_work = [ "style", "list-style-type:\"\\274C\u{A0}\"" ] in
-               [ works, [ text "transcription interactive (voir plus bas)" ]
-               ; works, [ text "transcription de documents, en ligne (voir plus bas)" ]
-               ; works, [ text "transcription de documents, sur votre ordinateur (voir "
-                        ; code [ text "--help" ]
-                        ; text ")"
-                        ]
-               ; works, [ text "transcription de pages que vous visitez (voir les options \
-                                de l'extension)" ]
-               ; doesnt_work, [ text "vérificateurs d'orthographe" ]
-               ; exp_hidden_class :: doesnt_work, [ text "clavier pour téléphone" ]
-               ]
-              )
-          ; p [ text "Notez que ces autres orthographes ne sont pas des recommendations \
-                      (ni des futures recommendations), simplement des possibilités \
-                      d'expérimentation." ]
-          ; submit_file (fun button ->
-                [ +(Dict_gen_common.Dict_gen.all_selection_html
-                      ~url_prefix:"/static/"
-                      ~name_prefix:""
-                      ~id_prefix:"conv-"
-                      ~checked:(fun r ->
-                        String.(=) (Dict_gen_common.Dict_gen.name r) "1990")
-                      ()
-                    |> nodes_of_string)
-                ; br
-                ; +button
-                ])
-              ~attrs:["id", "form-conv"]
-          ; br
-          ; interactive_transcription
-              ~id_textarea:"user-text2"
-              ~id_converted_text:"converted-text2"
-              ~initial_text:(`Placeholder "Tapez le texte à transcrire ici.")
+    details__summary_unstyled
+      [ h3 [ text "Support pour d'autres orthographes"
+           ; span ~cl:"text-decoration-line: underline" [ text "…" ]
           ]
       ]
+      [ p [ text "Parmi nos outils, voici ceux qui supportent d'autres orthographes \
+                  que l'orthographe Érofa:" ]
+      ; list' `ul
+          (let works = [ "style", "list-style-type:\"\\2705\u{A0}\"" ] in
+           let doesnt_work = [ "style", "list-style-type:\"\\274C\u{A0}\"" ] in
+           [ works, [ text "transcription interactive (voir plus bas)" ]
+           ; works, [ text "transcription de documents, en ligne (voir plus bas)" ]
+           ; works, [ text "transcription de documents, sur votre ordinateur (voir "
+                    ; code [ text "--help" ]
+                    ; text ")"
+                    ]
+           ; works, [ text "transcription de pages que vous visitez (voir les options \
+                            de l'extension)" ]
+           ; doesnt_work, [ text "vérificateurs d'orthographe" ]
+           ; exp_hidden_class :: doesnt_work, [ text "clavier pour téléphone" ]
+           ]
+          )
+      ; p [ text "Notez que ces autres orthographes ne sont pas des recommendations \
+                  (ni des futures recommendations), simplement des possibilités \
+                  d'expérimentation." ]
+       ; submit_file (fun button ->
+             [ +(Dict_gen_common.Dict_gen.all_selection_html
+                   ~url_prefix:"/static/"
+                   ~name_prefix:""
+                   ~id_prefix:"conv-"
+                   ~checked:(fun r ->
+                     String.(=) (Dict_gen_common.Dict_gen.name r) "1990")
+                   ()
+                 |> nodes_of_string)
+             ; br
+             ; +button
+             ])
+           ~attrs:["id", "form-conv"]
+       ; br
+       ; interactive_transcription
+           ~id_textarea:"user-text2"
+           ~id_converted_text:"converted-text2"
+           ~initial_text:(`Placeholder "Tapez le texte à transcrire ici.")
+       ]
 
   let section_donnees () =
     section
@@ -1007,55 +1009,91 @@ module Index = struct
             ; text " qui propose cette réforme !"
             ; hr
             ]
-          ; [ email_link [ text "Contactez-nous" ]
-            ; text " si vous avez des problèmes, questions ou suggestions !"
+          ; [ text "Le livre numérique gratuit "
+            ; a ~href:"/static/orthographe-qui-a-peur-de-la-reforme.epub"
+                [ cite [ text "Orthographe : qui a peur de la réforme ?" ] ]
+            ; text " (de Marie-Louise Moreau et Georges Legros) explique un tas de \
+                    choses sur l'orthographe : pourquoi l'orthographe est comme elle \
+                    est, comment elle a évolué dans le passé, les idées fausses qu'on \
+                    s'en fait, les craintes que génèrent une réforme, etc."
             ; hr
             ]
-          ; [ elt "details"
-                [ elt "summary"
-                    [ text "Licences et mentions légales" ]
-                ; div ~cl:"padding-left: 2em"
-                    [ p [ text "Les outils de cette page utilisent des dictionnaires \
-                                construits à partir d'Érofa ("
-                        ; a ~href:"http://erofa.free.fr/index.php?option=com_content&view=article&id=59&Itemid=68"
-                            [ text "utilisation non-commerciale" ]
-                        ; text "), de "
-                        ; a ~href:"http://www.lexique.org"
-                            [ text "Lexique" ]
-                        ; text " (la licence dit utilisation non-commerciale, mais les \
-                                auteurs permettent l'utilisation dans ce site), du "
-                        ; a ~href:"https://dumps.wikimedia.org/legal.html"
-                            [ text "wiktionnaire" ]
-                        ; text " (toute utilisation)."
-                        ]
-                    ; p [ text "Vous pouvez retrouver l'origine des icônes utilisées dans \
-                                cette page sur la page wikipédia dudit programme ou \
-                                format. Les quelques cas plus dures sont "
-                        ; a ~href:"https://commons.wikimedia.org/wiki/File:Text-txt.svg"
-                            [ text "fichier texte" ]
-                        ; text ", "
-                        ; a ~href:"https://commons.wikimedia.org/wiki/File:Pdf_by_mimooh.svg"
-                            [text "pdf" ]
-                        ; text ", "
-                        ; a ~href:"https://en.wikipedia.org/wiki/File:Crystal_Clear_app_linneighborhood.svg"
-                            [text "globe internet"]
-                        ; text ". Aucunes n'ont été modifiées."
-                        ]
-                    ; p [ text "Le favicon provient de "
-                        ; a ~href:"https://icons8.com/" [ text "icons8" ]
-                        ; text "."
-                        ]
-                    ]
+          ; [ p ~cl:"margin-top: 0; margin-bottom: 0.2em" [ text "Sur le site et les outils :" ]
+            ; list `ul
+                [ [ email_link [ text "Contactez-nous" ]
+                  ; text " si vous avez des problèmes, questions ou suggestions !"
+                  ]
+                ; [ details
+                      [ text "Activité" ]
+                      [ list `ul
+                          [ [ text "2024-05 - ? : étude de support pour l'orthographe \
+                                    Érofa pour les claviers de téléphones" ]
+                          ; [ text "À ce stade, les outils sont essentiellement finis." ]
+                          ; [ text "2024-05 : support de transcriptions de document \
+                                    côté client, amélioration de l'apparence du site" ]
+                          ; [ text "2024-01 - 2024-04 : support des rectifications de \
+                                    1990, ajout de la transcription de documents, \
+                                    extension pour Safari, support d'orthographes \
+                                    autres que l'orthographe Érofa dans le site et dans \
+                                    les extensions, impression d'un livre classique en \
+                                    orthographe Érofa (Alice au pays des merveilles)." ]
+                          ; [ text "2023-10 - 2024-01 : extension pour Chrome, la \
+                                    transcription inclut maintenant les mots dérivés \
+                                    comme les conjugaisons (grâce l'application \
+                                    informatisée des règles Érofa à un lexique), \
+                                    création du site avec la transcription interactive" ]
+                          ; [ text "2023-10 : extension pour Firefox" ]
+                          ]
+                      ]
+                  ]
+                ; [ details
+                      [ text "Licences et mentions légales" ]
+                      [ div ~cl:"padding-left: 2em"
+                          [ p [ text "Les outils de cette page utilisent des dictionnaires \
+                                      construits à partir d'Érofa ("
+                              ; a ~href:"http://erofa.free.fr/index.php?option=com_content&view=article&id=59&Itemid=68"
+                                  [ text "utilisation non-commerciale" ]
+                              ; text "), de "
+                              ; a ~href:"http://www.lexique.org"
+                                  [ text "Lexique" ]
+                              ; text " (la licence dit utilisation non-commerciale, mais les \
+                                      auteurs permettent l'utilisation dans ce site), du "
+                              ; a ~href:"https://dumps.wikimedia.org/legal.html"
+                                  [ text "wiktionnaire" ]
+                              ; text " (toute utilisation)."
+                              ]
+                          ; p [ text "Vous pouvez retrouver l'origine des icônes utilisées dans \
+                                      cette page sur la page wikipédia dudit programme ou \
+                                      format. Les quelques cas plus dures sont "
+                              ; a ~href:"https://commons.wikimedia.org/wiki/File:Text-txt.svg"
+                                  [ text "fichier texte" ]
+                              ; text ", "
+                              ; a ~href:"https://commons.wikimedia.org/wiki/File:Pdf_by_mimooh.svg"
+                                  [text "pdf" ]
+                              ; text ", "
+                              ; a ~href:"https://en.wikipedia.org/wiki/File:Crystal_Clear_app_linneighborhood.svg"
+                                  [text "globe internet"]
+                              ; text ". Aucunes n'ont été modifiées."
+                              ]
+                          ; p [ text "Le favicon provient de "
+                              ; a ~href:"https://icons8.com/" [ text "icons8" ]
+                              ; text "."
+                              ]
+                          ]
+                      ]
+                  ]
+                ; [ text "Pour les développeurs, voici le "
+                  ; a ~href:"https://github.com/v-gb/ortografe"
+                      [ text "code source" ]
+                  ; text " de ce site et de ses outils."
+                  ]
+                ; [ text "Publication au "
+                  ; a ~href:"https://cmlf2024.sciencesconf.org/data/pages/Programme_CMLF_2024_version_9.pdf"
+                      [ text "CMLF 2024" ]
+                  ; text " sur une partie du travail ci-dessus. Lien à venir."
+                  ]
                 ]
-            ; hr
             ]
-          ; [ text "Pour les développeurs, voici le "
-            ; a ~href:"https://github.com/v-gb/ortografe"
-                [ text "code source" ]
-            ; text " de cette page et de ses outils."
-            ; hr
-            ]
-          ; [ text "À venir : article scientifique sur une partie du travail ci-dessus." ]
           ]
       ]
 
