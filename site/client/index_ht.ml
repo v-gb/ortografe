@@ -1087,10 +1087,12 @@ module Index = struct
                       [ text "code source" ]
                   ; text " de ce site et de ses outils."
                   ]
-                ; [ text "Publication au "
-                  ; a ~href:"https://cmlf2024.sciencesconf.org/data/pages/Programme_CMLF_2024_version_9.pdf"
+                ; [a ~href:"https://hal.science/hal-04579389"
+                     [ text "Article scientifique" ]
+                  ; text " sur une partie du travail ci-dessus au "
+                  ; a ~href:"https://cmlf2024.sciencesconf.org/"
                       [ text "CMLF 2024" ]
-                  ; text " sur une partie du travail ci-dessus. Lien à venir."
+                  ; text "."
                   ]
                 ]
             ]
