@@ -233,67 +233,75 @@ let logger = function
        !r
      in
      fun handler request ->
+     let id = next_id () in
      (* format for request  : 13:04:49.553 GET ID IP PATH UA"
         format for response : 13:04:49.553 200 ID in INTus"
       *)
-     let id = next_id () in
-     let before = Time_ns.now () in
-     let ofday =
-       Time_ns.now ()
-       |> Time_ns.to_int63_ns_since_epoch
-       |> Int63.to_int_exn
-       |> (fun i -> i mod (86400 * 1_000_000_000))
-       |> Time_ns.Span.of_int_ns
-       |> Time_ns.Ofday.of_span_since_start_of_day_exn
-       |> Time_ns.Ofday.to_millisecond_string
-     in
-     let method_ = Dream.method_to_string (Dream.method_ request) in
-     let user_agent =
-       let user_agent = String.concat (Dream.headers request "User-Agent") in
-       match String.rsplit2 user_agent ~on:' ' with
-       | None -> user_agent
-       | Some (_, s) ->
-          match String.rsplit2 s ~on:'/' with
-          | Some (("Safari" | "Firefox" | "Chrome" | "Edg"), _) -> s
-          | _ -> user_agent
-     in
-     let client =
-       let s = Dream.client request in
-       match String.split s ~on:':' with
-       | [ host; _port ] -> host
-       | _ -> s (* ipv6 probably *)
-     in
-     Stdlib.prerr_endline [%string "%{ofday} %{method_} %{id#Int} %{client} %{Dream.target request}  %{user_agent}"];
-     Stdlib.flush stderr;
-     Lwt.try_bind
-       (fun () -> handler request)
-       (fun response ->
-         let duration = Time_ns.Span.to_int_us (Time_ns.diff (Time_ns.now ()) before) in
-         let status = Dream.status response in
-         let bcolor, ecolor =
-           if Dream.is_server_error status
-           then "[31m", "[39m"
-           else if Dream.is_client_error status
-           then "[33m", "[39m"
-           else "[32m", "[39m"
-         in
-         Stdlib.prerr_endline [%string "%{ofday} %{bcolor}%{Dream.status_to_int status#Int}%{ecolor} %{id#Int} %{client} in %{duration#Int}us"];
-         Stdlib.flush stderr;
-         (match Dream.field response stream_end with
-          | None -> ()
-          | Some promise ->
-             ignore (
-                 Lwt.on_termination promise (fun () ->
-                     let bcolor, ecolor = "[35m", "[39m" in
-                     let duration = Time_ns.Span.to_int_us (Time_ns.diff (Time_ns.now ()) before) in
-                     Stdlib.prerr_endline [%string "%{ofday} %{bcolor}DON%{ecolor} %{id#Int} %{client} in %{duration#Int}us"];
-                     Stdlib.flush stderr;
-                   )));
-         Lwt.return response)
-       (fun exn ->
-         Stdlib.prerr_string [%string "Aborted by: %{Exn.to_string exn}"];
-         Stdlib.flush stderr;
-         Lwt.fail exn)
+     if String.is_suffix (Dream.target request) ~suffix:".jpg"
+        || String.is_suffix (Dream.target request) ~suffix:".svg"
+        || String.is_suffix (Dream.target request) ~suffix:".png"
+        || String.is_suffix (Dream.target request) ~suffix:".ico"
+        || String.is_suffix (Dream.target request) ~suffix:".css"
+     then handler request
+     else (
+       let before = Time_ns.now () in
+       let ofday =
+         Time_ns.now ()
+         |> Time_ns.to_int63_ns_since_epoch
+         |> Int63.to_int_exn
+         |> (fun i -> i mod (86400 * 1_000_000_000))
+         |> Time_ns.Span.of_int_ns
+         |> Time_ns.Ofday.of_span_since_start_of_day_exn
+         |> Time_ns.Ofday.to_millisecond_string
+       in
+       let method_ = Dream.method_to_string (Dream.method_ request) in
+       let user_agent =
+         let user_agent = String.concat (Dream.headers request "User-Agent") in
+         match String.rsplit2 user_agent ~on:' ' with
+         | None -> user_agent
+         | Some (_, s) ->
+            match String.rsplit2 s ~on:'/' with
+            | Some (("Safari" | "Firefox" | "Chrome" | "Edg"), _) -> s
+            | _ -> user_agent
+       in
+       let client =
+         let s = Dream.client request in
+         match String.split s ~on:':' with
+         | [ host; _port ] -> host
+         | _ -> s (* ipv6 probably *)
+       in
+       Stdlib.prerr_endline [%string "%{ofday} %{method_} %{id#Int} %{client} %{Dream.target request}  %{user_agent}"];
+       Stdlib.flush stderr;
+       Lwt.try_bind
+         (fun () -> handler request)
+         (fun response ->
+           let duration = Time_ns.Span.to_int_us (Time_ns.diff (Time_ns.now ()) before) in
+           let status = Dream.status response in
+           let bcolor, ecolor =
+             if Dream.is_server_error status
+             then "[31m", "[39m"
+             else if Dream.is_client_error status
+             then "[33m", "[39m"
+             else "[32m", "[39m"
+           in
+           Stdlib.prerr_endline [%string "%{ofday} %{bcolor}%{Dream.status_to_int status#Int}%{ecolor} %{id#Int} %{client} in %{duration#Int}us"];
+           Stdlib.flush stderr;
+           (match Dream.field response stream_end with
+            | None -> ()
+            | Some promise ->
+               ignore (
+                   Lwt.on_termination promise (fun () ->
+                       let bcolor, ecolor = "[35m", "[39m" in
+                       let duration = Time_ns.Span.to_int_us (Time_ns.diff (Time_ns.now ()) before) in
+                       Stdlib.prerr_endline [%string "%{ofday} %{bcolor}DON%{ecolor} %{id#Int} %{client} in %{duration#Int}us"];
+                       Stdlib.flush stderr;
+                     )));
+           Lwt.return response)
+         (fun exn ->
+           Stdlib.prerr_string [%string "Aborted by: %{Exn.to_string exn}"];
+           Stdlib.flush stderr;
+           Lwt.fail exn)
+     )
 
 let redirect handler request =
   match Dream.header request "Host" with
