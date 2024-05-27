@@ -14,7 +14,7 @@ val name : rule -> string
 val erofa : rule
 val all_builtin : rule list Lazy.t
 val supports_repeated_rewrites : rule -> bool
-val plurals_in_s : rule -> bool
+val plurals_in_s : rule -> string option option
 val custom_rule : (string * string) list -> rule
 
 type rules = rule list

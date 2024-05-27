@@ -65,7 +65,8 @@ function parse_dict(str, link = undefined) {
         if (typeof meta_json?.supports_repeated_rewrites == "boolean") {
             meta.supports_repeated_rewrites = meta_json.supports_repeated_rewrites;
         }
-        if (typeof meta_json?.plurals_in_s == "boolean") {
+        if (typeof meta_json?.plurals_in_s == "boolean"
+            || typeof meta_json?.plurals_in_s == "string") {
             meta.plurals_in_s = meta_json.plurals_in_s;
         }
     }

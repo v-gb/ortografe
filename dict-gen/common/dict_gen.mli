@@ -57,7 +57,7 @@ type metadata =
   { desc : string option
   ; lang : string option
   ; supports_repeated_rewrites : bool option
-  ; plurals_in_s : bool option
+  ; plurals_in_s : string option option
   }
 
 val metadata_of_json : _ json -> metadata

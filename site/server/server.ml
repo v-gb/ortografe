@@ -486,7 +486,7 @@ let post_conv ~max_input_size ~staged request =
                     { convert_uppercase = true
                     ; dict
                     ; interleaved = true
-                    ; plurals_in_s = plurals_in_s ||? true
+                    ; plurals_in_s = plurals_in_s ||? Some "s"
                     }
               with
               | exception e ->

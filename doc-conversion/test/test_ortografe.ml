@@ -45,7 +45,7 @@ let options =
   { Ortografe.convert_uppercase = false
   ; dict = Stdlib.Hashtbl.find_opt (force Ortografe_embedded.erofa)
   ; interleaved = true
-  ; plurals_in_s = true
+  ; plurals_in_s = Some "s"
   }
 
 let%expect_test[@ocamlformat "disable"] "pure text" =
@@ -82,7 +82,7 @@ Nom propre: pierre Pierre pierre-feuille-ciseau Jean-Pierre.
       -Majuscules: HISTOIRE.
       +Majuscules: ISTOIRE. "]);
   (let rewrite2 =
-     Ortografe.pure_text test ~dst:String ~options:{ options with plurals_in_s = false }
+     Ortografe.pure_text test ~dst:String ~options:{ options with plurals_in_s = None }
    in
    print_string (diff_strings rewrite1 rewrite2 ~context:0);
    [%expect "

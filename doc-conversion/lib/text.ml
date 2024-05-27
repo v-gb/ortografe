@@ -123,8 +123,6 @@ let depluralize w =
   then Some (String.sub w 0 (String.length w - 1))
   else None
 
-let pluralize w = w ^ "s"
-
 let uncapitalize w =
   split_on_first_uchar w ~f:(fun w0 ->
       if Uucp.Case.is_upper w0
@@ -197,13 +195,16 @@ let iter_pure_text ~options src ~f =
           | Some "" -> f w
           | Some res -> f (recapitalize res)
           | None -> (
-              match if options.plurals_in_s then depluralize wu else None with
+              match options.plurals_in_s with
               | None -> f w
-              | Some wu -> (
-                  match dict wu with
-                  | Some "" -> f w
-                  | Some res -> f (recapitalize (pluralize res))
-                  | None -> f w))))
+              | Some plural_marker -> (
+                  match depluralize wu with
+                  | None -> f w
+                  | Some wu -> (
+                      match dict wu with
+                      | Some "" -> f w
+                      | Some res -> f (recapitalize (res ^ plural_marker))
+                      | None -> f w)))))
 
 let convert (type a) ?buf ?progress:_ ~options src ~(dst : a out) : a =
   match dst with

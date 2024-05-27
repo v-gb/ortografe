@@ -53,7 +53,7 @@ let convert ~rules ~which_dict str =
       { convert_uppercase = true
       ; dict
       ; interleaved = true
-      ; plurals_in_s = metadata.plurals_in_s ||? true
+      ; plurals_in_s = metadata.plurals_in_s ||? Some "s"
       }
     str
 

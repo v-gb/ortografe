@@ -4,16 +4,19 @@ let simplify_mapping tbl ~plurals_in_s =
   (* remove identity mappings and trivial plurals *)
   Hashtbl.filteri_inplace tbl ~f:(fun ~key:old ~data:(new_, _) ->
       String.( <> ) old new_
-      && ((not plurals_in_s)
-         ||
-         match
-           (String.chop_suffix old ~suffix:"s", String.chop_suffix new_ ~suffix:"s")
-         with
-         | Some old_no_s, Some new_no_s -> (
-             match Hashtbl.find tbl old_no_s with
-             | Some (new', _) when String.( = ) new' new_no_s -> false
-             | _ -> true)
-         | _ -> true))
+      &&
+      match plurals_in_s with
+      | None -> true
+      | Some plural_marker -> (
+          match
+            ( String.chop_suffix old ~suffix:"s"
+            , String.chop_suffix new_ ~suffix:plural_marker )
+          with
+          | Some old_no_s, Some new_no_s -> (
+              match Hashtbl.find tbl old_no_s with
+              | Some (new', _) when String.( = ) new' new_no_s -> false
+              | _ -> true)
+          | _ -> true))
 
 let change_from_1990_is_undesirable ~has_erofa post90 =
   has_erofa
@@ -103,7 +106,7 @@ let build_erofa_ext ~erofa ~post90 ~lexique ~all =
   add_post90_entries base post90 ~has_erofa:true;
   if not all
   then (
-    simplify_mapping base ~plurals_in_s:true;
+    simplify_mapping base ~plurals_in_s:(Some "s");
     Hashtbl.filter_inplace base ~f:(fun (_, rank) ->
         rank >= 0 (* i.e. "not from erofa" *)));
   ranked base
@@ -256,7 +259,7 @@ type metadata =
   { desc : string option
   ; lang : string option
   ; supports_repeated_rewrites : bool option
-  ; plurals_in_s : bool option
+  ; plurals_in_s : string option option
   }
 
 let no_metadata =
@@ -273,9 +276,11 @@ let metadata_of_json (json : _ json) =
         | "desc", `String s -> desc := Some s
         | "lang", `String s -> lang := Some s
         | "supports_repeated_rewrites", `Bool b -> supports_repeated_rewrites := Some b
-        | "plurals_in_s", `Bool b -> plurals_in_s := Some b
+        | "plurals_in_s", `Bool b -> plurals_in_s := Some (if b then Some "s" else None)
+        | "plurals_in_s", `String s -> plurals_in_s := Some (Some s)
         | _ -> ())
   | _ -> ());
+
   { desc = !desc
   ; lang = !lang
   ; supports_repeated_rewrites = !supports_repeated_rewrites
@@ -289,7 +294,12 @@ let json_of_metadata t =
        ; Option.map t.lang ~f:(fun s -> ("lang", `String s))
        ; Option.map t.supports_repeated_rewrites ~f:(fun b ->
              ("supports_repeated_rewrites", `Bool b))
-       ; Option.map t.plurals_in_s ~f:(fun b -> ("plurals_in_s", `Bool b))
+       ; Option.map t.plurals_in_s ~f:(fun o ->
+             ( "plurals_in_s"
+             , match o with
+               | None -> `Bool false
+               | Some "s" -> `Bool true
+               | Some s -> `String s ))
        ])
 
 let merge_metadata_right_biased m1 m2 =
@@ -329,7 +339,17 @@ let interpret_rules rules =
       |> List.sort ~compare:String.compare
       |> String.concat ~sep:" "
     in
-    let plurals_in_s = List.for_all rewrite_rules ~f:Rewrite.plurals_in_s in
+    let plurals_in_s =
+      List.filter_map rewrite_rules ~f:Rewrite.plurals_in_s
+      |> List.hd
+      |> (__ ||? Some "s")
+      (* until we roll this code to the safari extension, it seems best to avoid this *)
+      |>
+      function
+      | (None | Some "s") as opt -> opt
+      | _ -> None
+    in
+
     { desc = Some name
     ; lang = Some "fr"
     ; supports_repeated_rewrites =

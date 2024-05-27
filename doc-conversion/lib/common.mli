@@ -14,7 +14,7 @@ type options =
   { convert_uppercase : bool
   ; dict : string -> string option
   ; interleaved : bool
-  ; plurals_in_s : bool
+  ; plurals_in_s : string option
   }
 
 type 'a convert =

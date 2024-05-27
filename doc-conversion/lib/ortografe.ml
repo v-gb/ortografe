@@ -46,7 +46,7 @@ type options = Common.options =
   { convert_uppercase : bool
   ; dict : string -> string option
   ; interleaved : bool
-  ; plurals_in_s : bool
+  ; plurals_in_s : string option
   }
 
 type 'a convert = 'a Common.convert
@@ -232,7 +232,7 @@ let ext_conv ?src_type src dst inex =
       let options =
         { convert_uppercase = true
         ; interleaved = true
-        ; plurals_in_s = true
+        ; plurals_in_s = Some "s"
         ; dict = (fun x -> Some x)
         }
       in

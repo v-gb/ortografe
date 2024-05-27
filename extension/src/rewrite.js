@@ -23,9 +23,9 @@ function depluralize(s) {
     return s.slice(0, -1)
 }
 
-function pluralize(s) {
+function pluralize(plurals_in_s, s) {
     // pass undefined/null through, so it's easier to check on the caller side
-    return s ? s + "s" : s
+    return s ? s + plurals_in_s : s
 }
 
 function rewrite_word(table, plurals_in_s, word) {
@@ -60,8 +60,8 @@ function rewrite_word(table, plurals_in_s, word) {
             postprocess = (x) => x;
         }
         let repl = postprocess(table.get(processed_word))
-        if (!repl && is_plural(processed_word) && plurals_in_s) {
-            repl = postprocess(pluralize(table.get(depluralize(processed_word))))
+        if (!repl && is_plural(processed_word) && plurals_in_s !== null) {
+            repl = postprocess(pluralize(plurals_in_s, table.get(depluralize(processed_word))))
         }
         return repl
     }
@@ -222,7 +222,7 @@ function rewrite_under(options, table, root){
     let count = 0
     let to_remove = []
     const backgroundColor = options.background_color || options.default_background_color || '#b9f4b9'
-    const plurals_in_s = options.plurals_in_s != false;
+    const plurals_in_s = options.plurals_in_s === undefined ? "s" : options.plurals_in_s;
     const walk = make_walk(root);
     let n;
     while(n=walk.nextNode()) {
@@ -488,8 +488,12 @@ async function extension_main() {
         if (meta?.supports_repeated_rewrites == false) {
             options.disable_watch = true
         }
-        if (meta?.plurals_in_s == false) {
-            options.plurals_in_s = false
+        switch (typeof meta?.plurals_in_s) {
+        case "boolean":
+            options.plurals_in_s = meta.plurals_in_s ? "s" : null
+            break
+        case "string":
+            options.plurals_in_s = meta.plurals_in_s;
         }
     }
     normalize_options(options)

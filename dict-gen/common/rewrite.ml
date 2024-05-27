@@ -420,13 +420,13 @@ type rule =
   ; f : f
   ; prefilter : unit -> [ `Re of Re.t | `All ]
   ; supports_repeated_rewrites : bool
-  ; plurals_in_s : bool
+  ; plurals_in_s : string option option
   }
 
 let all_builtin = ref []
 
-let new_rule ?(supports_repeated_rewrites = true) ?(plurals_in_s = true)
-    ?(problems = []) name doc ~prefilter f =
+let new_rule ?(supports_repeated_rewrites = true) ?plurals_in_s ?(problems = []) name
+    doc ~prefilter f =
   let rule =
     { name; doc; problems; f; prefilter; supports_repeated_rewrites; plurals_in_s }
   in
@@ -1122,8 +1122,9 @@ let accent_plat =
 
 let _ : rule =
   let pluriel_en_plus = true in
-  new_rule' ~supports_repeated_rewrites:false ~plurals_in_s:false "ortograf.net"
-    "les règles de http://www.ortograf.net/"
+  new_rule' ~supports_repeated_rewrites:false
+    ~plurals_in_s:(Some (if pluriel_en_plus then "+" else ""))
+    "ortograf.net" "les règles de http://www.ortograf.net/"
     ~prefilter:(fun () -> `All)
     (fun () ->
       (* problème :
@@ -1255,7 +1256,7 @@ let _ : rule =
         { row = { aligned_row.row with ortho }; alignment = dummy_search_res })
 
 let _ : rule =
-  new_rule' ~supports_repeated_rewrites:false ~plurals_in_s:false "alfonic"
+  new_rule' ~supports_repeated_rewrites:false ~plurals_in_s:(Some "") "alfonic"
     "les règles de https://alfonic.org/"
     ~problems:
       [ "Les liaisons ne sont pas écrites."
@@ -1556,7 +1557,7 @@ let custom_rule from_tos =
                   | `E -> rewrite_E env aligned_row ~target:from ~repl:to_))
         })
   ; supports_repeated_rewrites = true
-  ; plurals_in_s = true
+  ; plurals_in_s = None
   }
 
 type rules = rule list

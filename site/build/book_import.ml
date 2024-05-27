@@ -98,7 +98,7 @@ let options =
          | "appartemens" -> Some "apartements"
          | s -> Stdlib.Hashtbl.find_opt dict s)
     ; interleaved = true
-    ; plurals_in_s = true
+    ; plurals_in_s = Some "s"
     }
 
 let convert_wikisource epub ~url ~dst =

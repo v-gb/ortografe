@@ -53,7 +53,7 @@ let bench =
                (match Sys.getenv "INTERLEAVED" with
                | "false" -> false
                | _ | (exception Not_found) -> true)
-           ; plurals_in_s = metadata.plurals_in_s ||? true
+           ; plurals_in_s = metadata.plurals_in_s ||? Some "s"
            }
          arg1 (Some "/dev/null");
        let t2 = Sys.time () in
@@ -237,7 +237,7 @@ let main more_cmd =
                      (match Sys.getenv "INTERLEAVED" with
                      | "false" -> false
                      | _ | (exception Not_found) -> true)
-                 ; plurals_in_s = metadata.plurals_in_s ||? true
+                 ; plurals_in_s = metadata.plurals_in_s ||? Some "s"
                  }
                ?src_type:input_type in_ out
            in

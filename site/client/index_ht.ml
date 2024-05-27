@@ -277,7 +277,7 @@ module Index = struct
         { convert_uppercase = false
         ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa)
         ; interleaved = true
-        ; plurals_in_s = true
+        ; plurals_in_s = Some "s"
         }
       ~dst:String w
 

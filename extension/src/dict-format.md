@@ -87,11 +87,17 @@ Optionally, the first line can contain a one-line json value with the following 
   // can choose to disable rewrite, if the loss of functionality is
   // worth reducing the confusion.
 
-  plurals_in_s : bool,
+  plurals_in_s : (bool | string),
   // Defaults to true. When set, the extension assumes that if a word
   // from the page, say "pains", is missing from the dictionary but
   // "pain" is in the dictionary, then "pains" should be rewritten to
   // whatever "pain" gets rewritten to, plus a trailing "s".
+  //
+  // When set to a string, the behavior is the same as with true, except that
+  // instead of appending a trailing "s", the string itself is appended.
+  //
+  // The deployed Safari extension currently only supports dictionaries
+  // where this field is a boolean.
 }
 ```
 

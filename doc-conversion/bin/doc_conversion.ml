@@ -21,7 +21,7 @@ let impl, convert_string =
                 { convert_uppercase = true
                 ; dict
                 ; interleaved = true
-                ; plurals_in_s = metadata.plurals_in_s ||? true
+                ; plurals_in_s = metadata.plurals_in_s ||? Some "s"
                 }
               file_contents
             ||? failwith ("type de fichier non supporté: " ^ filename)
