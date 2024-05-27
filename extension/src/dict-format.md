@@ -8,8 +8,9 @@ The format is :
 
   Capitalized words in texts are looked up first as is in the dictionary, then
   uncapitalized. This allows common nouns to be rewritten when capitalized (in titles for
-  instance), while allowing specific rules for proper nouns.  Furthermore, if a
-  capitalized entry maps to the empty string, the word is left alone (same effect as if
+  instance), while allowing specific rules for proper nouns.
+
+  If an entry maps to the empty string, the word is left alone (same effect as if
   you had a no-op entry like "abc,abc", but ensuring that the entry won't be highlighted
   when highlighting is enabled).
 
