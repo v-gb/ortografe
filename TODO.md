@@ -12,9 +12,6 @@ De façon générale, voir ./README.md pour comment tout construire.
     - (pour voir ce que ça donne) essai de simplification des lettres muettes comme e du féminin ou s du pluriel
     - (pour voir ce que ça donne) remplacer les s prononcés z par z
 
-- dans l'extension, permettre de créer des dictionnaires dans l'extension en
-  écrivant quelque chose comme "oi/wa".
-
 - pluriels simples des rectifications de 1990. En gardant le mot précédent en mémoire, et
   quand on trouve un mot ambigu comme sèche-cheveux, on peut regarder si mot précédent
   est un article comme le/un/mes/quelques etc. Ce pourrait suffisamment peu couteux pour
@@ -25,7 +22,8 @@ De façon générale, voir ./README.md pour comment tout construire.
   désambigüiser des homographes comme « je sens qu'il a du bon sens ».
 
 - investiguer le cout de supporter un peu d'analyse des phrases, pour distinguer singulier
-  et pluriel (un sèche-cheveu, des sèche-cheveux), verbe et nom (sens, couvent)
+  et pluriel (un sèche-cheveu, des sèche-cheveux), verbe et nom (sens, couvent). Ou alors
+  on peut « simplement » demander à une IA de désambigüiser, pour les calculs offline.
 
 ## Technique
 
@@ -45,26 +43,6 @@ De façon générale, voir ./README.md pour comment tout construire.
   (3.5x plus lent en javascript qu'en ocaml natif, maintenant). En 2024-02,
   `wasm_of_ocaml`, il est trop tôt pour essayer, et wasm-gc à l'air lent en général,
   surtout dans firefox.
-
-- faire que quelqu'un d'autre puisse convertir des documents avec des outils linguistiques
-  arbitraires, sans avoir à faire du travail pour chaque type de document. Idée : 
-
-        $ ortografe_cli conv -extract foo.odt | tee foo.json
-        "Le titre"
-        { kind: "flush" }
-        "Voici un paragraphe de text qui contient un mot en "
-        "gras"
-        "ou un "
-        "lien"
-        "."
-        { kind: "flush" }
-        ...
-        $ sed 's/ph/f/g' foo.json > foo2.json
-        $ ortografe_cli conv -replace foo2.json foo.odt
-
-    Entre chaque chaine, il y a des bouts de structure du document (comme des informations
-    de formatage), c'est pour ça que la deuxième commande veut exactement le même nombre
-    de chaine que la première commande a affiché.
 
 - Meilleure détection de l'anglais. On a tendance à réécrire des mots en anglais dans des
   pages majoritairement anglaises mais avec un peu de structure de la page en français
