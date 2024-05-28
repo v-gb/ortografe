@@ -10,6 +10,7 @@
    hyper
    ortografe
    ortografe_embedded
+   sexp_with_utf8
    uri
  )
  (foreign_stubs

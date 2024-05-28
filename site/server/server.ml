@@ -394,7 +394,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                            let str =
                              match e with
                              | Failure s -> s
-                             | _ -> Base.Exn.to_string e
+                             | _ -> Sexp_with_utf8.exn_to_string e
                            in
                            respond_error_text (`Status 422) str
                         | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
