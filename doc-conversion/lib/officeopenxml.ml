@@ -122,7 +122,8 @@ let convert_old which ?convert_text ~options src ~dst =
   | Other _ ->
      failwith [%string "Les fichiers « .%{old_ext} » ne sont pas supportés ici. Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."]
   );
-  (* should put a time limit and memory, perhaps with the cgroup exe? *)
+  (* Should put a memory limit, perhaps with the cgroup exe? At least, in prod the OOM
+     killer is selecting the open office process, not the server. *)
   let d = Filename.temp_dir "ortografe" "tmp" in
   Fun.protect
     ~finally:(fun () ->
