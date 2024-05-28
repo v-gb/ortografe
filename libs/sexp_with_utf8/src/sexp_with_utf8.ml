@@ -10,28 +10,32 @@ let must_escape str =
   let len = String.length str in
   len = 0
   ||
-    let rec loop str ix =
+    let rec loop str len ix =
       match str.[ix] with
       | '"' | '(' | ')' | ';' | '\\' -> true
       | '|' ->
-         ix > 0
-         &&
-           let next = ix - 1 in
-           Char.equal str.[next] '#' || loop str next
+         let next = ix + 1 in
+         next < len
+         && (Char.equal str.[next] '#' || loop str len next)
       | '#' ->
-         ix > 0
-         &&
-           let next = ix - 1 in
-           Char.equal str.[next] '|' || loop str next
+         let next = ix + 1 in
+         next < len
+         && (Char.equal str.[next] '|' || loop str len next)
       | '\000' .. '\032' -> true
       | '\127' .. '\255' ->
          let utf_decode = String.get_utf_8_uchar str ix in
-         Uchar.utf_decode_is_valid utf_decode
-         && Uucp.Alpha.is_alphabetic (Uchar.utf_decode_uchar utf_decode)
-         && loop str (ix + Uchar.utf_decode_length utf_decode)
-      | _ -> ix > 0 && loop str (ix - 1)
+         let is_alphabetic =
+           Uchar.utf_decode_is_valid utf_decode
+           && Uucp.Alpha.is_alphabetic (Uchar.utf_decode_uchar utf_decode)
+         in
+         not is_alphabetic
+         || let next = ix + Uchar.utf_decode_length utf_decode in
+            next < len && loop str len next
+      | _ ->
+         let next = ix + 1 in
+         next < len && loop str len next
     in
-    loop str (len - 1)
+    loop str len 0
 ;;
 
 let escaped s =
