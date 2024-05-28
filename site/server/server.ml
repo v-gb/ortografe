@@ -51,7 +51,21 @@ let limit_body_size ~max_size request =
 
 let html_of_response ~title_unescaped ~body_unescaped =
   Printf.sprintf
-    "<html><body><h1>%s</h1><pre>%s</pre></body></html>"
+    "<html>
+     <head>
+     <style>
+body {
+  font-size: 1.1rem;
+  line-height: 1.3;
+  max-width: 50em;
+}
+pre {
+  white-space: pre-wrap;
+}
+     </style>
+     </head>
+     <body><h1>%s</h1><pre>%s</pre></body>
+     </html>"
     title_unescaped
     body_unescaped
 
@@ -376,7 +390,13 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                                          ; plurals_in_s = plurals_in_s ||? true
                                          ; impl = Ortografe.markup_impl }
                         with
-                        | exception e -> respond_error_text (`Status 422) (Base.Exn.to_string e)
+                        | exception e ->
+                           let str =
+                             match e with
+                             | Failure s -> s
+                             | _ -> Base.Exn.to_string e
+                           in
+                           respond_error_text (`Status 422) str
                         | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
                         | Some (`ext new_ext, new_body) ->
                            let new_fname = Filename.remove_extension fname ^ "-conv" ^ new_ext in

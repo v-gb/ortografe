@@ -105,10 +105,13 @@ let convert which ?convert_text ~options src ~dst =
       else None)
   |> write_out dst
 
-let sys_command_exn str =
+let sys_command_exn ?(handle = Fun.const None) str =
   let i = Sys.command str in
   if i <> 0
-  then failwith (str ^ " exited with code " ^ Int.to_string i)
+  then
+    match handle i with
+    | Some e -> raise e
+    | None -> failwith (str ^ " exited with code " ^ Int.to_string i)
 
 let convert_old which ?convert_text ~options src ~dst =
   let old_ext =
@@ -133,7 +136,17 @@ let convert_old which ?convert_text ~options src ~dst =
       let new_path = old_path ^ "x" in
       Out_channel.with_open_bin old_path
         (fun oc -> Out_channel.output_string oc src);
-      sys_command_exn [%string {|cd %{Filename.quote d} && timeout -s SIGKILL 10s bwrap --unshare-all --die-with-parent --new-session --dev-bind / / libreoffice --headless --convert-to %{new_ext} %{Filename.basename old_path} >&2|}];
+      sys_command_exn [%string {|cd %{Filename.quote d} && timeout -s SIGKILL 10s bwrap --unshare-all --die-with-parent --new-session --dev-bind / / libreoffice --headless --convert-to %{new_ext} %{Filename.basename old_path} >&2|}]
+        ~handle:(function
+          | 137 (* SIGKILL *) ->
+             Some
+               (Failure
+                  [%string "Échec de la conversion de votre fichier (qui utilise un \
+                            ancien format de Microsoft Office) en un format plus \
+                            récent, probablement par manque de mémoire.\n\nOuvrez votre \
+                            fichier, enregistrez-le en tant que .%{new_ext}, puis \
+                            réessayez." ])
+          | _ -> None);
       let src =
         In_channel.with_open_bin new_path (fun ic ->
             In_channel.input_all ic)
