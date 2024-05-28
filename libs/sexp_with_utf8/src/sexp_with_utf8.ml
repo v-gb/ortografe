@@ -6,6 +6,16 @@ open StdLabels
 
 let default_indent = ref 1
 
+let leave_bytes_as_is str ix =
+  let utf_decode = String.get_utf_8_uchar str ix in
+  let is_alphabetic =
+    Uchar.utf_decode_is_valid utf_decode
+    && Uucp.Alpha.is_alphabetic (Uchar.utf_decode_uchar utf_decode)
+  in
+  if is_alphabetic
+  then Uchar.utf_decode_length utf_decode
+  else 0
+
 let must_escape str =
   let len = String.length str in
   len = 0
@@ -23,14 +33,11 @@ let must_escape str =
          && (Char.equal str.[next] '|' || loop str len next)
       | '\000' .. '\032' -> true
       | '\127' .. '\255' ->
-         let utf_decode = String.get_utf_8_uchar str ix in
-         let is_alphabetic =
-           Uchar.utf_decode_is_valid utf_decode
-           && Uucp.Alpha.is_alphabetic (Uchar.utf_decode_uchar utf_decode)
-         in
-         not is_alphabetic
-         || let next = ix + Uchar.utf_decode_length utf_decode in
-            next < len && loop str len next
+         (match leave_bytes_as_is str ix with
+          | 0 -> true
+          | n ->
+             let next = ix + n in
+             next < len && loop str len next)
       | _ ->
          let next = ix + 1 in
          next < len && loop str len next
@@ -40,53 +47,82 @@ let must_escape str =
 
 let escaped s =
   let n = ref 0 in
-  for i = 0 to String.length s - 1 do
-    n
-    := !n
-       +
-         match String.unsafe_get s i with
-         | '\"' | '\\' | '\n' | '\t' | '\r' | '\b' -> 2
-         | ' ' .. '~' -> 1
-         | _ -> 4
+  let i = ref 0 in
+  let adv = ref 0 in
+  while !i < String.length s do
+    match String.unsafe_get s !i with
+    | '\"' | '\\' | '\n' | '\t' | '\r' | '\b' -> n := !n + 2; i := !i + 1
+    | ' ' .. '~' -> n := !n + 1; i := !i + 1
+    | '\127' .. '\255'
+         when (adv := leave_bytes_as_is s !i; !adv > 0) ->
+       n := !n + !adv; i := !i + !adv
+    | _ -> n := !n + 4; i := !i + 1
   done;
   if !n = String.length s
   then s
   else (
     let s' = Bytes.create !n in
+    i := 0;
     n := 0;
-    for i = 0 to String.length s - 1 do
-      (match String.unsafe_get s i with
+    while !i < String.length s do
+      let i_start = !i in
+      let n_start = !n in
+      (match String.unsafe_get s !i with
        | ('\"' | '\\') as c ->
           Bytes.unsafe_set s' !n '\\';
-          incr n;
-          Bytes.unsafe_set s' !n c
+          n := !n + 1;
+          Bytes.unsafe_set s' !n c;
+          n := !n + 1;
+          i := !i + 1;
        | '\n' ->
           Bytes.unsafe_set s' !n '\\';
-          incr n;
-          Bytes.unsafe_set s' !n 'n'
+          n := !n + 1;
+          Bytes.unsafe_set s' !n 'n';
+          n := !n + 1;
+          i := !i + 1;
        | '\t' ->
           Bytes.unsafe_set s' !n '\\';
-          incr n;
-          Bytes.unsafe_set s' !n 't'
+          n := !n + 1;
+          Bytes.unsafe_set s' !n 't';
+          n := !n + 1;
+          i := !i + 1;
        | '\r' ->
           Bytes.unsafe_set s' !n '\\';
-          incr n;
-          Bytes.unsafe_set s' !n 'r'
+          n := !n + 1;
+          Bytes.unsafe_set s' !n 'r';
+          n := !n + 1;
+          i := !i + 1;
        | '\b' ->
           Bytes.unsafe_set s' !n '\\';
-          incr n;
-          Bytes.unsafe_set s' !n 'b'
-       | ' ' .. '~' as c -> Bytes.unsafe_set s' !n c
+          n := !n + 1;
+          Bytes.unsafe_set s' !n 'b';
+          n := !n + 1;
+          i := !i + 1;
+       | ' ' .. '~' as c ->
+          Bytes.unsafe_set s' !n c;
+          n := !n + 1;
+          i := !i + 1;
+       | '\127' .. '\255'
+            when (adv := leave_bytes_as_is s !i; !adv > 0) ->
+          for _ = 1 to !adv do
+            Bytes.unsafe_set s' !n (String.unsafe_get s !i);
+            n := !n + 1;
+            i := !i + 1;
+          done
        | c ->
           let a = Char.code c in
           Bytes.unsafe_set s' !n '\\';
-          incr n;
+          n := !n + 1;
           Bytes.unsafe_set s' !n (Char.chr (48 + (a / 100)));
-          incr n;
+          n := !n + 1;
           Bytes.unsafe_set s' !n (Char.chr (48 + (a / 10 mod 10)));
-          incr n;
-          Bytes.unsafe_set s' !n (Char.chr (48 + (a mod 10))));
-      incr n
+          n := !n + 1;
+          Bytes.unsafe_set s' !n (Char.chr (48 + (a mod 10)));
+          n := !n + 1;
+          i := !i + 1;
+      );
+      assert (!n > n_start);
+      assert (!i > i_start);
     done;
     Bytes.unsafe_to_string s')
 ;;
