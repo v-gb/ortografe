@@ -49,6 +49,11 @@ let limit_body_size ~max_size request =
      Dream.set_body request body;
      Lwt.return (Ok ())
 
+let html_of_response ~title_unescaped ~body_unescaped =
+  Printf.sprintf
+    "<html><body><h1>%s</h1><pre>%s</pre></body></html>"
+    title_unescaped
+    body_unescaped
 
 let error_has_body = Dream.new_field ~name:"error-has-body" ()
 
@@ -59,9 +64,11 @@ let my_error_template (error : Dream.error) debug_info suggested_response =
       let status = Dream.status suggested_response in
       Dream.set_header suggested_response "Content-Type" Dream.text_html;
       Dream.set_body suggested_response
-        (Printf.sprintf "<html><body> <h1>%d %s</h1><pre>%s</pre> </body></html>"
-           (Dream.status_to_int status)
-           (Dream.html_escape (Dream.status_to_string status))
+        (html_of_response
+           ~title_unescaped:(Printf.sprintf "%d %s"
+                               (Dream.status_to_int status)
+                               (Dream.html_escape (Dream.status_to_string status)))
+           ~body_unescaped:
            (match error.caused_by with
             | `Client -> ""
             | `Server -> Dream.html_escape debug_info)));
@@ -96,14 +103,11 @@ let respond_error_text status str =
     Dream.response
       ~status
       ~headers:["Content-Type", Dream.text_html]
-      (Printf.sprintf
-         "<html>
-          <body>
-          <h1>Error %d: %s</h1>
-          <pre>%s</pre>
-          </body>
-          </html>"
-         code (Dream.html_escape reason) (Dream.html_escape str))
+      (html_of_response
+         ~title_unescaped:(Printf.sprintf "Error %d: %s"
+                             code
+                             (Dream.html_escape reason))
+         ~body_unescaped:(Dream.html_escape str))
   in
   Dream.set_field response error_has_body ();
   Lwt.return response
