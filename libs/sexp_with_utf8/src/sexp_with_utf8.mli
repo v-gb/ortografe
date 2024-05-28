@@ -3,3 +3,4 @@
 
 val linkme : unit
 val to_string_hum : ?indent:int -> Sexplib.Sexp.t -> string
+val exn_to_string : exn -> string

@@ -231,5 +231,8 @@ let print_with_backtrace exc raw_backtrace =
   then Stdlib.Printexc.print_raw_backtrace Stdlib.stderr raw_backtrace;
   Stdlib.flush Stdlib.stderr
 ;;
+ 
+let exn_to_string exn =
+  to_string_hum ~indent:2 (Sexplib.Conv.sexp_of_exn exn)
 
 let linkme = Stdlib.Printexc.set_uncaught_exception_handler print_with_backtrace
