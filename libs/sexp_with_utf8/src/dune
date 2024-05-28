@@ -1,0 +1,3 @@
+(library
+ (name sexp_with_utf8)
+ (libraries sexplib uucp))

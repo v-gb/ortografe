@@ -1,7 +1,6 @@
 (library
  (name dict_gen)
  (libraries
-   bheap
    cmdliner
    cmdliner_bindops
    core
@@ -10,9 +9,7 @@
    dict_gen_common
    eio
    eio_main
-   re
-   uucp
-   uutf
+   sexp_with_utf8
    yojson
  )
  (preprocess (pps ppx_jane
