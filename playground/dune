@@ -1,9 +1,14 @@
 (executable
  (name x)
  (libraries base brr brrex js_of_ocaml)
- (js_of_ocaml (flags --source-map-inline --pretty))
+ (js_of_ocaml)
  (preprocess (pps ppx_sexp_conv))
  (modes js))
+
+(env
+ (jsopt (js_of_ocaml
+         (compilation_mode whole_program)
+         (flags --opt 3))))
 
 (rule
  (target foo.html)

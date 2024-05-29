@@ -14,6 +14,12 @@ zip -q ../extension.zip "${files[@]}"
 # wanted to use manifest v3 with firefox it wouldn't support optional_host_permissions,
 # only # optional_permissions.
 # https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/optional_permissions
+dict_gen_size=$(wc -c < ../src/dict_gen.bc.js)
+if [ $dict_gen_size -ge 1000000 ]; then
+    jsopt_suffix="-nonopt"
+else
+    jsopt_suffix=""
+fi
 mkdir -p ../src2
 rsync --relative -a -d "${files[@]}" ../src2
 chmod +w ../src2/*
@@ -23,6 +29,7 @@ jq  < manifest.json > ../src2/manifest.json \
     | del(.action)
     | . + {"optional_permissions": .optional_host_permissions}
     | del(.optional_host_permissions)
-    '
+    | .version = .version + '\""$jsopt_suffix"\"
+
 cd ../src2;
 zip -q ../extension2.zip "${files[@]}"

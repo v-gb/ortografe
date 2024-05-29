@@ -24,14 +24,11 @@
     ppx_lazy_option_op
     ppx_partial
  ))
- ;; should figure out how to switch conveniently between fast build and small js
- (js_of_ocaml (flags --opt 3
-                     --no-sourcemap
-                     ; --source-map-inline
-                     ; --pretty
- ))
+ (js_of_ocaml)
  (modes js)
  (modules doc_conversion))
 
 (env
-  (_ (js_of_ocaml (compilation_mode whole_program))))
+ (jsopt (js_of_ocaml
+         (compilation_mode whole_program)
+         (flags --opt 3))))
