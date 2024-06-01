@@ -111,24 +111,6 @@ fi")))
  (action
   (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/2/2f/Thunderbird_2023_icon.svg")))
 
-;; https://creativecommons.org/publicdomain/zero/1.0/deed
-(rule
- (target linux.svg)
- (action
-  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg?uselang=fr")))
-
-;; public domain
-(rule
- (target apple.svg)
- (action
-  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg")))
-
-;; public domain
-(rule
- (target microsoft.svg)
- (action
-  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg")))
-
 ;; https://creativecommons.org/licenses/by-sa/3.0/deed.en
 (rule
  (target pdf.svg)
