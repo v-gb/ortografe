@@ -1,0 +1,10 @@
+(library
+ (name dict_gen_nonbrowser)
+ (libraries
+   cmdliner
+   cmdliner_bindops
+   core
+   dict_gen_common
+ )
+ (preprocess (pps ppx_uchar_literal
+                  ppx_lazy_option_op)))

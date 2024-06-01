@@ -5,8 +5,8 @@
    cmdliner_bindops
    core
    core_unix
-   core_unix.sys_unix
    dict_gen_common
+   dict_gen_nonbrowser
    eio
    eio_main
    sexp_with_utf8

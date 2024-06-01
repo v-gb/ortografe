@@ -1,0 +1,15 @@
+(library
+ (name ortografe_cli)
+ (libraries
+   cmdliner
+   cmdliner_bindops
+   dict_gen_common
+   dict_gen_nonbrowser
+   ortografe
+   ortografe_embedded
+   yojson
+ )
+ (preprocess (pps ppx_jane
+                  ppx_lazy_option_op
+                  ppx_partial
+                  ppx_list_include)))
