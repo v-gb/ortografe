@@ -31,32 +31,6 @@ end
 module More_markup = More_markup
 module Common = Common
 
-type 'a stream = 'a Common.stream =
-  | Markup of ('a, Markup.sync) Markup.stream
-  | Fun of (('a -> unit) -> unit)
-
-type impl = Common.impl =
-  { parse : flavor:[ `Xml | `Html ] -> string -> Markup.signal stream
-  ; print : flavor:[ `Xml | `Html ] -> Markup.signal stream -> (char -> unit) -> (string -> unit) -> unit
-  }
-
-let markup_impl =
-  { parse = (fun ~flavor src ->
-      Markup ((match flavor with
-               | `Xml -> Markup.parse_xml (Markup.string src)
-               | `Html -> Markup.parse_html (Markup.string src))
-              |> Markup.signals))
-  ; print = (fun ~flavor stream on_char _on_str ->
-    match stream with
-    | Fun _ -> failwith "expected Markup stream, not Fun stream"
-    | Markup stream ->
-       (match flavor with
-        | `Xml -> Markup.write_xml stream
-        | `Html -> Markup.write_html stream)
-       |> Markup.iter on_char)
-  }
-let markup_print_impl = markup_impl
-
 type 'a out = 'a Common.out =
   | Channel : Out_channel.t -> unit out
   | String : string out
@@ -67,7 +41,6 @@ type options = Common.options =
   ; dict : string -> string option
   ; interleaved : bool
   ; plurals_in_s : bool
-  ; impl : impl
   }
 
 type 'a convert = 'a Common.convert
@@ -248,7 +221,6 @@ let ext_conv ?src_type src dst inex =
         ; interleaved = true
         ; plurals_in_s = true
         ; dict = (fun x -> Some x)
-        ; impl = markup_impl
         }
       in
       match inex with

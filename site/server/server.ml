@@ -387,8 +387,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
                                 ~options:{ convert_uppercase = true
                                          ; dict
                                          ; interleaved = true
-                                         ; plurals_in_s = plurals_in_s ||? true
-                                         ; impl = Ortografe.markup_impl }
+                                         ; plurals_in_s = plurals_in_s ||? true }
                         with
                         | exception e ->
                            let str =

@@ -328,8 +328,7 @@ module Index = struct
                      ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa)
                      ; interleaved = true
                      ; plurals_in_s = true
-                     ; impl = Ortografe.markup_impl
-            }
+                     }
             ~dst:String
        |> nodes_of_string
        |> p ~cl

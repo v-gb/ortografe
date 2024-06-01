@@ -17,8 +17,7 @@ let convert_string dict_contents =
                  ; dict
                  ; interleaved = true
                  ; plurals_in_s = metadata.plurals_in_s ||? true
-                 ; impl = Ortografe.markup_impl
-        }
+                 }
         file_contents
       ||? failwith ("type de fichier non supporté: " ^ filename)
     with e ->

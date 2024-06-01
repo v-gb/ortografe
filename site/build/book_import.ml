@@ -104,7 +104,6 @@ let options = lazy { Ortografe.convert_uppercase = true
                         | s -> Stdlib.Hashtbl.find_opt dict s)
                    ; interleaved = true
                    ; plurals_in_s = true 
-                   ; impl = Ortografe.markup_impl
                    }
 
 let convert_wikisource epub ~url ~dst =

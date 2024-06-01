@@ -1,4 +1,5 @@
 open! Common
+open struct module Markup = Markup_t end
 
 let html_transform ~convert_text signal =
   (* maybe we should check the tag ns for the xhtml case *)
@@ -6,7 +7,7 @@ let html_transform ~convert_text signal =
   let notranscribe_pattern = Core.String.Search_pattern.create "notranscribe" in
   let stack = Core.Stack.create () in
   let hide_current = ref false in
-  More_markup.map (fun elt ->
+  Markup.map (fun elt ->
       (match elt with
        | `Start_element ((_, tag), attributes) ->
           let hide =
@@ -41,7 +42,6 @@ let convert ?convert_text ~options src ~dst =
       fun src -> Text.convert ~buf ~options src ~dst:String
   in
   More_markup.transform
-    ~impl:options.impl
     ~flavor:`Html src ~dst ~transform:(html_transform ~convert_text)
 
 let convert_xhtml ?convert_text ~options src ~dst =
@@ -52,5 +52,4 @@ let convert_xhtml ?convert_text ~options src ~dst =
       fun src -> Text.convert ~buf ~options src ~dst:String
   in
   More_markup.transform
-    ~impl:options.impl
     ~flavor:`Xml src ~dst ~transform:(html_transform ~convert_text)

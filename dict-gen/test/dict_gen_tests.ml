@@ -71,7 +71,6 @@ let convert ~rules ~which_dict str =
              ; dict
              ; interleaved = true
              ; plurals_in_s = metadata.plurals_in_s ||? true
-             ; impl = Ortografe.markup_impl
              }
     str
 

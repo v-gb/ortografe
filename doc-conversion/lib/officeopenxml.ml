@@ -1,4 +1,5 @@
 open Common
+open struct module Markup = Markup_t end
 
 (* This is the spec: http://officeopenxml.com/WPcontentOverview.php.
    I think that:
@@ -25,7 +26,7 @@ let drop_squigglies signals =
    *)
   let open Core in
   let stack = Stack.of_list [true] in
-  More_markup.filter (function
+  Markup.filter (function
       | `Start_element (name, _) ->
          Stack.push stack
            (not ([%compare.equal: (string * string)] name (More_markup.docx_ns, "proofErr")));
@@ -90,7 +91,6 @@ let convert_xml which ?convert_text ~options src ~dst =
        fun src -> Text.convert ~buf ~options src ~dst:String
   in
   More_markup.transform
-    ~impl:options.impl
     ~flavor:`Xml src ~dst
     ~transform:(fun signals ->
       signals

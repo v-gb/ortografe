@@ -21,20 +21,10 @@ let buffer ?(n = 123) buf =
   | Some buf -> Buffer.clear buf; buf
   | None -> Buffer.create n
 
-type 'a stream =
-  | Markup of ('a, Markup.sync) Markup.stream
-  | Fun of (('a -> unit) -> unit)
-
-type impl =
-  { parse : flavor:[ `Xml | `Html ] -> string -> Markup.signal stream
-  ; print : flavor:[ `Xml | `Html ] -> Markup.signal stream -> (char -> unit) -> (string -> unit) -> unit
-  }
-
 type options =
   { convert_uppercase : bool
   ; dict : (string -> string option)
   ; interleaved : bool
   ; plurals_in_s : bool
-  ; impl : impl
   }
 type 'a convert = options:options -> string -> dst:'a out -> 'a

@@ -1,10 +1,8 @@
 (** Extension of the [Markup] library *)
 module Markup := Markup_t
+type 'a stream := ('a, Markup.sync) Markup.stream
 
-val map : ('a -> 'b) -> 'a Common.stream -> 'b Common.stream
-val filter : ('a -> bool) -> 'a Common.stream -> 'a Common.stream
-val concat_map : ('a -> 'b list) -> 'a Common.stream -> 'b Common.stream
-val duplicate : 'a Common.stream -> 'a Common.stream * 'a Common.stream
+val concat_map : ('a -> 'b list) -> 'a stream -> 'b stream
 
 val docx_ns : string
 
@@ -16,8 +14,7 @@ type signal = Markup.signal [@@deriving equal, sexp_of]
 val trees : (Markup.signal, 'a) Markup.stream -> (tree, 'a) Markup.stream
 
 val transform
-   : impl:Common.impl
-  -> transform:(Markup.signal Common.stream -> Markup.signal Common.stream)
+   : transform:(Markup.signal stream -> Markup.signal stream)
   -> flavor:[ `Xml | `Html ]
   -> string
   -> dst:'a Common.out
