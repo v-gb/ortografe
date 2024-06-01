@@ -2,8 +2,7 @@
  (name ortografe)
  (libraries
    core
-   markup
-   markup_print
+   markup_t
    uucp
    uunf
    uuseg

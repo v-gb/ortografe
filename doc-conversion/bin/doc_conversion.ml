@@ -17,11 +17,7 @@ let convert_string dict_contents =
                  ; dict
                  ; interleaved = true
                  ; plurals_in_s = metadata.plurals_in_s ||? true
-                 ; impl =
-                     { parse = (fun ~flavor src ->
-                         Fun (Markup_js.parse ~flavor src))
-                     ; print = Ortografe.markup_print_impl.print
-                     }
+                 ; impl = Ortografe.markup_impl
         }
         file_contents
       ||? failwith ("type de fichier non supporté: " ^ filename)

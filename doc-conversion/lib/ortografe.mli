@@ -1,3 +1,4 @@
+module Markup := Markup_t
 type 'a stream = 'a Common.stream =
   | Markup of ('a, Markup.sync) Markup.stream
   | Fun of (('a -> unit) -> unit)

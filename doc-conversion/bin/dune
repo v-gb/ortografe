@@ -17,7 +17,6 @@
    brrex
    dict_gen_common
    js_of_ocaml
-   markup_js
    ortografe
  )
  (preprocess

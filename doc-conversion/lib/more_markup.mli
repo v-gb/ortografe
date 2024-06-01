@@ -1,4 +1,5 @@
 (** Extension of the [Markup] library *)
+module Markup := Markup_t
 
 val map : ('a -> 'b) -> 'a Common.stream -> 'b Common.stream
 val filter : ('a -> bool) -> 'a Common.stream -> 'a Common.stream

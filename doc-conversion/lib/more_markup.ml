@@ -1,4 +1,5 @@
 open Core
+open struct module Markup = Markup_t end
 
 let map f = function
   | Common.Markup s -> Common.Markup (Markup.map f s)

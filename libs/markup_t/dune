@@ -1,0 +1,9 @@
+;; This directory is a snapshot of
+;; https://github.com/v-gb/markup.ml/commit/627df761fd34295e0b8c4c69f0ea35e5e192de3d
+;; (except with markup renamed to markup_t)
+(library
+ (name markup_t)
+ (synopsis "Error-recovering functional HTML5 and XML parsers")
+ (instrumentation (backend bisect_ppx))
+ (libraries uutf)
+ (flags (:standard -w -9)))

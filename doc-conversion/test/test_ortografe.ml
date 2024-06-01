@@ -1,4 +1,5 @@
 open Core
+open struct module Markup = Markup_t end
 
 let pp_xml src =
   Markup.parse_xml

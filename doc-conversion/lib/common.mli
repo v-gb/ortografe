@@ -1,5 +1,5 @@
 (** A few misc utility functions and types *)
-
+module Markup := Markup_t
 type 'a out =
   | Channel : Out_channel.t -> unit out
   | String : string out

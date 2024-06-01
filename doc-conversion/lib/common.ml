@@ -1,3 +1,4 @@
+open struct module Markup = Markup_t end
 type 'a out =
   | Channel : Out_channel.t -> unit out
   | String : string out

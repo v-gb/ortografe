@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e -u -o pipefail
-output=$(dune describe external-lib-deps | sexp select external_deps | sexp query 'each (index 0)' | cut -d . -f 1 | sort -u | xargs echo)
+output=$(dune describe external-lib-deps | sexp select external_deps | sexp query 'each (index 0)' | cut -d . -f 1 | sort -u | grep -xv dynlink | xargs echo)
 sed -i -e "s/^\( *\).*MARKER/\1$output ;; MARKER/" dune-project

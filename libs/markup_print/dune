@@ -1,4 +1,0 @@
-(library
- (name markup_print)
- (libraries base markup)
- (preprocess (pps ppx_lazy_option_op)))

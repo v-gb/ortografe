@@ -1,4 +1,5 @@
 open Common
+open struct module Markup = Markup_t end
 
 module Dyn_protect = struct
   open Core
@@ -54,18 +55,7 @@ let markup_impl =
         | `Html -> Markup.write_html stream)
        |> Markup.iter on_char)
   }
-let markup_print_impl =
-  { parse = markup_impl.parse
-  ; print = (fun ~flavor stream _on_char on_str ->
-    let producer =
-      match stream with
-      | Fun f -> f
-      | Markup stream -> Markup.iter __ stream
-    in
-    match flavor with
-    | `Xml -> Markup_print.Xml_writer.write producer on_str
-    | `Html -> Markup_print.Html_writer.write producer on_str)
-  }
+let markup_print_impl = markup_impl
 
 type 'a out = 'a Common.out =
   | Channel : Out_channel.t -> unit out

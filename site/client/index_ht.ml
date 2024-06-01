@@ -1,4 +1,5 @@
 open Core
+open struct module Markup = Markup_t end
 
 module General_purpose = struct
   type node =
