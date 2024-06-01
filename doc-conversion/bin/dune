@@ -4,6 +4,12 @@
  (modules ortografe_cli))
 
 (executable
+ (name ortografe)
+ (libraries ortografe_cli)
+ (modes js)
+ (modules ortografe))
+
+(executable
  (name doc_conversion)
  (libraries
    base64
