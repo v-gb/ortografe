@@ -192,8 +192,9 @@ module General_purpose = struct
       ; body
       ]
 
-  let details ?cl ?summary_cl summary body =
+  let details ?cl ?summary_cl ?(open_ = false) summary body =
     elt ?cl "details"
+      ~attrs:(if open_ then [ "open", "" ] else [])
       (elt ?cl:summary_cl "summary" summary :: body)
   let cite ?cl body = elt ?cl "cite" body
 
@@ -869,8 +870,8 @@ module Index = struct
         ]
     ]
 
-  let details__summary_unstyled summary body =
-    details
+  let details__summary_unstyled ?open_ summary body =
+    details ?open_
       ~summary_cl:"
 &::marker { content: none; }
 &::-webkit-details-marker { display: none; }
