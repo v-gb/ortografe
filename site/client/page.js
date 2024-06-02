@@ -150,3 +150,30 @@ if ((new URL(window.location)).searchParams.get("exp")) {
         elt.classList.add('exp-shown')
     }
 }
+
+
+function download(filename, text) {
+    // We have 3 versions of this : this one, the one is extensions/src/options.js
+    // and the ocaml one in doc-conversion/bin/doc_conversion.ml.
+    // https://ourcodeworld.com/articles/read/189/how-to-create-a-file-and-generate-a-download-with-javascript-in-the-browser-without-a-server
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    try {
+        element.click();
+    } finally {
+        document.body.removeChild(element);
+    }
+}
+
+document.getElementById("download-dict")?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const dict_gen = await lazy_dict_gen();
+    const [ rules, selection_text ] = dict_gen.currently_selected_rules("conv-");
+    const [ dict, _stats ] =
+        await dict_gen.generate("/static", "/static/Lexique383.gen.tsv",
+                                "/static/rect1990.csv", rules, 1, false);
+    download("dict.csv", dict)
+})

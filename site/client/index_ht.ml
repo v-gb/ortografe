@@ -900,6 +900,7 @@ module Index = struct
                             de l'extension)" ]
            ; doesnt_work, [ text "vérificateurs d'orthographe" ]
            ; exp_hidden_class :: doesnt_work, [ text "clavier pour téléphone" ]
+           ; works, [ text "données (voir plus bas)" ]
            ]
           )
       ; p [ text "Notez que ces autres orthographes ne sont pas des recommendations \
@@ -923,6 +924,12 @@ module Index = struct
            ~id_textarea:"user-text2"
            ~id_converted_text:"converted-text2"
            ~initial_text:(`Placeholder "Tapez le texte à transcrire ici.")
+       ; p
+           [ text "Données : "
+           ; a ~href:"dict.csv" ~attrs:[ "id", "download-dict" ]
+               [ text "csv" ]
+           ; text " contenant l'orthographe avant/après."
+           ]
        ]
 
   let section_donnees () =
@@ -1115,8 +1122,8 @@ module Index = struct
               ; section_transcription_pages ()
               ; section_verificateurs ()
               ; +section_claviers ()
-              ; section_autres_orthographes ()
               ; section_donnees ()
+              ; section_autres_orthographes ()
               ; section_aller_plus_loin ()
               ; submit_file
                   ~attrs:["id", "doc-conv"; exp_hidden_class ]
