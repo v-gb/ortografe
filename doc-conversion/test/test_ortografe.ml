@@ -105,12 +105,14 @@ Nom propre: pierre Pierre pierre-feuille-ciseau Jean-Pierre.
       {|
 Le maître a dû goûter ce week-end.
 Un sèche-cheveux, des sèche-cheveux.
+Auto-stoppeur, auto-stoppeur. (* bug *)
 |}
   in
   print_string rewrite3;
   [%expect "
     Le maitre a d\195\187 gouter ce weekend.
-    Un s\195\168che-cheveux, des s\195\168che-cheveux."]
+    Un s\195\168che-cheveux, des s\195\168che-cheveux.
+    Auto-stoppeur, autostoppeur. (* bug *)"]
 )
 
 
