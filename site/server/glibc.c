@@ -7,8 +7,15 @@
 // significantly worse than glibc malloc, even with the 2021-ish reimplementation)
 
 #include <math.h>
+
 __asm__(".symver fmod_2_2_5,fmod@GLIBC_2.2.5");
 extern double fmod_2_2_5(double x, double y);
 double __wrap_fmod(double x, double y) {
   return fmod_2_2_5(x, y);
+}
+
+__asm__(".symver strtol_2_2_5,strtol@GLIBC_2.2.5");
+extern double strtol_2_2_5(const char nptr, char ** endptr, int base);
+long __wrap___isoc23_strtol(const char nptr, char ** endptr, int base) {
+  return strtol_2_2_5(nptr, endptr, base);
 }
