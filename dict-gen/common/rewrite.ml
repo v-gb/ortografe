@@ -1445,10 +1445,12 @@ let staged_gen ?(fix_oe = false) ~rules:which_rules () =
            in
            (rule aligned_row).row.ortho
 
-let gen ?(fix_oe = false) ?(not_understood = `Ignore) ~rules:which_rules lexique f =
+let gen ?progress ?(fix_oe = false) ?(not_understood = `Ignore) ~rules:which_rules lexique f =
   let rules = Rules.create () in
   let skip = load_skip () in
   let rule, prefilter = compose_rules rules ~which_rules in
+  let length_lexique = List.length lexique in
+  let chunk_size = List.length lexique / 100 in
   let total = ref 0 in
   let considered = ref 0 in
   let prefiltered_out = ref 0 in
@@ -1456,6 +1458,11 @@ let gen ?(fix_oe = false) ?(not_understood = `Ignore) ~rules:which_rules lexique
   List.iter lexique
     ~f:(fun row ->
       total := !total + 1;
+      if !total % chunk_size =$ 0
+      then
+        (match progress with
+         | None -> ()
+         | Some f -> f (!total * 100 / length_lexique));
       if not (skip row) then (
         considered := !considered + 1;
         (* The filtering phase makes the creation of dict-arpetani go from 1.95 to 1.725s

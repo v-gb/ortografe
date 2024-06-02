@@ -313,7 +313,7 @@ let interpret_rules rules =
   in
   has_erofa, rewrite_rules, oe, rect1990, metadata
 
-let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
+let gen ?(profile = false) ?progress ~rules ~all ~output ~json_to_string data =
   let has_erofa, rewrite_rules, oe, rect1990, metadata = interpret_rules rules in
   let plurals_in_s = metadata.plurals_in_s ||? failwith "missing plurals_in_s" in
   let post90, lexique =
@@ -350,16 +350,19 @@ let gen ?(profile = false) ~rules ~all ~output ~json_to_string data =
         List.iter (ranked all) ~f:(fun (old, new_) ->
             output [%string "%{old},%{new_}\n"])))
   in
+  Option.iter progress ~f:(fun f -> f 10);
   let stats =
     time ~profile "rewrite" (fun () ->
-    Rewrite.gen
-      ~not_understood:`Ignore
-      ~fix_oe:oe
-      ~rules:rewrite_rules
-      lexique print)
+      Rewrite.gen
+        ?progress:(Option.map progress ~f:(fun wrapper n -> wrapper (10 + n * 8 / 10)))
+        ~not_understood:`Ignore
+        ~fix_oe:oe
+        ~rules:rewrite_rules
+        lexique print)
   in
   time ~profile "post-computation" (fun () ->
-      after ());
+    after ());
+  Option.iter progress ~f:(fun f -> f 100);
   `Stats [%sexp ~~(stats : Rewrite.stats)]
 
 let staged_gen data =

@@ -20,7 +20,8 @@ type rules = rule list
 
 type stats [@@deriving sexp_of]
 val gen
-    :  ?fix_oe:bool
+    :  ?progress:(int -> unit)
+    -> ?fix_oe:bool
     -> ?not_understood:[ `Raise | `Call of (Sexplib.Sexp.t -> unit) | `Ignore ]
     -> rules:rules
     -> Data.Lexique.t

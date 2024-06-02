@@ -101,7 +101,7 @@ async function set_dict(dict) {
 
 function currently_selected_rules() {
     const [ rules, selection_text, nonempty ] = dict_gen.currently_selected_rules("checkbox-");
-    document.getElementById("load-checkbox-label").innerText = selection_text;
+    document.getElementById("load-checkbox-label-sel").innerText = selection_text;
     document.getElementById("deselect").style.display = nonempty ? "unset" : "none";
     return rules;
 }
@@ -116,8 +116,8 @@ function add_rule_selection_ui() {
     })
 }
 
-async function compute_dict(rules) {
-    const [dict, stats] = await dict_gen.generate(".", "./Lexique383.gen.tsv", "./dict1990.gen.csv", rules, 1, false);
+async function compute_dict(rules, set_progress) {
+    const [dict, stats] = await dict_gen.generate(".", "./Lexique383.gen.tsv", "./dict1990.gen.csv", rules, 1, false, set_progress);
     console.log(stats);
     return dict;
 }
@@ -139,15 +139,18 @@ async function load_dict_from_computation(e) {
     try {
         const rules = currently_selected_rules();
         if (e.target.id == 'load-checkbox') {
-            const elt = document.getElementById("floatingCirclesG");
-            if (elt.classList.contains("idle")) {
-                elt.classList.remove("idle");
+            const elt = document.getElementById("load-checkbox-label");
+            if (elt.style.getPropertyValue("--progress") == "0%") {
+                function set_progress(v) {
+                    elt.style.setProperty("--progress", v + "%")
+                }
+                set_progress(1);
                 try {
-                    const dict = await compute_dict(rules);
+                    const dict = await compute_dict(rules, set_progress);
                     set_dict(parse_dict(dict));
                     await display_dict_preview(false);
                 } finally {
-                    elt.classList.add("idle");
+                    set_progress(0);
                 }
             }
         }

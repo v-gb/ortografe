@@ -170,10 +170,22 @@ function download(filename, text) {
 
 document.getElementById("download-dict")?.addEventListener("click", async (e) => {
     e.preventDefault();
-    const dict_gen = await lazy_dict_gen();
-    const [ rules, selection_text ] = dict_gen.currently_selected_rules("conv-");
-    const [ dict, _stats ] =
-        await dict_gen.generate("/static", "/static/Lexique383.gen.tsv",
-                                "/static/rect1990.csv", rules, 1, false);
-    download("dict.csv", dict)
+    function set_progress(v) {
+        e.target.style.setProperty("--progress", v + "%")
+    }
+    set_progress(0);
+    e.target.classList.add("loading");
+    try {
+        const dict_gen = await lazy_dict_gen();
+        set_progress(10);
+        const [ rules, selection_text ] = dict_gen.currently_selected_rules("conv-");
+        const [ dict, _stats ] =
+              await dict_gen.generate("/static", "/static/Lexique383.gen.tsv",
+                                      "/static/rect1990.csv", rules, 1, false,
+                                      (i) => set_progress(10 + i * 8 / 10));
+        set_progress(90);
+        download("dict.csv", dict);
+    } finally {
+        e.target.classList.remove("loading");
+    }
 })

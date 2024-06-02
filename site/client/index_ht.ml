@@ -203,6 +203,10 @@ end
 
 open General_purpose
 
+let green_pale = "#e5fbe5"
+let green = "#b9f4b9"
+let _ = green_pale
+
 let html ~head ?body_style ~body () =
   html ~lang:"fr" ~head ?body_style ~body ()
 
@@ -880,7 +884,7 @@ module Index = struct
       body
 
   let section_autres_orthographes () =
-    details__summary_unstyled
+    details__summary_unstyled (* ~open_:true *)
       [ h3 [ text "Support pour d'autres orthographes"
            ; span ~cl:"text-decoration-line: underline" [ text "…" ]
           ]
@@ -926,7 +930,16 @@ module Index = struct
            ~initial_text:(`Placeholder "Tapez le texte à transcrire ici.")
        ; p
            [ text "Données : "
-           ; a ~href:"dict.csv" ~attrs:[ "id", "download-dict" ]
+           ; a ~href:"dict.csv"
+               ~attrs:[ "id", "download-dict" ]
+               ~cl:[%string "&.loading {
+                               border-radius: 6px;
+                               background: linear-gradient(to right,
+                                 white 0 var(--progress),
+                                 %{green_pale} var(--progress) 100%);
+                               border: 2px solid %{green};
+                               padding: 0 3px 3px 3px;
+                             }"]
                [ text "csv" ]
            ; text " contenant l'orthographe avant/après."
            ]

@@ -46,6 +46,7 @@ type 'a json =
 
 val gen
     :  ?profile:bool
+    -> ?progress:(int -> unit)
     -> rules:rules
     -> all:bool
     -> output:(string -> unit)
