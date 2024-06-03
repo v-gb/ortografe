@@ -51,7 +51,6 @@ const lazy_next_stage = async_lazy(async () =>
     await dict_gen.staged_generate("/static/Lexique383.gen.tsv",
                                    "/static/rect1990.csv"))
 if (user_text2) {
-    const dictionary_is_lazy = true;
     const update = mirror_and_rewrite(user_text2, converted_text2, async () => {
         const dict_gen = await lazy_dict_gen();
         while (true) {
@@ -61,49 +60,31 @@ if (user_text2) {
             if (selection_text == cache2?.selection_text) {
                 break;
             } else {
-                // ideally, we would generate the dictionary on demand, like we do when
-                // converting docs but that code works on text, not the dom, and can't
-                // highlight things.
-                if (!dictionary_is_lazy) {
-                    [ cache2.dict, cache2.stats ] =
-                        await dict_gen.generate("/static", "/static/Lexique383.gen.tsv",
-                                                "/static/rect1990.csv", rules, 1, false);
-                    cache2.selection_text = selection_text;
-                    cache2.table = null;
-                } else {
-                    const next_stage = await lazy_next_stage();
-                    const word_f = next_stage(rules);
-                    cache2.dict = null;
-                    cache2.stats = null;
-                    cache2.selection_text = selection_text;
-                    cache2.table = {
-                        size: 1,
-                        has: (word) => word_f(word) != null,
-                        get: word_f,
-                    }
+                const next_stage = await lazy_next_stage();
+                const word_f = next_stage(rules);
+                cache2.selection_text = selection_text;
+                cache2.table = {
+                    size: 1,
+                    has: (word) => word_f(word) != null,
+                    get: word_f,
                 }
             }
         }
         const options = {color:true, trivial:false, background_color:'#b9f4b9',
-                         rewrite: 'custom', custom_dict: cache2.dict}
-        if (cache2?.table == undefined) {
-            cache2.table = load_dict(options);
-        }
+                         rewrite: 'custom', custom_dict: null}
         // hopefully there can be no "context switch" at the place where the caller
         // awaits this return, because that would introduce a (very tight) race condition
         // that could theorically cause an input change to be missed.
         return [ options, cache2.table ]
     })
-    if (dictionary_is_lazy) {
-        document.getElementById('form-conv')?.addEventListener("change", () => {
-            if (converted_text2.childNodes.length > 0) {
-                // Avoid downloading all the stuff if the user hasn't typed in the
-                // textarea yet. Maybe a better point of view would be: if
-                // lazy_next_stage in unforced, then don't force it.
-                update();
-            }
-        })
-    }
+    document.getElementById('form-conv')?.addEventListener("change", () => {
+        if (converted_text2.childNodes.length > 0) {
+            // Avoid downloading all the stuff if the user hasn't typed in the
+            // textarea yet. Maybe a better point of view would be: if
+            // lazy_next_stage in unforced, then don't force it.
+            update();
+        }
+    })
 }
 
 const lazy_doc_conversion = async_lazy(async () => {
