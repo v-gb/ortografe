@@ -90,7 +90,7 @@ let on_message_rpc, on_message =
       | v -> Fut.ok v
     )
 
-let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n : Jv.t) profile progress =
+let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules profile progress =
   (* We need to run this in a worker, otherwise the loading animation doesn't actually
    * animate, which we kind of want it to, since the a 2s of waiting is on the longer
    * side. *)
@@ -100,14 +100,10 @@ let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n :
       (fun js_f i -> ignore (Jv.apply js_f [|Jv.of_int i|]))
       progress
   in
-  let n = Jv.to_int n in
   let profile = Jv.to_bool profile in
   Brrex.fut_to_promise
     ~ok:(fun (dict, duration) -> Jv.of_jv_list [ Jv.of_string dict ; Jv.of_string duration ])
-    (on_message
-       ~local:(n = 0)
-       ?progress
-       (lexique_url, dict1990_url, rules, profile))
+    (on_message ?progress (lexique_url, dict1990_url, rules, profile))
 
 let staged_generate =
   Jv.callback ~arity:2
@@ -138,7 +134,7 @@ let () =
     (fun () ->
       Js_of_ocaml.Js.export "dict_gen"
         (Js_of_ocaml.Js.Unsafe.inject
-           (Jv.obj [| "generate", Jv.callback ~arity:6 generate_in_worker
+           (Jv.obj [| "generate", Jv.callback ~arity:5 generate_in_worker
                     ; "staged_generate", staged_generate
                     ; "html_fragment", Jv.callback ~arity:1 html_fragment
                     ; "currently_selected_rules", Jv.callback ~arity:1 currently_selected_rules
