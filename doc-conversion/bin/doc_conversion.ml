@@ -35,38 +35,6 @@ let convert_string dict_contents =
   `mime (Ortografe.mimetype_by_ext new_ext ||? failwith "unknown extension??"),
   new_text
 
-let download ~mime ~filename text =
-  (* One possible problem is there's a size limit on the size of inline
-     data. https://developer.mozilla.org/en-US/docs/web/http/basics_of_http/data_urls
-     says 32MB in firefox and more in chrome/safari, so that seems good enough. *)
-  let el =
-    Brr.El.v
-      ~at:[ Brr.At.v
-              (Jstr.v "href")
-              (match text with
-               | `Jstr str ->
-                  (Jstr.append
-                     (Jstr.v [%string "data:%{mime};charset=utf-8,"])
-                     (Brrex.or_throw (Brr.Uri.encode str)))
-               | `Str str ->
-                  (Jstr.append
-                     (Jstr.v [%string "data:%{mime};base64,"])
-                     (Jstr.v (Base64.encode_string str))))
-          ; Brr.At.v
-              (Jstr.v "download")
-              filename
-          ; Brr.At.v
-              (Jstr.v "style")
-              (Jstr.v "display: none")
-      ]
-      (Jstr.v "a") []
-  in
-  Brr.El.append_children
-    (Brr.Document.body Brr.G.document)
-    [ el ];
-  Brr.El.click el;
-  Brr.El.remove el
-
 let convert_file dict_content =
   let f = convert_string dict_content in
   fun file_object ->
@@ -76,7 +44,10 @@ let convert_file dict_content =
     let `name new_name, `mime mime, new_text =
       f ~filename:(Jstr.to_string filename) text
     in
-    download ~mime ~filename:(Jstr.v new_name) (`Str new_text);
+    Brrex.download_from_memory
+      ~mime
+      ~filename:(Jstr.v new_name)
+      (`Str_in_base64 (Base64.encode_string new_text));
     Fut.ok ()
 
 let with_exn_in_dom_sync id f =

@@ -1,4 +1,4 @@
 (library
  (name brrex)
  (libraries brr)
- (preprocess (pps ppx_partial)))
+ (preprocess (pps ppx_partial ppx_string)))

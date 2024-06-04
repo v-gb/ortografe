@@ -25,3 +25,12 @@ val json_to_string : ([< `Array of 'a list
                       as 'a) -> string
 
 val read_bytes : Brr.File.t -> string Fut.or_error
+
+(** This is mimicking the effect of clicking on an anchor tag, but with data that's
+    provided as code in the client, instead of as a url on the server. *)
+val download_from_memory :
+  mime:string
+  -> filename:Jstr.t
+  -> [< `Jstr of Jstr.t | `Str_in_base64 of string ]
+  -> unit
+

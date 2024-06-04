@@ -79,3 +79,36 @@ let read_bytes file_object =
   let open Fut.Result_syntax in
   let* buf = Brr.Blob.array_buffer (Brr.File.as_blob file_object) in
   Fut.ok (Brr.Tarray.to_string (Brr.Tarray.of_buffer Uint8 buf))
+
+
+let download_from_memory ~mime ~filename text =
+  (* One possible problem is there's a size limit on the size of inline
+     data. https://developer.mozilla.org/en-US/docs/web/http/basics_of_http/data_urls
+     says 32MB in firefox and more in chrome/safari, so that seems good enough. *)
+  let el =
+    Brr.El.v
+      ~at:[ Brr.At.v
+              (Jstr.v "href")
+              (match text with
+               | `Jstr str ->
+                  (Jstr.append
+                     (Jstr.v [%string "data:%{mime};charset=utf-8,"])
+                     (or_throw (Brr.Uri.encode str)))
+               | `Str_in_base64 str_in_base64 ->
+                  (Jstr.append
+                     (Jstr.v [%string "data:%{mime};base64,"])
+                     (Jstr.v str_in_base64)))
+          ; Brr.At.v
+              (Jstr.v "download")
+              filename
+          ; Brr.At.v
+              (Jstr.v "style")
+              (Jstr.v "display: none")
+      ]
+      (Jstr.v "a") []
+  in
+  Brr.El.append_children
+    (Brr.Document.body Brr.G.document)
+    [ el ];
+  Brr.El.click el;
+  Brr.El.remove el
