@@ -66,66 +66,34 @@ let html_fragment () =
     ~url_prefix:"/" ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
   |> Jv.of_string
 
-let on_message ?progress ~k (lexique_url, dict1990_url, rules, profile) =
-  let open Fut.Result_syntax in
-  let* embedded =
-    time_fut ~profile "fetch" (fun () ->
-        let* data_lexique_Lexique383_gen_tsv = Brrex.fetch lexique_url in
-        Option.iter progress ~f:(fun f -> f 5);
-        let* extension_dict1990_gen_csv = Brrex.fetch dict1990_url in
-        Option.iter progress ~f:(fun f -> f 10);
-        Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
-               ; extension_dict1990_gen_csv
+let on_message_rpc, on_message =
+  Brrex.rpc_with_progress (fun ?progress (lexique_url, dict1990_url, rules, profile) ->
+      let open Fut.Result_syntax in
+      let* embedded =
+        time_fut ~profile "fetch" (fun () ->
+            let* data_lexique_Lexique383_gen_tsv = Brrex.fetch lexique_url in
+            Option.iter progress ~f:(fun f -> f 5);
+            let* extension_dict1990_gen_csv = Brrex.fetch dict1990_url in
+            Option.iter progress ~f:(fun f -> f 10);
+            Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
+                   ; extension_dict1990_gen_csv
           })
-  in
-  match
-    generate
-      ?progress:(Option.map progress ~f:(fun f x -> f (10 + x * 9 / 10)))
-      ~profile
-      embedded
-      rules
-  with
-  | exception e -> Fut.error (Jv.Error.v (Jstr.of_string (Exn.to_string e)))
-  | v -> Fut.ok (k v)
+      in
+      match
+        generate
+          ?progress:(Option.map progress ~f:(fun f x -> f (10 + x * 9 / 10)))
+          ~profile
+          embedded
+          rules
+      with
+      | exception e -> Fut.error (Jv.Error.v (Jstr.of_string (Exn.to_string e)))
+      | v -> Fut.ok v
+    )
 
-let rpc : type q r.
-          ?progress:_
-          -> local:bool
-          -> path:string
-          -> (q -> (r, 'b) Result.t Fut.t)
-          -> q
-          -> (q -> _)
-          -> (r, 'b) Result.t Fut.t
-  = fun ?progress ~local ~path impl arg constr ->
-  (* This function ensures well typedness, by tying the result in the worker
-     case and in the non-worker case. *)
-  let open Fut.Syntax in
-  if local
-  then impl arg
-  else (
-    let worker = Brr_webworkers.Worker.create (Jstr.of_string (path ^ "/dict_gen.bc.js")) in
-    Brr_webworkers.Worker.post worker (constr arg);
-    let rec loop () =
-      let* event = Brr.Ev.next Brr_io.Message.Ev.message
-                     (Brr_webworkers.Worker.as_target worker) in
-      match Brr_io.Message.Ev.data (Brr.Ev.as_type event) with
-      | ("magic-string", i) -> Option.iter progress ~f:(fun f -> f i); loop ()
-      | _ -> Fut.return event
-    in
-    let* event = loop () in
-    Brr_webworkers.Worker.terminate worker;
-    Fut.return
-      (Brrex.or_throw
-         (Brr_io.Message.Ev.data
-            (Brr.Ev.as_type event)
-          : ((r, Jv.Error.t) Result.t, Jv.Error.t) Result.t))
-  )
-
-let generate_in_worker path (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n : Jv.t) profile progress =
+let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules (n : Jv.t) profile progress =
   (* We need to run this in a worker, otherwise the loading animation doesn't actually
    * animate, which we kind of want it to, since the a 2s of waiting is on the longer
    * side. *)
-  let path = Jv.to_string path in
   let rules = (Stdlib.Obj.magic : Jv.t -> selected_rules) rules in
   let progress =
     Jv.to_option
@@ -136,13 +104,10 @@ let generate_in_worker path (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules
   let profile = Jv.to_bool profile in
   Brrex.fut_to_promise
     ~ok:(fun (dict, duration) -> Jv.of_jv_list [ Jv.of_string dict ; Jv.of_string duration ])
-    (rpc
-       ?progress
+    (on_message
        ~local:(n = 0)
-       ~path
-       (on_message ?progress ~k:Fn.id)
-       (lexique_url, dict1990_url, rules, profile)
-       (fun arg -> `On_message arg))
+       ?progress
+       (lexique_url, dict1990_url, rules, profile))
 
 let staged_generate =
   Jv.callback ~arity:2
@@ -168,24 +133,13 @@ let staged_generate =
                        (f (Jv.to_string jstr)))))))
 
 let () =
-  if Brr_webworkers.Worker.ami ()
-  then
-    let open Fut.Syntax in
-    Brrex.fut_await
-      (let* event = Brr.Ev.next Brr_io.Message.Ev.message Brr.G.target in
-       let data = Brr_io.Message.Ev.data (Brr.Ev.as_type event) in
-       match data with
-       | `On_message data ->
-          on_message data ~k:Jv.repr
-            ~progress:(fun i -> Brr_webworkers.Worker.G.post ("magic-string", i)))
-      (fun res ->
-        Brr_webworkers.Worker.G.post
-          (res : ((Jv.t, Jv.Error.t) Result.t, Jv.Error.t) Result.t))
-  else
-    Js_of_ocaml.Js.export "dict_gen"
-      (Js_of_ocaml.Js.Unsafe.inject
-         (Jv.obj [| "generate", Jv.callback ~arity:7 generate_in_worker
-                  ; "staged_generate", staged_generate
-                  ; "html_fragment", Jv.callback ~arity:1 html_fragment
-                  ; "currently_selected_rules", Jv.callback ~arity:1 currently_selected_rules
-            |]))
+  Brrex.main
+    [ on_message_rpc ]
+    (fun () ->
+      Js_of_ocaml.Js.export "dict_gen"
+        (Js_of_ocaml.Js.Unsafe.inject
+           (Jv.obj [| "generate", Jv.callback ~arity:6 generate_in_worker
+                    ; "staged_generate", staged_generate
+                    ; "html_fragment", Jv.callback ~arity:1 html_fragment
+                    ; "currently_selected_rules", Jv.callback ~arity:1 currently_selected_rules
+              |])))

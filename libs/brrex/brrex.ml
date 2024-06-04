@@ -121,5 +121,81 @@ let fetch url =
   let* buf = Brr_io.Fetch.Body.array_buffer (Brr_io.Fetch.Response.as_body response) in
   Fut.ok (string_of_array_buffer buf)
 
+let document = Jv.get Jv.global "document"
 let get_element_by_id id =
-  Jv.call (Jv.get Jv.global "document") "getElementById" [| Jv.of_jstr id |]
+  Jv.call document "getElementById" [| Jv.of_jstr id |]
+
+type rpc = string * ((bool * Jv.t) -> Jv.t Fut.or_error)
+let current_script =
+  if Jv.is_undefined document
+  then lazy (failwith "no currentScript, because no document")
+  else
+    (* We need to run this at toplevel, because currentScript is only defined when
+       executing the toplevel of a script. *)
+    let src = Jv.get (Jv.get document "currentScript") "src" in
+    lazy (Jv.to_jstr (Jv.get (Jv.new' (Jv.get Jv.global "URL") [|src|]) "pathname"))
+
+let rpc_name =
+  let r = ref (-1) in
+  fun () ->
+  r := !r + 1;
+  "rpc" ^ Int.to_string !r
+
+let rpc_with_progress : type q r.
+               (?progress:(int -> unit) -> q -> r Fut.or_error)
+               -> rpc * (?local:bool -> ?progress:(int -> unit) -> q -> r Fut.or_error)
+  = fun impl ->
+  let rpc_name = rpc_name () in
+  (rpc_name, (fun (has_progress, q) ->
+                  let progress =
+                    if has_progress
+                    then Some (fun i -> Brr_webworkers.Worker.G.post ("magic-string", i))
+                    else None
+                  in
+                  (Obj.magic
+                     (impl ?progress (Obj.magic (q : Jv.t) : q) : r Fut.or_error)
+                   : Jv.t Fut.or_error))),
+  (fun ?(local = false) ?progress arg ->
+    let open Fut.Syntax in
+    if local
+    then impl ?progress arg
+    else (
+      let worker = Brr_webworkers.Worker.create (Lazy.force current_script) in
+      Brr_webworkers.Worker.post worker (rpc_name, (Option.is_some progress, arg));
+      let* event =
+        let rec loop () =
+          let* event = Brr.Ev.next Brr_io.Message.Ev.message
+                         (Brr_webworkers.Worker.as_target worker) in
+          match Brr_io.Message.Ev.data (Brr.Ev.as_type event) with
+          | ("magic-string", i) -> Option.iter (fun f -> f i) progress; loop ()
+          | _ -> Fut.return event
+        in loop ()
+      in
+      Brr_webworkers.Worker.terminate worker;
+      Fut.return
+        (or_throw
+           (Brr_io.Message.Ev.data
+              (Brr.Ev.as_type event)
+            : ((r, Jv.Error.t) Result.t, Jv.Error.t) Result.t))))
+
+let rpc impl =
+  let rpc, f = rpc_with_progress (fun ?progress:_ q -> impl q) in
+  rpc, (fun ?local q -> f ?progress:None ?local q)
+
+let main (rpcs : rpc list) f =
+  let rpcs = Hashtbl.of_seq (List.to_seq rpcs) in
+  if Brr_webworkers.Worker.ami ()
+  then
+    let open Fut.Syntax in
+    fut_await
+      (let* event = Brr.Ev.next Brr_io.Message.Ev.message Brr.G.target in
+       let data = Brr_io.Message.Ev.data (Brr.Ev.as_type event) in
+       let (rpc_name, rpc_arg) = data in
+       let impl =
+         Hashtbl.find_opt rpcs rpc_name ||? failwith ("unknown rpc " ^ rpc_name)
+       in
+       impl rpc_arg)
+      (fun res ->
+        Brr_webworkers.Worker.G.post
+          (res : ((Jv.t, Jv.Error.t) Result.t, Jv.Error.t) Result.t))
+  else f ()

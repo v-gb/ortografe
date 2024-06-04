@@ -39,3 +39,12 @@ val download_from_memory :
 val fetch : Jstr.t -> string Fut.or_error
 
 val get_element_by_id : Jstr.t -> Jv.t
+
+type rpc
+val rpc : ('q -> 'r Fut.or_error)
+          -> rpc * (?local:bool -> 'q -> 'r Fut.or_error)
+val rpc_with_progress
+    : (?progress:(int -> unit) -> 'q -> 'r Fut.or_error)
+  -> rpc
+     * (?local:bool -> ?progress:(int -> unit) -> 'q -> 'r Fut.or_error)
+val main : rpc list -> (unit -> unit) -> unit

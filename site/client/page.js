@@ -161,7 +161,7 @@ document.getElementById("download-dict")?.addEventListener("click", async (e) =>
         set_progress(10);
         const [ rules, selection_text ] = dict_gen.currently_selected_rules("conv-");
         const [ dict, _stats ] =
-              await dict_gen.generate("/static", "/static/Lexique383.gen.tsv",
+              await dict_gen.generate("/static/Lexique383.gen.tsv",
                                       "/static/rect1990.csv", rules, 1, false,
                                       (i) => set_progress(10 + i * 8 / 10));
         set_progress(90);
