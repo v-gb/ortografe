@@ -817,7 +817,23 @@ let _ : rule =
       let pattern_gne = String.Search_pattern.create "gne" in
       let pattern_gni = String.Search_pattern.create "gni" in
       let pattern_gn = String.Search_pattern.create "gn" in
+      let pattern_N = String.Search_pattern.create "N" in
       fun env aligned_row ->
+        let aligned_row =
+          if String.mem aligned_row.row.phon 'N'
+          then
+            let row2 =
+              { aligned_row.row
+                with phon =
+                       String.Search_pattern.replace_all pattern_N
+                         ~in_:aligned_row.row.phon ~with_:"nj"
+              }
+            in
+            match Rules.search env.rules row2.ortho row2.phon with
+            | Error _ -> aligned_row (* échoue pour « oignon », « encoignure » *)
+            | Ok alignment2 -> { row = row2; alignment = alignment2 }
+          else aligned_row
+        in
         let aligned_row = ref aligned_row in
         aligned_row := rewrite env !aligned_row ~target:pattern_gne ~repl:"nye";
         aligned_row := rewrite env !aligned_row ~target:pattern_gni ~repl:"nyi";
