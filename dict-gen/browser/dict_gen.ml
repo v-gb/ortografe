@@ -66,19 +66,13 @@ let html_fragment () =
     ~url_prefix:"/" ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
   |> Jv.of_string
 
-let fetch url =
-  let open Fut.Result_syntax in
-  let* response = Brr_io.Fetch.url url in
-  let* text = Brr_io.Fetch.Body.text (Brr_io.Fetch.Response.as_body response) in
-  Fut.return (Ok (Jstr.to_string text))
-
 let on_message ?progress ~k (lexique_url, dict1990_url, rules, profile) =
   let open Fut.Result_syntax in
   let* embedded =
     time_fut ~profile "fetch" (fun () ->
-        let* data_lexique_Lexique383_gen_tsv = fetch lexique_url in
+        let* data_lexique_Lexique383_gen_tsv = Brrex.fetch lexique_url in
         Option.iter progress ~f:(fun f -> f 5);
-        let* extension_dict1990_gen_csv = fetch dict1990_url in
+        let* extension_dict1990_gen_csv = Brrex.fetch dict1990_url in
         Option.iter progress ~f:(fun f -> f 10);
         Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
                ; extension_dict1990_gen_csv
@@ -157,8 +151,8 @@ let staged_generate =
         ~ok:Fn.id
         (let open Fut.Result_syntax in
          let* embedded =
-           let* data_lexique_Lexique383_gen_tsv = fetch lexique_url in
-           let* extension_dict1990_gen_csv = fetch dict1990_url in
+           let* data_lexique_Lexique383_gen_tsv = Brrex.fetch lexique_url in
+           let* extension_dict1990_gen_csv = Brrex.fetch dict1990_url in
            Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
                   ; extension_dict1990_gen_csv
              }

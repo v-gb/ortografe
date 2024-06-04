@@ -34,4 +34,8 @@ val download_from_memory :
   -> [< `Jstr of Jstr.t | `Str_in_base64 of string ]
   -> unit
 
+(** The data doesn't return utf8 necessarily, it just returns whatever is received
+    on the wire. *)
+val fetch : Jstr.t -> string Fut.or_error
+
 val get_element_by_id : Jstr.t -> Jv.t

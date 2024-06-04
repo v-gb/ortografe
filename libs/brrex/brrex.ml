@@ -75,11 +75,13 @@ let json_to_string v =
   in
   Jstr.to_string (Brr.Json.encode (to_js v))
 
+let string_of_array_buffer buf =
+  Brr.Tarray.to_string (Brr.Tarray.of_buffer Uint8 buf)
+
 let read_bytes file_object =
   let open Fut.Result_syntax in
   let* buf = Brr.Blob.array_buffer (Brr.File.as_blob file_object) in
-  Fut.ok (Brr.Tarray.to_string (Brr.Tarray.of_buffer Uint8 buf))
-
+  Fut.ok (string_of_array_buffer buf)
 
 let download_from_memory ~mime ~filename text =
   (* One possible problem is there's a size limit on the size of inline
@@ -112,6 +114,12 @@ let download_from_memory ~mime ~filename text =
     [ el ];
   Brr.El.click el;
   Brr.El.remove el
+
+let fetch url =
+  let open Fut.Result_syntax in
+  let* response = Brr_io.Fetch.url url in
+  let* buf = Brr_io.Fetch.Body.array_buffer (Brr_io.Fetch.Response.as_body response) in
+  Fut.ok (string_of_array_buffer buf)
 
 let get_element_by_id id =
   Jv.call (Jv.get Jv.global "document") "getElementById" [| Jv.of_jstr id |]
