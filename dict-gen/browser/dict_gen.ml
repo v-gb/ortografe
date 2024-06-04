@@ -30,16 +30,13 @@ let generate ?profile ?progress embedded rules =
   in
   (Buffer.contents buf, sexp_str)
 
-let get_element_by_id id =
-  Jv.call (Jv.get Jv.global "document") "getElementById" [| Jv.of_jstr id |]
-
 type selected_rules = Dict_gen_common.Dict_gen.rules
 let currently_selected_rules id_prefix =
   let builtin = Lazy.force Dict_gen_common.Dict_gen.all_builtin in
   let selected_builtins =
     List.filter builtin ~f:(fun rule ->
         Jv.get
-          (get_element_by_id
+          (Brrex.get_element_by_id
              (Jstr.of_string
                 (id_prefix ^ Dict_gen_common.Dict_gen.name rule)))
           "checked"
@@ -47,7 +44,7 @@ let currently_selected_rules id_prefix =
   in
   let custom_rule =
     Jv.get
-      (get_element_by_id (Jstr.of_string (id_prefix ^ "custom")))
+      (Brrex.get_element_by_id (Jstr.of_string (id_prefix ^ "custom")))
       "value"
     |> Jv.to_string
     |> Dict_gen_common.Dict_gen.custom_rule

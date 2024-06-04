@@ -34,3 +34,4 @@ val download_from_memory :
   -> [< `Jstr of Jstr.t | `Str_in_base64 of string ]
   -> unit
 
+val get_element_by_id : Jstr.t -> Jv.t

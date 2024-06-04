@@ -112,3 +112,6 @@ let download_from_memory ~mime ~filename text =
     [ el ];
   Brr.El.click el;
   Brr.El.remove el
+
+let get_element_by_id id =
+  Jv.call (Jv.get Jv.global "document") "getElementById" [| Jv.of_jstr id |]
