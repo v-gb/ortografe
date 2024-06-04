@@ -100,7 +100,7 @@ async function set_dict(dict) {
 }
 
 function currently_selected_rules() {
-    const [ rules, selection_text, nonempty ] = dict_gen.currently_selected_rules("checkbox-");
+    const [ rules, selection_text, nonempty ] = dict_gen_browser.currently_selected_rules("checkbox-");
     document.getElementById("load-checkbox-label-sel").innerText = selection_text;
     document.getElementById("deselect").style.display = nonempty ? "unset" : "none";
     return rules;
@@ -108,7 +108,7 @@ function currently_selected_rules() {
 
 function add_rule_selection_ui() {
     // The html is static, meaning the possible values are shipped in the extension.
-    document.getElementById("load-dict-details").innerHTML = dict_gen.html_fragment();
+    document.getElementById("load-dict-details").innerHTML = dict_gen_browser.html_fragment();
     document.getElementById("checkbox-custom").addEventListener("input", (e) => {
         with_exn_in_dom("load_error", async () => {
             currently_selected_rules();
@@ -117,7 +117,7 @@ function add_rule_selection_ui() {
 }
 
 async function compute_dict(rules, set_progress) {
-    const [dict, stats] = await dict_gen.generate("./Lexique383.gen.tsv", "./dict1990.gen.csv", rules, false, set_progress);
+    const [dict, stats] = await dict_gen_browser.generate("./Lexique383.gen.tsv", "./dict1990.gen.csv", rules, false, set_progress);
     console.log(stats);
     return dict;
 }

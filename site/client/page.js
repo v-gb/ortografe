@@ -43,20 +43,20 @@ const getScript = url => new Promise((resolve, reject) => {
 let cache2 = {};
 const user_text2 = document.getElementById('user-text2')
 const converted_text2 = document.getElementById('converted-text2')
-const lazy_dict_gen = async_lazy(async () => {
-    await getScript("/static/dict_gen.bc.js");
-    return dict_gen;
+const lazy_dict_gen_browser = async_lazy(async () => {
+    await getScript("/static/dict_gen_browser.bc.js");
+    return dict_gen_browser;
 })
 const lazy_next_stage = async_lazy(async () =>
-    await dict_gen.staged_generate("/static/Lexique383.gen.tsv",
-                                   "/static/rect1990.csv"))
+    await dict_gen_browser.staged_generate("/static/Lexique383.gen.tsv",
+                                           "/static/rect1990.csv"))
 if (user_text2) {
     const update = mirror_and_rewrite(user_text2, converted_text2, async () => {
-        const dict_gen = await lazy_dict_gen();
+        const dict_gen_browser = await lazy_dict_gen_browser();
         while (true) {
             // loop to ensure we reach a fixpoint if the selection changes while we compute a
             // dictionary
-            const [ rules, selection_text ] = dict_gen.currently_selected_rules("conv-");
+            const [ rules, selection_text ] = dict_gen_browser.currently_selected_rules("conv-");
             if (selection_text == cache2?.selection_text) {
                 break;
             } else {
@@ -157,13 +157,13 @@ document.getElementById("download-dict")?.addEventListener("click", async (e) =>
     set_progress(0);
     e.target.classList.add("loading");
     try {
-        const dict_gen = await lazy_dict_gen();
+        const dict_gen_browser = await lazy_dict_gen_browser();
         set_progress(10);
-        const [ rules, selection_text ] = dict_gen.currently_selected_rules("conv-");
+        const [ rules, selection_text ] = dict_gen_browser.currently_selected_rules("conv-");
         const [ dict, _stats ] =
-              await dict_gen.generate("/static/Lexique383.gen.tsv",
-                                      "/static/rect1990.csv", rules, false,
-                                      (i) => set_progress(10 + i * 8 / 10));
+              await dict_gen_browser.generate("/static/Lexique383.gen.tsv",
+                                              "/static/rect1990.csv", rules, false,
+                                              (i) => set_progress(10 + i * 8 / 10));
         set_progress(90);
         download("dict.csv", dict);
     } finally {

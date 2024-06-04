@@ -14,8 +14,8 @@ zip -q ../extension.zip "${files[@]}"
 # wanted to use manifest v3 with firefox it wouldn't support optional_host_permissions,
 # only # optional_permissions.
 # https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/optional_permissions
-dict_gen_size=$(wc -c < ../src/dict_gen.bc.js)
-if [ $dict_gen_size -ge 1000000 ]; then
+dict_gen_browser_size=$(wc -c < ../src/dict_gen_browser.bc.js)
+if [ $dict_gen_browser_size -ge 1000000 ]; then
     jsopt_suffix="-nonopt"
 else
     jsopt_suffix=""

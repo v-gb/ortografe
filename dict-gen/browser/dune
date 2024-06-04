@@ -1,5 +1,5 @@
 (executable
- (name dict_gen)
+ (name dict_gen_browser)
  (libraries js_of_ocaml dict_gen_common brr brrex)
  (preprocess (pps ppx_compare ;; drop ppx_jane, to avoid the toplevel inline tests side effects
                   ppx_sexp_conv

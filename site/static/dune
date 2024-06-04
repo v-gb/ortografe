@@ -3,7 +3,7 @@
 (rule (action (copy %{project_root}/extension/dict1990.gen.csv rect1990.csv)))
 (copy_files (files ../client/{*.js,*.html}))
 (copy_files (files %{project_root}/data/lexique/Lexique383.gen.tsv))
-(copy_files (files %{project_root}/dict-gen/browser/dict_gen.bc.js))
+(copy_files (files %{project_root}/dict-gen/browser/dict_gen_browser.bc.js))
 (copy_files (files %{project_root}/doc-conversion/bin/*.bc.js))
 (copy_files (files %{project_root}/extension/src/{{rewrite,dict}.js,rules-format.html}))
 (copy_files (files %{project_root}/keyboard/*.{zip,dict}))
@@ -13,8 +13,8 @@
   (target dict.js.gz)
   (action  (run gzip -f -n -k %{dep:dict.js})))
 (rule
-  (target dict_gen.bc.js.gz)
-  (action  (run gzip -f -n -k %{dep:dict_gen.bc.js})))
+  (target dict_gen_browser.bc.js.gz)
+  (action  (run gzip -f -n -k %{dep:dict_gen_browser.bc.js})))
 (rule
   (target doc_conversion.bc.js.gz)
   (action  (run gzip -f -n -k %{dep:doc_conversion.bc.js})))

@@ -132,7 +132,7 @@ let () =
   Brrex.main
     [ on_message_rpc ]
     (fun () ->
-      Js_of_ocaml.Js.export "dict_gen"
+      Js_of_ocaml.Js.export "dict_gen_browser"
         (Js_of_ocaml.Js.Unsafe.inject
            (Jv.obj [| "generate", Jv.callback ~arity:5 generate_in_worker
                     ; "staged_generate", staged_generate
