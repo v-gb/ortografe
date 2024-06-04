@@ -2,7 +2,7 @@ open Base
 type json =
   [ `Array of json list
   | `Assoc of (string * json) list
-  | `Boolean of bool
+  | `Bool of bool
   | `Null
   | `Number of float
   | `String of string ]

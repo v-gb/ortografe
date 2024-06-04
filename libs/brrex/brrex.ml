@@ -55,11 +55,25 @@ let json_of_string str =
             |> `Assoc __
        | "string" -> `String (Jv.to_string jv)
        | "number" -> `Number (Jv.to_float jv)
-       | "boolean" -> `Boolean (Jv.to_bool jv)
+       | "boolean" -> `Bool (Jv.to_bool jv)
        | s -> failwith ("unknown type in json " ^ s)
      in
      conv jv
 ;;
+
+let json_to_string v =
+  let rec to_js = function
+    | `Bool b -> Jv.of_bool b
+    | `String s -> Jv.of_string s
+    | `Null -> Jv.null
+    | `Number f -> Jv.of_float f
+    | `Array l -> Jv.of_list to_js l
+    | `Assoc l ->
+       List.map (fun (k, v) -> (k, to_js v)) l
+       |> Array.of_list
+       |> Jv.obj
+  in
+  Jstr.to_string (Brr.Json.encode (to_js v))
 
 let read_bytes file_object =
   let open Fut.Result_syntax in

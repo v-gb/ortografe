@@ -10,18 +10,6 @@ let time_fut ~profile name f =
     Fut.return x
   ) else f ()
 
-
-let json_to_string v =
-  let rec to_js = function
-    | `Bool b -> Jv.of_bool b
-    | `String s -> Jv.of_string s
-    | `Assoc l ->
-       List.map ~f:(fun (k, v) -> (k, to_js v)) l
-       |> Array.of_list
-       |> Jv.obj
-  in
-  Jstr.to_string (Brr.Json.encode (to_js v))
-
 let generate ?profile ?progress embedded rules =
   let t1 = Stdlib.Sys.time () in
   let buf = Buffer.create 1_000_000 in
@@ -32,7 +20,7 @@ let generate ?profile ?progress embedded rules =
       ~rules
       ~all:false
       ~output:(Buffer.add_string buf)
-      ~json_to_string
+      ~json_to_string:Brrex.json_to_string
       (`Embedded embedded)
   in
   let t2 = Stdlib.Sys.time () in

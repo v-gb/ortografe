@@ -11,10 +11,17 @@ val fut_await : 'a Fut.t -> (('a, Jv.Error.t) result -> unit) -> unit
 
 val json_of_string : string -> ([> `Array of 'a list
                                 | `Assoc of (string * 'a) list
-                                | `Boolean of bool
+                                | `Bool of bool
                                 | `Null
                                 | `Number of float
                                 | `String of string ]
                                 as 'a)
+val json_to_string : ([< `Array of 'a list
+                      | `Assoc of (string * 'a) list
+                      | `Bool of bool
+                      | `Null
+                      | `Number of float
+                      | `String of string ]
+                      as 'a) -> string
 
 val read_bytes : Brr.File.t -> string Fut.or_error
