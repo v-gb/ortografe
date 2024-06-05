@@ -133,6 +133,11 @@ let () =
       Js_of_ocaml.Js.export "dict_gen_browser"
         (Js_of_ocaml.Js.Unsafe.inject
            (Jv.obj [| "generate", generate
+                    ; "download_from_memory",
+                      Brrex.B.(fun3' string jstr jstr unit')
+                        (fun mime filename content ->
+                          Brrex.download_from_memory
+                            ~mime ~filename (`Jstr content))
                     ; "staged_generate", staged_generate
                     ; "html_fragment", Brrex.B.(fun1' unit string') html_fragment
                     ; "currently_selected_rules",

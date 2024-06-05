@@ -133,22 +133,6 @@ if ((new URL(window.location)).searchParams.get("exp")) {
 }
 
 
-function download(filename, text) {
-    // We have 3 versions of this : this one, the one is extensions/src/options.js
-    // and the ocaml one in doc-conversion/bin/doc_conversion.ml.
-    // https://ourcodeworld.com/articles/read/189/how-to-create-a-file-and-generate-a-download-with-javascript-in-the-browser-without-a-server
-    const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    element.setAttribute('download', filename);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    try {
-        element.click();
-    } finally {
-        document.body.removeChild(element);
-    }
-}
-
 document.getElementById("download-dict")?.addEventListener("click", async (e) => {
     e.preventDefault();
     function set_progress(v) {
@@ -165,7 +149,7 @@ document.getElementById("download-dict")?.addEventListener("click", async (e) =>
                                               "/static/rect1990.csv", rules, false,
                                               (i) => set_progress(10 + i * 8 / 10));
         set_progress(90);
-        download("dict.csv", dict);
+        dict_gen_browser.download_from_memory("text/plain", "dict.csv", dict);
     } finally {
         e.target.classList.remove("loading");
     }
