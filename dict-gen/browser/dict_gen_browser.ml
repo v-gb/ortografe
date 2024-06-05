@@ -10,7 +10,7 @@ let time_fut ~profile name f =
     Fut.return x
   ) else f ()
 
-let generate ?profile ?progress embedded rules =
+let compute_dict ?profile ?progress embedded rules =
   let t1 = Stdlib.Sys.time () in
   let buf = Buffer.create 1_000_000 in
   let `Stats stats =
@@ -66,7 +66,10 @@ let html_fragment () =
     ~url_prefix:"/" ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
   |> Jv.of_string
 
-let on_message_rpc, on_message =
+let generate_ww_rpc, generate_ww =
+  (* We need to run this in a worker, otherwise the loading animation doesn't actually
+     animate, which we kind of want it to, since the a 2s of waiting is on the longer
+     side. *)
   Brrex.rpc_with_progress (fun ?progress (lexique_url, dict1990_url, rules, profile) ->
       let open Fut.Result_syntax in
       let* embedded =
@@ -80,7 +83,7 @@ let on_message_rpc, on_message =
           })
       in
       match
-        generate
+        compute_dict
           ?progress:(Option.map progress ~f:(fun f x -> f (10 + x * 9 / 10)))
           ~profile
           embedded
@@ -90,20 +93,19 @@ let on_message_rpc, on_message =
       | v -> Fut.ok v
     )
 
-let generate_in_worker (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules profile progress =
-  (* We need to run this in a worker, otherwise the loading animation doesn't actually
-   * animate, which we kind of want it to, since the a 2s of waiting is on the longer
-   * side. *)
-  let rules = (Stdlib.Obj.magic : Jv.t -> selected_rules) rules in
-  let progress =
-    Jv.to_option
-      (fun js_f i -> ignore (Jv.apply js_f [|Jv.of_int i|]))
-      progress
-  in
-  let profile = Jv.to_bool profile in
-  Brrex.fut_to_promise
-    ~ok:(fun (dict, duration) -> Jv.of_jv_list [ Jv.of_string dict ; Jv.of_string duration ])
-    (on_message ?progress (lexique_url, dict1990_url, rules, profile))
+let generate =
+  Jv.callback ~arity:5
+    (fun (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules profile progress ->
+      let rules = (Stdlib.Obj.magic : Jv.t -> selected_rules) rules in
+      let progress =
+        Jv.to_option
+          (fun js_f i -> ignore (Jv.apply js_f [|Jv.of_int i|]))
+          progress
+      in
+      let profile = Jv.to_bool profile in
+      Brrex.fut_to_promise
+        ~ok:(fun (dict, duration) -> Jv.of_jv_list [ Jv.of_string dict ; Jv.of_string duration ])
+        (generate_ww ?progress (lexique_url, dict1990_url, rules, profile)))
 
 let staged_generate =
   Jv.callback ~arity:2
@@ -130,11 +132,11 @@ let staged_generate =
 
 let () =
   Brrex.main
-    [ on_message_rpc ]
+    [ generate_ww_rpc ]
     (fun () ->
       Js_of_ocaml.Js.export "dict_gen_browser"
         (Js_of_ocaml.Js.Unsafe.inject
-           (Jv.obj [| "generate", Jv.callback ~arity:5 generate_in_worker
+           (Jv.obj [| "generate", generate
                     ; "staged_generate", staged_generate
                     ; "html_fragment", Jv.callback ~arity:1 html_fragment
                     ; "currently_selected_rules", Jv.callback ~arity:1 currently_selected_rules
