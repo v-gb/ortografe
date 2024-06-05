@@ -3,7 +3,6 @@ open Base
 external js_expr : string -> 'a = "caml_js_expr"
 
 let convert_string dict_contents =
-  let dict_contents = Jv.to_string dict_contents in
   let dict, metadata =
     Dict_gen_common.Dict_gen.parse dict_contents
       ~json_of_string:Brrex.json_of_string
@@ -64,7 +63,7 @@ let with_exn_in_dom_sync id f =
   })|} : Jstr.t -> Jv.t -> 'a)
     id (Jv.callback ~arity:1 (f : unit -> 'a))
 
-let with_exn_in_dom_async id (f : unit -> 'a Fut.or_error) : 'a Fut.or_error =
+let with_exn_in_dom_async (type a) id (f : unit -> a Fut.or_error) : a Fut.or_error =
   (js_expr {|(async (id, f) => {
     document.getElementById(id).textContent = "";
     try {
@@ -77,24 +76,27 @@ let with_exn_in_dom_async id (f : unit -> 'a Fut.or_error) : 'a Fut.or_error =
   })|} : Jstr.t -> Jv.t -> Jv.t)
     id (Jv.callback ~arity:1
           (fun () ->
-            Brrex.fut_to_promise ~ok:Fn.id (f ())))
-  |> Fut.of_promise ~ok:Fn.id
+            Brrex.fut_to_promise ~ok:(Stdlib.Obj.magic : a -> Jv.t) (f ())))
+  |> Fut.of_promise ~ok:(Stdlib.Obj.magic : Jv.t -> a)
 
-let convert_file_handle_errors id dict_content =
-  let f =
-    with_exn_in_dom_sync id
-      (fun () -> convert_file dict_content) in
-  fun file_object ->
-    with_exn_in_dom_async id (fun () ->
-        let open Fut.Result_syntax in
-        let* () = f file_object in
-        Fut.ok (Jv.undefined))
+let convert_file_handle_errors =
+  Brrex.B.(
+    fun2'
+      jstr
+      string
+      (fun1' (magic : Jv.t -> Brr.File.t)
+         (promise_or_error' unit')))
+    (fun id dict_content ->
+      let f =
+        with_exn_in_dom_sync id
+          (fun () -> convert_file dict_content) in
+      (fun file_object ->
+        with_exn_in_dom_async id (fun () ->
+            f file_object)))
 
 let () =
   Js_of_ocaml.Js.export "doc_conversion"
     (Js_of_ocaml.Js.Unsafe.inject
        (Jv.obj
-          [| "convert",
-             Jv.callback ~arity:2 (fun a b ->
-                 Jv.callback ~arity:1 (convert_file_handle_errors a b))
+          [| "convert", convert_file_handle_errors
           |]))

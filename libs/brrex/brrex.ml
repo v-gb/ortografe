@@ -199,3 +199,48 @@ let main (rpcs : rpc list) f =
         Brr_webworkers.Worker.G.post
           (res : ((Jv.t, Jv.Error.t) Result.t, Jv.Error.t) Result.t))
   else f ()
+
+module B = struct
+  let unit = ignore
+  let jstr = Jv.to_jstr
+  let string = Jv.to_string
+  let bool = Jv.to_bool
+  let int = Jv.to_int
+  let magic = Stdlib.Obj.magic
+  let option = Jv.to_option
+  let fun1 f1 fres f =
+    fun a1 -> fres (Jv.apply f [|f1 a1|])
+
+  let unit' () = Jv.undefined
+  let jstr' = Jv.of_jstr
+  let string' = Jv.of_string
+  let bool' = Jv.of_bool
+  let int' = Jv.of_int
+  let magic' = Stdlib.Obj.magic
+  let option' f o = Jv.of_option ~none:Jv.null f o
+  let promise_or_error' ok t = fut_to_promise t ~ok
+  let t2' f1 f2 (a1, a2) =
+    Jv.of_jv_list [ f1 a1; f2 a2 ]
+  let t3' f1 f2 f3 (a1, a2, a3) =
+    Jv.of_jv_list [ f1 a1; f2 a2; f3 a3 ]
+  let fun1' f1 fres f =
+    Jv.callback ~arity:1
+      (fun a1 ->
+        fres (f (f1 a1)))
+  let fun2' f1 f2 fres f =
+    Jv.callback ~arity:2
+      (fun a1 a2 ->
+        fres (f (f1 a1) (f2 a2)))
+  let fun3' f1 f2 f3 fres f =
+    Jv.callback ~arity:3
+      (fun a1 a2 a3 ->
+        fres (f (f1 a1) (f2 a2) (f3 a3)))
+  let fun5' f1 f2 f3 f4 f5 fres f =
+    Jv.callback ~arity:5
+      (fun a1 a2 a3 a4 a5 ->
+        fres (f (f1 a1) (f2 a2) (f3 a3) (f4 a4) (f5 a5)))
+  let fun6' f1 f2 f3 f4 f5 f6 fres f =
+    Jv.callback ~arity:6
+      (fun a1 a2 a3 a4 a5 a6 ->
+        fres (f (f1 a1) (f2 a2) (f3 a3) (f4 a4) (f5 a5) (f6 a6)))
+end

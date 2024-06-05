@@ -57,14 +57,11 @@ let currently_selected_rules id_prefix =
          |> String.concat ~sep:" "
   in
   let selection_is_nonempty = not (List.is_empty selected_rules) in
-  Jv.of_list Fn.id [ Jv.Id.to_jv selected_rules
-                   ; Jv.of_string selection_text
-                   ; Jv.of_bool selection_is_nonempty ]
+  (selected_rules, selection_text, selection_is_nonempty)
 
 let html_fragment () =
   Dict_gen_common.Dict_gen.all_selection_html
     ~url_prefix:"/" ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
-  |> Jv.of_string
 
 let generate_ww_rpc, generate_ww =
   (* We need to run this in a worker, otherwise the loading animation doesn't actually
@@ -92,43 +89,42 @@ let generate_ww_rpc, generate_ww =
       | exception e -> Fut.error (Jv.Error.v (Jstr.of_string (Exn.to_string e)))
       | v -> Fut.ok v
     )
-
+  
 let generate =
-  Jv.callback ~arity:5
-    (fun (lexique_url : Jstr.t) (dict1990_url : Jstr.t) rules profile progress ->
-      let rules = (Stdlib.Obj.magic : Jv.t -> selected_rules) rules in
-      let progress =
-        Jv.to_option
-          (fun js_f i -> ignore (Jv.apply js_f [|Jv.of_int i|]))
-          progress
-      in
-      let profile = Jv.to_bool profile in
-      Brrex.fut_to_promise
-        ~ok:(fun (dict, duration) -> Jv.of_jv_list [ Jv.of_string dict ; Jv.of_string duration ])
-        (generate_ww ?progress (lexique_url, dict1990_url, rules, profile)))
-
+  Brrex.B.(
+    fun5'
+      jstr
+      jstr
+      (magic : Jv.t -> selected_rules)
+      bool
+      (option (fun1 int' unit))
+      (promise_or_error'
+         (t2' string' string')))
+    (fun lexique_url dict1990_url rules profile progress ->
+      generate_ww ?progress (lexique_url, dict1990_url, rules, profile))
+  
 let staged_generate =
-  Jv.callback ~arity:2
+  Brrex.B.(
+    fun2'
+      jstr
+      jstr
+      (promise_or_error'
+         (fun1'
+            (magic : Jv.t -> selected_rules)
+            (fun1' string (option' string')))))
     (fun lexique_url dict1990_url ->
-      Brrex.fut_to_promise
-        ~ok:Fn.id
-        (let open Fut.Result_syntax in
-         let* embedded =
-           let* data_lexique_Lexique383_gen_tsv = Brrex.fetch lexique_url in
-           let* extension_dict1990_gen_csv = Brrex.fetch dict1990_url in
-           Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
-                  ; extension_dict1990_gen_csv
-             }
-         in
-         let next_stage = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
-         Fut.ok (
-             Jv.callback ~arity:1 (fun (x : selected_rules) ->
-                 let f, _meta = next_stage x in
-                 Jv.callback ~arity:1 (fun jstr ->
-                     Jv.of_option
-                       ~none:Jv.null
-                       Jv.of_string
-                       (f (Jv.to_string jstr)))))))
+      let open Fut.Result_syntax in
+      let* embedded =
+        let* data_lexique_Lexique383_gen_tsv = Brrex.fetch lexique_url in
+        let* extension_dict1990_gen_csv = Brrex.fetch dict1990_url in
+        Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
+               ; extension_dict1990_gen_csv
+          }
+      in
+      let next_stage = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
+      Fut.ok (fun x ->
+        let f, _meta = next_stage x in
+        f))
 
 let () =
   Brrex.main
@@ -138,6 +134,8 @@ let () =
         (Js_of_ocaml.Js.Unsafe.inject
            (Jv.obj [| "generate", generate
                     ; "staged_generate", staged_generate
-                    ; "html_fragment", Jv.callback ~arity:1 html_fragment
-                    ; "currently_selected_rules", Jv.callback ~arity:1 currently_selected_rules
+                    ; "html_fragment", Brrex.B.(fun1' unit string') html_fragment
+                    ; "currently_selected_rules",
+                        Brrex.B.(fun1' string (t3' Jv.Id.to_jv string' bool'))
+                          currently_selected_rules
               |])))

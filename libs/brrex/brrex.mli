@@ -48,3 +48,64 @@ val rpc_with_progress
   -> rpc
      * (?local:bool -> ?progress:(int -> unit) -> 'q -> 'r Fut.or_error)
 val main : rpc list -> (unit -> unit) -> unit
+
+
+(** Bindings  *)
+module B : sig
+  val unit : Jv.t -> unit
+  val jstr : Jv.t -> Jstr.t
+  val string : Jv.t -> string
+  val bool : Jv.t -> bool
+  val int : Jv.t -> int
+  val magic : Jv.t -> _
+  val option : (Jv.t -> 'a) -> Jv.t -> 'a option
+  val fun1 : ('a1 -> Jv.t) -> (Jv.t -> 'r) -> Jv.t -> ('a1 -> 'r)
+
+  val unit' : unit -> Jv.t
+  val jstr' : Jstr.t -> Jv.t
+  val string' : string -> Jv.t
+  val bool' : bool -> Jv.t
+  val int' : int -> Jv.t
+  val magic' : _ -> Jv.t
+  val option' : ('a -> Jv.t) -> 'a option -> Jv.t
+  val promise_or_error' : ('a -> Jv.t) -> 'a Fut.or_error -> Jv.t
+  val t2' : ('a1 -> Jv.t) -> ('a2 -> Jv.t) -> 'a1 * 'a2 -> Jv.t
+  val t3' : ('a1 -> Jv.t) -> ('a2 -> Jv.t) -> ('a3 -> Jv.t) -> 'a1 * 'a2 * 'a3 -> Jv.t
+  val fun1'
+      : (Jv.t -> 'a1)
+        -> ('r -> Jv.t)
+        -> ('a1 -> 'r)
+        -> Jv.t
+  val fun2'
+      : (Jv.t -> 'a1)
+        -> (Jv.t -> 'a2)
+        -> ('r -> Jv.t)
+        -> ('a1 -> 'a2 -> 'r)
+        -> Jv.t
+  val fun3'
+      : (Jv.t -> 'a1)
+        -> (Jv.t -> 'a2)
+        -> (Jv.t -> 'a3)
+        -> ('r -> Jv.t)
+        -> ('a1 -> 'a2 -> 'a3 -> 'r)
+        -> Jv.t
+  val fun5'
+      : (Jv.t -> 'a1)
+        -> (Jv.t -> 'a2)
+        -> (Jv.t -> 'a3)
+        -> (Jv.t -> 'a4)
+        -> (Jv.t -> 'a5)
+        -> ('r -> Jv.t)
+        -> ('a1 -> 'a2 -> 'a3 -> 'a4 -> 'a5 -> 'r)
+        -> Jv.t
+  val fun6'
+      : (Jv.t -> 'a1)
+        -> (Jv.t -> 'a2)
+        -> (Jv.t -> 'a3)
+        -> (Jv.t -> 'a4)
+        -> (Jv.t -> 'a5)
+        -> (Jv.t -> 'a6)
+        -> ('r -> Jv.t)
+        -> ('a1 -> 'a2 -> 'a3 -> 'a4 -> 'a5 -> 'a6 -> 'r)
+        -> Jv.t
+end
