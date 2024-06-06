@@ -26,23 +26,8 @@ De façon générale, voir ./README.md pour comment tout construire.
   on peut « simplement » demander à une IA de désambigüiser, pour les calculs offline.
 
 ## Technique
-
-- fournir la conversion en local
-  Ça permettrait de convertir des documents :
-  - sans limite de taille
-  - avec des dictionnaires calculés, sans ajouter de la charge au serveur
-  Et de manière, ça réduit la dépendence vers un service centralisée.
-
-  Deux options semblent possible :
-  - compiler ortografe_cli.exe en javascript, et fournir ça
-  - fournir un web app progressive https://developer.mozilla.org/fr/docs/Web/Progressive_web_apps
     
 - extension : ajouter une façon de signaler des problèmes, comme mauvaise réécriture ?
-
-- extension : rééssayer de compiler en wasm, pour optimiser la création de dictionnaire
-  (3.5x plus lent en javascript qu'en ocaml natif, maintenant). En 2024-02,
-  `wasm_of_ocaml`, il est trop tôt pour essayer, et wasm-gc à l'air lent en général,
-  surtout dans firefox.
 
 - Meilleure détection de l'anglais. On a tendance à réécrire des mots en anglais dans des
   pages majoritairement anglaises mais avec un peu de structure de la page en français
