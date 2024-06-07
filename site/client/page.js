@@ -93,14 +93,14 @@ const lazy_doc_conversion = async_lazy(async () => {
 })
 const lazy_conv = async_lazy(async () => {
     const doc_conversion = await lazy_doc_conversion();
-    return doc_conversion.convert('doc-conv-button-error',
-                                  'alice,saucissonette\nlapin,lapinou\nanimaux,animals\n')
+    return await doc_conversion.convert('doc-conv-button-error',
+                                        'alice,saucissonette\nlapin,lapinou\nanimaux,animals\n')
 })
 document.getElementById('doc-conv-button')?.addEventListener("change", async (e) => {
     // problem: can't send the same file twice ! Should unset the data or something.
     e.preventDefault();
     const conv = await lazy_conv();
-    await conv(e.target.files.item(0))
+    await conv(e.target.files.item(0));
 })
 
 for (const elt of document.getElementsByClassName('mailelt')) {
