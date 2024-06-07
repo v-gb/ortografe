@@ -141,9 +141,11 @@ let rpc_name =
   r := !r + 1;
   "rpc" ^ Int.to_string !r
 
+type ww_cache = Brr_webworkers.Worker.t option ref
+let ww_cache () = ref None
 let rpc_with_progress : type q r.
                (?progress:(int -> unit) -> q -> r Fut.or_error)
-               -> rpc * (?local:bool -> ?progress:(int -> unit) -> q -> r Fut.or_error)
+               -> rpc * (?ww_cache:ww_cache -> ?local:bool -> ?progress:(int -> unit) -> q -> r Fut.or_error)
   = fun impl ->
   let rpc_name = rpc_name () in
   (rpc_name, (fun (has_progress, q) ->
@@ -155,12 +157,19 @@ let rpc_with_progress : type q r.
                   (Obj.magic
                      (impl ?progress (Obj.magic (q : Jv.t) : q) : r Fut.or_error)
                    : Jv.t Fut.or_error))),
-  (fun ?(local = false) ?progress arg ->
+  (fun ?ww_cache ?(local = false) ?progress arg ->
     let open Fut.Syntax in
     if local
     then impl ?progress arg
     else (
-      let worker = Brr_webworkers.Worker.create (Lazy.force current_script) in
+      let worker =
+        match ww_cache with
+        | Some { contents = Some w } -> w
+        | _ ->
+           let w = Brr_webworkers.Worker.create (Lazy.force current_script) in
+           Option.iter (fun r -> r := Some w) ww_cache;
+           w
+      in
       Brr_webworkers.Worker.post worker (rpc_name, (Option.is_some progress, arg));
       let* event =
         let rec loop () =
@@ -171,7 +180,9 @@ let rpc_with_progress : type q r.
           | _ -> Fut.return event
         in loop ()
       in
-      Brr_webworkers.Worker.terminate worker;
+      (match ww_cache with
+       | None -> Brr_webworkers.Worker.terminate worker
+       | Some _ -> ());
       Fut.return
         (or_throw
            (Brr_io.Message.Ev.data
@@ -180,24 +191,29 @@ let rpc_with_progress : type q r.
 
 let rpc impl =
   let rpc, f = rpc_with_progress (fun ?progress:_ q -> impl q) in
-  rpc, (fun ?local q -> f ?progress:None ?local q)
+  rpc, (fun ?ww_cache ?local q -> f ?ww_cache ?progress:None ?local q)
 
 let main (rpcs : rpc list) f =
   let rpcs = Hashtbl.of_seq (List.to_seq rpcs) in
   if Brr_webworkers.Worker.ami ()
   then
     let open Fut.Syntax in
-    fut_await
-      (let* event = Brr.Ev.next Brr_io.Message.Ev.message Brr.G.target in
-       let data = Brr_io.Message.Ev.data (Brr.Ev.as_type event) in
-       let (rpc_name, rpc_arg) = data in
-       let impl =
-         Hashtbl.find_opt rpcs rpc_name ||? failwith ("unknown rpc " ^ rpc_name)
-       in
-       impl rpc_arg)
-      (fun res ->
-        Brr_webworkers.Worker.G.post
-          (res : ((Jv.t, Jv.Error.t) Result.t, Jv.Error.t) Result.t))
+    let rec loop () =
+      let* event = Brr.Ev.next Brr_io.Message.Ev.message Brr.G.target in
+      fut_await
+        (let* () = Fut.return () in (* so all exns are async *)
+         let data = Brr_io.Message.Ev.data (Brr.Ev.as_type event) in
+         let (rpc_name, rpc_arg) = data in
+         let impl =
+           Hashtbl.find_opt rpcs rpc_name ||? failwith ("unknown rpc " ^ rpc_name)
+         in
+         impl rpc_arg)
+        (fun res ->
+          Brr_webworkers.Worker.G.post
+            (res : ((Jv.t, Jv.Error.t) Result.t, Jv.Error.t) Result.t));
+       loop ()
+     in
+     ignore (loop () : [ `Never_returns ] Fut.t)
   else f ()
 
 module B = struct

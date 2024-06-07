@@ -40,13 +40,15 @@ val fetch : Jstr.t -> string Fut.or_error
 
 val get_element_by_id : Jstr.t -> Jv.t
 
+type ww_cache
+val ww_cache : unit -> ww_cache
 type rpc
 val rpc : ('q -> 'r Fut.or_error)
-          -> rpc * (?local:bool -> 'q -> 'r Fut.or_error)
+          -> rpc * (?ww_cache:ww_cache -> ?local:bool -> 'q -> 'r Fut.or_error)
 val rpc_with_progress
     : (?progress:(int -> unit) -> 'q -> 'r Fut.or_error)
   -> rpc
-     * (?local:bool -> ?progress:(int -> unit) -> 'q -> 'r Fut.or_error)
+     * (?ww_cache:ww_cache -> ?local:bool -> ?progress:(int -> unit) -> 'q -> 'r Fut.or_error)
 val main : rpc list -> (unit -> unit) -> unit
 
 
