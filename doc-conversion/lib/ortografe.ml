@@ -45,18 +45,18 @@ type options = Common.options =
 
 type 'a convert = 'a Common.convert
 
-let pure_text ?convert_text ?buf ~options src ~dst =
+let pure_text ?convert_text ?buf ?progress ~options src ~dst =
   match convert_text with
   | Some f -> write_out dst (f src)
-  | None -> Text.convert ?buf ~options src ~dst
+  | None -> Text.convert ?progress ?buf ~options src ~dst
 let html = Html.convert
 let xhtml = Html.convert_xhtml
 let officeopenxml = Officeopenxml.convert
 let officeopenxml_old = Officeopenxml.convert_old
 let opendocument = Opendocument.convert
 
-let epub ?convert_text ~options src ~dst =
-  Zip.map src (fun member contents ->
+let epub ?convert_text ?progress ~options src ~dst =
+  Zip.map ?progress src (fun member contents ->
       (* The xhtml is the bulk of the pages, but in principle, we
          could rewrite more stuff: content.opf, toc.ncx *)
       match Filename.extension (Zipc.Member.path member) with
@@ -66,8 +66,8 @@ let epub ?convert_text ~options src ~dst =
       | _ -> None)
   |> write_out dst
 
-let htmlz ?convert_text ~options src ~dst =
-  Zip.map src (fun member contents ->
+let htmlz ?convert_text ?progress ~options src ~dst =
+  Zip.map ?progress src (fun member contents ->
       match Filename.extension (Zipc.Member.path member) with
       | ".html" ->
          Some (html ?convert_text ~options (contents ()) ~dst:String)
@@ -107,23 +107,23 @@ let of_ext ext =
   | ".epub" -> Some (ext, `Epub)
   | _ -> None
 
-let convert ?convert_text typ ~options src ~dst =
+let convert ?convert_text typ ?progress ~options src ~dst =
   match typ with
-  | `Html -> html ?convert_text ~options src ~dst
-  | `Xhtml -> xhtml ?convert_text ~options src ~dst
-  | `Htmlz -> htmlz ?convert_text ~options src ~dst
-  | `Docx -> officeopenxml `Docx ?convert_text ~options src ~dst
-  | `Pptx -> officeopenxml `Pptx ?convert_text ~options src ~dst
-  | `Doc -> officeopenxml_old `Doc ?convert_text ~options src ~dst
-  | `Ppt -> officeopenxml_old `Ppt ?convert_text ~options src ~dst
-  | `Opendocument -> opendocument ?convert_text ~options src ~dst
-  | `Epub -> epub ?convert_text ~options src ~dst
-  | `Text -> pure_text ?convert_text ~options src ~dst
+  | `Html -> html ?convert_text ?progress ~options src ~dst
+  | `Xhtml -> xhtml ?convert_text ?progress ~options src ~dst
+  | `Htmlz -> htmlz ?convert_text ?progress ~options src ~dst
+  | `Docx -> officeopenxml `Docx ?convert_text ?progress ~options src ~dst
+  | `Pptx -> officeopenxml `Pptx ?convert_text ?progress ~options src ~dst
+  | `Doc -> officeopenxml_old `Doc ?convert_text ?progress ~options src ~dst
+  | `Ppt -> officeopenxml_old `Ppt ?convert_text ?progress ~options src ~dst
+  | `Opendocument -> opendocument ?convert_text ?progress ~options src ~dst
+  | `Epub -> epub ?convert_text ?progress ~options src ~dst
+  | `Text -> pure_text ?convert_text ?progress ~options src ~dst
 
-let convert_string ~ext ~options src =
+let convert_string ~ext ?progress ~options src =
   match of_ext ext with
   | None -> None
-  | Some (ext, typ) -> Some (`ext ext, convert typ ~options src ~dst:String)
+  | Some (ext, typ) -> Some (`ext ext, convert typ ?progress ~options src ~dst:String)
 
 let open_channel dp name =
   let out_ch = Out_channel.open_bin name in

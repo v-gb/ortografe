@@ -82,7 +82,7 @@ let files_to_rewrite = function
          | _ -> false
        else false)
 
-let convert_xml which ?convert_text ~options src ~dst =
+let convert_xml which ?convert_text ?progress:_ ~options src ~dst =
   let convert_text =
     match convert_text with
     | Some f -> f
@@ -97,9 +97,9 @@ let convert_xml which ?convert_text ~options src ~dst =
       |> drop_squigglies
       |> convert_stream ~convert_text ~doc_ns:(ns which))
 
-let convert which ?convert_text ~options src ~dst =
+let convert which ?convert_text ?progress ~options src ~dst =
   let files_to_rewrite = files_to_rewrite which in
-  Zip.map src (fun member contents ->
+  Zip.map ?progress src (fun member contents ->
       if files_to_rewrite (Zipc.Member.path member)
       then Some (convert_xml ?convert_text which ~options (contents ()) ~dst:String)
       else None)
@@ -113,7 +113,7 @@ let sys_command_exn ?(handle = Fun.const None) str =
     | Some e -> raise e
     | None -> failwith (str ^ " exited with code " ^ Int.to_string i)
 
-let convert_old which ?convert_text ~options src ~dst =
+let convert_old which ?convert_text ?progress ~options src ~dst =
   let old_ext =
     match which with
     | `Doc -> "doc"
@@ -151,7 +151,7 @@ let convert_old which ?convert_text ~options src ~dst =
         In_channel.with_open_bin new_path (fun ic ->
             In_channel.input_all ic)
       in
-      convert ?convert_text
+      convert ?convert_text ?progress
         (match which with
          | `Doc -> `Docx
          | `Ppt -> `Pptx)

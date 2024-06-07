@@ -217,7 +217,7 @@ let iter_pure_text ~options src ~f =
              | None -> f w
     )
 
-let convert (type a) ?buf ~options src ~(dst : a out) : a =
+let convert (type a) ?buf ?progress:_ ~options src ~(dst : a out) : a =
   match dst with
   | Ignore -> ()
   | String ->

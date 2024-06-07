@@ -34,7 +34,7 @@ let html_transform ~convert_text signal =
       else elt)
     signal
 
-let convert ?convert_text ~options src ~dst =
+let convert ?convert_text ?progress:_ ~options src ~dst =
   let convert_text =
     convert_text
     ||?
@@ -44,7 +44,7 @@ let convert ?convert_text ~options src ~dst =
   More_markup.transform
     ~flavor:`Html src ~dst ~transform:(html_transform ~convert_text)
 
-let convert_xhtml ?convert_text ~options src ~dst =
+let convert_xhtml ?convert_text ?progress:_ ~options src ~dst =
   let convert_text =
     convert_text
     ||?

@@ -10,11 +10,20 @@ let count_size () =
     if !total_size > !max_size
     then failwith "files in zip too large")
 
-let map src f =
+let member_size member =
+  match Zipc.Member.kind member with
+  | Dir -> 0
+  | File file -> Zipc.File.decompressed_size file
+
+let map ?progress src f =
   let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in
+  let total_bytes = Zipc.fold (fun member acc -> acc + member_size member) zipc 0 in
+  let bytes_so_far = ref 0 in
   let count = count_size () in
   let new_zipc =
     Zipc.fold (fun member acc ->
+        Option.iter (fun f -> f (!bytes_so_far * 100 / total_bytes)) progress;
+        bytes_so_far := !bytes_so_far + member_size member;
         match Zipc.Member.kind member with
         | Dir -> acc
         | File file ->
