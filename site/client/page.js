@@ -99,8 +99,18 @@ const lazy_conv = async_lazy(async () => {
 document.getElementById('doc-conv-button')?.addEventListener("change", async (e) => {
     // problem: can't send the same file twice ! Should unset the data or something.
     e.preventDefault();
-    const conv = await lazy_conv();
-    await conv(e.target.files.item(0));
+    const label = document.getElementById("doc-conv-label");
+    function set_progress(v) {
+        label.style.setProperty("--progress", v + "%")
+    }
+    set_progress(0);
+    try {
+        const conv = await lazy_conv();
+        set_progress(10);
+        await conv(e.target.files.item(0), (i) => set_progress(10 + i * 9 / 10));
+    } finally {
+        set_progress(0);
+    }
 })
 
 for (const elt of document.getElementsByClassName('mailelt')) {

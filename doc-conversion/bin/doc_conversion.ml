@@ -12,11 +12,12 @@ let impls, convert_string =
         Fut.ok ())
   in
   let stage2_impl, stage2 =
-    Brrex.rpc (fun (filename, file_contents) ->
+    Brrex.rpc_with_progress (fun ?progress (filename, file_contents) ->
         let `ext new_ext, new_text =
           try
             let dict, metadata = !z ||? failwith "z should always be set" in
             Ortografe.convert_string
+              ?progress
               ~ext:(Stdlib.Filename.extension filename)
               ~options:{ convert_uppercase = true
                        ; dict
@@ -36,6 +37,7 @@ let impls, convert_string =
             |> Jstr.of_string
             |> Jv.throw
         in
+        Option.iter ~f:(fun f -> f 100) progress;
         Fut.ok (
             `name (Stdlib.Filename.remove_extension filename ^ "-conv" ^ new_ext),
             `mime (Ortografe.mimetype_by_ext new_ext ||? failwith "unknown extension??"),
@@ -46,18 +48,17 @@ let impls, convert_string =
     let open Fut.Result_syntax in
     let ww_cache = Brrex.ww_cache () in
     let* () = stage1 ~ww_cache dict_contents in
-    Fut.ok (fun ~filename file_contents ->
-        stage2 ~ww_cache
-          (filename, file_contents)))
+    Fut.ok (fun ?progress ~filename file_contents ->
+        stage2 ~ww_cache ?progress (filename, file_contents)))
 
 let convert_file dict_content =
   let open Fut.Result_syntax in
   let* f = convert_string dict_content in
-  Fut.ok (fun file_object ->
+  Fut.ok (fun ?progress file_object ->
       let* text = Brrex.read_bytes file_object in
       let filename = Brr.File.name file_object in
       let* `name new_name, `mime mime, new_text =
-        f ~filename:(Jstr.to_string filename) text
+        f ?progress ~filename:(Jstr.to_string filename) text
       in
       Brrex.download_from_memory
         ~mime
@@ -87,16 +88,17 @@ let convert_file_handle_errors =
       jstr
       string
       (promise_or_error'
-         (fun1' (magic : Jv.t -> Brr.File.t)
+         (fun2' (magic : Jv.t -> Brr.File.t)
+            (option (fun1 int' unit))
             (promise_or_error' unit'))))
     (fun id dict_content ->
       let open Fut.Result_syntax in
       let* f =
         with_exn_in_dom_async id
           (fun () -> convert_file dict_content) in
-      Fut.ok (fun file_object ->
+      Fut.ok (fun file_object progress ->
           with_exn_in_dom_async id (fun () ->
-              f file_object)))
+              f ?progress file_object)))
 
 let () =
   Brrex.main

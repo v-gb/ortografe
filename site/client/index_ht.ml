@@ -521,9 +521,12 @@ module Index = struct
 
   let email_link children = elt "a" ~attrs:["class", "mailelt"] children
 
-  let submit_file ?replace_onchange ?(attrs = []) f =
-    let upload_css = {|
-    background-color: #e5fbe5;
+  let submit_file ?replace_onchange ?label_attrs ?(attrs = []) f =
+    let upload_css = [%string {|
+    --progress: 0%;
+    background: linear-gradient(to right,
+                      white 0 var(--progress),
+                      %{green_pale} var(--progress) 100%);
     border: 1.5px solid;
     border-radius: 4px;
     cursor: pointer;
@@ -534,7 +537,7 @@ module Index = struct
     text-align: center;
     text-transform: none;
     width: fit-content;
-  |} in
+    |}] in
     elt "form"
       ~attrs:[ "action", "/conv"
              ; "method", "post"
@@ -543,6 +546,7 @@ module Index = struct
              ]
       (f [ elt "label"
              ~cl:upload_css
+             ?attrs:label_attrs
              [ leafelt "input"
                  ~cl:"display:none"
                  [ "type", "file"
@@ -1140,6 +1144,7 @@ module Index = struct
               ; section_aller_plus_loin ()
               ; submit_file
                   ~attrs:["id", "doc-conv"; exp_hidden_class ]
+                  ~label_attrs:["id", "doc-conv-label"]
                   ~replace_onchange:["id", "doc-conv-button"]
                   (fun z -> [ div ~attrs:["id", "doc-conv-button-error"] []; +z ])
               ]
