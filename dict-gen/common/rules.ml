@@ -345,6 +345,9 @@ let create () : t =
       new_fixed digraph [ "e", Core; "Er", Core ]);
   new_fixed "ez$" [ "e", Core; "E", Core ]; (* avez *)
   new_fixed "es" [ "e", Surprising; "E", Surprising ]; (* lesquelles *)
+  new_fixed "ess" [ "es", Core; "Es", Core ]; (* « essayer » a la prononciation
+                                                 attendue, donc on ne veut pas utiliser
+                                                 la règle précédente. *)
   List.iter [ "eau"; "eaux" ] ~f:(fun g -> new_fixed g [ "o", Core ]);
   new_fixed "et$" [ "E", Core ];
   new_fixed "est$" [ "Est", Core ];
