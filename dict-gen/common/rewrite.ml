@@ -440,32 +440,26 @@ let erofa_prefilter' = lazy (
        ; str "deux"
        ; seq [any; str "y"]
        ; str "h"
+       ; str "nss"
        ] @ List.map [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s -> str (s ^ s))
 ))
 
-let bit_pattern_all_double_consonants = 0b11_1111_1111
-let bit_ch = 10
-let bit_ph = 11
-let bit_h = 12
-let bit_x = 13
-let bit_oe = 14
-let bit_y = 15
+let bit_pattern_all_double_consonants = (1 lsl 11) - 1
+let bit_ss = 10 (* overlaps with bit_pattern_all_double_consonants *)
+let bit_ch = 11
+let bit_ph = 12
+let bit_h = 13
+let bit_x = 14
+let bit_oe = 15 (* oe ou œ *)
+let bit_y = 16
 let find_relevant_patterns ortho phon =
-  (* bit 0..9: double consonne, pour chaque consonne dans l'ordre au dessus
-       bit 10: ch
-       bit 11: ph
-       bit 12: h
-       bit 13: x
-       bit 14: oe ou œ
-       bit 15: y
-
-       On utilise une hypothèse d'indépendence ici : les réécritures érofa
-       ne crée pas d'opportunités d'autres réécritures. Avec des mots arbitraires,
-       on pourrait avoir arhra, où une fois le h supprimé, une opportunité de
-       simplifier une double consonne se présente. Mais on ignore ce genre de
-       possibilités. Il serait peut-être possible de recalculer [find_relevant_patterns]
-       après un changement, si on voulais éviter cette hypothèse (par exemple,
-       si on voulait utiliser ce genre de calcul pour tous les prefilter). *)
+  (* On utilise une hypothèse d'indépendence ici : les réécritures érofa ne crée pas
+     d'opportunités d'autres réécritures. Avec des mots arbitraires, on pourrait avoir
+     arhra, où une fois le h supprimé, une opportunité de simplifier une double
+     consonne se présente. Mais on ignore ce genre de possibilités. Il serait peut-être
+     possible de recalculer [find_relevant_patterns] après un changement, si on voulais
+     éviter cette hypothèse (par exemple, si on voulait utiliser ce genre de calcul
+     pour tous les prefilter). *)
   let bits = ref 0 in
   let prev = ref '\000' in
   for i = 0 to String.length ortho - 1 do
@@ -481,6 +475,10 @@ let find_relevant_patterns ortho phon =
      | 'r' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 7)
      | 'c' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 8)
      | 'd' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 9)
+     | 's' -> if Char.(=) !prev c
+                 && i >=$ 2
+                 && Char.(=) (String.unsafe_get ortho (i - 2)) 'n'
+              then bits := !bits lor (1 lsl bit_ss)
      | 'h' -> bits := !bits
                       lor ((Bool.to_int (Char.(=) !prev 'c')) lsl bit_ch)
                       lor ((Bool.to_int (Char.(=) !prev 'p')) lsl bit_ph)
@@ -542,6 +540,14 @@ let erofa_rule rules =
   let patterns_double_consonants =
     List.mapi [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun bit s ->
         bit, String.Search_pattern.create (s ^ s), s)
+    (* On ne réécrit pas ss en s, mais que nss en ns, car sinon le code considère que
+       le ss dans dessus ou ressource peut être simplifié car on a une surprise avant
+       (e prononcé eu devant une double consonne) et une surprise après (s prononcé s
+       entre deux voyelles, comme dans parasol). La deuxième règle est probablement
+       plus forte que la première et donc on devrait que la réécriture augmente la
+       surprise, mais bon. Les seuls mots qui changent sont les subjonctifs imparfaits,
+       que l'on peut capturer avec "nss". *)
+    @ [ bit_ss, String.Search_pattern.create "nss", "ns" ]
   in
   { rules
   ; compute =
