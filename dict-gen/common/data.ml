@@ -354,7 +354,7 @@ module Lexique = struct
         "dominions"; "surfeuses"; "sen"; "basketball"; "callgirl"; "ladys"; "volleyball";
         "callgirls"; "ranchs"; "tennismans"; "cowboy"; "cowboys"; "rugbymans"; "hugh";
         "giorno"; "mamma"; "bluff"; "nurse"; "pub"; "drugstore"; "muffin"; "by"; "pueblo";
-        "species";
+        "species"; "crossman";
         (* not real words for this purpose *)
         "min"; "com"; "zzz"; "ah"; "oh"; "eh"; "ha"; "peuh"; "pouh"; "houhou"; "hare";
         "hon"; "haha"; "meuh"; "pouah"; "pfft"; "pff"; "hi"; "ohé"; "ouh"; "ouah"; "ho";
