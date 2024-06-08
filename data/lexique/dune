@@ -40,8 +40,17 @@
         -cmd ".import ../homemade/lexique-extra.csv l"
         -cmd ".mode tab"
         -cmd ".import Lexique383-full.gen.tsv tmp"
-        -cmd "delete from tmp where exists (select 1 from l where l.ortho = tmp.ortho);"
-        -cmd "insert into tmp(ortho,phon,lemme) select ortho,phon,case when lemme == '' then ortho else lemme end from l where ortho not like '#%'"
+        -cmd "update tmp
+              set phon = l.phon
+              from l where tmp.ortho = l.ortho;"
+        -cmd "insert into tmp(ortho,phon,lemme)
+              select l.ortho,
+                     l.phon,
+                     case when l.lemme == '' then l.ortho else l.lemme end
+              from l
+              left join tmp on l.ortho = tmp.ortho
+              where tmp.ortho is null
+                and l.ortho not like '#%'"
         ;; transform "à l'aveuglette" into "aveuglette"
         -cmd "update tmp
               set ortho = substring(ortho, 6),
