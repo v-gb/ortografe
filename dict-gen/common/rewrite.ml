@@ -123,7 +123,7 @@ let rewrite_e_double_consonants =
       let aligned_row1 = !aligned_row in
       let rec loop k : Rules.path_elt list -> _ = function
         | ({ graphem = "e"; phonem = ("e" | "E"); _ } as p1)
-          :: ({ graphem = ("bb" | "cc" | "dd" | "ff" | "gg" | "ll" | "mm" | "nn" | "pp" | "rr" | "tt" as consonants)
+          :: ({ graphem = ("bb" | "cc" | "dd" | "ff" | "gg" | "ll" | "mm" | "nn" | "pp" | "rr" | "tt" | "zz" as consonants)
               ; phonem
               ; _ } as p2)
           :: rest
@@ -454,6 +454,7 @@ let erofa_prefilter' = lazy (
              ; "r"
              (* s is handled by the nss pattern *)
              ; "t"
+             ; "z"
              ]
 ))
 
@@ -469,8 +470,9 @@ let bit_pp = bit_nn + 1
 let bit_rr = bit_pp + 1
 let bit_ss = bit_rr + 1
 let bit_tt = bit_ss + 1
-let bit_pattern_all_double_consonants = (1 lsl (bit_tt + 1)) - 1
-let bit_ch = bit_tt + 1
+let bit_zz = bit_tt + 1
+let bit_pattern_all_double_consonants = (1 lsl (bit_zz + 1)) - 1
+let bit_ch = bit_zz + 1
 let bit_ph = bit_ch + 1
 let bit_h = bit_ph + 1
 let bit_x = bit_h + 1
@@ -504,6 +506,7 @@ let find_relevant_patterns ortho phon =
                  && Char.(=) (String.unsafe_get ortho (i - 2)) 'n'
               then bits := !bits lor (1 lsl bit_ss)
      | 't' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_tt)
+     | 'z' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_zz)
      | 'h' -> bits := !bits
                       lor ((Bool.to_int (Char.(=) !prev 'c')) lsl bit_ch)
                       lor ((Bool.to_int (Char.(=) !prev 'p')) lsl bit_ph)
@@ -574,7 +577,8 @@ let erofa_rule rules =
              ; bit_pp, "p"
              ; bit_rr, "r"
              ; bit_ss, "s"
-             ; bit_tt, "t" ]
+             ; bit_tt, "t"
+             ; bit_zz, "z" ]
       ~f:(fun (bit, s) ->
         if bit =$ bit_ss
         then
