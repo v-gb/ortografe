@@ -51,7 +51,9 @@ const lazy_next_stage = async_lazy(async () =>
     await dict_gen_browser.staged_generate("/static/Lexique383.gen.tsv",
                                            "/static/rect1990.csv"))
 if (user_text2) {
+    let textarea_has_been_used = false
     const update = mirror_and_rewrite(user_text2, converted_text2, async () => {
+        textarea_has_been_used = true;
         const dict_gen_browser = await lazy_dict_gen_browser();
         while (true) {
             // loop to ensure we reach a fixpoint if the selection changes while we compute a
@@ -78,10 +80,9 @@ if (user_text2) {
         return [ options, cache2.table ]
     })
     document.getElementById('form-conv')?.addEventListener("change", () => {
-        if (converted_text2.childNodes.length > 0) {
+        if (textarea_has_been_used) {
             // Avoid downloading all the stuff if the user hasn't typed in the
-            // textarea yet. Maybe a better point of view would be: if
-            // lazy_next_stage in unforced, then don't force it.
+            // textarea yet.
             update();
         }
     })
