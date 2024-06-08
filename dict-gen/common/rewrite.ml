@@ -123,7 +123,7 @@ let rewrite_e_double_consonants =
       let aligned_row1 = !aligned_row in
       let rec loop k : Rules.path_elt list -> _ = function
         | ({ graphem = "e"; phonem = ("e" | "E"); _ } as p1)
-          :: ({ graphem = ("bb" | "cc" | "dd" | "ff" | "ll" | "mm" | "nn" | "pp" | "rr" | "tt" as consonants)
+          :: ({ graphem = ("bb" | "cc" | "dd" | "ff" | "gg" | "ll" | "mm" | "nn" | "pp" | "rr" | "tt" as consonants)
               ; phonem
               ; _ } as p2)
           :: rest
@@ -446,6 +446,7 @@ let erofa_prefilter' = lazy (
              ; "c"
              ; "d"
              ; "f"
+             ; "g"
              ; "l"
              ; "m"
              ; "n"
@@ -456,15 +457,15 @@ let erofa_prefilter' = lazy (
              ]
 ))
 
-let bit_pattern_all_double_consonants = (1 lsl 11) - 1
-let bit_ll = 4
-let bit_ss = 9 (* overlaps with bit_pattern_all_double_consonants *)
-let bit_ch = 11
-let bit_ph = 12
-let bit_h = 13
-let bit_x = 14
-let bit_oe = 15 (* oe ou œ *)
-let bit_y = 16
+let bit_pattern_all_double_consonants = (1 lsl 12) - 1
+let bit_ll = 5
+let bit_ss = 10 (* overlaps with bit_pattern_all_double_consonants *)
+let bit_ch = 12
+let bit_ph = 13
+let bit_h = 14
+let bit_x = 15
+let bit_oe = 16 (* oe ou œ *)
+let bit_y = 17
 let find_relevant_patterns ortho phon =
   (* On utilise une hypothèse d'indépendence ici : les réécritures érofa ne crée pas
      d'opportunités d'autres réécritures. Avec des mots arbitraires, on pourrait avoir
@@ -482,16 +483,17 @@ let find_relevant_patterns ortho phon =
      | 'c' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 1)
      | 'd' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 2)
      | 'f' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 3)
+     | 'g' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 4)
      | 'l' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_ll)
-     | 'm' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 5)
-     | 'n' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 6)
-     | 'p' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 7)
-     | 'r' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 8)
+     | 'm' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 6)
+     | 'n' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 7)
+     | 'p' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 8)
+     | 'r' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 9)
      | 's' -> if Char.(=) !prev c
                  && i >=$ 2
                  && Char.(=) (String.unsafe_get ortho (i - 2)) 'n'
               then bits := !bits lor (1 lsl bit_ss)
-     | 't' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 10)
+     | 't' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 11)
      | 'h' -> bits := !bits
                       lor ((Bool.to_int (Char.(=) !prev 'c')) lsl bit_ch)
                       lor ((Bool.to_int (Char.(=) !prev 'p')) lsl bit_ph)
@@ -551,7 +553,8 @@ let erofa_rule rules =
         ])
   in
   let patterns_double_consonants =
-    List.mapi [ "b"; "c"; "d"; "f"; "l"; "m"; "n"; "p"; "r"; "s"; "t" ] ~f:(fun bit s ->
+    List.mapi [ "b"; "c"; "d"; "f"; "g"; "l"; "m"; "n"; "p"; "r"; "s"; "t" ]
+      ~f:(fun bit s ->
         if bit =$ bit_ss
         then
           (* On ne réécrit pas ss en s, mais que nss en ns, car sinon le code considère
