@@ -123,7 +123,7 @@ let rewrite_e_double_consonants =
       let aligned_row1 = !aligned_row in
       let rec loop k : Rules.path_elt list -> _ = function
         | ({ graphem = "e"; phonem = ("e" | "E"); _ } as p1)
-          :: ({ graphem = ("bb" | "nn" | "mm" | "ll" | "tt" | "pp" | "ff" | "rr" | "cc" | "dd" as consonants)
+          :: ({ graphem = ("bb" | "cc" | "dd" | "ff" | "ll" | "mm" | "nn" | "pp" | "rr" | "tt" as consonants)
               ; phonem
               ; _ } as p2)
           :: rest
@@ -441,11 +441,24 @@ let erofa_prefilter' = lazy (
        ; seq [any; str "y"]
        ; str "h"
        ; str "nss"
-       ] @ List.map [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun s -> str (s ^ s))
+       ] @ List.map  ~f:(fun s -> str (s ^ s))
+             [ "b"
+             ; "c"
+             ; "d"
+             ; "f"
+             ; "l"
+             ; "m"
+             ; "n"
+             ; "p"
+             ; "r"
+             (* s is handled by the nss pattern *)
+             ; "t"
+             ]
 ))
 
 let bit_pattern_all_double_consonants = (1 lsl 11) - 1
-let bit_ss = 10 (* overlaps with bit_pattern_all_double_consonants *)
+let bit_ll = 4
+let bit_ss = 9 (* overlaps with bit_pattern_all_double_consonants *)
 let bit_ch = 11
 let bit_ph = 12
 let bit_h = 13
@@ -466,19 +479,19 @@ let find_relevant_patterns ortho phon =
     let c = String.unsafe_get ortho i in
     (match c with
      | 'b' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 0)
-     | 'n' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 1)
-     | 'm' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 2)
-     | 'l' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 3)
-     | 't' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 4)
-     | 'p' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 5)
-     | 'f' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 6)
-     | 'r' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 7)
-     | 'c' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 8)
-     | 'd' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 9)
+     | 'c' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 1)
+     | 'd' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 2)
+     | 'f' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 3)
+     | 'l' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_ll)
+     | 'm' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 5)
+     | 'n' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 6)
+     | 'p' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 7)
+     | 'r' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 8)
      | 's' -> if Char.(=) !prev c
                  && i >=$ 2
                  && Char.(=) (String.unsafe_get ortho (i - 2)) 'n'
               then bits := !bits lor (1 lsl bit_ss)
+     | 't' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 10)
      | 'h' -> bits := !bits
                       lor ((Bool.to_int (Char.(=) !prev 'c')) lsl bit_ch)
                       lor ((Bool.to_int (Char.(=) !prev 'p')) lsl bit_ph)
@@ -494,9 +507,9 @@ let find_relevant_patterns ortho phon =
   let bits =
     (* Il est couteux de considérer tous les ill prononcé /y/, donc on limite
        les faux positifs en vérifier qu'il y a au moins un /l/ quelque part. *)
-    if bits land (1 lsl 3 (* l *)) <>$ 0
+    if bits land (1 lsl bit_ll (* l *)) <>$ 0
        && not (String.mem phon 'l')
-    then bits lxor (1 lsl 3)
+    then bits lxor (1 lsl bit_ll)
     else bits
   in
   let bits =
@@ -538,16 +551,18 @@ let erofa_rule rules =
         ])
   in
   let patterns_double_consonants =
-    List.mapi [ "b"; "n"; "m"; "l"; "t"; "p"; "f"; "r"; "c"; "d" ] ~f:(fun bit s ->
-        bit, String.Search_pattern.create (s ^ s), s)
-    (* On ne réécrit pas ss en s, mais que nss en ns, car sinon le code considère que
-       le ss dans dessus ou ressource peut être simplifié car on a une surprise avant
-       (e prononcé eu devant une double consonne) et une surprise après (s prononcé s
-       entre deux voyelles, comme dans parasol). La deuxième règle est probablement
-       plus forte que la première et donc on devrait que la réécriture augmente la
-       surprise, mais bon. Les seuls mots qui changent sont les subjonctifs imparfaits,
-       que l'on peut capturer avec "nss". *)
-    @ [ bit_ss, String.Search_pattern.create "nss", "ns" ]
+    List.mapi [ "b"; "c"; "d"; "f"; "l"; "m"; "n"; "p"; "r"; "s"; "t" ] ~f:(fun bit s ->
+        if bit =$ bit_ss
+        then
+          (* On ne réécrit pas ss en s, mais que nss en ns, car sinon le code considère
+             que le ss dans dessus ou ressource peut être simplifié car on a une
+             surprise avant (e prononcé eu devant une double consonne) et une surprise
+             après (s prononcé s entre deux voyelles, comme dans parasol). La deuxième
+             règle est probablement plus forte que la première et donc on devrait que
+             la réécriture augmente la surprise, mais bon. Les seuls mots qui changent
+             sont les subjonctifs imparfaits, que l'on peut capturer avec "nss". *)
+          bit, String.Search_pattern.create "nss", "ns"
+        else bit, String.Search_pattern.create (s ^ s), s)
   in
   { rules
   ; compute =
