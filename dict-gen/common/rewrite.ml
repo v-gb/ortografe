@@ -457,15 +457,25 @@ let erofa_prefilter' = lazy (
              ]
 ))
 
-let bit_pattern_all_double_consonants = (1 lsl 12) - 1
-let bit_ll = 5
-let bit_ss = 10 (* overlaps with bit_pattern_all_double_consonants *)
-let bit_ch = 12
-let bit_ph = 13
-let bit_h = 14
-let bit_x = 15
-let bit_oe = 16 (* oe ou œ *)
-let bit_y = 17
+let bit_bb = 0
+let bit_cc = bit_bb + 1
+let bit_dd = bit_cc + 1
+let bit_ff = bit_dd + 1
+let bit_gg = bit_ff + 1
+let bit_ll = bit_gg + 1
+let bit_mm = bit_ll + 1
+let bit_nn = bit_mm + 1
+let bit_pp = bit_nn + 1
+let bit_rr = bit_pp + 1
+let bit_ss = bit_rr + 1
+let bit_tt = bit_ss + 1
+let bit_pattern_all_double_consonants = (1 lsl (bit_tt + 1)) - 1
+let bit_ch = bit_tt + 1
+let bit_ph = bit_ch + 1
+let bit_h = bit_ph + 1
+let bit_x = bit_h + 1
+let bit_oe = bit_x + 1 (* oe ou œ *)
+let bit_y = bit_oe + 1
 let find_relevant_patterns ortho phon =
   (* On utilise une hypothèse d'indépendence ici : les réécritures érofa ne crée pas
      d'opportunités d'autres réécritures. Avec des mots arbitraires, on pourrait avoir
@@ -479,21 +489,21 @@ let find_relevant_patterns ortho phon =
   for i = 0 to String.length ortho - 1 do
     let c = String.unsafe_get ortho i in
     (match c with
-     | 'b' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 0)
-     | 'c' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 1)
-     | 'd' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 2)
-     | 'f' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 3)
-     | 'g' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 4)
+     | 'b' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_bb)
+     | 'c' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_cc)
+     | 'd' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_dd)
+     | 'f' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_ff)
+     | 'g' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_gg)
      | 'l' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_ll)
-     | 'm' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 6)
-     | 'n' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 7)
-     | 'p' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 8)
-     | 'r' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 9)
+     | 'm' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_mm)
+     | 'n' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_nn)
+     | 'p' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_pp)
+     | 'r' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_rr)
      | 's' -> if Char.(=) !prev c
                  && i >=$ 2
                  && Char.(=) (String.unsafe_get ortho (i - 2)) 'n'
               then bits := !bits lor (1 lsl bit_ss)
-     | 't' -> if Char.(=) !prev c then bits := !bits lor (1 lsl 11)
+     | 't' -> if Char.(=) !prev c then bits := !bits lor (1 lsl bit_tt)
      | 'h' -> bits := !bits
                       lor ((Bool.to_int (Char.(=) !prev 'c')) lsl bit_ch)
                       lor ((Bool.to_int (Char.(=) !prev 'p')) lsl bit_ph)
@@ -553,8 +563,19 @@ let erofa_rule rules =
         ])
   in
   let patterns_double_consonants =
-    List.mapi [ "b"; "c"; "d"; "f"; "g"; "l"; "m"; "n"; "p"; "r"; "s"; "t" ]
-      ~f:(fun bit s ->
+    List.map [ bit_bb, "b"
+             ; bit_cc, "c"
+             ; bit_dd, "d"
+             ; bit_ff, "f"
+             ; bit_gg, "g"
+             ; bit_ll, "l"
+             ; bit_mm, "m"
+             ; bit_nn, "n"
+             ; bit_pp, "p"
+             ; bit_rr, "r"
+             ; bit_ss, "s"
+             ; bit_tt, "t" ]
+      ~f:(fun (bit, s) ->
         if bit =$ bit_ss
         then
           (* On ne réécrit pas ss en s, mais que nss en ns, car sinon le code considère
