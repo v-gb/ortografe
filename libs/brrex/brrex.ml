@@ -223,6 +223,7 @@ module B = struct
   let bool = Jv.to_bool
   let int = Jv.to_int
   let magic = Stdlib.Obj.magic
+  let jv = Fun.id
   let option = Jv.to_option
   let fun1 f1 fres f =
     fun a1 -> fres (Jv.apply f [|f1 a1|])
@@ -233,6 +234,7 @@ module B = struct
   let bool' = Jv.of_bool
   let int' = Jv.of_int
   let magic' = Stdlib.Obj.magic
+  let jv' = Fun.id
   let option' f o = Jv.of_option ~none:Jv.null f o
   let promise_or_error' ok t = fut_to_promise t ~ok
   let t2' f1 f2 (a1, a2) =

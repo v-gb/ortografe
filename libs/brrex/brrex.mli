@@ -60,6 +60,7 @@ module B : sig
   val bool : Jv.t -> bool
   val int : Jv.t -> int
   val magic : Jv.t -> _
+  val jv : Jv.t -> Jv.t
   val option : (Jv.t -> 'a) -> Jv.t -> 'a option
   val fun1 : ('a1 -> Jv.t) -> (Jv.t -> 'r) -> Jv.t -> ('a1 -> 'r)
 
@@ -69,6 +70,7 @@ module B : sig
   val bool' : bool -> Jv.t
   val int' : int -> Jv.t
   val magic' : _ -> Jv.t
+  val jv' : Jv.t -> Jv.t
   val option' : ('a -> Jv.t) -> 'a option -> Jv.t
   val promise_or_error' : ('a -> Jv.t) -> 'a Fut.or_error -> Jv.t
   val t2' : ('a1 -> Jv.t) -> ('a2 -> Jv.t) -> 'a1 * 'a2 -> Jv.t
