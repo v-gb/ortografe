@@ -47,37 +47,23 @@ const lazy_dict_gen_browser = async_lazy(async () => {
     await getScript("/static/dict_gen_browser.bc.js");
     return dict_gen_browser;
 })
-const lazy_next_stage = async_lazy(async () =>
-    await dict_gen_browser.staged_generate("/static/Lexique383.gen.tsv",
-                                           "/static/rect1990.csv"))
 if (user_text2) {
     let textarea_has_been_used = false
     const update = mirror_and_rewrite(user_text2, converted_text2, async () => {
         textarea_has_been_used = true;
         const dict_gen_browser = await lazy_dict_gen_browser();
-        while (true) {
-            // loop to ensure we reach a fixpoint if the selection changes while we compute a
-            // dictionary
-            const [ rules, selection_text ] = dict_gen_browser.currently_selected_rules("conv-");
-            if (selection_text == cache2?.selection_text) {
-                break;
-            } else {
-                const next_stage = await lazy_next_stage();
-                const word_f = next_stage(rules);
-                cache2.selection_text = selection_text;
-                cache2.table = {
-                    size: 1,
-                    has: (word) => word_f(word) != null,
-                    get: word_f,
-                }
-            }
-        }
+        const word_f =
+              await dict_gen_browser.staged_generate(
+                  cache2, "conv-",
+                  "/static/Lexique383.gen.tsv",
+                  "/static/rect1990.csv",)
+        const table = { size: 1, has: (word) => word_f(word) != null, get: word_f }
         const options = {color:true, trivial:false, background_color:'#b9f4b9',
                          rewrite: 'custom', custom_dict: null}
         // hopefully there can be no "context switch" at the place where the caller
         // awaits this return, because that would introduce a (very tight) race condition
         // that could theorically cause an input change to be missed.
-        return [ options, cache2.table ]
+        return [ options, table ]
     })
     document.getElementById('form-conv')?.addEventListener("change", () => {
         if (textarea_has_been_used) {

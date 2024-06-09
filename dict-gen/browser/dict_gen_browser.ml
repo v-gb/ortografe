@@ -106,23 +106,41 @@ let generate =
          (t2' string' string')))
     (fun lexique_url dict1990_url rules profile progress ->
       generate_ww ?progress (lexique_url, dict1990_url, rules, profile))
-  
+
+let cached cache (type a r) key ~eq (v : a) (f : int -> a -> r) =
+  match Jv.to_option (Stdlib.Obj.magic : Jv.t -> a * r * int) (Jv.get cache key) with
+  | Some (v', r, _) when eq v v' -> r
+  | opt ->
+     let i =
+       match opt with
+       | Some (_, _, i) -> i + 1
+       | None -> 0
+     in
+     let r = f i v in
+     Jv.set cache key (Stdlib.Obj.magic (v, r, i : a * r * int) : Jv.t);
+     r
+
 let staged_generate =
-  Brrex.B.(
-    fun2'
-      jstr
-      jstr
-      (promise_or_error'
-         (fun1'
-            (magic : Jv.t -> selected_rules)
-            (fun1' string (option' string')))))
-    (fun lexique_url dict1990_url ->
+  Brrex.B.(fun4' jv string jstr jstr
+             (promise_or_error' (fun1' string (option' string'))))
+    (fun cache prefix csv1 csv2 ->
       let open Fut.Result_syntax in
-      let* embedded = embedded ~lexique_url ~dict1990_url in
-      let next_stage = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
-      Fut.ok (fun x ->
-        let f, _meta = next_stage x in
-        f))
+      let* next_stage =
+        cached cache "next_stage"
+          ~eq:[%equal: Jstr.t * Jstr.t]
+          (csv1, csv2)
+          (fun i (lexique_url, dict1990_url) ->
+            let* embedded = embedded ~lexique_url ~dict1990_url in
+            Fut.ok (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded), i))
+      in
+      let selection_rules, selection_text, _ = currently_selected_rules prefix in
+      let word_f, _metadata =
+        cached cache "word_f"
+          ~eq:[%equal: string * (_ * int)]
+          (selection_text, next_stage)
+          (fun _ (_selection_text, (next_stage, _)) -> next_stage selection_rules)
+      in
+      Fut.ok word_f)
 
 let () =
   Brrex.main
