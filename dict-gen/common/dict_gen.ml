@@ -209,7 +209,7 @@ let all_selection_html
     let name = "custom" in
     [%string {|
 <div>
-  Autres changements
+  Autres
   <a style="background-color: #1e90ff; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;" href="%{url_prefix}rules-format.html" target="_blank">?</a>
   :
   <input type="text" id="%{id_prefix ^ name}" name="%{name_prefix ^ name}"
