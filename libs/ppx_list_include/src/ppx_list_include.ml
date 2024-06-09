@@ -8,10 +8,26 @@ let rec extract_list_literal rev_acc e =
   | _ -> rev_acc, Some e
 let extract_list_literal e = extract_list_literal [] e
 
+open struct
+    open Ast_builder.Default
+    
+    (* this ?tail argument should go into ppxlib *)
+    let rec elist ~loc ?tail l =
+      match l with
+      | [] ->
+         (match tail with
+          | Some tail -> tail
+          | None -> pexp_construct ~loc (Located.mk ~loc (Longident.Lident "[]")) None)
+      | x :: l ->
+         pexp_construct ~loc
+           (Located.mk ~loc (Longident.Lident "::"))
+           (Some (pexp_tuple ~loc [ x; elist ~loc ?tail l ]))
+  end
+
 let add_list_literal (x, xs) =
   match x with
   | [] -> xs
-  | first :: _ -> Ast_builder.Default.elist ~loc:first.pexp_loc x :: xs
+  | first :: _ -> `Literal (first.pexp_loc, x) :: xs
 
 let list_literal e =
   let rev_acc, tail = extract_list_literal e in
@@ -25,15 +41,24 @@ let list_literal e =
            | [%expr +[%e? e]] ->
               (match extract_list_literal e with
               | rev_l, None -> (List.rev_append rev_l cur, acc)
-              | rev_l, Some tail -> (List.rev rev_l, tail :: add_list_literal (cur, acc)))
+              | rev_l, Some tail -> (List.rev rev_l, `Dyn tail :: add_list_literal (cur, acc)))
            | _ -> (e :: cur, acc))
-         ([], match tail with None -> [] | Some e -> [e])
+         ([], match tail with None -> [] | Some e -> [`Dyn e])
     |> add_list_literal
     |> (function
-        | [e] -> e
+        | [ `Literal (loc, l) ] -> elist ~loc l
+        | [ `Literal (loc, l); `Dyn tail ] -> elist ~loc l ~tail
+        | [ `Dyn e ] ->
+           (* Don't optimize type errors away in things like [+""] *)
+           let loc = e.pexp_loc in
+           [%expr ([%e e] : _ Stdlib.List.t)]
         | l ->
            let loc = e.pexp_loc in
-           let e = Ast_builder.Default.elist ~loc l in
+           let e = Ast_builder.Default.elist ~loc
+                     (List.map (function
+                          | `Dyn e -> e
+                          | `Literal (loc, l) -> elist ~loc l) l)
+           in
            (* Maybe we should use Base.List.concat, because Stdlib.List.concat
               is not tail rec, and rebuilds the last element of the list because
               it uses Stdlib.(@) which fails to optimize l @ [], unlike Base.(@). *)
