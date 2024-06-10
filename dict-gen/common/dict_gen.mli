@@ -71,3 +71,13 @@ val staged_gen
       -> (string -> string option) * metadata)
 
 val time : profile:bool -> string -> (unit -> 'a) -> 'a
+
+val merge_right_biased
+   : (string -> string option) * metadata
+  -> (string -> string option) * metadata
+  -> (string -> string option) * metadata
+
+val merge_right_biased_opt
+   : (string -> string option) * metadata
+  -> ((string -> string option) * metadata) option
+  -> (string -> string option) * metadata

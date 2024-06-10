@@ -211,11 +211,8 @@ let main more_cmd =
              match from_rules, from_dict_file with
              | None, None -> Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa), no_metadata
              | Some v, None | None, Some v -> v
-             | Some (f_rules, m_rules), Some (f_dict, _m_dict) ->
-                (fun word ->
-                  match f_dict word with
-                  | Some _ as opt -> opt
-                  | None -> f_rules word), m_rules
+             | Some p_rules, Some p_dict ->
+                Dict_gen_common.Dict_gen.merge_right_biased p_rules p_dict
            in
            let convert ~in_ ~out =
              Ortografe.convert_files

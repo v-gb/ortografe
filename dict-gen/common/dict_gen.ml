@@ -241,12 +241,14 @@ type metadata =
   ; supports_repeated_rewrites : bool option
   ; plurals_in_s : bool option
   }
+
 let no_metadata =
   { desc = None
   ; lang = None
   ; supports_repeated_rewrites = None
   ; plurals_in_s = None
   }
+
 let metadata_of_json (json : _ json) =
   let desc = ref None in
   let lang = ref None in
@@ -275,6 +277,15 @@ let json_of_metadata t =
        ; Option.map t.supports_repeated_rewrites ~f:(fun b -> "supports_repeated_rewrites", `Bool b)
        ; Option.map t.plurals_in_s ~f:(fun b -> "plurals_in_s", `Bool b)
        ])
+
+let merge_metadata_right_biased m1 m2 =
+  { desc = Option.first_some m2.desc m1.desc
+  ; lang = Option.first_some m2.lang m1.lang
+  ; supports_repeated_rewrites =
+      Option.first_some m2.supports_repeated_rewrites m1.supports_repeated_rewrites
+  ; plurals_in_s =
+      Option.first_some m2.plurals_in_s m1.plurals_in_s
+  }
 
 let interpret_rules rules =
   let erofa = `Builtin "erofa" in
@@ -466,3 +477,13 @@ let parse str ~json_of_string =
                          "didn't get exactly 2 items in line %S" l));
   Stdlib.Hashtbl.find_opt h, metadata
 
+let merge_right_biased (f1, m1) (f2, m2) =
+  (fun word ->
+    match f2 word with
+    | Some _ as opt -> opt
+    | None -> f1 word),
+  merge_metadata_right_biased m1 m2
+
+let merge_right_biased_opt d1 = function
+  | None -> d1
+  | Some d2 -> merge_right_biased d1 d2
