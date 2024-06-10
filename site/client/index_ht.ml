@@ -802,7 +802,9 @@ module Index = struct
                     [ [ text "Installez "
                       ; a ~href:"https://f-droid.org/"
                           [ text "F-Droid" ]
-                      ; text " (un catalogue d'applications comme le Play Store)."
+                      ; text " depuis son site (pas disponible dans le Play \
+                              Store). C'est un catalogue d'applications comme le Play \
+                              Store."
                       ]
                     ; [ text "Installez "
                       ; a ~href:"https://f-droid.org/fr/packages/helium314.keyboard"
@@ -839,11 +841,11 @@ module Index = struct
                           ]
                       ]
                     ]
-                ; text "Quand vous voulez repasser en orthographe usuelle, quand le \
-                        clavier est visible, cliquer sur l'icône de clavier en bas à \
-                        droite et sélectionnez votre ancien clavier (si vous ne savez \
-                        pas lequel c'est, c'est probablement Gboard). Et pour repasser \
-                        en Érofa, même manipulation, mais sélectionnez HeliBoard."
+                ; text "Pour repasser en orthographe usuelle, quand le clavier est \
+                        visible, cliquez sur l'icône de clavier en bas à droite et \
+                        sélectionnez votre ancien clavier (probablement Gboard). Et \
+                        pour repasser en Érofa, même manipulation, mais sélectionnez \
+                        HeliBoard."
                 ]
             ]
         (* Avec gboard, le fait qu'on ne puisse pas supprimer les entrées de façon
