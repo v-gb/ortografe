@@ -58,7 +58,8 @@ if (user_text2) {
                   [ dict_gen_browser.currently_selected_rules("conv-"),
                     "/static/Lexique383.gen.tsv",
                     "/static/rect1990.csv",
-                  ]
+                  ],
+                  null,
               )
         const table = { size: 1, has: (word) => word_f(word) != null, get: word_f }
         const options = {color:true, trivial:false, background_color:'#b9f4b9',
