@@ -918,6 +918,28 @@ module Index = struct
                      String.(=) (Dict_gen_common.Dict_gen.name r) "1990")
                    ()
                  |> nodes_of_string)
+             ; div
+                 [ text "Autres "
+                 ; a ~attrs:[ "style", "background-color: #1e90ff; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;"
+                            ; "target", "_blank" ]
+                     ~href:"/static/dict-format.html"
+                     [ text "?" ]
+                 ; text " : "
+                 ; span
+                     ~cl:"cursor: pointer;"
+                     ~attrs:[ "id", "form-conv-dict-deselect"
+                            ; "style", "display: none"
+                            ; "onclick", "const elt = document.getElementById('form-conv-dict'); elt.value = null; elt.dispatchEvent(new Event('change', { bubbles: true }));"
+                               ]
+                     [ text "\u{2BBE} " ]
+                 ; elt "label"
+                     [ leafelt "input"
+                         [ "id", "form-conv-dict"
+                         ; "type", "file"
+                         ; "accept", ".txt,.csv,.dict"
+                         ]
+                     ]
+                 ]
              ; br
              ; +button
              ])

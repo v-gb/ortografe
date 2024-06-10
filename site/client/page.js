@@ -59,13 +59,24 @@ if (user_text2) {
                     "/static/Lexique383.gen.tsv",
                     "/static/rect1990.csv",
                   ],
-                  null,
+                  document.getElementById('form-conv-dict').files[0],
               )
         const table = { size: 1, has: (word) => word_f(word) != null, get: word_f }
         const options = {color:true, trivial:false, background_color:'#b9f4b9',
                          rewrite: 'custom', custom_dict: null}
         return [ options, table ]
     })
+    {
+        const input_elt = document.getElementById('form-conv-dict');
+        if (input_elt) {
+            const update_label = () => {
+                const elt = document.getElementById('form-conv-dict-deselect');
+                elt.style.display = (input_elt.files[0] == null) ? 'none' : 'unset'
+            }
+            input_elt.addEventListener("change", update_label);
+            update_label();
+        }
+    }
     document.getElementById('form-conv')?.addEventListener("change", () => {
         if (textarea_has_been_used) {
             // Avoid downloading all the stuff if the user hasn't typed in the
