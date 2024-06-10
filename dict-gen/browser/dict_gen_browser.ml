@@ -63,6 +63,14 @@ let html_fragment () =
   Dict_gen_common.Dict_gen.all_selection_html
     ~url_prefix:"/" ~id_prefix:"checkbox-" ~name_prefix:"load-" ()
 
+let embedded ~lexique_url ~dict1990_url =
+  let open Fut.Result_syntax in
+  let* data_lexique_Lexique383_gen_tsv = Brrex.fetch lexique_url in
+  let* extension_dict1990_gen_csv = Brrex.fetch dict1990_url in
+  Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
+         ; extension_dict1990_gen_csv
+         }
+
 let generate_ww_rpc, generate_ww =
   (* We need to run this in a worker, otherwise the loading animation doesn't actually
      animate, which we kind of want it to, since the a 2s of waiting is on the longer
@@ -71,13 +79,9 @@ let generate_ww_rpc, generate_ww =
       let open Fut.Result_syntax in
       let* embedded =
         time_fut ~profile "fetch" (fun () ->
-            let* data_lexique_Lexique383_gen_tsv = Brrex.fetch lexique_url in
-            Option.iter progress ~f:(fun f -> f 5);
-            let* extension_dict1990_gen_csv = Brrex.fetch dict1990_url in
+            let* embedded = embedded ~lexique_url ~dict1990_url in
             Option.iter progress ~f:(fun f -> f 10);
-            Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
-                   ; extension_dict1990_gen_csv
-          })
+            Fut.ok embedded)
       in
       match
         compute_dict
@@ -114,13 +118,7 @@ let staged_generate =
             (fun1' string (option' string')))))
     (fun lexique_url dict1990_url ->
       let open Fut.Result_syntax in
-      let* embedded =
-        let* data_lexique_Lexique383_gen_tsv = Brrex.fetch lexique_url in
-        let* extension_dict1990_gen_csv = Brrex.fetch dict1990_url in
-        Fut.ok { Dict_gen_common.Dict_gen.data_lexique_Lexique383_gen_tsv
-               ; extension_dict1990_gen_csv
-          }
-      in
+      let* embedded = embedded ~lexique_url ~dict1990_url in
       let next_stage = Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded) in
       Fut.ok (fun x ->
         let f, _meta = next_stage x in
