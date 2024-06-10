@@ -1,4 +1,4 @@
-(executable
+(library
  (name dict_gen_browser)
  (libraries js_of_ocaml dict_gen_common brr brrex)
  (preprocess (pps ppx_compare ;; drop ppx_jane, to avoid the toplevel inline tests side effects
@@ -7,10 +7,4 @@
                   ppx_string
                   ppx_uchar_literal
                   ppx_lazy_option_op
-                  ppx_partial))
- (modes js))
-
-(env
- (jsopt (js_of_ocaml
-         (compilation_mode whole_program)
-         (flags --opt 3))))
+                  ppx_partial)))

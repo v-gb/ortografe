@@ -143,7 +143,7 @@ let staged_generate =
       in
       Fut.ok dict)
 
-let () =
+let main () =
   Brrex.main
     [ generate_ww_rpc ]
     (fun () ->

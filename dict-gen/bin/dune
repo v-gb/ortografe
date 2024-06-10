@@ -1,3 +1,15 @@
 (executable
  (name        dict_gen)
- (libraries   dict_gen))
+ (libraries   dict_gen)
+ (modules dict_gen))
+
+(executable
+ (name dict_gen_browser)
+ (libraries dict_gen_browser)
+ (modes js)
+ (modules dict_gen_browser))
+
+(env
+ (jsopt (js_of_ocaml
+         (compilation_mode whole_program)
+         (flags --opt 3))))

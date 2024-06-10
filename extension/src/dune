@@ -1,5 +1,5 @@
 (copy_files (files ../dict.js))
-(copy_files (files %{project_root}/dict-gen/browser/dict_gen_browser.bc.js))
+(copy_files (files %{project_root}/dict-gen/bin/dict_gen_browser.bc.js))
 (copy_files (files %{project_root}/extension/dict1990.gen.csv))
 (copy_files (files %{project_root}/data/lexique/Lexique383.gen.tsv))
          
