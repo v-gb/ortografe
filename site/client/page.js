@@ -93,10 +93,15 @@ document.getElementById('doc-conv-button')?.addEventListener("change", async (e)
     }
     set_progress(0);
     try {
+        const dict_gen_browser = await lazy_dict_gen_browser();
         const conv = await lazy_conv();
         await doc_conversion.convert(
             conv,
             'doc-conv-button-error',
+            [ dict_gen_browser.currently_selected_rules("conv-"),
+              "/static/Lexique383.gen.tsv",
+              "/static/rect1990.csv",
+            ],
             custom_dict,
             e.target.files.item(0),
             set_progress

@@ -5,9 +5,12 @@ external js_expr : string -> 'a = "caml_js_expr"
 let impl, convert_string =
   let cache = Jv.obj [||] in
   let impl, f =
-    Brrex.rpc_with_progress (fun ?progress (dict_blob, filename, file_contents) ->
+    Brrex.rpc_with_progress
+      (fun ?progress (rules_params, dict_blob, filename, file_contents) ->
         let open Fut.Result_syntax in
-        let* dict, metadata = Dict_gen_browser.staged_generate cache None dict_blob in
+        let* dict, metadata =
+          Dict_gen_browser.staged_generate cache rules_params dict_blob
+        in
         let `ext new_ext, new_text =
           try
             Option.iter progress ~f:(fun f -> f 10);
@@ -40,15 +43,15 @@ let impl, convert_string =
             new_text))
   in
   impl,
-  (fun ?progress ww_cache dict_blob ~filename file_contents ->
-    f ~ww_cache ?progress (dict_blob, filename, file_contents))
+  (fun ?progress ww_cache rules_params dict_blob ~filename file_contents ->
+    f ~ww_cache ?progress (rules_params, dict_blob, filename, file_contents))
 
-let convert_file ?progress ww_cache dict_blob doc_file =
+let convert_file ?progress ww_cache rules_params dict_blob doc_file =
   let open Fut.Result_syntax in
   let* text = Brrex.read_bytes_from_file doc_file in
   let filename = Brr.File.name doc_file in
   let* `name new_name, `mime mime, new_text =
-    convert_string ww_cache ?progress dict_blob
+    convert_string ww_cache ?progress rules_params dict_blob
       ~filename:(Jstr.to_string filename) text
   in
   Brrex.download_from_memory
@@ -78,16 +81,17 @@ let ww_cache, ww_cache' = Brrex.B.magic_ ()
 
 let convert_file_handle_errors =
   Brrex.B.(
-    fun5'
+    fun6'
       ww_cache
       jstr
+      (option (t3 (t3 Dict_gen_browser.selected_rules string bool) jstr jstr))
       (option Brr.Blob.of_jv)
       Brr.File.of_jv
       (option (fun1 int' unit))
       (promise_or_error' unit'))
-    (fun ww_cache id dict_blob doc_file progress ->
+    (fun ww_cache id rules_params dict_blob doc_file progress ->
       with_exn_in_dom_async id (fun () ->
-          convert_file ?progress ww_cache dict_blob doc_file))
+          convert_file ?progress ww_cache rules_params dict_blob doc_file))
 
 let () =
   Brrex.main
