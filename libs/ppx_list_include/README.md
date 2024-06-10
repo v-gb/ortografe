@@ -7,12 +7,12 @@ for instance, `[ 1; +l; 3 ]` is preprocessed into `List.concat [ [1]; l; [3] ]`.
 
 # Why
 
-This is just a minor syntactic shortcut. Sometimes, like building some
-datastructures or process arguments, list literals can feel rather limited
-because you frequently need to splice lists into lists, and starting with a list
-and turning it into a `List.concat` or similar later adds a bit of friction.
+This is just a minor syntactic shortcut. Sometimes, like building html (as trees) or
+process arguments, list literals can feel rather limited because you frequently need to
+splice lists into lists, and starting with a list and turning it into a `List.concat`
+or similar later adds a bit of friction.
 
-For instance:
+For instance, if you start with:
 
 ```ocaml
 Process.run
@@ -21,7 +21,7 @@ Process.run
     ()
 ```
 
-when you want to pass more options:
+and then want to pass more options:
 
 ```ocaml
 Process.run
@@ -47,7 +47,7 @@ Process.run
     ~args:[ +(match unified with
               | None -> []
               | Some ctx -> [ "-U=" ^ Int.to_string ctx ])
-          ; +(if side_by_side then ["-y"] else [])
+          ; +if side_by_side then ["-y"] else []
           ; "--"
           ; file1
           ; file2
