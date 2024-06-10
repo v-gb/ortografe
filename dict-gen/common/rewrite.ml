@@ -215,7 +215,7 @@ let erofa_preserve =
              ; prefix "alleman"
              ; prefix "hollan"
              ; prefix "mourr"
-             ; str "chrétien"
+             ; str "chréti"
              ; str "christ"
              ; str "olymp"
              ; str "hébr"
