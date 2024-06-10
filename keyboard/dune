@@ -26,6 +26,7 @@
   (sandbox always)
    dicttool_aosp.jar
    main_fr.combined.gz
+   %{project_root}/extension/dict.gen.csv
    %{project_root}/doc-conversion/bin/ortografe_cli.exe
  )
  (action (run ./gen-heliboard)))
