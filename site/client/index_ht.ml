@@ -787,7 +787,7 @@ module Index = struct
       ]
 
   let section_claviers () =
-    [ section ~attrs:[exp_hidden_class]
+    [ section
         [ h3 [ text "Clavier pour téléphone" ]
         ; p [ text "La plupart des claviers virtuels pour téléphone s'adaptent à votre \
                     orthographe : après avoir tapé les mots quelques fois en \
@@ -852,22 +852,15 @@ module Index = struct
            simple limite l'utilisation aux orthographes qu'on veut utiliser
            permanennement, ce n'est pas vraiment utilisable pour érofa où au mieux un
            utilisateur voudrait passer d'une orthographe à l'autre. *)
-        ; p [ text "Truc pas prêt" ]
-        ; list `ul [
+        ; div ~attrs:[exp_hidden_class]
+            [ list `ul [
               [ a ~href:"/static/gboard-1990-1000.zip"
                   [ text "Dictionnaire 1990 pour gboard" ] ]
-            ; [ a ~href:"/static/gboard-erofa-1000.zip"
-                  [ text "Dictionnaire Érofa pour gboard" ]
-              ]
-            ; [ a ~href:"https://www.reddit.com/r/gboard/comments/z89a3f/how_to_empty_user_dictionary/" [ text "seule méthode pour supprimer les entrées :(" ] ]
-            ]
-        ]
-    ; section
-        [ h3 [ text "Clavier pour téléphone" ]
-        ; p [ text "Un clavier virtuel pour écrire en orthographe Érofa sur téléphone \
-                    est en cours d'étude. Mais même sans, la plupart des claviers \
-                    s'adaptent à votre orthographe après avoir tapé les mots quelques \
-                    fois en orthographe Érofa."
+                ; [ a ~href:"/static/gboard-erofa-1000.zip"
+                      [ text "Dictionnaire Érofa pour gboard" ]
+                  ]
+                ; [ a ~href:"https://www.reddit.com/r/gboard/comments/z89a3f/how_to_empty_user_dictionary/" [ text "seule méthode pour supprimer les entrées :(" ] ]
+                ]
             ]
         ]
     ; section
@@ -909,7 +902,7 @@ module Index = struct
            ; works, [ text "transcription de pages que vous visitez (voir les options \
                             de l'extension)" ]
            ; doesnt_work, [ text "vérificateurs d'orthographe" ]
-           ; exp_hidden_class :: doesnt_work, [ text "clavier pour téléphone" ]
+           ; doesnt_work, [ text "clavier pour téléphone" ]
            ; works, [ text "données (voir plus bas)" ]
            ]
           )
@@ -1030,8 +1023,10 @@ module Index = struct
                 ; [ details
                       [ text "Activité" ]
                       [ list `ul
-                          [ [ text "2024-05 - ? : étude de support pour l'orthographe \
-                                    Érofa pour les claviers de téléphones" ]
+                          [ [ text "2024-06 - ? : plus de support pour d'autres \
+                                    orthographes" ]
+                          ; [ text "2024-06 : support pour l'orthographe Érofa pour les \
+                                    claviers de téléphones" ]
                           ; [ text "À ce stade, les outils sont essentiellement finis." ]
                           ; [ text "2024-05 : support de transcriptions de document \
                                     côté client, amélioration de l'apparence du site" ]
