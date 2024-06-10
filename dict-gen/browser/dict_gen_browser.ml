@@ -122,12 +122,7 @@ let cached cache (type a r) key ~eq (v : a) (f : int -> a -> r) =
      r
 
 let staged_generate =
-  Brrex.B.(fun3'
-             jv
-             (t3 (t3 selected_rules string bool) jstr jstr)
-             (option Brr.Blob.of_jv)
-             (promise_or_error' (map' fst (fun1' string (option' string')))))
-    (fun cache (currently_selected_rules, csv1, csv2) dict_blob ->
+   (fun cache (currently_selected_rules, csv1, csv2) dict_blob ->
       let open Fut.Result_syntax in
       let* next_stage =
         cached cache "next_stage"
@@ -182,7 +177,14 @@ let main () =
                         (fun mime filename content ->
                           Brrex.download_from_memory
                             ~mime ~filename (`Jstr content))
-                    ; "staged_generate", staged_generate
+                    ; "staged_generate",
+                      Brrex.B.(fun3'
+                                 jv
+                                 (t3 (t3 selected_rules string bool) jstr jstr)
+                                 (option Brr.Blob.of_jv)
+                                 (promise_or_error'
+                                    (map' fst (fun1' string (option' string')))))
+                        staged_generate
                     ; "html_fragment", Brrex.B.(fun1' unit string') html_fragment
                     ; "currently_selected_rules",
                         Brrex.B.(fun1' string (t3' selected_rules' string' bool'))
