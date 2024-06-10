@@ -103,7 +103,7 @@ fi")))
 (rule
  (target edge.svg)
  (action
-  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/f6/Edge_Logo_2019.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/9/98/Microsoft_Edge_logo_%282019%29.svg")))
 
 ;; MPL2, same as firefox
 (rule

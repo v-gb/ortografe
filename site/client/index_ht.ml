@@ -738,7 +738,7 @@ module Index = struct
           , (fun ~cl ->
             a ~href:ext_in_chrome_link
               [ img ~cl:(cl ^ clickable_icon_round) "/static/edge.svg"
-                  [ "alt", ""; "width", "720"; "height", "720" ]
+                  [ "alt", ""; "width", "256"; "height", "256" ]
               ])
           , [ text "Ordinateur, et peut-être téléphone. Suivez "
             ; a ~href:edge_instructions_link
