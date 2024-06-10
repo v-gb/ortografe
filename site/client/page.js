@@ -82,7 +82,7 @@ const lazy_doc_conversion = async_lazy(async () => {
 const custom_dict = new Blob(['alice,saucissonette\nlapin,lapinou\nanimaux,animals\n'])
 const lazy_conv = async_lazy(async () => {
     const doc_conversion = await lazy_doc_conversion();
-    return await doc_conversion.convert('doc-conv-button-error', custom_dict)
+    return doc_conversion.create();
 })
 document.getElementById('doc-conv-button')?.addEventListener("change", async (e) => {
     // problem: can't send the same file twice ! Should unset the data or something.
@@ -94,8 +94,13 @@ document.getElementById('doc-conv-button')?.addEventListener("change", async (e)
     set_progress(0);
     try {
         const conv = await lazy_conv();
-        set_progress(10);
-        await conv(e.target.files.item(0), (i) => set_progress(10 + i * 9 / 10));
+        await doc_conversion.convert(
+            conv,
+            'doc-conv-button-error',
+            custom_dict,
+            e.target.files.item(0),
+            set_progress
+        )
     } finally {
         set_progress(0);
     }

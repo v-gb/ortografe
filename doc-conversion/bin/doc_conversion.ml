@@ -2,25 +2,18 @@ open Base
    
 external js_expr : string -> 'a = "caml_js_expr"
 
-let impls, convert_string =
-  let z = ref None in
+let impl, convert_string =
   let cache = Jv.obj [||] in
-  let stage1_impl, stage1 =
-    Brrex.rpc (fun dict_blob ->
+  let impl, f =
+    Brrex.rpc_with_progress (fun ?progress (dict_blob, filename, file_contents) ->
         let open Fut.Result_syntax in
-        let* p =
-          Dict_gen_browser.staged_generate cache None dict_blob
-        in
-        z := Some p;
-        Fut.ok ())
-  in
-  let stage2_impl, stage2 =
-    Brrex.rpc_with_progress (fun ?progress (filename, file_contents) ->
+        let* dict, metadata = Dict_gen_browser.staged_generate cache None dict_blob in
         let `ext new_ext, new_text =
           try
-            let dict, metadata = !z ||? failwith "z should always be set" in
+            Option.iter progress ~f:(fun f -> f 10);
             Ortografe.convert_string
-              ?progress
+              ?progress:(Option.map progress ~f:(fun f i ->
+                             f (10 + i * 9 / 10)))
               ~ext:(Stdlib.Filename.extension filename)
               ~options:{ convert_uppercase = true
                        ; dict
@@ -46,28 +39,23 @@ let impls, convert_string =
             `mime (Ortografe.mimetype_by_ext new_ext ||? failwith "unknown extension??"),
             new_text))
   in
-  [stage1_impl; stage2_impl],
-  (fun dict_blob ->
-    let open Fut.Result_syntax in
-    let ww_cache = Brrex.ww_cache () in
-    let* () = stage1 ~ww_cache dict_blob in
-    Fut.ok (fun ?progress ~filename file_contents ->
-        stage2 ~ww_cache ?progress (filename, file_contents)))
+  impl,
+  (fun ?progress ww_cache dict_blob ~filename file_contents ->
+    f ~ww_cache ?progress (dict_blob, filename, file_contents))
 
-let convert_file dict_blob =
+let convert_file ?progress ww_cache dict_blob doc_file =
   let open Fut.Result_syntax in
-  let* f = convert_string dict_blob in
-  Fut.ok (fun ?progress doc_file ->
-      let* text = Brrex.read_bytes_from_file doc_file in
-      let filename = Brr.File.name doc_file in
-      let* `name new_name, `mime mime, new_text =
-        f ?progress ~filename:(Jstr.to_string filename) text
-      in
-      Brrex.download_from_memory
-        ~mime
-        ~filename:(Jstr.v new_name)
-        (`Str_in_base64 (Base64.encode_string new_text));
-      Fut.ok ())
+  let* text = Brrex.read_bytes_from_file doc_file in
+  let filename = Brr.File.name doc_file in
+  let* `name new_name, `mime mime, new_text =
+    convert_string ww_cache ?progress dict_blob
+      ~filename:(Jstr.to_string filename) text
+  in
+  Brrex.download_from_memory
+    ~mime
+    ~filename:(Jstr.v new_name)
+    (`Str_in_base64 (Base64.encode_string new_text));
+  Fut.ok ()
 
 let with_exn_in_dom_async (type a) id (f : unit -> a Fut.or_error) : a Fut.or_error =
   (js_expr {|(async (id, f) => {
@@ -85,30 +73,29 @@ let with_exn_in_dom_async (type a) id (f : unit -> a Fut.or_error) : a Fut.or_er
             Brrex.fut_to_promise ~ok:(Stdlib.Obj.magic : a -> Jv.t) (f ())))
   |> Fut.of_promise ~ok:(Stdlib.Obj.magic : Jv.t -> a)
 
+let create () = Brrex.ww_cache ()
+let ww_cache, ww_cache' = Brrex.B.magic_ ()
+
 let convert_file_handle_errors =
   Brrex.B.(
-    fun2'
+    fun5'
+      ww_cache
       jstr
       (option Brr.Blob.of_jv)
-      (promise_or_error'
-         (fun2' Brr.File.of_jv
-            (option (fun1 int' unit))
-            (promise_or_error' unit'))))
-    (fun id dict_blob ->
-      let open Fut.Result_syntax in
-      let* f =
-        with_exn_in_dom_async id
-          (fun () -> convert_file dict_blob) in
-      Fut.ok (fun doc_file progress ->
-          with_exn_in_dom_async id (fun () ->
-              f ?progress doc_file)))
+      Brr.File.of_jv
+      (option (fun1 int' unit))
+      (promise_or_error' unit'))
+    (fun ww_cache id dict_blob doc_file progress ->
+      with_exn_in_dom_async id (fun () ->
+          convert_file ?progress ww_cache dict_blob doc_file))
 
 let () =
   Brrex.main
-    impls
+    [ impl ]
     (fun () ->
       Js_of_ocaml.Js.export "doc_conversion"
         (Js_of_ocaml.Js.Unsafe.inject
            (Jv.obj
-              [| "convert", convert_file_handle_errors
+              [| "create", Brrex.B.(fun1' unit ww_cache') create
+               ; "convert", convert_file_handle_errors
               |])))
