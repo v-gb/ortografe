@@ -125,6 +125,9 @@ let document = Jv.get Jv.global "document"
 let get_element_by_id id =
   Jv.call document "getElementById" [| Jv.of_jstr id |]
 
+let selection_from_file_input input =
+  Jv.to_option Brr.File.of_jv (Jv.Jarray.get (Jv.get input "files") 0)
+
 type rpc = string * ((bool * Jv.t) -> Jv.t Fut.or_error)
 let current_script =
   if Jv.is_undefined document
@@ -217,6 +220,9 @@ let main (rpcs : rpc list) f =
   else f ()
 
 module B = struct
+  type 'a t = Jv.t -> 'a
+  type 'a t' = 'a -> Jv.t
+
   let unit = ignore
   let jstr = Jv.to_jstr
   let string = Jv.to_string
@@ -225,6 +231,10 @@ module B = struct
   let magic = Stdlib.Obj.magic
   let jv = Fun.id
   let option = Jv.to_option
+  let map f base jv = f (base jv)
+  let t2 f1 f2 jv = f1 (Jv.Jarray.get jv 0), f2 (Jv.Jarray.get jv 1)
+  let t3 f1 f2 f3 jv = f1 (Jv.Jarray.get jv 0), f2 (Jv.Jarray.get jv 1), f3 (Jv.Jarray.get jv 2)
+  let t4 f1 f2 f3 f4 jv = f1 (Jv.Jarray.get jv 0), f2 (Jv.Jarray.get jv 1), f3 (Jv.Jarray.get jv 2), f4 (Jv.Jarray.get jv 3)
   let fun1 f1 fres f =
     fun a1 -> fres (Jv.apply f [|f1 a1|])
 
@@ -236,11 +246,14 @@ module B = struct
   let magic' = Stdlib.Obj.magic
   let jv' = Fun.id
   let option' f o = Jv.of_option ~none:Jv.null f o
+  let map' f base a = base (f a)
   let promise_or_error' ok t = fut_to_promise t ~ok
   let t2' f1 f2 (a1, a2) =
     Jv.of_jv_list [ f1 a1; f2 a2 ]
   let t3' f1 f2 f3 (a1, a2, a3) =
     Jv.of_jv_list [ f1 a1; f2 a2; f3 a3 ]
+  let t4' f1 f2 f3 f4 (a1, a2, a3, a4) =
+    Jv.of_jv_list [ f1 a1; f2 a2; f3 a3; f4 a4 ]
   let fun1' f1 fres f =
     Jv.callback ~arity:1
       (fun a1 ->
@@ -253,6 +266,10 @@ module B = struct
     Jv.callback ~arity:3
       (fun a1 a2 a3 ->
         fres (f (f1 a1) (f2 a2) (f3 a3)))
+  let fun4' f1 f2 f3 f4 fres f =
+    Jv.callback ~arity:4
+      (fun a1 a2 a3 a4 ->
+        fres (f (f1 a1) (f2 a2) (f3 a3) (f4 a4)))
   let fun5' f1 f2 f3 f4 f5 fres f =
     Jv.callback ~arity:5
       (fun a1 a2 a3 a4 a5 ->
@@ -261,4 +278,7 @@ module B = struct
     Jv.callback ~arity:6
       (fun a1 a2 a3 a4 a5 a6 ->
         fres (f (f1 a1) (f2 a2) (f3 a3) (f4 a4) (f5 a5) (f6 a6)))
+
+  let magic_ () =
+    magic, magic'
 end

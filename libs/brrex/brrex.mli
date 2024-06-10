@@ -39,6 +39,7 @@ val download_from_memory :
 val fetch : Jstr.t -> string Fut.or_error
 
 val get_element_by_id : Jstr.t -> Jv.t
+val selection_from_file_input :  Jv.t -> Brr.File.t option
 
 type ww_cache
 val ww_cache : unit -> ww_cache
@@ -54,62 +55,41 @@ val main : rpc list -> (unit -> unit) -> unit
 
 (** Bindings  *)
 module B : sig
-  val unit : Jv.t -> unit
-  val jstr : Jv.t -> Jstr.t
-  val string : Jv.t -> string
-  val bool : Jv.t -> bool
-  val int : Jv.t -> int
-  val magic : Jv.t -> _
-  val jv : Jv.t -> Jv.t
-  val option : (Jv.t -> 'a) -> Jv.t -> 'a option
-  val fun1 : ('a1 -> Jv.t) -> (Jv.t -> 'r) -> Jv.t -> ('a1 -> 'r)
+  type 'a t = Jv.t -> 'a
+  type 'a t' = 'a -> Jv.t
+  val unit : unit t
+  val jstr : Jstr.t t
+  val string : string t
+  val bool : bool t
+  val int : int t
+  val magic : _ t
+  val jv : Jv.t t
+  val option : 'a t -> 'a option t
+  val map : ('i -> 'a) -> 'i t -> 'a t
+  val t2 : 'a1 t -> 'a2 t -> ('a1 * 'a2) t
+  val t3 : 'a1 t -> 'a2 t -> 'a3 t -> ('a1 * 'a2 * 'a3) t
+  val t4 : 'a1 t -> 'a2 t -> 'a3 t -> 'a4 t -> ('a1 * 'a2 * 'a3 * 'a4) t
+  val fun1 : 'a1 t' -> 'r t -> ('a1 -> 'r) t
 
-  val unit' : unit -> Jv.t
-  val jstr' : Jstr.t -> Jv.t
-  val string' : string -> Jv.t
-  val bool' : bool -> Jv.t
-  val int' : int -> Jv.t
-  val magic' : _ -> Jv.t
-  val jv' : Jv.t -> Jv.t
-  val option' : ('a -> Jv.t) -> 'a option -> Jv.t
-  val promise_or_error' : ('a -> Jv.t) -> 'a Fut.or_error -> Jv.t
-  val t2' : ('a1 -> Jv.t) -> ('a2 -> Jv.t) -> 'a1 * 'a2 -> Jv.t
-  val t3' : ('a1 -> Jv.t) -> ('a2 -> Jv.t) -> ('a3 -> Jv.t) -> 'a1 * 'a2 * 'a3 -> Jv.t
-  val fun1'
-      : (Jv.t -> 'a1)
-        -> ('r -> Jv.t)
-        -> ('a1 -> 'r)
-        -> Jv.t
-  val fun2'
-      : (Jv.t -> 'a1)
-        -> (Jv.t -> 'a2)
-        -> ('r -> Jv.t)
-        -> ('a1 -> 'a2 -> 'r)
-        -> Jv.t
-  val fun3'
-      : (Jv.t -> 'a1)
-        -> (Jv.t -> 'a2)
-        -> (Jv.t -> 'a3)
-        -> ('r -> Jv.t)
-        -> ('a1 -> 'a2 -> 'a3 -> 'r)
-        -> Jv.t
-  val fun5'
-      : (Jv.t -> 'a1)
-        -> (Jv.t -> 'a2)
-        -> (Jv.t -> 'a3)
-        -> (Jv.t -> 'a4)
-        -> (Jv.t -> 'a5)
-        -> ('r -> Jv.t)
-        -> ('a1 -> 'a2 -> 'a3 -> 'a4 -> 'a5 -> 'r)
-        -> Jv.t
-  val fun6'
-      : (Jv.t -> 'a1)
-        -> (Jv.t -> 'a2)
-        -> (Jv.t -> 'a3)
-        -> (Jv.t -> 'a4)
-        -> (Jv.t -> 'a5)
-        -> (Jv.t -> 'a6)
-        -> ('r -> Jv.t)
-        -> ('a1 -> 'a2 -> 'a3 -> 'a4 -> 'a5 -> 'a6 -> 'r)
-        -> Jv.t
+  val unit' : unit t'
+  val jstr' : Jstr.t t'
+  val string' : string t'
+  val bool' : bool t'
+  val int' : int t'
+  val magic' : _ t'
+  val jv' : Jv.t t'
+  val option' : ('a t') -> 'a option t'
+  val map' : ('a -> 'r) -> 'r t' -> 'a t'
+  val promise_or_error' : 'a t' -> 'a Fut.or_error t'
+  val t2' : 'a1 t' -> 'a2 t' -> ('a1 * 'a2) t'
+  val t3' : 'a1 t' -> 'a2 t' -> 'a3 t' -> ('a1 * 'a2 * 'a3) t'
+  val t4' : 'a1 t' -> 'a2 t' -> 'a3 t' -> 'a4 t' -> ('a1 * 'a2 * 'a3 * 'a4) t'
+  val fun1' : 'a1 t -> 'r t' -> ('a1 -> 'r) t'
+  val fun2' : 'a1 t -> 'a2 t -> 'r t' -> ('a1 -> 'a2 -> 'r) t'
+  val fun3' : 'a1 t -> 'a2 t -> 'a3 t -> 'r t' -> ('a1 -> 'a2 -> 'a3 -> 'r) t'
+  val fun4' : 'a1 t -> 'a2 t -> 'a3 t -> 'a4 t -> 'r t' -> ('a1 -> 'a2 -> 'a3 -> 'a4 -> 'r) t'
+  val fun5' : 'a1 t -> 'a2 t -> 'a3 t -> 'a4 t -> 'a5 t -> 'r t' -> ('a1 -> 'a2 -> 'a3 -> 'a4 -> 'a5 -> 'r) t'
+  val fun6' : 'a1 t -> 'a2 t -> 'a3 t -> 'a4 t -> 'a5 t -> 'a6 t -> 'r t' -> ('a1 -> 'a2 -> 'a3 -> 'a4 -> 'a5 -> 'a6 -> 'r) t'
+
+  val magic_ : unit -> (Jv.t -> 'a) * ('a -> Jv.t)
 end
