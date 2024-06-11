@@ -122,22 +122,28 @@ let cached cache (type a r) key ~eq (v : a) (f : int -> a -> r) =
      r
 
 let staged_generate =
-   (fun cache (currently_selected_rules, csv1, csv2) dict_blob ->
-      let open Fut.Result_syntax in
-      let* next_stage =
-        cached cache "next_stage"
-          ~eq:[%equal: Jstr.t * Jstr.t]
-          (csv1, csv2)
-          (fun i (lexique_url, dict1990_url) ->
-            let* embedded = embedded ~lexique_url ~dict1990_url in
-            Fut.ok (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded), i))
-      in
-      let selection_rules, selection_text, _ = currently_selected_rules in
-      let dict =
-        cached cache "dict"
-          ~eq:[%equal: string * (_ * int)]
-          (selection_text, next_stage)
-          (fun _ (_selection_text, (next_stage, _)) -> next_stage selection_rules)
+   (fun cache rules_params dict_blob ->
+     let open Fut.Result_syntax in
+     let* dict =
+       match rules_params with
+       | None -> Fut.ok None
+       | Some (currently_selected_rules, csv1, csv2) ->
+          let* next_stage =
+            cached cache "next_stage"
+              ~eq:[%equal: Jstr.t * Jstr.t]
+              (csv1, csv2)
+              (fun i (lexique_url, dict1990_url) ->
+                let* embedded = embedded ~lexique_url ~dict1990_url in
+                Fut.ok (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded), i))
+          in
+          let selection_rules, selection_text, _ = currently_selected_rules in
+          let dict =
+            cached cache "dict"
+              ~eq:[%equal: string * (_ * int)]
+              (selection_text, next_stage)
+              (fun _ (_selection_text, (next_stage, _)) -> next_stage selection_rules)
+          in
+          Fut.ok (Some (dict, if List.is_empty selection_rules then `Empty else `Nonempty))
       in
       let* custom_dict =
         match dict_blob with
@@ -154,12 +160,10 @@ let staged_generate =
                |> Fut.ok)
       in
       let merged_dict =
-        match custom_dict with
-        | Some d when List.is_empty selection_rules ->
-           (* we only want to default to erofa rules when nothing is selected,
-              including no dictionary *)
-           d
-        | _ ->
+        match dict, custom_dict with
+        | None, None -> Fn.const None, Dict_gen_common.Dict_gen.no_metadata
+        | (None | Some (_, `Empty)), Some d -> d
+        | Some (dict, `Empty), None | Some (dict, `Nonempty), _ ->
            Dict_gen_common.Dict_gen.merge_right_biased_opt
              dict custom_dict
       in
@@ -180,7 +184,7 @@ let main () =
                     ; "staged_generate",
                       Brrex.B.(fun3'
                                  jv
-                                 (t3 (t3 selected_rules string bool) jstr jstr)
+                                 (option (t3 (t3 selected_rules string bool) jstr jstr))
                                  (option Brr.Blob.of_jv)
                                  (promise_or_error'
                                     (map' fst (fun1' string (option' string')))))
