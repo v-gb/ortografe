@@ -60,9 +60,6 @@ if (user_text2) {
         const table = { size: 1, has: (word) => word_f(word) != null, get: word_f }
         const options = {color:true, trivial:false, background_color:'#b9f4b9',
                          rewrite: 'custom', custom_dict: null}
-        // hopefully there can be no "context switch" at the place where the caller
-        // awaits this return, because that would introduce a (very tight) race condition
-        // that could theorically cause an input change to be missed.
         return [ options, table ]
     })
     document.getElementById('form-conv')?.addEventListener("change", () => {

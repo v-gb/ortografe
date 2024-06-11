@@ -393,21 +393,24 @@ function load_dict(options) {
 }
 
 
-function ignoring_concurrent_calls(f) {
-    let processing = false;
+function sequentialized_and_merged(f) {
+    let state = 0; // 0: idle, 1: running, 2: running + need to call again afterwards
     return async function() {
-        if (processing) { return };
-        processing = true;
+        if (state != 0) { state = 2; return };
         try {
-            return await f(...arguments);
+            while (true) {
+                state = 1;
+                await f(...arguments);
+                if (state == 1) { return }
+            }
         } finally {
-            processing = false;
+            state = 0;
         }
     }
 }
 
 function mirror_and_rewrite(input, dst, options_and_table) {
-    const f = ignoring_concurrent_calls(async () => {
+    const f = sequentialized_and_merged(async () => {
         // ideally, we´d be a bit smarter and not rewrite everything on
         // every single keystroke here
         const [ options, table ] = await options_and_table();
