@@ -31,6 +31,7 @@ let compute_dict ?profile ?progress embedded rules =
   (Buffer.contents buf, sexp_str)
 
 type selected_rules = Dict_gen_common.Dict_gen.rules
+let selected_rules, selected_rules' = Brrex.B.magic_ ()
 let currently_selected_rules id_prefix =
   let builtin = Lazy.force Dict_gen_common.Dict_gen.all_builtin in
   let selected_builtins =
@@ -99,7 +100,7 @@ let generate =
     fun5'
       jstr
       jstr
-      (magic : Jv.t -> selected_rules)
+      selected_rules
       bool
       (option (fun1 int' unit))
       (promise_or_error'
@@ -158,6 +159,6 @@ let main () =
                     ; "staged_generate", staged_generate
                     ; "html_fragment", Brrex.B.(fun1' unit string') html_fragment
                     ; "currently_selected_rules",
-                        Brrex.B.(fun1' string (t3' Jv.Id.to_jv string' bool'))
+                        Brrex.B.(fun1' string (t3' selected_rules' string' bool'))
                           currently_selected_rules
               |])))
