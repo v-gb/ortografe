@@ -122,10 +122,10 @@ let cached cache (type a r) key ~eq (v : a) (f : int -> a -> r) =
      r
 
 let staged_generate =
-  Brrex.B.(fun2' jv (t3 string jstr jstr)
+  Brrex.B.(fun2' jv (t3 (t3 selected_rules string bool) jstr jstr)
              (promise_or_error'
                 (map' fst (fun1' string (option' string')))))
-    (fun cache (prefix, csv1, csv2) ->
+    (fun cache (currently_selected_rules, csv1, csv2) ->
       let open Fut.Result_syntax in
       let* next_stage =
         cached cache "next_stage"
@@ -135,8 +135,8 @@ let staged_generate =
             let* embedded = embedded ~lexique_url ~dict1990_url in
             Fut.ok (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded), i))
       in
-      let selection_rules, selection_text, _ = currently_selected_rules prefix in
       let dict =
+        let selection_rules, selection_text, _ = currently_selected_rules in
         cached cache "dict"
           ~eq:[%equal: string * (_ * int)]
           (selection_text, next_stage)
