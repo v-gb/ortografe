@@ -121,10 +121,10 @@ let cached cache (type a r) key ~eq (v : a) (f : int -> a -> r) =
      r
 
 let staged_generate =
-  Brrex.B.(fun4' jv string jstr jstr
+  Brrex.B.(fun2' jv (t3 string jstr jstr)
              (promise_or_error'
                 (map' fst (fun1' string (option' string')))))
-    (fun cache prefix csv1 csv2 ->
+    (fun cache (prefix, csv1, csv2) ->
       let open Fut.Result_syntax in
       let* next_stage =
         cached cache "next_stage"

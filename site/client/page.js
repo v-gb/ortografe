@@ -54,9 +54,9 @@ if (user_text2) {
         const dict_gen_browser = await lazy_dict_gen_browser();
         const word_f =
               await dict_gen_browser.staged_generate(
-                  cache2, "conv-",
-                  "/static/Lexique383.gen.tsv",
-                  "/static/rect1990.csv",)
+                  cache2,
+                  [ "conv-", "/static/Lexique383.gen.tsv", "/static/rect1990.csv" ]
+              )
         const table = { size: 1, has: (word) => word_f(word) != null, get: word_f }
         const options = {color:true, trivial:false, background_color:'#b9f4b9',
                          rewrite: 'custom', custom_dict: null}
