@@ -24,7 +24,8 @@ val json_to_string : ([< `Array of 'a list
                       | `String of string ]
                       as 'a) -> string
 
-val read_bytes : Brr.File.t -> string Fut.or_error
+val read_bytes : Brr.Blob.t -> string Fut.or_error
+val read_bytes_from_file : Brr.File.t -> string Fut.or_error
 
 (** This is mimicking the effect of clicking on an anchor tag, but with data that's
     provided as code in the client, instead of as a url on the server. *)
@@ -39,7 +40,6 @@ val download_from_memory :
 val fetch : Jstr.t -> string Fut.or_error
 
 val get_element_by_id : Jstr.t -> Jv.t
-val selection_from_file_input :  Jv.t -> Brr.File.t option
 
 type ww_cache
 val ww_cache : unit -> ww_cache

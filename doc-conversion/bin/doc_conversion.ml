@@ -54,9 +54,9 @@ let impls, convert_string =
 let convert_file dict_content =
   let open Fut.Result_syntax in
   let* f = convert_string dict_content in
-  Fut.ok (fun ?progress file_object ->
-      let* text = Brrex.read_bytes file_object in
-      let filename = Brr.File.name file_object in
+  Fut.ok (fun ?progress doc_file ->
+      let* text = Brrex.read_bytes_from_file doc_file in
+      let filename = Brr.File.name doc_file in
       let* `name new_name, `mime mime, new_text =
         f ?progress ~filename:(Jstr.to_string filename) text
       in
@@ -88,7 +88,7 @@ let convert_file_handle_errors =
       jstr
       string
       (promise_or_error'
-         (fun2' (magic : Jv.t -> Brr.File.t)
+         (fun2' Brr.File.of_jv
             (option (fun1 int' unit))
             (promise_or_error' unit'))))
     (fun id dict_content ->
@@ -96,9 +96,9 @@ let convert_file_handle_errors =
       let* f =
         with_exn_in_dom_async id
           (fun () -> convert_file dict_content) in
-      Fut.ok (fun file_object progress ->
+      Fut.ok (fun doc_file progress ->
           with_exn_in_dom_async id (fun () ->
-              f ?progress file_object)))
+              f ?progress doc_file)))
 
 let () =
   Brrex.main
