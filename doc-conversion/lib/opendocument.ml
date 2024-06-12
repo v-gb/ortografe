@@ -75,16 +75,17 @@ let convert ?convert_text ?progress ~options src ~dst =
        let buf = buffer None in
        fun src -> Text.convert ~buf ~options src ~dst:String
   in
-  Zip.map ?progress src (fun member contents ->
-      match Zipc.Member.path member with
+  Zip.map ?progress src (fun ~path ->
+      match path with
       | "content.xml"
       | "styles.xml" (* contains header/footer *) ->
-         Some (More_markup.transform
-                 ~flavor:`Xml
-                 ~transform:(
-                   if options.interleaved
-                   then odt_transform_interleaved ~convert_text
-                   else odt_transform ~convert_text)
-                 (contents ()) ~dst:String)
+         Some (fun ~contents ->
+             More_markup.transform
+               ~flavor:`Xml
+               ~transform:(
+                 if options.interleaved
+                 then odt_transform_interleaved ~convert_text
+                 else odt_transform ~convert_text)
+               contents ~dst:String)
       | _ -> None)
   |> write_out dst

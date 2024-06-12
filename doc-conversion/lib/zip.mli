@@ -5,5 +5,5 @@ val max_size : int ref
 val map
     : ?progress:(int -> unit)
    -> string
-   -> (Zipc.Member.t -> (unit -> string) -> string option)
+   -> (path:string -> (contents:string -> string) option)
    -> string

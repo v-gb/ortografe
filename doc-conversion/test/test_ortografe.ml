@@ -359,7 +359,7 @@ let time f =
   x, (Time_ns.diff after before)
 
 let read_whole_zip zip =
-  Ortografe.map_zip zip (fun _ content -> Some (content ()))
+  Ortografe.map_zip zip (fun ~path:_ -> Some (fun ~contents -> contents))
 
 let%expect_test "zip_bomb" = (
     let dir = "/tmp/zip-bomb" in

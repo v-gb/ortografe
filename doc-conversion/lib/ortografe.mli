@@ -31,7 +31,7 @@ val mimetype_by_ext : string -> string option
 val map_zip
     : ?progress:(int -> unit)
       -> string
-      -> (Zipc.Member.t -> (unit -> string) -> string option)
+      -> (path:string -> (contents:string -> string) option)
       -> string
 
 module More_markup = More_markup

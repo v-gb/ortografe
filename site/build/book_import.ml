@@ -112,16 +112,16 @@ let convert_wikisource epub ~url ~dst =
   let epub = Ortografe.epub epub ~dst:String ~options:(Lazy.force options) in
   let epub_conv =
     Ortografe.map_zip epub
-      (fun member contents ->
+      (fun ~path ->
         (* There's missing CSS in the wikisource epubs (or maybe it's intended that the
            ereader would provide its own). So add CSS settings to make the look of the
            converted xhtml and the wikisource html similar. *)
-        match Filename.basename (Zipc.Member.path member) with
+        match Filename.basename path with
         | f when String.is_suffix f ~suffix:".html"
                  || String.is_suffix f ~suffix:".xhtml"
-          -> Some (make_the_html_mobile_friendly ~url (contents ()))
+          -> Some (fun ~contents -> make_the_html_mobile_friendly ~url contents)
         | "main.css" ->
-           Some (contents () ^ {|
+           Some (fun ~contents -> contents ^ {|
 body {
   max-width: min(90%, 36em);
   margin: 0 auto;
@@ -145,14 +145,14 @@ let convert_gutenberg zip ~url ~dst =
   let data = Ortografe.htmlz zip ~dst:String ~options:(Lazy.force options) in
   let new_data =
     Ortografe.map_zip data
-      (fun member contents ->
+      (fun ~path ->
         (* There's missing CSS in the wikisource epubs (or maybe it's intended that the
            ereader would provide its own). So add CSS settings to make the look of the
            converted xhtml and the wikisource html similar. *)
-        match Filename.basename (Zipc.Member.path member) with
+        match Filename.basename path with
         | f when String.is_suffix f ~suffix:".html"
                  || String.is_suffix f ~suffix:".xhtml"
-          -> Some (make_the_html_mobile_friendly ~url (contents ()))
+          -> Some (fun ~contents -> make_the_html_mobile_friendly ~url contents)
         | _ -> None)
   in
   extract_zip ~data:new_data ~dst;
@@ -232,8 +232,8 @@ let guess_main_file ~url ~data =
   let files =
     let files = Queue.create () in
     ignore (
-        Ortografe.map_zip data (fun member _contents ->
-            Queue.enqueue files (Zipc.Member.path member);
+        Ortografe.map_zip data (fun ~path ->
+            Queue.enqueue files path;
             None) : string);
     Queue.to_list files
   in

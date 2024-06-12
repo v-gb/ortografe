@@ -56,21 +56,21 @@ let officeopenxml_old = Officeopenxml.convert_old
 let opendocument = Opendocument.convert
 
 let epub ?convert_text ?progress ~options src ~dst =
-  Zip.map ?progress src (fun member contents ->
+  Zip.map ?progress src (fun ~path ->
       (* The xhtml is the bulk of the pages, but in principle, we
          could rewrite more stuff: content.opf, toc.ncx *)
-      match Filename.extension (Zipc.Member.path member) with
+      match Filename.extension path with
       | ".xhtml" | ".html" -> (* in principle we'd need to read the root file to know how
                                  to interpret the various files. *)
-         Some (xhtml ?convert_text ~options (contents ()) ~dst:String)
+         Some (fun ~contents -> xhtml ?convert_text ~options contents ~dst:String)
       | _ -> None)
   |> write_out dst
 
 let htmlz ?convert_text ?progress ~options src ~dst =
-  Zip.map ?progress src (fun member contents ->
-      match Filename.extension (Zipc.Member.path member) with
+  Zip.map ?progress src (fun ~path ->
+      match Filename.extension path with
       | ".html" ->
-         Some (html ?convert_text ~options (contents ()) ~dst:String)
+         Some (fun ~contents -> html ?convert_text ~options contents ~dst:String)
       | _ -> None)
   |> write_out dst
 
