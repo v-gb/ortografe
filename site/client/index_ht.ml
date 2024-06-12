@@ -941,8 +941,11 @@ module Index = struct
                      ]
                  ]
              ; br
+             ; div ~attrs:["id", "form-conv-button-error"] []
              ; +button
-             ])
+           ])
+           ~label_attrs:["id", "form-conv-label"]
+           ~replace_onchange:["id", "form-conv-button"]
            ~attrs:["id", "form-conv"]
        ; br
        ; interactive_transcription
@@ -1045,10 +1048,9 @@ module Index = struct
                 ; [ details
                       [ text "Activité" ]
                       [ list `ul
-                          [ [ text "2024-06 - ? : plus de support pour d'autres \
-                                    orthographes" ]
-                          ; [ text "2024-06 : support pour l'orthographe Érofa pour les \
-                                    claviers de téléphones" ]
+                          [ [ text "2024-06 : support pour écrire en Érofa avec les \
+                                    claviers de téléphones, support de transcription \
+                                    avec des dictionnaires personnalisés." ]
                           ; [ text "À ce stade, les outils sont essentiellement finis." ]
                           ; [ text "2024-05 : support de transcriptions de document \
                                     côté client, amélioration de l'apparence du site" ]
@@ -1161,11 +1163,6 @@ module Index = struct
               ; section_donnees ()
               ; section_autres_orthographes ()
               ; section_aller_plus_loin ()
-              ; submit_file
-                  ~attrs:["id", "doc-conv"; exp_hidden_class ]
-                  ~label_attrs:["id", "doc-conv-label"]
-                  ~replace_onchange:["id", "doc-conv-button"]
-                  (fun z -> [ div ~attrs:["id", "doc-conv-button-error"] []; +z ])
               ]
           ]
       ]

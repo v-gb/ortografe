@@ -77,6 +77,45 @@ if (user_text2) {
             update_label();
         }
     }
+    const lazy_doc_conversion = async_lazy(async () => {
+        await getScript("/static/doc_conversion.bc.js");
+        return doc_conversion;
+    })
+    const lazy_conv = async_lazy(async () => {
+        const doc_conversion = await lazy_doc_conversion();
+        return doc_conversion.create();
+    })
+    document.getElementById('form-conv-button')?.addEventListener("change", async (e) => {
+        const dict_blob = document.getElementById('form-conv-dict').files[0];
+        if (!dict_blob) {
+            e.target.form.submit();
+            return
+        }
+        // problem: can't send the same file twice ! Should unset the data or something.
+        e.preventDefault();
+        const label = document.getElementById("form-conv-label");
+        function set_progress(v) {
+            label.style.setProperty("--progress", v + "%")
+        }
+        set_progress(0);
+        try {
+            const dict_gen_browser = await lazy_dict_gen_browser();
+            const conv = await lazy_conv();
+            await doc_conversion.convert(
+                conv,
+                'form-conv-button-error',
+                [ dict_gen_browser.currently_selected_rules("conv-"),
+                  "/static/Lexique383.gen.tsv",
+                  "/static/rect1990.csv",
+                ],
+                dict_blob,
+                e.target.files[0],
+                set_progress,
+            )
+        } finally {
+            set_progress(0);
+        }        
+    })
     document.getElementById('form-conv')?.addEventListener("change", () => {
         if (textarea_has_been_used) {
             // Avoid downloading all the stuff if the user hasn't typed in the
@@ -85,42 +124,6 @@ if (user_text2) {
         }
     })
 }
-
-const lazy_doc_conversion = async_lazy(async () => {
-    await getScript("/static/doc_conversion.bc.js");
-    return doc_conversion;
-})
-const custom_dict = new Blob(['alice,saucissonette\nlapin,lapinou\nanimaux,animals\n'])
-const lazy_conv = async_lazy(async () => {
-    const doc_conversion = await lazy_doc_conversion();
-    return doc_conversion.create();
-})
-document.getElementById('doc-conv-button')?.addEventListener("change", async (e) => {
-    // problem: can't send the same file twice ! Should unset the data or something.
-    e.preventDefault();
-    const label = document.getElementById("doc-conv-label");
-    function set_progress(v) {
-        label.style.setProperty("--progress", v + "%")
-    }
-    set_progress(0);
-    try {
-        const dict_gen_browser = await lazy_dict_gen_browser();
-        const conv = await lazy_conv();
-        await doc_conversion.convert(
-            conv,
-            'doc-conv-button-error',
-            [ dict_gen_browser.currently_selected_rules("conv-"),
-              "/static/Lexique383.gen.tsv",
-              "/static/rect1990.csv",
-            ],
-            custom_dict,
-            e.target.files.item(0),
-            set_progress
-        )
-    } finally {
-        set_progress(0);
-    }
-})
 
 for (const elt of document.getElementsByClassName('mailelt')) {
     elt.setAttribute('href', 'mzilto:contzct@orthogrzphe-rztionnelle.info'.replaceAll('z', 'a'))
