@@ -4,11 +4,14 @@ external js_expr : string -> 'a = "caml_js_expr"
 
 let impls, convert_string =
   let z = ref None in
+  let cache = Jv.obj [||] in
   let stage1_impl, stage1 =
-    Brrex.rpc (fun dict_contents ->
-        z := Some (
-                 Dict_gen_common.Dict_gen.parse dict_contents
-                   ~json_of_string:Brrex.json_of_string);
+    Brrex.rpc (fun dict_blob ->
+        let open Fut.Result_syntax in
+        let* p =
+          Dict_gen_browser.staged_generate cache None dict_blob
+        in
+        z := Some p;
         Fut.ok ())
   in
   let stage2_impl, stage2 =
@@ -44,16 +47,16 @@ let impls, convert_string =
             new_text))
   in
   [stage1_impl; stage2_impl],
-  (fun dict_contents ->
+  (fun dict_blob ->
     let open Fut.Result_syntax in
     let ww_cache = Brrex.ww_cache () in
-    let* () = stage1 ~ww_cache dict_contents in
+    let* () = stage1 ~ww_cache dict_blob in
     Fut.ok (fun ?progress ~filename file_contents ->
         stage2 ~ww_cache ?progress (filename, file_contents)))
 
-let convert_file dict_content =
+let convert_file dict_blob =
   let open Fut.Result_syntax in
-  let* f = convert_string dict_content in
+  let* f = convert_string dict_blob in
   Fut.ok (fun ?progress doc_file ->
       let* text = Brrex.read_bytes_from_file doc_file in
       let filename = Brr.File.name doc_file in
@@ -86,16 +89,16 @@ let convert_file_handle_errors =
   Brrex.B.(
     fun2'
       jstr
-      string
+      (option Brr.Blob.of_jv)
       (promise_or_error'
          (fun2' Brr.File.of_jv
             (option (fun1 int' unit))
             (promise_or_error' unit'))))
-    (fun id dict_content ->
+    (fun id dict_blob ->
       let open Fut.Result_syntax in
       let* f =
         with_exn_in_dom_async id
-          (fun () -> convert_file dict_content) in
+          (fun () -> convert_file dict_blob) in
       Fut.ok (fun doc_file progress ->
           with_exn_in_dom_async id (fun () ->
               f ?progress doc_file)))

@@ -16,6 +16,7 @@
    brr
    brrex
    dict_gen_common
+   dict_gen_browser
    js_of_ocaml
    ortografe
  )
