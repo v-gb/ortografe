@@ -18,6 +18,10 @@ and old not like 'héroïne'
 and old not like 'héroïq%'
 and old not like '%philippin%'
 and old not like 'eczém%'
+and old not like 'kabbale'
+and old not like 'flûtiaux'
+and old not like 'sheikh'
+and old not like 'œcuméni%'
 -- The coordonner entry is erroneous. Let our dict generation do the right thing
 --
 -- Drop héro and héroïne to avoid removing the h for the meaning of héroique.
@@ -29,6 +33,13 @@ and old not like 'eczém%'
 --
 -- Drop eczémateux, as this entry takes precedence over the correct exémateux that
 -- we compute.
+--
+-- kabbale, flûtiaux and sheikh have differents spellings with the 1990
+-- rectifications, so drop the Érofa entries so the 1990 corrections can take
+-- precedence
+--
+-- drop œcuménique/œcuménisme because while most greek œ are rewritten é even
+-- if it's not the most common pronunciation, this one isn't.
 EOF
     } \
         | tr -d '"' \

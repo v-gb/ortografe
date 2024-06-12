@@ -549,6 +549,8 @@ let erofa_rule rules =
     ; "oeu", "eu"
     ; "œ", "eu"
     ; "oe", "eu"
+    ; "oest", "est" (* œstrogène *)
+    ; "œst", "est"
     ; "œ", "é"
     ; "oe", "é"
     ]

@@ -88,6 +88,12 @@
                           or ortho like 'hockey%'
                           or ortho like 'hulul%'
                         then 't'
+                        when ortho like 'hiéro%'
+                          or ortho like 'hypo%'
+                          or ortho like 'hyper%'
+                          or ortho like 'hystér%'
+                          or ortho like 'hémo%'
+                        then 'f'
                         when coalesce(w_lemme.h_aspire, w.h_aspire, 'true') = 'true' then 't'
                         else 'f'
                         end

@@ -940,7 +940,6 @@ courrez,courez
 donneriez,doneriez
 débattu,débatu
 gîte,gite
-hiéroglyphes,hiéroglifes
 impresario,imprésario
 maîtrisez,maitrisez
 abandonnait,abandonait
@@ -1211,6 +1210,7 @@ frottez,frotez
 transmettra,transmétra
 accompagnons,acompagnons
 adhère,adère
+kabbale,cabale
 disparaîtrait,disparaitrait
 débattue,débatue
 déshabillée,désabillée
@@ -1621,6 +1621,7 @@ gri-gri,grigri
 habituerai,abituerai
 interpellent,interpèlent
 nettoyons,nétoyons
+oscille,oscile
 rappeliez,rapeliez
 rapporterez,raporterez
 recycle,recicle
@@ -1635,6 +1636,7 @@ approuvée,aprouvée
 chaykh,cheik
 cheykh,cheik
 scheich,cheik
+sheikh,cheik
 collaborait,colaborait
 passe-partout,passepartout
 pollue,polue
@@ -1981,6 +1983,8 @@ joaillier,joailler
 lynché,linché
 mentionnait,mentionait
 nettoiera,nétoiera
+oecuménique,écuménique
+œcuménique,écuménique
 pardonnait,pardonait
 parrainé,parainé
 programmez,programez
@@ -2372,8 +2376,6 @@ hébergée,ébergée
 immobilisez,imobilisez
 martyrise,martirise
 martyrisé,martirisé
-oestrogènes,eustrogènes
-œstrogènes,eustrogènes
 offriront,ofriront
 omettez,ométez
 paraphez,parafez
@@ -2649,7 +2651,7 @@ décolleront,décoleront
 dédommagée,dédomagée
 flattent,flatent
 fourrerai,fourerai
-hypo,hipo
+hypo,ipo
 hébergera,ébergera
 hébergez,ébergez
 inhibe,inibe
@@ -3371,7 +3373,7 @@ grattant,gratant
 guettons,guétons
 habillerons,abillerons
 halopéridol,alopéridol
-hypochondriaque,hipocondriaque
+hypochondriaque,ipocondriaque
 hébergeant,ébergeant
 hébergeons,ébergeons
 inhumée,inumée
@@ -3789,6 +3791,7 @@ leurré,leuré
 milliseconde,miliseconde
 méprennent,méprènent
 méthédrine,métédrine
+oscillent,oscilent
 pagayez,pagaillez
 perfectionne,perfectione
 protégeraient,protègeraient
@@ -4866,7 +4869,7 @@ honorant,onorant
 honoreront,onoreront
 humanise,umanise
 humectée,umectée
-hypercoagulabilité,hipercoagulabilité
+hypercoagulabilité,ipercoagulabilité
 hyperkaliémie,iperkaliémie
 hypertrichose,ipertricose
 hypnotisait,ipnotisait
@@ -4886,7 +4889,6 @@ institutionnalisé,institutionalisé
 insufflait,insuflait
 insufflant,insuflant
 intercéderai,intercèderai
-interraciale,intéraciale
 interrogerait,intérogerait
 interrompais,intérompais
 interromprai,intéromprai
@@ -4915,8 +4917,6 @@ nasopharynx,nasofarinx
 neptunienne,neptuniène
 nourrissiez,nourissiez
 occuperions,ocuperions
-oesophagiennes,eusofagiènes
-œsophagiennes,eusofagiènes
 oeuvrera,euvrera
 œuvrera,euvrera
 oeuvrez,euvrez
@@ -5402,7 +5402,6 @@ herba,erba
 hibernaient,ibernaient
 hispanophone,hispanofone
 hister,ister
-hiéroglyphiques,hiéroglifiques
 homogénéisé,omogénéisé
 honoriez,onoriez
 horrifiait,orifiait
@@ -6614,8 +6613,12 @@ occasionnent,ocasionent
 occultait,ocultait
 occultera,ocultera
 occupai,ocupai
-oenothera,eunotera
-œnothera,eunotera
+oecuménisme,écuménisme
+œcuménisme,écuménisme
+oedèmes,édèmes
+œdèmes,édèmes
+oenothera,énotera
+œnothera,énotera
 offenserai,ofenserai
 offenserez,ofenserez
 offenseront,ofenseront
@@ -6639,6 +6642,8 @@ ordonneront,ordoneront
 ordonniez,ordoniez
 ornithoptère,ornitoptère
 orthographiées,ortografiées
+oscillait,oscilait
+oscillez,oscilez
 ostéoarthrite,ostéoartrite
 oursonne,oursone
 ovationné,ovationé
@@ -7961,7 +7966,6 @@ bucheronne,bucherone
 bûcheronne,bucherone
 bucheronner,bucheroner
 bûcheronner,bucheroner
-kabbales,cabales
 kabbalistes,cabalistes
 cabanettes,cabanètes
 cabrette,cabrète
@@ -9101,8 +9105,8 @@ hydrogénisation,hidrogénisation
 hygiaphone,igiafone
 hylémorphique,ilémorfique
 hyménoptère,iménoptère
-hyperborée,hiperborée
-hyperthyroïdien,hipertiroïdien
+hyperborée,iperborée
+hyperthyroïdien,ipertiroïdien
 hypnogène,ipnogène
 hypnotiquement,hipnotiquement
 hypnotisa,ipnotisa
@@ -9457,12 +9461,8 @@ occulta,oculta
 occultaient,ocultaient
 occultement,ocultement
 occupât,ocupât
-oenologues,eunologues
-œnologues,eunologues
-oenophile,eunofile
-œnophile,eunofile
-oesophages,eusofages
-œsophages,eusofages
+oenophile,énofile
+œnophile,énofile
 oeuvraient,euvraient
 œuvraient,euvraient
 oeuvrette,euvrète
@@ -9500,6 +9500,11 @@ orphique,orfique
 orphisme,orfisme
 orphée,orfée
 orthographiait,ortografiait
+oscilla,oscila
+oscillai,oscilai
+oscillaient,oscilaient
+oscillèrent,oscilèrent
+oscillé,oscilé
 ouateux,ouateus
 ouraniennes,ouraniènes
 ovationnaient,ovationaient
@@ -10526,11 +10531,13 @@ corrélé,corélé
 épellative,épélative
 façonnons,façonons
 factuellement,factuèlement
+flutiaux,flutiaus
+flûtiaux,flutiaus
 francopolyphonie,francopolifonie
 glottophage,glotofage
 hétérolingue,étérolingue
-hypercentral,hipercentral
-hypercentrale,hipercentrale
+hypercentral,ipercentral
+hypercentrale,ipercentrale
 illustreraient,ilustreraient
 mythifié,mitifié
 mythifiée,mitifiée
