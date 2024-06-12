@@ -1,4 +1,51 @@
-% Dictionary file format
+% Fichier de dictionnaire
+
+**(see English version further down)**
+
+Un fichier dictionnaire spécifie comment transcrire les mots d'un texte. Voici un
+exemple de dictionnaire qui remplace quelques `ph` par des `f` :
+
+```
+{"desc":"ph/f","lang":"fr"}
+photo,foto
+photographie,fotografie
+téléphone,téléfone
+```
+
+Le format est :
+
+- une liste de lignes (séparées par des sauts de lignes, pas de retours chariots)
+- chaque ligne contient l'ancienne orthographe, une virgule, la nouvelle
+  orthographe. Il n'y a ni guillemets ni échappements comme on en trouve dans les csv.
+
+  Un mot capitalisé dans un texte est d'abord cherché tel que dans le dictionnaire,
+  puis s'il n'y est pas, décapitalisé. Ainsi les noms communs sont réécrits même s'ils
+  sont capitalisés (dans les titres par exemple), mais des réécritures spécifiques pour
+  les noms propres sont possibles.
+
+  Si la nouvelle orthographe est une chaine vide, le mot n'est pas modifié.
+  
+  Un mot contenant des traits d'union est d'abord cherché entier dans le dictionnaire,
+  mais s'il n'y est pas, alors chaque morceau est traité indépendamment.
+
+Le fichier peut optionnellement contenir un objet json en première ligne, son schéma
+est décrit dans la partie anglaise plus bas.
+
+### Faire utiliser votre dictionnaire par d'autres gens
+
+Voir la section dans la partie anglaise.
+
+## English version
+
+A dictionary file specifies how to transcribe the words of a text. Here is a dictionary
+that replaces some `ph` by `f`:
+
+```
+{"desc":"ph/f","lang":"fr"}
+photo,foto
+photography,fotografy
+phone,fone
+```
 
 The format is :
 
@@ -48,18 +95,8 @@ Optionally, the first line can contain a one-line json value with the following 
 }
 ```
 
-Example of a dictionary that replaces `il` or `ill` by `y`:
 
-```
-{"desc":"il/y","lang":"fr","supports_repeated_rewrites":true,"plurals_in_s":true}
-fille,fiye
-travail,travaye
-famille,famiye
-travaille,travaye
-travailler,travayer
-```
-
-## Asking other people to load your dictionary
+### Asking other people to load your dictionary
 
 If you want to ask people to load a dictionary you provide, you can of course ask them to
 copy a link and paste it into the extension.
