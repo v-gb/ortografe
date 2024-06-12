@@ -41,7 +41,7 @@ A dictionary file specifies how to transcribe the words of a text. Here is a dic
 that replaces some `ph` by `f`:
 
 ```
-{"desc":"ph/f","lang":"fr"}
+{"desc":"ph/f","lang":"en"}
 photo,foto
 photography,fotografy
 phone,fone
