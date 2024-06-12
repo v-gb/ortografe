@@ -160,7 +160,7 @@ let main more_cmd =
              ~man:[ `S C.Manpage.s_description
                   ; `P "Transcrit le texte du document INPUT_FILE (ou stdin si non
                         spécifié) en OUTPUT_FILE (ou un nom dérivé de INPUT_FILE si non
-                        spécifié, ou stdout). La transcription utilise l'orthographe érofa
+                        spécifié, ou stdout). La transcription utilise l'orthographe Érofa
                         à moins qu'une autre orthographe ne soit sélectionnée."
                   ; `P "Exemples :"
                   ; `Pre "$(iname) foo.docx"

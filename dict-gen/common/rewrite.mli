@@ -1,6 +1,6 @@
 (** Functionality to respell words in the given lexique *)
 
-(** Matches words that shouldn't change, according to the érofa rules,
+(** Matches words that shouldn't change, according to the Érofa rules,
     like proper nouns, or manual exceptions. *)
 val erofa_preserve : string -> bool
 

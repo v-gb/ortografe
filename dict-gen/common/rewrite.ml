@@ -343,7 +343,7 @@ let erofa_preserve =
              ; str "prométhé"
              ; seq [rep any; str "flux"] (* reflux, influx comme flux *)
              (* pour préserver le t dans wisigoth et quelques autres mots. Je
-                ne comprends pas ce que fait le dico érofa d'ailleurs. ostrogoth
+                ne comprends pas ce que fait le dico Érofa d'ailleurs. ostrogoth
                 est un nom de peuple, pourquoi le toucher ? *)
              ; seq [any; str "got"; opt (str "h"); opt (str "s"); eos ]
       ]))
@@ -479,7 +479,7 @@ let bit_x = bit_h + 1
 let bit_oe = bit_x + 1 (* oe ou œ *)
 let bit_y = bit_oe + 1
 let find_relevant_patterns ortho phon =
-  (* On utilise une hypothèse d'indépendence ici : les réécritures érofa ne crée pas
+  (* On utilise une hypothèse d'indépendence ici : les réécritures Érofa ne crée pas
      d'opportunités d'autres réécritures. Avec des mots arbitraires, on pourrait avoir
      arhra, où une fois le h supprimé, une opportunité de simplifier une double
      consonne se présente. Mais on ignore ce genre de possibilités. Il serait peut-être
@@ -1033,7 +1033,7 @@ let _ : rule list =
         (fun () ->
              (* problème :
                 - trop d'accent grave sur les e en général. On pourrait au moins appliquer
-                la même idée que les règles érofa pour améliorer ça.
+                la même idée que les règles Érofa pour améliorer ça.
               *)
              let graphem_by_phonem =
                Hashtbl.of_alist_exn (module Uchar)

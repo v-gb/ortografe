@@ -91,7 +91,7 @@ let options = lazy { Ortografe.convert_uppercase = true
                        (let dict = Lazy.force Ortografe_embedded.erofa in
                         function
                         (* modernize archaisms in frankenstein, as the edition is quite old
-                           and people could get confused and think we made a mistake, or érofa
+                           and people could get confused and think we made a mistake, or Érofa
                            is removing silent t's *)
                         | "savans" -> Some "savants"
                         | "momens" -> Some "moments"

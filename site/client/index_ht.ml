@@ -850,7 +850,7 @@ module Index = struct
             ]
         (* Avec gboard, le fait qu'on ne puisse pas supprimer les entrées de façon
            simple limite l'utilisation aux orthographes qu'on veut utiliser
-           permanennement, ce n'est pas vraiment utilisable pour érofa où au mieux un
+           permanennement, ce n'est pas vraiment utilisable pour Érofa où au mieux un
            utilisateur voudrait passer d'une orthographe à l'autre. *)
         ; div ~attrs:[exp_hidden_class]
             [ list `ul [

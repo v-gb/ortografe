@@ -83,9 +83,9 @@ let check_and_compare str rules =
 let%expect_test _ =
   let str = {|
 rien: rien
-érofa: rythme apparaitre
+Érofa: rythme apparaitre
 1990: maître wallabies
-1990 + érofa: apparaître
+1990 + Érofa: apparaître
 oe: oedipien oedipienne
 œ: œdipien œdipienne
 cas difficile: chariot chariotage
@@ -94,63 +94,63 @@ cas difficile: chariot chariotage
   let () = check_and_compare [ `Builtin "erofa" ] in
   [%expect {|
     rien: rien
-    érofa: ritme aparaitre
+    Érofa: ritme aparaitre
     1990: maître wallabies
-    1990 + érofa: aparaître
+    1990 + Érofa: aparaître
     oe: oedipien oedipiène
     œ: œdipien œdipiène
     cas dificile: chariot chariotage |}];
   let () = check_and_compare [ `Builtin "erofa"; `Builtin "1990" ] in
   [%expect {|
     rien: rien
-    érofa: ritme aparaitre
+    Érofa: ritme aparaitre
     1990: maitre wallabys
-    1990 + érofa: aparaitre
+    1990 + Érofa: aparaitre
     oe: oedipien oedipiène
     œ: œdipien œdipiène
     cas dificile: chariot chariotage |}];
   let () = check_and_compare [ `Builtin "erofa"; `Builtin "oe" ] in
   [%expect {|
     rien: rien
-    érofa: ritme aparaitre
+    Érofa: ritme aparaitre
     1990: maître wallabies
-    1990 + érofa: aparaître
+    1990 + Érofa: aparaître
     oe: œdipien œdipiène
     œ: œdipien œdipiène
     cas dificile: chariot chariotage |}];
   let () = check_and_compare [ `Builtin "erofa"; `Builtin "1990"; `Builtin "oe" ] in
   [%expect {|
     rien: rien
-    érofa: ritme aparaitre
+    Érofa: ritme aparaitre
     1990: maitre wallabys
-    1990 + érofa: aparaitre
+    1990 + Érofa: aparaitre
     oe: œdipien œdipiène
     œ: œdipien œdipiène
     cas dificile: chariot chariotage |}];
   let () = check_and_compare [ `Builtin "1990" ] in
   [%expect {|
     rien: rien
-    érofa: rythme apparaitre
+    Érofa: rythme apparaitre
     1990: maitre wallabys
-    1990 + érofa: apparaitre
+    1990 + Érofa: apparaitre
     oe: oedipien oedipienne
     œ: œdipien œdipienne
     cas difficile: charriot charriotage |}];
   let () = check_and_compare [ `Builtin "oe" ] in
   [%expect {|
     rien: rien
-    érofa: rythme apparaitre
+    Érofa: rythme apparaitre
     1990: maître wallabies
-    1990 + érofa: apparaître
+    1990 + Érofa: apparaître
     oe: œdipien œdipienne
     œ: œdipien œdipienne
     cas difficile: chariot chariotage |}];
   let () = check_and_compare [ `Builtin "1990"; `Builtin "oe" ] in
   [%expect {|
     rien: rien
-    érofa: rythme apparaitre
+    Érofa: rythme apparaitre
     1990: maitre wallabys
-    1990 + érofa: apparaitre
+    1990 + Érofa: apparaitre
     oe: œdipien œdipienne
     œ: œdipien œdipienne
     cas difficile: charriot charriotage |}];
