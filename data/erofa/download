@@ -1,0 +1,3 @@
+#!/bin/bash
+set -e -u -o pipefail
+curl https://gitlab.com/erofa/coorte/-/raw/3681e401127ec934023d35631624f725f1944cd7/DOR/DOR.csv -O
