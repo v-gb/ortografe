@@ -53,7 +53,7 @@ type env =
 type aligned_row = { row : Data.Lexique.row; alignment : Rules.search_res }
 
 let debug aligned_row search_res2 ortho2 phon2 b1 b2 =
-  if aligned_row.row.ortho = "graffiti"
+  if aligned_row.row.ortho = "mourre"
   then Stdlib.prerr_endline
          (Sexp.to_string [%sexp
                              ~~(ortho2 : string)
@@ -230,12 +230,11 @@ let erofa_preserve =
              [ prefix "souhai"
              ; prefix "alleman"
              ; prefix "hollan"
-             ; prefix "mourr"
              ; str "chréti"
              ; str "christ"
              ; str "olymp"
              ; str "hébr"
-             ; str "gallo"
+             ; str "gallo" (* problème : attrape gallon aussi *)
              ; str "bohém"
              ; str "bohèm"
              ; str "bohêm"
@@ -250,7 +249,7 @@ let erofa_preserve =
              ; str "stakhanov"
              ; str "tyrrh"
              ; str "dionys"
-             ; str "tyrol"
+             ; str "tyroli" (* tyrolien, mais pas martyrologe *)
              ; str "élysé"
              ; str "abyssin"
              ; str "dreyfus"
@@ -277,7 +276,9 @@ let erofa_preserve =
              ; str "sahar"
              ; str "luthér"
              ; prefix "phénic"
-             ; str "syri" (* syrien *)
+             ; seq [ str "syri"
+                   ; alt [ str "e"; str "é"; str "è" ]
+                   ] (* syrien, mais pas syrinx *)
              ; str "athén"
              ; prefix "héro"
              ; str "arthur"
@@ -659,7 +660,9 @@ let erofa_rule rules =
           (* exclut des trucs du genre tramway -> tramwai *)
           aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_y, "i") ~to_:"i" ~start:1;
           aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_y, "j") ~to_:"i"
-                     ~start:(Bool.to_int (!aligned_row.row.ortho <> "yeus"));
+                           ~start:(match !aligned_row.row.ortho with
+                                   | "yeus" | "yeuse" -> 0
+                                   | _ -> 1);
           aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_y, "ij") ~to_:"i" ~start:1;
           aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_yn, "in") ~to_:"in";
           aligned_row := rewrite_graphem env !aligned_row ~from:(pattern_yn, "5") ~to_:"in";

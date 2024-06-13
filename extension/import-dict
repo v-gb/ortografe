@@ -20,6 +20,7 @@ and old not like '%philippin%'
 and old not like 'eczém%'
 and old not like 'kabbale'
 and old not like 'flûtiaux'
+and old not like 'vacill%'
 and old not like 'sheikh'
 and old not like 'œcuméni%'
 -- The coordonner entry is erroneous. Let our dict generation do the right thing
@@ -38,8 +39,11 @@ and old not like 'œcuméni%'
 -- rectifications, so drop the Érofa entries so the 1990 corrections can take
 -- precedence
 --
+-- drop vacillation and others, because the pronunciation used seems surprising
+--
 -- drop œcuménique/œcuménisme because while most greek œ are rewritten é even
 -- if it's not the most common pronunciation, this one isn't.
+
 EOF
     } \
         | tr -d '"' \
