@@ -520,6 +520,22 @@ type path_elt =
   }
 let __ p = p.i, p.j, p.this_surprise, p.importance
 type search_res = { path : path_elt list; surprise : int }
+let to_string { path; surprise } =
+  let ortho =
+    List.map path ~f:__.graphem
+    |> String.concat
+    |> String.chop_suffix_if_exists ~suffix:"$"
+  in
+  let graphemes =
+    List.map path ~f:(fun p ->
+        if String.(=) p.phonem ""
+        then "[32m" ^ p.graphem ^ "[39m"
+        else p.graphem) |> String.concat ~sep:"|" in
+  let phonemes =
+    List.map path ~f:(fun p -> p.phonem)
+    |> String.concat ~sep:"|"
+  in
+  [%string "%{surprise#Int}  %{ortho} %{graphemes}  %{phonemes}\n"]
 
 module Heap =
   Binary_heap.Make(struct

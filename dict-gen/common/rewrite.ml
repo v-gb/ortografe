@@ -52,10 +52,30 @@ type env =
 
 type aligned_row = { row : Data.Lexique.row; alignment : Rules.search_res }
 
+let debug aligned_row search_res2 ortho2 phon2 b1 b2 =
+  if aligned_row.row.ortho = "graffiti"
+  then Stdlib.prerr_endline
+         (Sexp.to_string [%sexp
+                             ~~(ortho2 : string)
+                        , ~~(phon2 : string)
+                        , ~~(b1 : bool)
+                        , (if b1 then Some b2 else None : bool option)
+                        , (Rules.to_string search_res2 : string)
+         ])
+       
 let keep_if_plausible_phon_opt env (aligned_row : aligned_row) ortho2 phon2 =
   match Rules.search env.rules ortho2 phon2 with
-  | Ok search_res2 when search_res2.surprise <=$ aligned_row.alignment.surprise
-                        && env.accept ortho2 ->
+  | Ok search_res2 when
+         if true
+         then
+           search_res2.surprise <=$ aligned_row.alignment.surprise
+           && env.accept ortho2
+         else (
+           let b1 = search_res2.surprise <=$ aligned_row.alignment.surprise in
+           let b2 = b1 && env.accept ortho2 in
+           debug aligned_row search_res2 ortho2 phon2 b1 b2;
+           b2
+         ) ->
      Some { row = { aligned_row.row with ortho = ortho2; phon = phon2 }; alignment = search_res2 }
   | _ -> None
 

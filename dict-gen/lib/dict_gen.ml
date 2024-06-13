@@ -127,17 +127,7 @@ let check (lexique : Data.Lexique.t) ~skip =
       else
         match Rules.search rules row.ortho row.phon with
         | Error s -> prerr_endline (Sexp_with_utf8.to_string_hum s)
-        | Ok { path; surprise } ->
-           let graphemes =
-             List.map path ~f:(fun p ->
-                 if String.(=) p.phonem ""
-                 then "[32m" ^ p.graphem ^ "[39m"
-                 else p.graphem) |> String.concat ~sep:"|" in
-           let phonemes =
-             List.map path ~f:(fun p -> p.phonem)
-             |> String.concat ~sep:"|"
-           in
-           printf "%d %d  %s %s  %s\n%!" i surprise row.ortho graphemes phonemes;
+        | Ok search_res -> printf "%d %s%!" i (Rules.to_string search_res)
     )
 
 let main () =
