@@ -52,6 +52,13 @@ type env =
 
 type aligned_row = { row : Data.Lexique.row; alignment : Rules.search_res }
 
+let keep_if_plausible_phon_opt env (aligned_row : aligned_row) ortho2 phon2 =
+  match Rules.search env.rules ortho2 phon2 with
+  | Ok search_res2 when search_res2.surprise <=$ aligned_row.alignment.surprise
+                        && env.accept ortho2 ->
+     Some { row = { aligned_row.row with ortho = ortho2; phon = phon2 }; alignment = search_res2 }
+  | _ -> None
+
 let rewrite ?(start = 0) env (aligned_row : aligned_row) ~target ~repl =
   let pos = ref start in
   let aligned_row = ref aligned_row in
@@ -61,31 +68,20 @@ let rewrite ?(start = 0) env (aligned_row : aligned_row) ~target ~repl =
     match string_search_pattern_replace_first_opt target ~in_:row1.ortho ~with_:repl ~pos:!pos with
     | None -> pos := String.length row1.ortho
     | Some (ortho2, match_i) ->
-       (match Rules.search env.rules ortho2 row1.phon with
-        | Ok search_res2 when search_res2.surprise <=$ aligned_row1.alignment.surprise
-                              && env.accept ortho2 ->
-           aligned_row := { row = { row1 with ortho = ortho2 }; alignment = search_res2 }
-        | _ -> ());
+       (match keep_if_plausible_phon_opt env aligned_row1 ortho2 row1.phon with
+        | Some aligned_row2 -> aligned_row := aligned_row2
+        | None -> ());
        pos := match_i + 1
   done;
   !aligned_row
-
-let keep_if_plausible_phon_opt env (aligned_row : aligned_row) ortho2 phon2 =
-  match Rules.search env.rules ortho2 phon2 with
-  | Ok search_res2 when search_res2.surprise <=$ aligned_row.alignment.surprise
-                        && env.accept ortho2 ->
-     Some { row = { aligned_row.row with ortho = ortho2; phon = phon2 }; alignment = search_res2 }
-  | _ -> None
 
 let keep_if_plausible_opt env (aligned_row : aligned_row) ortho2 =
   keep_if_plausible_phon_opt env aligned_row ortho2 aligned_row.row.phon
 
 let keep_if_plausible env (aligned_row : aligned_row) ortho2 =
-  match Rules.search env.rules ortho2 aligned_row.row.phon with
-  | Ok search_res2 when search_res2.surprise <=$ aligned_row.alignment.surprise
-                        && env.accept ortho2 ->
-     { row = { aligned_row.row with ortho = ortho2 }; alignment = search_res2 }
-  | _ -> aligned_row
+  match keep_if_plausible_opt env aligned_row ortho2 with
+  | Some a -> a
+  | None -> aligned_row
 
 let keep_regardless env (aligned_row : aligned_row) ortho2 =
   match Rules.search env.rules ortho2 aligned_row.row.phon with
