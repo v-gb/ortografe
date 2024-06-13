@@ -64,7 +64,7 @@ pre {
 }
      </style>
      </head>
-     <body><h1>%s</h1><pre>%s</pre></body>
+     <body><h3>%s</h3><pre>%s</pre></body>
      </html>"
     title_unescaped
     body_unescaped

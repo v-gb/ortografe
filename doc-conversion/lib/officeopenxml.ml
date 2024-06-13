@@ -124,7 +124,7 @@ let convert_old which ?convert_text ?progress ~options src ~dst =
   (match Stdlib.Sys.backend_type with
   | Native | Bytecode -> ()
   | Other _ ->
-     failwith [%string "Les fichiers « .%{old_ext} » ne sont pas supportés ici. Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."]
+     failwith [%string "Les fichiers « .%{old_ext} » ne sont pas supportés ici (format trop ancien). Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."]
   );
   (* Should put a memory limit, perhaps with the cgroup exe? At least, in prod the OOM
      killer is selecting the open office process, not the server. *)
@@ -137,8 +137,11 @@ let convert_old which ?convert_text ?progress ~options src ~dst =
       let new_path = old_path ^ "x" in
       Out_channel.with_open_bin old_path
         (fun oc -> Out_channel.output_string oc src);
-      sys_command_exn [%string {|cd %{Filename.quote d} && timeout -s SIGKILL 10s bwrap --unshare-all --die-with-parent --new-session --dev-bind / / libreoffice --headless --convert-to %{new_ext} %{Filename.basename old_path} >&2|}]
+      sys_command_exn [%string {|which libreoffice > /dev/null || exit 13; cd %{Filename.quote d} && timeout -s SIGKILL 10s bwrap --unshare-all --die-with-parent --new-session --dev-bind / / libreoffice --headless --convert-to %{new_ext} %{Filename.basename old_path} >&2|}]
         ~handle:(function
+          | 13 ->
+             Some
+               (Failure [%string "Les fichiers « .%{old_ext} » ne sont plus supportés ici (format trop ancien). Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."])
           | 137 (* SIGKILL *) ->
              Some
                (Failure
