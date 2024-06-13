@@ -342,24 +342,25 @@ let gen ?(profile = false) ?progress ~rules ~all ~output ~json_to_string data =
         build_lexique_post90 lexique post90 ~rect1990)
   in
   let print, after =
-    if all
-    then (fun old new_ ->
-      let mod_ = if String.(=) old new_ then "=" else "M" in
-      output [%string "%{old},%{new_},%{mod_}\n"]),
-         ignore
-    else (
-      let all = Hashtbl.create (module String) ~size:(List.length lexique) in
-      (fun old new_ -> add_ranked all ~key:old ~data:new_),
-      (fun () ->
-        add_post90_entries all post90 ~has_erofa;
-        simplify_mapping all ~plurals_in_s;
-        (json_of_metadata metadata
-         |> json_to_string
-         |> (fun s -> s ^ "\n")
-         |> output
-        );
-        List.iter (ranked all) ~f:(fun (old, new_) ->
-            output [%string "%{old},%{new_}\n"])))
+    let all_tbl = Hashtbl.create (module String) ~size:(List.length lexique) in
+    (fun old new_ -> add_ranked all_tbl ~key:old ~data:new_),
+    (fun () ->
+      add_post90_entries all_tbl post90 ~has_erofa;
+      if not all then (
+        simplify_mapping all_tbl ~plurals_in_s;
+        json_of_metadata metadata
+        |> json_to_string
+        |> (fun s -> s ^ "\n")
+        |> output
+      );
+      if all
+      then
+        List.iter (ranked all_tbl) ~f:(fun (old, new_) ->
+            let mod_ = if String.(=) old new_ then "=" else "M" in
+            output [%string "%{old},%{new_},%{mod_}\n"])
+      else
+        List.iter (ranked all_tbl) ~f:(fun (old, new_) ->
+            output [%string "%{old},%{new_}\n"]))
   in
   Option.iter progress ~f:(fun f -> f 10);
   let stats =
