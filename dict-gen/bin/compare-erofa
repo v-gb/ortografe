@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e -u -o pipefail
+dor=$(jj workspace root)/_build/default/extension/dict.external-sources.gen.csv
+mine=/tmp/mine
+$(jj workspace root)/_build/default/dict-gen/bin/dict_gen.exe gen --oe --1990 --erofa --all --write $mine
+sqlite3 -bail <<EOF | less -S
+.mode csv
+create table dor(old,new_);
+.import $dor dor
+create table gen(old,new_,change);
+.import $mine gen
+select dor.old, dor.new_, gen.new_ from dor inner join gen on dor.old = gen.old where dor.new_ <> gen.new_ order by dor.old;
+EOF

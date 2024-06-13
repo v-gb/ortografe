@@ -12,38 +12,23 @@ alter table t rename column "Grafie modifiée" to new;
 select old, new
 from t
 where old != ''
-and old not like 'coordonner'
-and old not like 'héro'
-and old not like 'héroïne'
-and old not like 'héroïq%'
-and old not like '%philippin%'
-and old not like 'eczém%'
-and old not like 'kabbale'
-and old not like 'flûtiaux'
-and old not like 'vacill%'
-and old not like 'sheikh'
-and old not like 'œcuméni%'
--- The coordonner entry is erroneous. Let our dict generation do the right thing
---
--- Drop héro and héroïne to avoid removing the h for the meaning of héroique.
--- We then make the error of not removing the h for the drug, but oh well, that
--- seems like a less confusing error to make.
---
--- Drop phillipine, as as a game it should be rewritten, but this word is most
--- likely the adjective for the people (or the country when pluralalized)
---
--- Drop eczémateux, as this entry takes precedence over the correct exémateux that
--- we compute.
---
--- kabbale, flûtiaux and sheikh have differents spellings with the 1990
--- rectifications, so drop the Érofa entries so the 1990 corrections can take
--- precedence
---
--- drop vacillation and others, because the pronunciation used seems surprising
---
--- drop œcuménique/œcuménisme because while most greek œ are rewritten é even
--- if it's not the most common pronunciation, this one isn't.
-
+and old not like 'coordonner' -- new=cordoner, ce qui est faux
+and old not like 'héro' -- on laisse tomber tout ça, car le sens de héroîque
+and old not like 'héroïne' -- garde le h, mais le sens de la drogue non, et comme on ne
+and old not like 'héroïq%' -- peut pas distinguer, garder tous les h est préférable
+and old not like '%philippin%' -- le jeu « phillipine » peut-être réécrit, mais pas le pays, donc on préfère ne pas avoir l'entrée
+and old not like 'eczém%' -- 1990 pas pris en compte
+and old not like 'kabbale' -- 1990 pas pris en compte
+and old not like 'flûtiaux' -- 1990 pas pris en compte
+and old not like 'vacill%' -- entrée utilise une prononcation /l/, mais /j/ est plus courant
+and old not like 'sheikh' -- 1990 pas pris en compte
+and old not like 'œcuméni%' -- œ->eu. Autant utiliser é comme pour les autres œ
+and old not like 'bufflonne' -- new=bufluonne au lieu de buflone
+and not (old like 'douc%' and new like 'douss%') -- entrée non justifiée par les règles
+and old not like 'déhotter' -- sans le préfixe, le h est aspiré, donc il est à garder ici
+and old not like '%succion%' -- prononciation en /s/ au lieu /ks/ est possible mais moins commune
+and old not like 'wallonne' -- erreur du DOR, qui touche un nom de peuple
+and old not like 'zorille' -- prononcé /y/, pas /l/
 EOF
     } \
         | tr -d '"' \

@@ -99,6 +99,7 @@
                           or ortho like 'humano%' -- humano, mais pas humant
                           or ortho like 'héli%' -- héliporté
                           or ortho like 'hérédo'
+                          or ortho like 'herpé%'
                         then 'f'
                         when coalesce(w_lemme.h_aspire, w.h_aspire, 'true') = 'true' then 't'
                         else 'f'
