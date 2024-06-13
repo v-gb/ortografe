@@ -6,7 +6,7 @@ if [ "${1-part1}" = part1 ]; then
     {
         sqlite3 -bail <<'EOF'
 .mode csv
-.import ../data/erofa/DOR-numerique_v1.0.2.csv t
+.import ../data/erofa/DOR.csv t
 alter table t rename column "Grafie initiale" to old;
 alter table t rename column "Grafie modifiée" to new;
 select old, new
