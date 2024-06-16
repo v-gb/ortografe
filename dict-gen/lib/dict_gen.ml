@@ -22,12 +22,13 @@ let root ~from =
      done;
      !from
 
-let build_erofa_ext ~root =
+let build_erofa_ext ~root ~all =
   let combined_erofa =
     Dict_gen.build_erofa_ext
       ~erofa:(Data_fs.load_erofa (`Root root))
       ~post90:(Data_fs.load_post90 (`Root root))
       ~lexique:(Data_fs.load_lexique (`Root root))
+      ~all
   in
   List.iter combined_erofa ~f:(fun (old, new_) ->
       print_endline [%string "%{old},%{new_}"])
@@ -154,10 +155,12 @@ let main () =
                check lexique ~skip:(Rewrite.load_skip ())))
       ; gen_cmd "gen"
       ; C.Cmd.v (C.Cmd.info "erofa-ext")
-          (let+ () = return () in
+          (let+ () = return ()
+           and+ all = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"inclure les mots inchangés" ["all"]))
+           in
            Eio_main.run (fun env ->
                let root = root ~from:(Eio.Stdenv.fs env) in
-               build_erofa_ext ~root))
+               build_erofa_ext ~root ~all))
       ]
   in
   C.Cmd.eval cmd |> exit

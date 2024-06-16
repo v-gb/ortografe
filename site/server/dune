@@ -19,3 +19,12 @@
  (link_flags :standard -ccopt -Wl,--wrap=fmod,--wrap=__isoc23_strtol)
  (preprocess (pps ppx_jane lwt_ppx ppx_lazy_option_op))
  )
+
+(rule
+ (deps
+  (sandbox always)
+  (:erofa_all %{project_root}/data/homemade/dict-erofa-all.csv))
+ (action (with-stdout-to data.ml
+          (run bash
+               -euo pipefail
+               -c "echo -n 'let data_homemade_dict_erofa_all = {|'; cat %{erofa_all}; echo '|}';"))))

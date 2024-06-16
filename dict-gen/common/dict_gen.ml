@@ -85,7 +85,7 @@ let build_lexique_post90 (lexique : Data.Lexique.t) post90 ~rect1990 =
         | None -> [ r ]
         | Some new_ortho -> [ r; { r with ortho = new_ortho } ])
 
-let build_erofa_ext ~erofa ~post90 ~lexique =
+let build_erofa_ext ~erofa ~post90 ~lexique ~all =
   (* start with whole erofa db, so [simplify_mapping] considers singular in the erofa csv *)
   let base = Hashtbl.map erofa ~f:(fun data -> data, -1) in
   ignore (
@@ -99,8 +99,10 @@ let build_erofa_ext ~erofa ~post90 ~lexique =
         (fun old new_ -> add_ranked base ~key:old ~data:new_)
       : Rewrite.stats);
   add_post90_entries base post90 ~has_erofa:true;
-  simplify_mapping base ~plurals_in_s:true;
-  Hashtbl.filter_inplace base ~f:(fun (_, rank) -> rank >= 0 (* i.e. "not from erofa" *));
+  if not all then (
+    simplify_mapping base ~plurals_in_s:true;
+    Hashtbl.filter_inplace base ~f:(fun (_, rank) -> rank >= 0 (* i.e. "not from erofa" *));
+  );
   ranked base
 
 type embedded =

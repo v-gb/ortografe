@@ -10,6 +10,7 @@ val build_erofa_ext
     : erofa:(string, string) Hashtbl.t
    -> post90:(string, string) Hashtbl.t
    -> lexique:Data.Lexique.t
+   -> all:bool
    -> (string * string) list
 
 type embedded =

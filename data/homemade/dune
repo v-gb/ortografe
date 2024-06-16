@@ -4,6 +4,7 @@
 ;; verbs conjugations (the erofa dictionary usually only lists the infinitives), or some
 ;; feminine inflections. It also ensures that the overall rewrite applies a decent fraction
 ;; of the 1990 rectifications.
+
 (rule
  (deps
   (sandbox always)
@@ -16,3 +17,15 @@
   (with-stdout-to dict-erofa-ext.csv
    (setenv DUNEROOT %{project_root}
     (run %{project_root}/dict-gen/bin/dict_gen.exe erofa-ext)))))
+
+(rule
+ (deps
+  (sandbox always)
+   %{project_root}/data/lexique/Lexique383.gen.tsv
+   %{project_root}/extension/dict.external-sources.gen.csv
+   %{project_root}/extension/dict1990.gen.csv
+ )
+ (action
+  (with-stdout-to dict-erofa-all.csv
+   (setenv DUNEROOT %{project_root}
+    (run %{project_root}/dict-gen/bin/dict_gen.exe erofa-ext --all)))))
