@@ -32,8 +32,49 @@ let build_erofa_ext ~root ~dict_search =
   in
   if dict_search
   then
+    let special_cases =
+      [ "héro", "éro (drogue)"
+      ; "héroïne", "éroïne (drogue), héroïne"
+      (* The DOR sometimes contains several entries (like barillet below), or entries
+         that make sense in specifics sense (like héroïne) above, which the rewriting
+         tools can't use. But for dict-search, it can make sense to keep them.
+
+         They come from this DOR query, or seeing what gets filtered out in
+         extension/import-dict:
+         select old,group_concat(new)
+         from (select distinct "Grafie initiale" as old, "Grafie modifiée" as new from t)
+         group by old
+         having count( * ) > 1
+         order by old;
+       *)
+      ; "barillet", "barilet, barillet"
+      ; "hyène", "hiène, iène"
+      ; "malachite", "malaquite, malachite"
+      ; "sakieh", "sakiè, sakié"
+      ; "surrénal", "surénal, surrénal"
+      ; "surrénale", "surénale, surrénale"
+      ; "surrénalien", "surénalien, surrénalien"
+      ; "surrénalienne", "surénaliène, surrénaliène"
+      ; "surrénalite", "surénalite, surrénalite"
+      ; "surrénaux", "surénaus, surrénaus"
+      ; "tyrolienne", "tyroliène, tiroliène"
+      ; "œcuménicité", "eucuménicité, écuménicité"
+      ; "œcuménique", "eucuménique, écuménique"
+      ; "œcuménisme", "eucuménisme, écuménisme"
+      ; "œdème", "eudème, édème"
+      ]
+      |> List.concat_map ~f:(fun (k, v) ->
+             let k' = String.substr_replace_all k ~pattern:"œ" ~with_:"oe" in
+             if String.(=) k k'
+             then [ (k, v) ]
+             else [ (k, v); (k', v) ])
+      |> Hashtbl.of_alist_exn (module String)
+    in
     Dict_search.create
-      (fun f -> List.iter combined_erofa ~f:(fun (a, b) -> f a b))
+      (fun f -> List.iter combined_erofa ~f:(fun (a, b) ->
+                    match Hashtbl.find special_cases a with
+                    | Some b' -> f a b'
+                    | None -> f a b))
     |> Dict_search.to_persist
     |> print_string
   else
