@@ -508,6 +508,31 @@ module Index = struct
           ]
       ]
 
+  let section_dictionnaire () =
+    section
+      ~attrs:[exp_hidden_class]
+      [ h3 [ text "Dictionnaire de transcription" ]
+      ; div
+          ~cl:"text-align: center;"
+          [ leafelt "input"
+              [ "type", "text"
+              ; "placeholder", "Cherchez un mot !"
+              ; "id", "dict-search-input"
+              ]
+          ]
+      ; div
+          ~attrs:[ "id", "dict-search-output" ]
+          ~cl:"table { margin: auto }
+               td { text-align: center }
+               tbody tr:nth-child(odd) {
+                 background-color: #FAF9F6;
+               }
+               "
+          []
+      ; p ~cl:"font-size: 0.8em;"
+          [ text "Il est possible qu'il y ait quelques erreurs sur des mots peu communs." ]
+      ]
+
   let section_transcription_interactive () =
     section
       [ h3 [ text "Transcription interactive" ]
@@ -893,7 +918,8 @@ module Index = struct
       ; list' `ul
           (let works = [ "style", "list-style-type:\"\\2705\u{A0}\"" ] in
            let doesnt_work = [ "style", "list-style-type:\"\\274C\u{A0}\"" ] in
-           [ works, [ text "transcription interactive (voir plus bas)" ]
+           [ exp_hidden_class :: doesnt_work, [ text "Dictionnaire de transcription" ]
+           ; works, [ text "transcription interactive (voir plus bas)" ]
            ; works, [ text "transcription de documents, en ligne (voir plus bas)" ]
            ; works, [ text "transcription de documents, sur votre ordinateur (voir "
                     ; code [ text "--help" ]
@@ -1154,6 +1180,7 @@ module Index = struct
                   [ h2 [ text "Outils de mise en pratique" ]
                   ; p [ text "Nous proposons des outils pour utiliser cette proposition de rationalisation, que ce soit pour la lecture ou l'écriture." ]
                   ]
+              ; section_dictionnaire ()
               ; section_transcription_interactive ()
               ; section_transcription_en_ligne ()
               ; section_transcription_locale ()

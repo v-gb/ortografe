@@ -176,3 +176,41 @@ document.getElementById("download-dict")?.addEventListener("click", async (e) =>
         e.target.classList.remove("loading");
     }
 })
+
+
+// duplicated from rewrite.js
+function sequentialized_and_merged(f) {
+    let state = 0; // 0: idle, 1: running, 2: running + need to call again afterwards
+    return async function() {
+        if (state != 0) { state = 2; return };
+        try {
+            while (true) {
+                state = 1;
+                await f(...arguments);
+                if (state == 1) { return }
+            }
+        } finally {
+            state = 0;
+        }
+    }
+}
+
+const dict_search_input = document.getElementById("dict-search-input");
+if (dict_search_input) {
+    const dict_search_output = document.getElementById("dict-search-output");
+    dict_search_input.addEventListener("input", sequentialized_and_merged(async (e) => {
+        let html;
+        if (dict_search_input.value == '') {
+            html = ''
+        } else {
+            const p = new URLSearchParams();
+            p.set("q", dict_search_input.value);
+            const response = (await fetch("/dict?" + p.toString()));
+            if (!response.ok) {
+                throw new Error(`${response.status} ${response.statusText}`);
+            }
+            html = await response.text();
+        }
+        dict_search_output.innerHTML = html;
+    }))
+}
