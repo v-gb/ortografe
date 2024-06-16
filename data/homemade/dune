@@ -26,6 +26,6 @@
    %{project_root}/extension/dict1990.gen.csv
  )
  (action
-  (with-stdout-to dict-erofa-all.csv
+  (with-stdout-to dict-erofa-dict-search.binio
    (setenv DUNEROOT %{project_root}
-    (run %{project_root}/dict-gen/bin/dict_gen.exe erofa-ext --all)))))
+    (run %{project_root}/dict-gen/bin/dict_gen.exe erofa-ext --dict-search)))))

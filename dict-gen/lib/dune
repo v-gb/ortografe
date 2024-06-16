@@ -7,6 +7,7 @@
    core_unix
    dict_gen_common
    dict_gen_nonbrowser
+   dict_search
    eio
    eio_main
    sexp_with_utf8

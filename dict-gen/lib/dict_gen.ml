@@ -22,16 +22,23 @@ let root ~from =
      done;
      !from
 
-let build_erofa_ext ~root ~all =
+let build_erofa_ext ~root ~dict_search =
   let combined_erofa =
     Dict_gen.build_erofa_ext
       ~erofa:(Data_fs.load_erofa (`Root root))
       ~post90:(Data_fs.load_post90 (`Root root))
       ~lexique:(Data_fs.load_lexique (`Root root))
-      ~all
+      ~all:dict_search
   in
-  List.iter combined_erofa ~f:(fun (old, new_) ->
-      print_endline [%string "%{old},%{new_}"])
+  if dict_search
+  then
+    Dict_search.create
+      (fun f -> List.iter combined_erofa ~f:(fun (a, b) -> f a b))
+    |> Dict_search.to_persist
+    |> print_string
+  else
+    List.iter combined_erofa ~f:(fun (old, new_) ->
+        print_endline [%string "%{old},%{new_}"])
 
 let with_flow ~env ~write ~diff ~drop ~f =
   match write, diff with
@@ -156,11 +163,11 @@ let main () =
       ; gen_cmd "gen"
       ; C.Cmd.v (C.Cmd.info "erofa-ext")
           (let+ () = return ()
-           and+ all = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"inclure les mots inchangés" ["all"]))
+           and+ dict_search = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"afficher un Dict_search.t persisté" ["dict-search"]))
            in
            Eio_main.run (fun env ->
                let root = root ~from:(Eio.Stdenv.fs env) in
-               build_erofa_ext ~root ~all))
+               build_erofa_ext ~root ~dict_search))
       ]
   in
   C.Cmd.eval cmd |> exit

@@ -357,31 +357,30 @@ let _print_memory () =
   Gc.compact ();
   Core.print_s (memory ())
 
-let time str f =
+let time f =
   let open Core in
   let before = Time_ns.now () in
   let res = f () in
-  let duration = Time_ns.Span.to_int_ms (Time_ns.diff (Time_ns.now ()) before) in
-  Dream.log "%s: %dms" str duration;
-  res
+  res, Time_ns.Span.to_int_ms (Time_ns.diff (Time_ns.now ()) before)
 
 let get_dict () =
   let dict_search =
     lazy (
-        let dict_erofa_all =
-          time "loading index: dict" (fun () ->
-            Ortografe_embedded.load_dict Data.data_homemade_dict_erofa_all
-          )
+        let before = memory () in
+        let t, ms =
+          (* The persisted index makes loading much faster (100ms vs 750ms), and avoids
+             the need for compaction after to reduce memory usage (27MB->100MB->58MB
+             without persisting, 27MB->65MB with persisting). *)
+          time (fun () ->
+            Dict_search.of_persist Data.data_homemade_dict_erofa_dict_search)
         in
-        let index =
-          time "loading index: creation" (fun () ->
-              Dict_search.create
-                (Stdlib.Hashtbl.iter __ dict_erofa_all))
-        in
-        time "loading index: compaction" (fun () ->
-          Gc.compact (); (* 25MB before loading, 100MB after, 50MB after compacting *)
-        );
-        index
+        let after = memory () in
+        (let open Core in
+         print_s [%sexp "loading index"
+                , (before : Sexp.t)
+                , `ms (ms : int)
+                , (after : Sexp.t)]);
+        t
       )
   in
   fun request ->

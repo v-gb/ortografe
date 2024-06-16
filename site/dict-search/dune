@@ -7,6 +7,7 @@
    uucp
    uunf
    uutf
+   core
  )
- (preprocess (pps ppx_sexp_value ppx_sexp_conv ppx_compare ppx_pipebang))
+ (preprocess (pps ppx_sexp_value ppx_sexp_conv ppx_compare ppx_pipebang ppx_bin_prot))
 )

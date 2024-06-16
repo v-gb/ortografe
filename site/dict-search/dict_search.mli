@@ -14,3 +14,6 @@
 type t
 val create : ((string -> string -> unit) -> unit) -> t
 val search : t -> string -> limit:int -> (string * string) list
+
+val to_persist : t -> string
+val of_persist : string -> t

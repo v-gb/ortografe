@@ -24,8 +24,8 @@
 (rule
  (deps
   (sandbox always)
-  (:erofa_all %{project_root}/data/homemade/dict-erofa-all.csv))
+  (:erofa_dict_search %{project_root}/data/homemade/dict-erofa-dict-search.binio))
  (action (with-stdout-to data.ml
           (run bash
                -euo pipefail
-               -c "echo -n 'let data_homemade_dict_erofa_all = {|'; cat %{erofa_all}; echo '|}';"))))
+               -c "echo -n 'let data_homemade_dict_erofa_dict_search = {|'; cat %{erofa_dict_search}; echo '|}';"))))

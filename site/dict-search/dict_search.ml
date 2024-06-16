@@ -1,4 +1,4 @@
-open Base
+open Core
 
 module Change = struct
   type t =
@@ -6,13 +6,13 @@ module Change = struct
     | `Old of string
     | `New of string
     ]
-      [@@deriving compare, sexp_of]
+      [@@deriving bin_io, compare, sexp_of]
   include (val Comparator.make ~sexp_of_t ~compare)       
 end
 
 module K = struct
   type t = int * string
-                   [@@deriving compare, sexp_of]
+                   [@@deriving bin_io, compare, sexp_of]
   include (val Comparator.make ~sexp_of_t ~compare)       
 end
 
@@ -54,6 +54,7 @@ type t =
   { index : Change.t array Map.M(String).t Map.M(K).t
   ; max_length : int
   }
+[@@deriving bin_io]
 
 let create iter =
   let index =
@@ -76,6 +77,18 @@ let create iter =
                   |> Array.of_list))
   in
   { index; max_length = Map.max_elt_exn index |> fst |> fst }
+
+let to_persist t =
+  Binable.to_string
+    (module struct
+       type nonrec t = t [@@deriving bin_io]
+     end) t
+
+let of_persist str =
+  Binable.of_string
+    (module struct
+       type nonrec t = t [@@deriving bin_io]
+     end) str
 
 let search { index; max_length } term ~limit =
   let markless_term = strip_marks term in
