@@ -510,7 +510,6 @@ module Index = struct
 
   let section_dictionnaire () =
     section
-      ~attrs:[exp_hidden_class]
       [ h3 [ text "Dictionnaire de transcription" ]
       ; div
           ~cl:"text-align: center;"
@@ -918,7 +917,7 @@ module Index = struct
       ; list' `ul
           (let works = [ "style", "list-style-type:\"\\2705\u{A0}\"" ] in
            let doesnt_work = [ "style", "list-style-type:\"\\274C\u{A0}\"" ] in
-           [ exp_hidden_class :: doesnt_work, [ text "Dictionnaire de transcription" ]
+           [ doesnt_work, [ text "Dictionnaire de transcription" ]
            ; works, [ text "transcription interactive (voir plus bas)" ]
            ; works, [ text "transcription de documents, en ligne (voir plus bas)" ]
            ; works, [ text "transcription de documents, sur votre ordinateur (voir "
