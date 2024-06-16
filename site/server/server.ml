@@ -331,6 +331,52 @@ let redirect handler request =
        ("https://orthographe-rationnelle.info" ^ Dream.target request)
   | _ -> handler request
 
+let get_dict () =
+  let dict_search =
+    lazy (
+        let dict_erofa_all =
+          Ortografe_embedded.load_dict Data.data_homemade_dict_erofa_all
+        in
+        Dict_search.create
+          (Hashtbl.iter __ dict_erofa_all))
+  in
+  fun request ->
+  match Dream.query request "q" with
+  | None -> respond_error_text `Bad_Request "no ?q parameter"
+  | Some term ->
+     let responses =
+       if String.length term > 50
+       then []
+       else Dict_search.search (Lazy.force dict_search) term ~limit:10
+     in
+     let rect1990 = Lazy.force Ortografe_embedded.rect1990 in
+     let rows =
+       List.map (fun (a, c) ->
+           let b_opt = Hashtbl.find_opt rect1990 a in
+           let b = b_opt ||? "-" in
+           let c = if c = (b_opt ||? a) then "-" else c in
+           [%string "<tr><td>%{a}</td><td>%{b}</td><td>%{c}</td></tr>"]
+         )  responses
+       |> String.concat "\n"
+     in
+     let html =
+       [%string {|
+<table class="notranscribe">
+<thead>
+  <tr>
+    <th>Pré-Érofa</th>
+    <th>Recommandation<br>de 1990</th>
+    <th>Recommandation<br>1990 + Érofa</th>
+  </tr>
+</thead>
+<tbody>
+%{rows}
+</tbody>
+</table>
+|}]
+     in
+     Dream.html html
+     
 let post_conv ~max_input_size ~staged request =
   match%lwt limit_body_size ~max_size:max_input_size request with
   | Error `Too_big ->
@@ -410,7 +456,8 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
       else Fun.id)
   @@ redirect
   @@ Dream.router
-       [ Dream.post "/conv" (post_conv ~max_input_size ~staged)
+       [ Dream.get "/dict" (get_dict ())
+       ; Dream.post "/conv" (post_conv ~max_input_size ~staged)
        ; Dream.get "/" (from_filesystem static_root "index.html")
        ; Dream.get "/regles/alfonic" (from_filesystem static_root "regles_alfonic.html")
        ; Dream.get "/static/**" (Dream.static ~loader:from_filesystem static_root)

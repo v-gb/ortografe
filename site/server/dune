@@ -6,6 +6,7 @@
    core
    core_unix.sys_unix
    dict_gen_common
+   dict_search
    dream
    hyper
    ortografe
@@ -17,7 +18,7 @@
   (language c)
   (names glibc))
  (link_flags :standard -ccopt -Wl,--wrap=fmod,--wrap=__isoc23_strtol)
- (preprocess (pps ppx_jane lwt_ppx ppx_lazy_option_op))
+ (preprocess (pps ppx_jane lwt_ppx ppx_lazy_option_op ppx_partial))
  )
 
 (rule

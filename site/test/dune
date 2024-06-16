@@ -1,0 +1,12 @@
+(library
+ (name test_site)
+ (inline_tests (deps (sandbox always)))
+ (libraries
+   core
+   core_unix
+   core_unix.sys_unix
+   dict_search
+   sexp_with_utf8
+ )
+ (preprocess (pps ppx_jane)))
+  

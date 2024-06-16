@@ -1,0 +1,12 @@
+(library
+ (name dict_search)
+ (libraries
+   base
+   of_iter
+   re
+   uucp
+   uunf
+   uutf
+ )
+ (preprocess (pps ppx_sexp_value ppx_sexp_conv ppx_compare ppx_pipebang))
+)
