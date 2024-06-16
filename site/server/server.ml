@@ -150,7 +150,7 @@ let actual_from_system root disk_path _request =
             (fun () -> Lwt_io.close ch)
         in
         Dream.respond ~headers:(Dream.mime_lookup file_path) contents
-      else 
+      else
         let promise, resolver = Lwt.wait () in
         let%lwt response =
           Dream.stream
@@ -223,7 +223,7 @@ let from_filesystem root path request =
 let embedded : Dict_gen_common.Dict_gen.embedded =
   { data_lexique_Lexique383_gen_tsv = Ortografe_embedded.data_lexique_Lexique383_gen_tsv
   ; extension_dict1990_gen_csv = Ortografe_embedded.extension_dict1990_gen_csv
-  }  
+  }
 
 let define_client_ip : Dream.middleware =
   fun handler request ->
@@ -331,14 +331,58 @@ let redirect handler request =
        ("https://orthographe-rationnelle.info" ^ Dream.target request)
   | _ -> handler request
 
+let memory () =
+  let rss = ref Core.Byte_units.zero in
+  let pss = ref Core.Byte_units.zero in
+  let parse s =
+    Base.String.strip s
+    |> Base.String.chop_suffix_exn ~suffix:" kB"
+    |> int_of_string
+    |> Float.of_int
+    |> Core.Byte_units.of_kilobytes
+  in
+  Core.List.iter (Core.In_channel.read_lines "/proc/self/smaps")
+    ~f:(fun s ->
+      match Core.String.chop_prefix s ~prefix:"Rss:" with
+      | Some s -> rss := Core.Byte_units.(+) !rss (parse s)
+      | None ->
+         match Core.String.chop_prefix s ~prefix:"Pss:" with
+         | Some s -> pss := Core.Byte_units.(+) !pss (parse s)
+         | None -> ());
+  [%sexp `rss (!rss : Core.Byte_units.t),
+         `pss (!pss : Core.Byte_units.t) ]
+
+let _print_memory () =
+  Core.print_s (memory ());
+  Gc.compact ();
+  Core.print_s (memory ())
+
+let time str f =
+  let open Core in
+  let before = Time_ns.now () in
+  let res = f () in
+  let duration = Time_ns.Span.to_int_ms (Time_ns.diff (Time_ns.now ()) before) in
+  Dream.log "%s: %dms" str duration;
+  res
+
 let get_dict () =
   let dict_search =
     lazy (
         let dict_erofa_all =
-          Ortografe_embedded.load_dict Data.data_homemade_dict_erofa_all
+          time "loading index: dict" (fun () ->
+            Ortografe_embedded.load_dict Data.data_homemade_dict_erofa_all
+          )
         in
-        Dict_search.create
-          (Hashtbl.iter __ dict_erofa_all))
+        let index =
+          time "loading index: creation" (fun () ->
+              Dict_search.create
+                (Stdlib.Hashtbl.iter __ dict_erofa_all))
+        in
+        time "loading index: compaction" (fun () ->
+          Gc.compact (); (* 25MB before loading, 100MB after, 50MB after compacting *)
+        );
+        index
+      )
   in
   fun request ->
   match Dream.query request "q" with
@@ -376,7 +420,7 @@ let get_dict () =
 |}]
      in
      Dream.html html
-     
+
 let post_conv ~max_input_size ~staged request =
   match%lwt limit_body_size ~max_size:max_input_size request with
   | Error `Too_big ->
