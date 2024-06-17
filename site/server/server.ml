@@ -398,7 +398,11 @@ let get_dict () =
            let b_opt = Hashtbl.find_opt rect1990 a in
            let b = b_opt ||? "-" in
            let c = if c = (b_opt ||? a) then "-" else c in
-           [%string "<tr><td>%{a}</td><td>%{b}</td><td>%{c}</td></tr>"]
+           let link =
+             let a_for_url = Dream.to_percent_encoded a in
+             [%string {|<a href="https://dictionnaire.lerobert.com/definition/%{a_for_url}" style="background-color: #e22027; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;">R</a>|}]
+           in
+           [%string {|<tr><td>%{link}</td><td>%{a}</td><td>%{b}</td><td>%{c}</td></tr>|}]
          )  responses
        |> String.concat "\n"
      in
@@ -407,6 +411,7 @@ let get_dict () =
 <table class="notranscribe">
 <thead>
   <tr>
+    <th></th>
     <th>Pré-Érofa</th>
     <th>Recommandation<br>de 1990</th>
     <th>Recommandation<br>1990 + Érofa</th>
