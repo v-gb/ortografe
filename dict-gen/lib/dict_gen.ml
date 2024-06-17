@@ -57,7 +57,7 @@ let build_erofa_ext ~root ~dict_search =
       ; "surrénalienne", "surénaliène, surrénaliène"
       ; "surrénalite", "surénalite, surrénalite"
       ; "surrénaux", "surénaus, surrénaus"
-      ; "tyrolienne", "tyroliène, tiroliène"
+      ; "tyrolienne", "tiroliène (nom), tyroliène (adj)"
       ; "œcuménicité", "eucuménicité, écuménicité"
       ; "œcuménique", "eucuménique, écuménique"
       ; "œcuménisme", "eucuménisme, écuménisme"
