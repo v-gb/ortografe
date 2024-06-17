@@ -38,8 +38,7 @@ update-lock-file:
 
 .PHONY: first-install
 first-install:
-	@ # instructions from https://opam.ocaml.org/doc/Install.html
-	if ! which opam > /dev/null; then bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"; fi
+	./first-install # provides opam + os stuff like dot
 	if ! [ -d _opam ]; then opam switch create . 5.1.1 --yes; fi
 	@ echo "[32mignore complaints about missing fields below, opam is being silly, and it doesn't prevent the command from working[39m"
 	opam exec -- opam install --locked --deps-only ./ortografe.opam --yes
