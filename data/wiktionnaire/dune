@@ -8,7 +8,7 @@ set -e -u -o pipefail
 if [ -f min-computed.gen.csv ]; then
   cp min-computed.gen.csv min.gen.csv
 else
-  server=https://ortografe-server.fly.dev
+  server=https://orthographe-rationnelle.info
   # server=http://localhost:8081
   curl --fail-with-body -sS \"$server/static/min.gen.csv.zst\" | unzstd > %{target}
 fi
