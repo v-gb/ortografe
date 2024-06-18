@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -u -o pipefail
 missing_packages=()
-for s in "dot graphviz" "qpdf qpdf"; do
+for s in "dot graphviz" "qpdf qpdf" "inkscape inkscape" "sqlite3 sqlite3" "pandoc pandoc"; do
     read prog package <<< "$s"
     if ! which $prog > /dev/null; then
         missing_packages=("${missing_packages[@]} $package")
