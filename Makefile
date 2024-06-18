@@ -39,7 +39,8 @@ update-lock-file:
 .PHONY: first-install
 first-install:
 	./first-install # provides opam + os stuff like dot
-	if ! [ -d _opam ]; then opam switch create . 5.1.1 --yes; fi
+	@ # surely opam has to provide ways to do this ??
+	if ! [ -d _opam ]; then ocaml_version=$$(sed -n -e 's/.*"ocaml" {= "\(.*\)"}/\1/p'  ortografe.opam.locked); opam switch create . $$ocaml_version --yes; fi
 	@ echo "[32mignore complaints about missing fields below, opam is being silly, and it doesn't prevent the command from working[39m"
 	opam exec -- opam install --locked --deps-only ./ortografe.opam --yes
 	mkdir -p _build
