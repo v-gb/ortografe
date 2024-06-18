@@ -40,9 +40,7 @@ update-lock-file:
 first-install:
 	./first-install # provides opam + os stuff like dot
 	@ # surely opam has to provide ways to do this ??
-	if ! [ -d _opam ]; then ocaml_version=$$(sed -n -e 's/.*"ocaml" {= "\(.*\)"}/\1/p'  ortografe.opam.locked); opam switch create . $$ocaml_version --yes; fi
-	@ echo "[32mignore complaints about missing fields below, opam is being silly, and it doesn't prevent the command from working[39m"
-	opam exec -- opam install --locked --deps-only ./ortografe.opam --yes
+	if ! [ -d _opam ]; then ocaml_version=$$(sed -n -e 's/.*"ocaml" {= "\(.*\)"}/\1/p'  ortografe.opam.locked); opam switch create . $$ocaml_version --locked --deps-only --yes; else opam exec -- opam install --locked --deps-only ./ortografe.opam --yes; fi
 	mkdir -p _build
 	make all-w
 	@ echo "[32mExtensions built at _build/default/extension/*.zip ![39m"
