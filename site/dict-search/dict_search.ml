@@ -42,6 +42,7 @@ let is_compat str =
            | 'e' -> Re.(alt [ str "e"; str "é"; str "è"; str "ê"; str "ë" ])
            | 'i' -> Re.(alt [ str "i"; str "î"; str "ï" ])
            | 'o' -> Re.(alt [ str "o"; str "ô"; str "ö" ])
+           | 'u' -> Re.(alt [ str "u"; str "ù"; str "û"; str "ü" ])
            | 'y' -> Re.(alt [ str "y"; str "ÿ" ])
            | 'c' -> Re.(alt [ str "c"; str "ç" ])
            | c -> Re.char c)
