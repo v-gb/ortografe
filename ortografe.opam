@@ -18,6 +18,7 @@ depends: [
   "lwt_ppx"
   "patience_diff"
   "ppx_assert"
+  "ppx_bin_prot"
   "ppx_compare"
   "ppx_inline_test"
   "ppx_jane"
@@ -50,4 +51,7 @@ build: [
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
+]
+depexts: [
+  ["graphviz" "qpdf" "inkscape" "sqlite3" "pandoc"] {os-family = "debian"}
 ]

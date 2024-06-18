@@ -186,3 +186,5 @@ build: [
     "@doc" {with-doc}
   ]
 ]
+depexts:
+  ["graphviz" "inkscape" "pandoc" "qpdf" "sqlite3"] {os-family = "debian"}

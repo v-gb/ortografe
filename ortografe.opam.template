@@ -1,0 +1,3 @@
+depexts: [
+  ["graphviz" "qpdf" "inkscape" "sqlite3" "pandoc"] {os-family = "debian"}
+]

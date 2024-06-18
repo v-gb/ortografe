@@ -8,6 +8,6 @@
  (name ortografe)
  (allow_empty)
  (depends ocaml dune
-          base base64 bheap brr cmdliner core core_unix dream eio eio_main hyper js_of_ocaml lwt_ppx patience_diff ppx_assert ppx_compare ppx_inline_test ppx_jane ppxlib ppx_pipebang ppx_sexp_conv ppx_sexp_value ppx_string re sexplib uri uucp uunf uuseg uutf yojson zipc ;; MARKER
+          base base64 bheap brr cmdliner core core_unix dream eio eio_main hyper js_of_ocaml lwt_ppx patience_diff ppx_assert ppx_bin_prot ppx_compare ppx_inline_test ppx_jane ppxlib ppx_pipebang ppx_sexp_conv ppx_sexp_value ppx_string re sexplib uri uucp uunf uuseg uutf yojson zipc ;; MARKER
 
  ))

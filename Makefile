@@ -38,9 +38,13 @@ update-lock-file:
 
 .PHONY: first-install
 first-install:
-	./first-install # provides opam + os stuff like dot
-	@ # surely opam has to provide ways to do this ??
-	if ! [ -d _opam ]; then ocaml_version=$$(sed -n -e 's/.*"ocaml" {= "\(.*\)"}/\1/p'  ortografe.opam.locked); opam switch create . $$ocaml_version --locked --deps-only --yes; else opam exec -- opam install --locked --deps-only ./ortografe.opam --yes; fi
+	@ # instructions from https://opam.ocaml.org/doc/Install.html
+	if ! which opam > /dev/null; then bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"; fi
+	if ! [ -d _opam ]; then opam switch create --empty .; fi
+	@ # with --locked, opam sometimes uses the listed versions and sometimes not, but
+	@ # using the lock file directly seems much simpler.
+	opam exec -- opam install --depext-only ./ortografe.opam.locked --yes
+	opam exec -- opam install --deps-only ./ortografe.opam.locked --yes
 	mkdir -p _build
 	make all-w
 	@ echo "[32mExtensions built at _build/default/extension/*.zip ![39m"
