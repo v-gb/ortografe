@@ -235,8 +235,10 @@ let%expect_test "epub" = (
     Sys_unix.command_exn "pandoc epub.md -o epub.epub";
     Out_channel.write_all "epub-conv.epub"
       ~data:(Ortografe.epub ~options (In_channel.read_all "epub.epub") ~dst:String);
-    Sys_unix.command_exn "pandoc epub-conv.epub -o epub-conv.md";
-    let src_conv = In_channel.read_all "epub-conv.md" in
+    (* We used to convert to markdown, but pandoc's markdown output has changed across
+       versions. So try plain text, which is hopefully more stable. *)
+    Sys_unix.command_exn "pandoc epub-conv.epub -o epub-conv.txt -t plain";
+    let src_conv = In_channel.read_all "epub-conv.txt" in
     print_string src;
     [%expect "
       % title Orthographe
@@ -246,15 +248,9 @@ let%expect_test "epub" = (
       Allusion, choix."];
     print_string src_conv;
     [%expect "
-      []{#title_page.xhtml}
+      Ortografe
 
-      []{#ch001.xhtml}
-
-      ::: {#ch001.xhtml#orthographe .section .level1 number=\"1\"}
-      # Ortografe {number=\"1\"}
-
-      Alusion, chois.
-      :::"];
+      Alusion, chois."];
 )
 
 let%expect_test "doc" = (
