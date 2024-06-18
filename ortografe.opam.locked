@@ -187,4 +187,5 @@ build: [
   ]
 ]
 depexts:
-  ["graphviz" "inkscape" "pandoc" "qpdf" "sqlite3"] {os-family = "debian"}
+  ["graphviz" "inkscape" "jq" "pandoc" "qpdf" "sqlite3"]
+    {os-family = "debian"}
