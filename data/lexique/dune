@@ -1,5 +1,6 @@
 (rule
  (target Lexique383.zip)
+ (deps (sandbox always))
  (action (run curl --fail-with-body -o %{target} -sS "http://www.lexique.org/databases/Lexique383/Lexique383.zip")))
 
 (rule

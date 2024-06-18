@@ -12,7 +12,7 @@
 
 (rule
  (target foo.html)
- (deps x.bc.js)
+ (deps x.bc.js (sandbox always))
  (action (bash "
 {
 echo '<html><head><script>';

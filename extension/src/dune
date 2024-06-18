@@ -9,14 +9,16 @@
    Emblem_of_La_Francophonie.128.png
    Emblem_of_La_Francophonie.64.png
  )
- (deps    Emblem_of_La_Francophonie.svg)
+ (deps    Emblem_of_La_Francophonie.svg (sandbox always))
  (action  (run ../make-icon)))
 
 (rule
  (target dict-format.html)
+ (deps (sandbox always))
  (action  (run pandoc -s %{dep:dict-format.md} -o %{target})))
 (rule
  (target rules-format.html)
+ (deps (sandbox always))
  (action  (run pandoc -s %{dep:rules-format.md} -o %{target})))
 
 ;; by default, dune ignores all directories that start with an underscore \o/

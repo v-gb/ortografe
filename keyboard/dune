@@ -14,10 +14,12 @@
 ;; cause repeated downloads
 (rule
  (targets dicttool_aosp.jar)
+ (deps (sandbox always))
  (action (run curl --fail-with-body -sS -O https://raw.githubusercontent.com/remi0s/aosp-dictionary-tools/1e69dd2c04258e5e9e04bfb13b46faccf6a435b0/dicttool_aosp.jar)))
 
 (rule
  (targets main_fr.combined.gz)
+ (deps (sandbox always))
  (action (run curl --fail-with-body -sS -O https://codeberg.org/Helium314/aosp-dictionaries/raw/commit/0ec0417ef8baa8f4504aead129214ecfdf26ba28/wordlists/main_fr.combined.gz)))
 
 (rule

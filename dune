@@ -1,6 +1,6 @@
 (rule
  (target OA-dictionnaire-EROFA.pdf)
- (deps)
+ (deps (sandbox always))
  (action (run curl --fail-with-body -sS -O http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf)))
 
 ;; add spurious dependencies to server.exe, so we can
@@ -15,6 +15,7 @@
    ;; seems to do nothing
    %{project_root}/doc-conversion/test/.test_ortografe.inline-tests/inline_test_runner_test_ortografe.exe
    %{project_root}/dict-gen/test/.dict_gen_tests.inline-tests/inline_test_runner_dict_gen_tests.exe
+   (sandbox always)
  )
  (action (copy site/server/server.exe server_all.exe)))
 
