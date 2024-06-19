@@ -1124,7 +1124,7 @@ module Index = struct
                               ; text ". Aucunes n'ont été modifiées."
                               ]
                           ; p [ text "Le favicon provient de "
-                              ; a ~href:"https://icons8.com/" [ text "icons8" ]
+                              ; a ~href:"https://icons8.com/icon/hGBTBdUownyO/quill-pen" [ text "icons8" ]
                               ; text "."
                               ]
                           ]
