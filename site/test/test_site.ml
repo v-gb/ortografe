@@ -6,7 +6,8 @@ let print_s s =
 let%expect_test "dict_search"  =
   let t =
     Dict_search.create (fun yield ->
-        let yield1 s = yield s s in
+        let yield1 s = yield (s, s) s in
+        let yield a b = yield (a, b) a; yield (a, b) b in
         yield "choeur" "queur";
         yield "chœur" "queur";
         yield1 "met";
@@ -22,7 +23,14 @@ let%expect_test "dict_search"  =
       )
   in
   let search term =
-    print_s [%sexp (Dict_search.search t term ~limit:10 : (string * string) list)]
+    let res =
+      Dict_search.search t term
+        ~compare:[%compare:string * string] ~limit:10
+      |> List.map ~f:(fun (found, (a, b)) ->
+             assert (String.(=) found a || String.(=) found b);
+             (a, b))
+    in    
+    print_s [%sexp (res : (string * string) list)]
   in
   (* lookup is: diacritics-insensitive, and goes in increasing length order *)
   search "met";

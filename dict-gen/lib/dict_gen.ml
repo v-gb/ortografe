@@ -22,20 +22,23 @@ let root ~from =
      done;
      !from
 
-let build_erofa_ext ~root ~dict_search =
-  let combined_erofa =
-    Dict_gen.build_erofa_ext
-      ~erofa:(Data_fs.load_erofa (`Root root))
-      ~post90:(Data_fs.load_post90 (`Root root))
-      ~lexique:(Data_fs.load_lexique (`Root root))
-      ~all:dict_search
-  in
-  if dict_search
-  then
-    let special_cases =
-      [ "héro", "éro (drogue)"
-      ; "héroïne", "éroïne (drogue), héroïne"
-      (* The DOR sometimes contains several entries (like barillet below), or entries
+let group_preserve_order m alist =
+  let l = ref [] in
+  let tbl = Hashtbl.create ~size:(List.length alist) m in
+  List.iter alist ~f:(fun (k, v) ->
+      match Hashtbl.find tbl k with
+      | Some r -> r := v :: !r
+      | None ->
+         let r = ref [v] in
+         Hashtbl.add_exn tbl ~key:k ~data:r;
+         l := (k, r) :: !l);
+  List.rev_map !l ~f:(fun (k, r) -> k, List.rev !r)
+
+let create_dict_search ~post90 ~combined_erofa =
+  let special_cases =
+    [ "héro", "éro (drogue)"
+    ; "héroïne", "éroïne (drogue), héroïne"
+    (* The DOR sometimes contains several entries (like barillet below), or entries
          that make sense in specifics sense (like héroïne) above, which the rewriting
          tools can't use. But for dict-search, it can make sense to keep them.
 
@@ -46,36 +49,125 @@ let build_erofa_ext ~root ~dict_search =
          group by old
          having count( * ) > 1
          order by old;
-       *)
-      ; "barillet", "barilet, barillet"
-      ; "hyène", "hiène, iène"
-      ; "malachite", "malaquite, malachite"
-      ; "sakieh", "sakiè, sakié"
-      ; "surrénal", "surénal, surrénal"
-      ; "surrénale", "surénale, surrénale"
-      ; "surrénalien", "surénalien, surrénalien"
-      ; "surrénalienne", "surénaliène, surrénaliène"
-      ; "surrénalite", "surénalite, surrénalite"
-      ; "surrénaux", "surénaus, surrénaus"
-      ; "tyrolienne", "tiroliène (nom), tyroliène (adj)"
-      ; "œcuménicité", "eucuménicité, écuménicité"
-      ; "œcuménique", "eucuménique, écuménique"
-      ; "œcuménisme", "eucuménisme, écuménisme"
-      ; "œdème", "eudème, édème"
-      ]
-      |> List.concat_map ~f:(fun (k, v) ->
-             let k' = String.substr_replace_all k ~pattern:"œ" ~with_:"oe" in
-             if String.(=) k k'
-             then [ (k, v) ]
-             else [ (k, v); (k', v) ])
-      |> Hashtbl.of_alist_exn (module String)
-    in
+     *)
+    ; "barillet", "barilet, barillet"
+    ; "hyène", "hiène, iène"
+    ; "malachite", "malaquite, malachite"
+    ; "sakieh", "sakiè, sakié"
+    ; "surrénal", "surénal, surrénal"
+    ; "surrénale", "surénale, surrénale"
+    ; "surrénalien", "surénalien, surrénalien"
+    ; "surrénalienne", "surénaliène, surrénaliène"
+    ; "surrénalite", "surénalite, surrénalite"
+    ; "surrénaux", "surénaus, surrénaus"
+    ; "tyrolienne", "tiroliène (nom), tyroliène (adj)"
+    ; "œcuménicité", "eucuménicité, écuménicité"
+    ; "œcuménique", "eucuménique, écuménique"
+    ; "œcuménisme", "eucuménisme, écuménisme"
+    ; "œdème", "eudème, édème"
+    ]
+    |> List.concat_map ~f:(fun (k, v) ->
+           let k' = String.substr_replace_all k ~pattern:"œ" ~with_:"oe" in
+           if String.(=) k k'
+           then [ (k, v) ]
+           else [ (k, v); (k', v) ])
+    |> Hashtbl.of_alist_exn (module String)
+  in
+  let fail = ref false in
+  let data_keyed_by_post90 =
+    (* Dans le site, il est bruyant de voir des lignes en doubles
+         du genre :
+
+         interpella -> interpela -> -
+         interpela - >     -     -> -
+
+         Donc pour éviter ça, on supprime la deuxième ligne en
+         considerant que l'information de la première suffit.
+     *)
+    Of_iter.list (List.iter combined_erofa ~f:__)
+    |> List.map ~f:(fun (pre_erofa, erofa) ->
+           let post90 = Hashtbl.find post90 pre_erofa ||? pre_erofa in
+           post90, (pre_erofa, erofa))
+    |> group_preserve_order (module String)
+    |> List.concat_map ~f:(fun (post90, l) ->
+           (* On a souvent multiples orthographes Érofa car combined_erofa contient des
+              entrées du style apparaître->aparaitre and appara*i*tre->aparaitre, et
+              donc erofas contient les deux valeurs à droite des flèches. Donc on
+              regroupe par orthographe Érofa.
+
+              Dans des cas rares (~10 cas), on a plusieurs orthographes Érofa (donc
+              Map.length >= 2). Par exemple [ "affèterie", "afèterie" ]. Dans ce genre
+              de désaccord entre l'orthographe Érofa, on laisse Érofa prendre le pas
+              (Map.remove plus bas).
+              
+              Dans des cas encore plus rares (3 cas), on a plusieurs orthographes
+              Érofa pour différentes orthographes pré-90 même après avoir l'étape
+              du dessus. Par exemple :
+              appas -> appâts -> apas
+              appâts -> appâts -> apâts
+              (l'autre exemple est prud'homme/prudhomme et un mot dérivé)
+              Dans ce cas, on génère une entrée par entrée Érofa.
+            *)
+           let l2 =
+             List.map l ~f:Tuple.T2.swap
+             |> Map.of_alist_multi (module String)
+             |> Map.map ~f:(fun l ->
+                    List.filter l ~f:(fun s -> String.(<>) s post90)
+                    |> List.dedup_and_sort ~compare:String.compare)
+             |> (fun m ->
+               if Map.length m >= 2
+               then Map.remove m post90
+               else m)
+             |> Map.to_alist
+           in
+           if false && List.length l2 > 1
+           then (
+             Printf.eprintf "%s\n%!"
+               (Sexp_with_utf8.to_string_hum
+                  [%sexp "what2"
+                  , (post90 : string)
+                  , (l2 : (string * string list) list)]);
+             fail := true
+           );
+           List.map l2 ~f:(fun (erofa', pre_erofas') ->
+               pre_erofas', post90, erofa'))
+    |> List.map ~f:(fun (pre_erofas, post90, _ as v) ->
+           match Hashtbl.find special_cases post90 with
+           | Some erofa' -> (pre_erofas, post90, erofa')
+           | None -> v)
+  in
+  if !fail then assert false;
+  let q = Queue.create () in
+  let noop = ref 0 in
+  let dict_search =
     Dict_search.create
-      (fun f -> List.iter combined_erofa ~f:(fun (a, b) ->
-                    match Hashtbl.find special_cases a with
-                    | Some b' -> f a b'
-                    | None -> f a b))
-    |> Dict_search.to_persist
+      (fun yield ->
+        List.iter data_keyed_by_post90 ~f:(fun (as_, b, c) ->
+            if String.(=) b c
+               && List.is_empty as_
+            then (noop := !noop - 1; yield !noop c)
+            else (
+              let n = Queue.length q in
+              Queue.enqueue q (as_, b, c);
+              List.iter as_ ~f:(fun a -> yield n a);
+              yield n b;
+              yield n c)))
+  in
+  (Queue.to_array q, dict_search)
+
+let build_erofa_ext ~root ~dict_search =
+  let post90 = Data_fs.load_post90 (`Root root) in
+  let combined_erofa =
+    Dict_gen.build_erofa_ext
+      ~erofa:(Data_fs.load_erofa (`Root root))
+      ~post90
+      ~lexique:(Data_fs.load_lexique (`Root root))
+      ~all:dict_search
+  in
+  if dict_search
+  then
+    Dict_search.Erofa.to_persist (create_dict_search ~post90 ~combined_erofa)
+    |> Printf.sprintf "%S"
     |> print_string
   else
     List.iter combined_erofa ~f:(fun (old, new_) ->

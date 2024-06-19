@@ -28,4 +28,4 @@
  (action (with-stdout-to data.ml
           (run bash
                -euo pipefail
-               -c "echo -n 'let data_homemade_dict_erofa_dict_search = {|'; cat %{erofa_dict_search}; echo '|}';"))))
+               -c "echo -n 'let data_homemade_dict_erofa_dict_search = '; cat %{erofa_dict_search};"))))

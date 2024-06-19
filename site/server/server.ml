@@ -372,7 +372,8 @@ let get_dict () =
              the need for compaction after to reduce memory usage (27MB->100MB->58MB
              without persisting, 27MB->65MB with persisting). *)
           time (fun () ->
-            Dict_search.of_persist Data.data_homemade_dict_erofa_dict_search)
+              Dict_search.Erofa.of_persist
+                Data.data_homemade_dict_erofa_dict_search)
         in
         let after = memory () in
         (let open Core in
@@ -390,19 +391,27 @@ let get_dict () =
      let responses =
        if String.length term > 50
        then []
-       else Dict_search.search (Lazy.force dict_search) term ~limit:10
+       else
+         let q, dict_search = (Lazy.force dict_search) in
+         Dict_search.search dict_search ~compare:Int.compare term ~limit:10
+         |> List.map (fun (str, a) ->
+                if a < 0
+                then ([], str, str)
+                else q.(a))
      in
-     let rect1990 = Lazy.force Ortografe_embedded.rect1990 in
      let rows =
-       List.map (fun (a, c) ->
-           let b_opt = Hashtbl.find_opt rect1990 a in
-           let b = b_opt ||? "-" in
-           let c = if c = (b_opt ||? a) then "-" else c in
-           let link =
-             let a_for_url = Dream.to_percent_encoded a in
-             [%string {|<a href="https://dictionnaire.lerobert.com/definition/%{a_for_url}" style="background-color: #e22027; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;">R</a>|}]
+       List.map (fun (as_, b, c) ->
+           let as_display, b_display =
+             if List.is_empty as_
+             then b, "-"
+             else String.concat "<br>" as_, b
            in
-           [%string {|<tr><td>%{link}</td><td>%{a}</td><td>%{b}</td><td>%{c}</td></tr>|}]
+           let c_display = if String.equal b c then "-" else c in
+           let link =
+             let b_for_url = Dream.to_percent_encoded b in
+             [%string {|<a href="https://dictionnaire.lerobert.com/definition/%{b_for_url}" style="background-color: #e22027; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;">R</a>|}]
+           in
+           [%string {|<tr><td>%{link}</td><td>%{as_display}</td><td>%{b_display}</td><td>%{c_display}</td></tr>|}]
          )  responses
        |> String.concat "\n"
      in
@@ -412,9 +421,9 @@ let get_dict () =
 <thead>
   <tr>
     <th></th>
-    <th>Pré-Érofa</th>
-    <th>Recommandation<br>de 1990</th>
-    <th>Recommandation<br>1990 + Érofa</th>
+    <th>Autre<br>orthographe</th>
+    <th>Recommandé<br>depuis 1990</th>
+    <th>Recommandé<br>par Érofa</th>
   </tr>
 </thead>
 <tbody>

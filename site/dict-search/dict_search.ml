@@ -1,15 +1,5 @@
 open Core
 
-module Change = struct
-  type t =
-    [ `Unchanged
-    | `Old of string
-    | `New of string
-    ]
-      [@@deriving bin_io, compare, sexp_of]
-  include (val Comparator.make ~sexp_of_t ~compare)       
-end
-
 module K = struct
   type t = int * string
                    [@@deriving bin_io, compare, sexp_of]
@@ -51,8 +41,8 @@ let is_compat str =
   fun (str, _) ->
   Re.execp re (String.Search_pattern.replace_all oe_pattern ~with_:"oe" ~in_:str)
 
-type t =
-  { index : Change.t array Map.M(String).t Map.M(K).t
+type 'a t =
+  { index : 'a array Map.M(String).t Map.M(K).t
   ; max_length : int
   }
 [@@deriving bin_io]
@@ -60,38 +50,21 @@ type t =
 let create iter =
   let index =
     Of_iter.list (fun yield ->
-        iter (fun a b ->
-            if String.(=) a b
-            then
-              let a' = strip_marks a in
-              yield ((String.length a', a'), (a, `Unchanged))
-            else (
-              let a' = strip_marks a in
-              let b' = strip_marks b in
-              yield ((String.length a', a'), (a, `New b));
-              yield ((String.length b', b'), (b, `Old a)))))
+        iter (fun a str ->
+            let str' = strip_marks str in
+            yield ((String.length str', str'), (str, a))))
     |> Map.of_alist_multi (module K)
     |> Map.map ~f:(fun l ->
            Map.of_alist_multi (module String) l
-           |> Map.map ~f:(fun l ->
-                  List.dedup_and_sort ~compare:Change.compare l
-                  |> Array.of_list))
+           (* The 'a here are in order that iter gives them to us. We could take a
+              compare function like search, but in search, the ordering is meaningless,
+              only the equality is, so the situation is different, so it doesn't follow
+              that we should do what search does. *)
+           |> Map.map ~f:Array.of_list)
   in
   { index; max_length = Map.max_elt_exn index |> fst |> fst }
 
-let to_persist t =
-  Binable.to_string
-    (module struct
-       type nonrec t = t [@@deriving bin_io]
-     end) t
-
-let of_persist str =
-  Binable.of_string
-    (module struct
-       type nonrec t = t [@@deriving bin_io]
-     end) str
-
-let search { index; max_length } term ~limit =
+let search (type a) ({ index; max_length } : a t) term ~compare ~limit =
   let markless_term = strip_marks term in
   let search n =
     Map.to_sequence index
@@ -128,11 +101,20 @@ let search { index; max_length } term ~limit =
     |> Sequence.filter ~f:(is_compat term)
     |> Sequence.concat_map ~f:(fun (a, l) ->
            Array.to_sequence_mutable
-             (Array.map l ~f:(function
-                  | `Unchanged -> (a, a)
-                  | `Old b -> (b, a)
-                  | `New b -> (a, b))))
-    |> (fun l -> sequence_take_unique ~compare:[%compare: string * string] l limit)
+             (Array.map l ~f:(fun b -> (a, b))))
+    |> (fun l -> sequence_take_unique ~compare:(fun (_, a1) (_, a2) -> compare a1 a2) l limit)
     |> Sequence.to_list
   in
   all_matches
+
+module Erofa = struct
+  module T = struct
+    type nonrec t =
+      (string list * string * string) array * int t [@@deriving bin_io]
+  end
+  include T
+
+  let to_persist pair = Binable.to_string (module T) pair
+  let of_persist str = Binable.of_string (module T) str
+
+end

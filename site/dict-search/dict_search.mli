@@ -11,9 +11,13 @@
     - it's quick (20us to 400us kind of numbers)
  *)
 
-type t
-val create : ((string -> string -> unit) -> unit) -> t
-val search : t -> string -> limit:int -> (string * string) list
+type 'a t [@@deriving bin_io]
+val create : (('a -> string -> unit) -> unit) -> 'a t
+val search : 'a t -> string -> compare:('a -> 'a -> int) -> limit:int -> (string * 'a) list
 
-val to_persist : t -> string
-val of_persist : string -> t
+module Erofa : sig
+  type nonrec t =
+    (string list * string * string) array * int t
+  val to_persist : t -> string
+  val of_persist : string -> t
+end
