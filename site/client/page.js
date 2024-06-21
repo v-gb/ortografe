@@ -200,11 +200,16 @@ if (dict_search_input) {
     const dict_search_output = document.getElementById("dict-search-output");
     dict_search_input.addEventListener("input", sequentialized_and_merged(async (e) => {
         let html;
-        if (dict_search_input.value == '') {
+        // Strip leading spaces in case of copy-pasting, as leading spaces will
+        // otherwise result in no matches.
+        // Trailing spaces on the other hand could match. We remove one because
+        // gboard will add a trailing space on completion.
+        const text = dict_search_input.value.replace(/^ *(.*?) ?$/, "$1");
+        if (text == '') {
             html = ''
         } else {
             const p = new URLSearchParams();
-            p.set("q", dict_search_input.value);
+            p.set("q", text);
             const response = (await fetch("/dict?" + p.toString()));
             if (!response.ok) {
                 throw new Error(`${response.status} ${response.statusText}`);
