@@ -305,11 +305,15 @@ let h1 ?cl children = h1 ~cl:(
 " ^ (cl ||? "")) children
 
 let h2 children = h2 ~cl:"
+  margin-top: 1em;
+  margin-bottom: 0.3em;
   font-size: 2.5rem;
   font-family: sans-serif;
 " children
 
 let h3 children = h3 ~cl:"
+  margin-top: 2.2em;
+  margin-bottom: 0.8em;
   font-size: 1.3rem;
 " children
 
@@ -376,12 +380,16 @@ module Index = struct
             ]
         ]
     ; +books ~attrs:["style", "
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 40em;
+    margin-top: 1.5em;
     padding-left: 0;
     list-style-type: none;
     display: flex;
     flex-flow: row wrap;
     column-gap: 1.5em;
-    row-gap: 0.6em;
+    row-gap: 0.8em;
     justify-content: center;
     text-align:center;
     clear: both
@@ -567,6 +575,7 @@ module Index = struct
     text-align: center;
     text-transform: none;
     width: fit-content;
+    display: inline-block;
     |}] in
     elt "form"
       ~attrs:[ "action", "/conv"
@@ -1018,7 +1027,7 @@ module Index = struct
       ]
 
   let section_aller_plus_loin () =
-    let hr = hr ~cl:"width: 70%; border: 0.1px solid #f4f4f4;" () in
+    let hr = hr ~cl:"width: 70%; border: 0.1px solid #f4f4f4; margin: 0.8em;" () in
     section
       ~attrs:[aller_plus_loin_def]
       [ h2 [ text "Aller plus loin" ]
@@ -1183,7 +1192,7 @@ module Index = struct
               ; section_regles ()
               ; section ~attrs:[outils_def]
                   [ h2 [ text "Outils de mise en pratique" ]
-                  ; p [ text "Nous proposons des outils pour utiliser cette proposition de rationalisation, que ce soit pour rédiger de nouveaux textes ou pour transcrire des textes existants." ]
+                  ; p ~cl:"margin-top:0" [ text "Nous proposons des outils pour utiliser cette proposition de rationalisation, que ce soit pour rédiger de nouveaux textes ou pour transcrire des textes existants." ]
                   ]
               ; section_dictionnaire ()
               ; section_transcription_interactive ()
