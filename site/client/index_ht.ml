@@ -1177,7 +1177,7 @@ module Index = struct
               ; section_regles ()
               ; section ~attrs:[outils_def]
                   [ h2 [ text "Outils de mise en pratique" ]
-                  ; p [ text "Nous proposons des outils pour utiliser cette proposition de rationalisation, que ce soit pour la lecture ou l'écriture." ]
+                  ; p [ text "Nous proposons des outils pour utiliser cette proposition de rationalisation, que ce soit pour rédiger de nouveaux textes ou pour transcrire des textes existants." ]
                   ]
               ; section_dictionnaire ()
               ; section_transcription_interactive ()
