@@ -21,10 +21,10 @@ let strip_marks str =
   Buffer.contents b
 
 let is_compat str =
-  (* le traitement des œ est un peu redondant avec le fait que le dictionnaire a des
-     entrées avec oe et œ *)
   let oe_pattern = String.Search_pattern.create "œ" in
   let re =
+    (* Idéalement un oe dans la requête trouverait des œ dans les mots, mais
+       un cœ ne trouverait pas coexiste. *)
     String.Search_pattern.replace_all oe_pattern ~with_:"oe" ~in_:str
     |> String.to_list
     |> List.map ~f:(function

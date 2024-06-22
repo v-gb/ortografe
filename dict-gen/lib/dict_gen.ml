@@ -73,6 +73,22 @@ let create_dict_search ~post90 ~combined_erofa =
            else [ (k, v); (k', v) ])
     |> Hashtbl.of_alist_exn (module String)
   in
+  let oe_pattern = Core.String.Search_pattern.create "œ" in
+  let discard_oe l =
+    (* Les oe sont déjà gérés séparement dans la recherche, pas besoin d'avoir
+       tous les entrées en double en plus. *)
+    let to_drop =
+      Of_iter.list (fun yield ->
+          List.iter l ~f:(fun (a, _) ->
+              let a' =
+                Core.String.Search_pattern.replace_all oe_pattern
+                  ~in_:a ~with_:"oe"
+              in
+              if String.(<>) a a' then yield a'))
+      |> Set.of_list (module String)
+    in
+    List.filter l ~f:(fun (a, _) -> not (Set.mem to_drop a))
+  in
   let fail = ref false in
   let data_keyed_by_post90 =
     (* Dans le site, il est bruyant de voir des lignes en doubles
@@ -85,6 +101,7 @@ let create_dict_search ~post90 ~combined_erofa =
          considerant que l'information de la première suffit.
      *)
     Of_iter.list (List.iter combined_erofa ~f:__)
+    |> discard_oe
     |> List.map ~f:(fun (pre_erofa, erofa) ->
            let post90 = Hashtbl.find post90 pre_erofa ||? pre_erofa in
            post90, (pre_erofa, erofa))
