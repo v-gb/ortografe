@@ -21,25 +21,29 @@ let strip_marks str =
   Buffer.contents b
 
 let is_compat str =
-  let oe_pattern = String.Search_pattern.create "œ" in
   let re =
-    (* Idéalement un oe dans la requête trouverait des œ dans les mots, mais
-       un cœ ne trouverait pas coexiste. *)
-    String.Search_pattern.replace_all oe_pattern ~with_:"oe" ~in_:str
-    |> String.to_list
-    |> List.map ~f:(function
-           | 'a' -> Re.(alt [ str "a"; str "à"; str "â"; str "ä" ])
-           | 'e' -> Re.(alt [ str "e"; str "é"; str "è"; str "ê"; str "ë" ])
-           | 'i' -> Re.(alt [ str "i"; str "î"; str "ï" ])
-           | 'o' -> Re.(alt [ str "o"; str "ô"; str "ö" ])
-           | 'u' -> Re.(alt [ str "u"; str "ù"; str "û"; str "ü" ])
-           | 'y' -> Re.(alt [ str "y"; str "ÿ" ])
-           | 'c' -> Re.(alt [ str "c"; str "ç" ])
-           | c -> Re.char c)
+    Of_iter.list (fun yield ->
+        let e_re = Re.(alt [ str "e"; str "é"; str "è"; str "ê"; str "ë" ]) in
+        let o_re = Re.(alt [ str "o"; str "ô"; str "ö" ]) in
+        let i = ref 0 in
+        while !i < String.length str; do
+          (match String.get str !i with
+           | 'o' when !i + 1 < String.length str && Char.(=) str.[!i+1] 'e' ->
+              yield Re.(alt [ seq [ o_re; e_re ]; str "œ" ]);
+              i := !i + 1
+           | 'a' -> yield Re.(alt [ str "a"; str "à"; str "â"; str "ä" ])
+           | 'e' -> yield e_re
+           | 'i' -> yield Re.(alt [ str "i"; str "î"; str "ï" ])
+           | 'o' -> yield o_re
+           | 'u' -> yield Re.(alt [ str "u"; str "ù"; str "û"; str "ü" ])
+           | 'y' -> yield Re.(alt [ str "y"; str "ÿ" ])
+           | 'c' -> yield Re.(alt [ str "c"; str "ç" ])
+           | c -> yield (Re.char c));
+          i := !i + 1;
+        done)
     |> (fun res -> Re.compile (Re.(seq (bos :: res))))
   in
-  fun (str, _) ->
-  Re.execp re (String.Search_pattern.replace_all oe_pattern ~with_:"oe" ~in_:str)
+  fun (str, _) -> Re.execp re str
 
 type 'a t =
   { index : 'a array Map.M(String).t Map.M(K).t
