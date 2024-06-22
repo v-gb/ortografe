@@ -384,6 +384,7 @@ let get_dict () =
         t
       )
   in
+  let oe_pattern = lazy (Core.String.Search_pattern.create "œ") in
   fun request ->
   match Dream.query request "q" with
   | None -> respond_error_text `Bad_Request "no ?q parameter"
@@ -408,7 +409,14 @@ let get_dict () =
            in
            let c_display = if String.equal b c then "-" else c in
            let link =
-             let b_for_url = Dream.to_percent_encoded b in
+             let b_for_url =
+               (* lerobert ignores all diacritics (which is fine), but also drops œ on
+                  the floor instead of turning it into oe, which is less fine, so do it
+                  ourselves. *)
+               Dream.to_percent_encoded
+                 (Core.String.Search_pattern.replace_all
+                    (Lazy.force oe_pattern) ~in_:b ~with_:"oe")
+             in
              [%string {|<a href="https://dictionnaire.lerobert.com/definition/%{b_for_url}" style="background-color: #e22027; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;">R</a>|}]
            in
            [%string {|<tr><td>%{link}</td><td>%{as_display}</td><td>%{b_display}</td><td>%{c_display}</td></tr>|}]
