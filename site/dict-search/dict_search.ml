@@ -117,13 +117,38 @@ let search (type a) ({ index; max_length } : a t) term ~compare ~limit =
   all_matches
 
 module Erofa = struct
+  type index = int
+  let compare_index a b =
+    let a = if a < 0 then a asr 2 else a in
+    let b = if b < 0 then b asr 2 else b in
+    Int.compare a b
+
   module T = struct
     type nonrec t =
-      (string list * string * string) array * int t [@@deriving bin_io]
+      (string list * string * string * int) array * int t [@@deriving bin_io]
   end
   include T
 
   let to_persist pair = Binable.to_string (module T) pair
   let of_persist str = Binable.of_string (module T) str
+
+  type flags = { implied_plural : bool }
+
+  let flags bits = { implied_plural = bits mod 2 = 1 }
+  let convert_record (a, b, c, d) = (a, b, c, flags d)
+    
+  let search (q, t) term ~limit =
+    search t ~compare:compare_index term ~limit
+    |> List.map ~f:(fun (str, a) ->
+           if a >= 0
+           then convert_record q.(a)
+           else
+             let a = -a in
+             let str =
+               if a land 2 <> 0
+               then String.chop_suffix_exn str ~suffix:"s"
+               else str
+             in
+             convert_record ([], str, str, a mod 2))
 
 end

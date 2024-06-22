@@ -392,22 +392,18 @@ let get_dict () =
      let responses =
        if String.length term > 50
        then []
-       else
-         let q, dict_search = (Lazy.force dict_search) in
-         Dict_search.search dict_search ~compare:Int.compare term ~limit:10
-         |> List.map (fun (str, a) ->
-                if a < 0
-                then ([], str, str)
-                else q.(a))
+       else Dict_search.Erofa.search (Lazy.force dict_search) term ~limit:10
      in
      let rows =
-       List.map (fun (as_, b, c) ->
+       Core.List.map ~f:(fun (as_, b, c, flags) ->
+           let plural = if flags.implied_plural then "(s)" else "" in
            let as_display, b_display =
              if List.is_empty as_
-             then b, "-"
-             else String.concat "<br>" as_, b
+             then b ^ plural, "-"
+             else String.concat "<br>"
+                    (List.map (fun a -> a ^ plural) as_), b ^ plural
            in
-           let c_display = if String.equal b c then "-" else c in
+           let c_display = if String.equal b c then "-" else c ^ plural in
            let link =
              let b_for_url =
                (* lerobert ignores all diacritics (which is fine), but also drops œ on
