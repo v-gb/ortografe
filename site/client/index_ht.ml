@@ -479,24 +479,29 @@ module Index = struct
                            sans explication, et vous avez peut-être deviné une partie des \
                            règles. Excluant les noms propres :"
                 ])
-           ; +pseudo_list
+           ; +let words txt ws1 ws2 =
+                p [ text txt
+                  ; br; text ("Exemples : " ^ String.concat ~sep:", " ws1)
+                  ; br; text ("Mais pas : " ^ String.concat ~sep:", " ws2)
+                  ]
+              in
+              pseudo_list
                 ~cl:to_transcribe
                 ~wrap:(and_transcribe ~cl:transcription_result)
-                [ p [ text "Les consonnes doubles qui n'ont pas d'effet sur la \
-                            prononciation sont simplifiées."
-                    ; br; text "Exemples : sonnerie, appelle, accord, lutte, verre"
-                    ; br; text "Mais pas : messe, accident, ennui, surréalisme, Rennes"
-                    ]
-                ; p [ text "Les x finaux muets deviennent des s."
-                    ; br; text "Exemples : bijoux, choix, veux, deux"
-                    ; br; text "Mais pas : dix, duplex"
-                    ]
-                ; p [ text "Les ph, h et y d'origines grecques ou similaires \
-                            sont simplifiés."
-                    ; br; text "Exemples : photographie, rythme, humain, psychologie, \
-                                chaos, théâtre, huile, déshabiller"
-                    ; br; text "Mais pas : hache, ahuri, pays, babyfoot"
-                    ]
+                [ words
+                    "Les consonnes doubles qui n'ont pas d'effet sur la \
+                     prononciation sont simplifiées."
+                    [ "sonnerie"; "appelle"; "accord"; "lutte"; "verre" ]
+                    [ "messe"; "accident"; "ennui"; "surréalisme"; "Rennes" ]
+                ; words
+                    "Les x finaux muets deviennent des s."
+                    [ "bijoux"; "choix"; "veux"; "deux" ]
+                    [ "dix"; "duplex" ]
+                ; words "Les ph, h et y d'origines grecques ou similaires \
+                         sont simplifiés."
+                    [ "photographie"; "rythme"; "humain"; "psychologie"
+                      ; "chaos"; "théâtre"; "huile"; "déshabiller" ]
+                    [ "hache"; "ahuri"; "pays"; "babyfoot" ]
                 ]
           ])
       ; p ~cl:"font-size: 0.8em;"
