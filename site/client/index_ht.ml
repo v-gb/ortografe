@@ -492,15 +492,15 @@ module Index = struct
                     "Les consonnes doubles qui n'ont pas d'effet sur la \
                      prononciation sont simplifiées."
                     [ "sonnerie"; "appelle"; "accord"; "lutte"; "verre" ]
-                    [ "messe"; "accident"; "ennui"; "surréalisme"; "Rennes" ]
+                    [ "messe"; "accident"; "ennui"; "surréel"; "Rennes" ]
                 ; words
                     "Les x finaux muets deviennent des s."
                     [ "bijoux"; "choix"; "veux"; "deux" ]
-                    [ "dix"; "duplex" ]
+                    [ "dix"; "duplex"; "intox" ]
                 ; words "Les ph, h et y d'origines grecques ou similaires \
                          sont simplifiés."
-                    [ "photographie"; "rythme"; "humain"; "psychologie"
-                      ; "chaos"; "théâtre"; "huile"; "déshabiller" ]
+                    [ "photo"; "rythme"; "humain"
+                      ; "chaos"; "théâtre"; "huile" ]
                     [ "hache"; "ahuri"; "pays"; "babyfoot" ]
                 ]
           ])
