@@ -112,18 +112,13 @@ let create_dict_search ~post90 ~combined_erofa =
               donc erofas contient les deux valeurs à droite des flèches. Donc on
               regroupe par orthographe Érofa.
 
-              Dans des cas rares (~10 cas), on a plusieurs orthographes Érofa (donc
-              Map.length >= 2). Par exemple [ "affèterie", "afèterie" ]. Dans ce genre
-              de désaccord entre l'orthographe Érofa, on laisse Érofa prendre le pas
-              (Map.remove plus bas).
-              
-              Dans des cas encore plus rares (3 cas), on a plusieurs orthographes
-              Érofa pour différentes orthographes pré-90 même après avoir l'étape
-              du dessus. Par exemple :
+              Dans des cas très rares (3 cas plus bas), on a plusieurs orthographes
+              Érofa pour différentes orthographes pré-90 (List.length l2 > 1). Par
+              exemple :
               appas -> appâts -> apas
               appâts -> appâts -> apâts
-              (l'autre exemple est prud'homme/prudhomme et un mot dérivé)
-              Dans ce cas, on génère une entrée par entrée Érofa.
+              Dans ce cas, on génère une entrée par entrée Érofa, pour garder les
+              entrées du DOR.
             *)
            let l2 =
              List.map l ~f:Tuple.T2.swap
@@ -131,13 +126,12 @@ let create_dict_search ~post90 ~combined_erofa =
              |> Map.map ~f:(fun l ->
                     List.filter l ~f:(fun s -> String.(<>) s post90)
                     |> List.dedup_and_sort ~compare:String.compare)
-             |> (fun m ->
-               if Map.length m >= 2
-               then Map.remove m post90
-               else m)
              |> Map.to_alist
            in
-           if false && List.length l2 > 1
+           if List.length l2 > 1
+           && not (match post90 with
+                   | "appâts" | "prudhomme" | "prudhommie" -> true
+                   | _ -> false)
            then (
              Printf.eprintf "%s\n%!"
                (Sexp_with_utf8.to_string_hum
