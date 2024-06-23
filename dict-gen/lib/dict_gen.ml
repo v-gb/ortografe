@@ -112,9 +112,8 @@ let create_dict_search ~post90 ~combined_erofa =
               donc erofas contient les deux valeurs à droite des flèches. Donc on
               regroupe par orthographe Érofa.
 
-              Dans des cas très rares (3 cas plus bas), on a plusieurs orthographes
-              Érofa pour différentes orthographes pré-90 (List.length l2 > 1). Par
-              exemple :
+              Dans un seul cas, on a plusieurs orthographes Érofa pour différentes
+              orthographes pré-90 (List.length l2 > 1) :
               appas -> appâts -> apas
               appâts -> appâts -> apâts
               Dans ce cas, on génère une entrée par entrée Érofa, pour garder les
@@ -130,7 +129,7 @@ let create_dict_search ~post90 ~combined_erofa =
            in
            if List.length l2 > 1
            && not (match post90 with
-                   | "appâts" | "prudhomme" | "prudhommie" -> true
+                   | "appâts" -> true
                    | _ -> false)
            then (
              Printf.eprintf "%s\n%!"
