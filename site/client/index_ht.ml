@@ -8,15 +8,6 @@ module General_purpose = struct
     ; html : node Markup.node
     }
 
-  let string_of_trees trees =
-    List.map trees ~f:(fun tree ->
-        tree
-        |> Markup.from_tree __.html
-        |> Markup.pretty_print
-        |> Markup.write_html
-        |> Markup.to_string)
-    |> String.concat_lines
-
   let trees_of_string ?(attrs = []) src : _ list =
     let attrs =
       List.map attrs ~f:(fun (k, v) -> ((Markup.Ns.html, k), v))
@@ -134,7 +125,22 @@ module General_purpose = struct
   let section ?cl ?attrs children = elt "section" ?cl ?attrs children
   let img ?cl src attrs = leafelt "img" ?cl (("src", src) :: attrs)
   let code ?cl ?attrs children = elt "code" ?cl ?attrs children
-  let pseudo_list ?cl ?attrs ~wrap children =
+  let table ~header ?(cl="") l =
+    elt "table"
+      ~cl:("text-align:center;"^ cl)
+      [ +(match header with
+          | None -> []
+          | Some h ->
+             [ elt "thead"
+                 [ elt "tr" (List.map h ~f:(fun z -> elt "th" z)) ] ])
+      ; elt "tbody"
+          (List.map l ~f:(fun z -> elt "tr" (List.map z ~f:(fun zz -> elt "td" zz))))
+      ]
+  let flex_cl ?(wrap = false) dir =
+    let dir = match dir with `Row -> "row" | `Column -> "column" in
+    let wrap = if wrap then "wrap" else "nowrap" in
+    [%string "display: flex; flex-dir: %{dir}; flex-wrap: %{wrap}; "]
+  let pseudo_list ?cl ?attrs children : node list =
     let cl = (cl ||? "") ^ "
   display:flex;
   flex-direction: row;
@@ -142,13 +148,16 @@ module General_purpose = struct
   margin-left: 0.7em;
 "
     in
-    List.concat_mapi children ~f:(fun i c ->
+    List.concat_mapi children ~f:(fun i (c, wrap) ->
         wrap (div ~cl ?attrs
-                [ p [ span ~attrs:["style", "letter-spacing: -0.1em"]
+                [ p ~cl:"margin:0;"
+                    [ span ~attrs:["style",
+                                   if i = 0
+                                   then "letter-spacing: -0.1em"
+                                   else "letter-spacing: -0.05em"]
                         [ text [%string "%{i+1#Int}."] ] ]
                 ; c
       ]))
-
   let id name =
     "#" ^ name, ("id", name)
   let script src ~defer =
@@ -309,37 +318,6 @@ module Index = struct
   let outils_ref, outils_def = id "outils"
   let aller_plus_loin_ref, aller_plus_loin_def = id "aller-plus-loin"
 
-  let transcribe ~cl (elt : node) =
-    (* We insert the converted text into the index.html as compile time, so
-       - it works without javascript
-       - the layout doesn't move
-       - in principle, we could stop sending the 500kB of dict, although we
-       still do that currently. Although we wouldn't anymore if the moved
-       the transcription to another page, so progress.
-     *)
-    match elt.html with
-    | `Element (name, _attrs, children) ->
-       let new_children =
-         if String.(=) (snd name) "p"
-         then children
-         else
-           match (List.last_exn children).html with
-           | `Element (_, _, children) -> children
-           | _ -> failwith "asd"
-       in
-       string_of_trees new_children
-       |> Ortografe.html
-            ~options:{ convert_uppercase = false
-                     ; dict = Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa)
-                     ; interleaved = true
-                     ; plurals_in_s = true
-                     }
-            ~dst:String
-       |> nodes_of_string
-       |> p ~cl
-    | _ -> assert false
-  let and_transcribe ~cl elt = [ elt; transcribe ~cl elt ]
-
   let navbar () =
     navbar
       [ regles_ref, [ text "Règles" ]
@@ -454,57 +432,80 @@ module Index = struct
                  ; "class", "notranscribe"] []
       ]
 
+  let transcribe_word w =
+    Ortografe.pure_text
+      ~options:{ convert_uppercase = false
+               ; dict = Stdlib.Hashtbl.find_opt
+                          (Lazy.force Ortografe_embedded.erofa)
+               ; interleaved = true
+               ; plurals_in_s = true
+      }
+      ~dst:String
+      w
+
   let section_regles () =
-    let transcription_result = "
-    margin-left:calc(100% - clamp(75%, 30em, 85%));
-    width: fit-content;
-    border: 2px solid #b9f4b9;
-    background-color: #e5fbe5;
+    let transcription color =
+      let border_color, background_color =
+        match color with
+        | `green -> "#b9f4b9", "#e5fbe5"
+        | `grey -> "grey", "#FAF9F6"
+      in
+      [%string "
+    border: 2px solid %{border_color};
+    background-color: %{background_color};
     padding-top: 1px;
     padding-bottom: 2px;
     padding-left: 4px;
     padding-right: 4px;
     border-radius: 4px;
-    margin-top: -0.5em;
-    margin-bottom: 0em;
-  " in
+    margin-top: 0.1em;
+    margin-bottom: 0.1em;
+  "] in
+    let words txt ws1 ws2 =
+      text txt,
+      (fun x ->
+        [ x
+        ; div ~cl:(flex_cl `Row ~wrap:true
+                   ^ "justify-content: center; gap: 0.7em; margin-top: 0.2em;")
+            [ table ~header:(Some [[text "Exemples"]])
+                ~cl:(transcription `green)
+                (List.map ws1 ~f:(fun w ->
+                     let w' = transcribe_word w in
+                     [ [ text w; text " → ";  text w' ] ]))
+            ; table ~header:(Some [[text "Mais pas"]])
+                ~cl:(transcription `grey)
+                (List.map ws2 ~f:(fun w ->
+                     [ [ text w ] ]))
+            ]
+        ])
+    in
     section ~attrs:[regles_def]
       [ h2 [ text "Les règles" ]
       ; div ~cl:"display: flex; flex-direction: column;"
           ~attrs:[ "class", "notranscribe" ]
-          (let to_transcribe = "margin-right:calc(100% - clamp(75%, 30em, 85%)); " in
-           [ +and_transcribe ~cl:transcription_result
-                (p ~cl:(to_transcribe ^ "margin-top: 0;")
-                   [ text "Vous avez dû constater que les textes se lisent bien, même \
-                           sans explication, et vous avez peut-être deviné une partie des \
-                           règles. Excluant les noms propres :"
-                ])
-           ; +let words txt ws1 ws2 =
-                p [ text txt
-                  ; br; text ("Exemples : " ^ String.concat ~sep:", " ws1)
-                  ; br; text ("Mais pas : " ^ String.concat ~sep:", " ws2)
-                  ]
-              in
-              pseudo_list
-                ~cl:to_transcribe
-                ~wrap:(and_transcribe ~cl:transcription_result)
-                [ words
-                    "Les consonnes doubles qui n'ont pas d'effet sur la \
-                     prononciation sont simplifiées."
-                    [ "sonnerie"; "appelle"; "accord"; "lutte"; "verre" ]
-                    [ "messe"; "accident"; "ennui"; "surréel"; "Rennes" ]
-                ; words
-                    "Les x finaux muets deviennent des s."
-                    [ "bijoux"; "choix"; "veux"; "deux" ]
-                    [ "dix"; "duplex"; "intox" ]
-                ; words "Les ph, h et y d'origines grecques ou similaires \
-                         sont simplifiés."
-                    [ "photo"; "rythme"; "humain"
-                      ; "chaos"; "théâtre"; "huile" ]
-                    [ "hache"; "ahuri"; "pays"; "babyfoot" ]
-                ]
-          ])
-      ; p ~cl:"font-size: 0.8em;"
+          [ p ~cl:"margin: 0;"
+              [ text "Vous avez dû constater que les textes se lisent bien, même \
+                      sans explication, et vous avez peut-être deviné une partie des \
+                      règles. Excluant les noms propres :" ]
+          ; div ~cl:"max-width: 25em;"
+              (pseudo_list ~cl:"margin-top: 1em;"
+                 [ words
+                     "Les consonnes doubles qui n'ont pas d'effet sur la \
+                      prononciation sont simplifiées."
+                     [ "sonnerie"; "appelle"; "accord"; "lutte"; "verre" ]
+                     [ "messe"; "accident"; "ennui"; "surréel"; "Rennes" ]
+                 ; words
+                     "Les x finaux muets deviennent des s."
+                     [ "bijoux"; "choix"; "veux"; "deux" ]
+                     [ "dix"; "duplex"; "intox" ]
+                 ; words "Les ph, h et y d'origines grecques ou similaires \
+                          sont simplifiés."
+                     [ "photo"; "rythme"; "humain"
+                       ; "chaos"; "théâtre"; "huile" ]
+                     [ "hache"; "ahuri"; "pays"; "babyfoot" ]
+                 ])
+           ]
+      ; p ~cl:"font-size: 0.8em; margin-top: 1.5em;"
           [ text "Érofa propose également une "
           ; a ~href:"http://www.participepasse.info/"
               [ text "règle sur l'accord du participe passé" ]
