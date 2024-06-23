@@ -880,7 +880,8 @@ module Index = struct
                       [ list `ul
                           [ [ text "2024-06 : support pour écrire en Érofa avec les \
                                     claviers de téléphones, support de transcription \
-                                    avec des dictionnaires personnalisés." ]
+                                    avec des dictionnaires personnalisés, ajout de \
+                                    du dictionnaire consultable en ligne." ]
                           ; [ text "À ce stade, les outils sont essentiellement finis." ]
                           ; [ text "2024-05 : support de transcriptions de document \
                                     côté client, amélioration de l'apparence du site" ]
