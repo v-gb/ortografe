@@ -8,7 +8,6 @@ let%expect_test "dict_search"  =
     Dict_search.create (fun yield ->
         let yield1 s = yield (s, s) s in
         let yield a b = yield (a, b) a; yield (a, b) b in
-        yield "choeur" "queur";
         yield "chœur" "queur";
         yield1 "met";
         yield1 "méta";
@@ -47,12 +46,14 @@ let%expect_test "dict_search"  =
   [%expect {| ((mette mète) (mettes mètes)) |}];
 
   (* œ can be looked up with either "oe" or "œ" *)
+  search "choe";
+  [%expect {| ((chœur queur)) |}];
   search "cho";
-  [%expect {| ((choeur queur) (chœur queur)) |}];
+  [%expect {| () |}];
   search "chœ";
-  [%expect {| ((choeur queur) (chœur queur)) |}];
+  [%expect {| ((chœur queur)) |}];
 
   (* both old and new spellings are searched/retrieved *)
   search "q";
-  [%expect {| ((choeur queur) (chœur queur)) |}];
+  [%expect {| ((chœur queur)) |}];
   ()
