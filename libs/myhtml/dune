@@ -1,0 +1,10 @@
+(library
+ (name myhtml)
+ (libraries core markup_t re)
+ (preprocess (pps
+               ppx_lazy_option_op
+               ppx_list_include
+               ppx_partial
+               ppx_sexp_value
+               ppx_string
+             )))
