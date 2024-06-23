@@ -291,7 +291,10 @@ let create () : t =
   new_fixed "aou" [ "u", Surprising ]; (* aout *)
 
   (* E *)
-  new_fixed "è" [ "E", Core ];
+  new_fixed "è" [ "E", Core
+                ; "e", Surprising (* Quand on ajuste le lexique avec l'orthographe post
+                                     90 sans ajuster la phonétique en même temps. *)
+                ];
   new_fixed "ë" [ "e", Core ];
   new_fixed "ê" [ "e", Core; "E", Core ];
   new_fixed "é" [ "e", Core; "E", Surprising (* médecin *) ];

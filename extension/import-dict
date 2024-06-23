@@ -21,6 +21,7 @@ and old not like 'eczém%' -- 1990 pas pris en compte
 and old not like 'kabbale' -- 1990 pas pris en compte
 and old not like 'flûtiaux' -- 1990 pas pris en compte
 and old not like 'bonneterie' -- 1990 pas pris en compte
+and old not like 'crécerelle' -- 1990 pas pris en compte -- https://ro.ccdmd.qc.ca/regles-et-liste-de-mots
 and old not like 'vacill%' -- entrée utilise une prononcation /l/, mais /j/ est plus courant
 and old not like 'sheikh' -- 1990 pas pris en compte
 and old not like 'œcuméni%' -- œ->eu. Autant utiliser é comme pour les autres œ
