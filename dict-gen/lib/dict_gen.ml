@@ -110,15 +110,7 @@ let create_dict_search ~post90 ~combined_erofa =
            (* On a souvent multiples orthographes Érofa car combined_erofa contient des
               entrées du style apparaître->aparaitre and appara*i*tre->aparaitre, et
               donc erofas contient les deux valeurs à droite des flèches. Donc on
-              regroupe par orthographe Érofa.
-
-              Dans un seul cas, on a plusieurs orthographes Érofa pour différentes
-              orthographes pré-90 (List.length l2 > 1) :
-              appas -> appâts -> apas
-              appâts -> appâts -> apâts
-              Dans ce cas, on génère une entrée par entrée Érofa, pour garder les
-              entrées du DOR.
-            *)
+              regroupe par orthographe Érofa. *)
            let l2 =
              List.map l ~f:Tuple.T2.swap
              |> Map.of_alist_multi (module String)
@@ -128,13 +120,10 @@ let create_dict_search ~post90 ~combined_erofa =
              |> Map.to_alist
            in
            if List.length l2 > 1
-           && not (match post90 with
-                   | "appâts" -> true
-                   | _ -> false)
            then (
              Printf.eprintf "%s\n%!"
                (Sexp_with_utf8.to_string_hum
-                  [%sexp "what2"
+                  [%sexp "Incohérence entre Érofa et 1990"
                   , (post90 : string)
                   , (l2 : (string * string list) list)]);
              fail := true
