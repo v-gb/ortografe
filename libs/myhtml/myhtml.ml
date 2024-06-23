@@ -1,6 +1,174 @@
 open Core
 open struct module Markup = Markup_t end
 
+module Css = struct
+  type t = [ `Kv  of string * string | `Raw of string | `Sel of string * string ]
+  type length = float * [ `em | `rem | `px | `percent ]
+  let to_string l =
+    List.map l ~f:(function
+        | `Raw r -> r
+        | `Sel (sel, v) -> [%string "%{sel} %{v}\n"]
+        | `Kv (k, v) -> [%string "%{k}: %{v};\n"]
+      )
+    |> String.concat
+
+  let zero = (0., `em)
+  let em f = (f, `em)
+  let rem f = (f, `rem)
+  let px f = (f, `px)
+  let percent f = (f, `percent)
+  let size (f, unit) =
+    match unit with
+    | `em ->
+       (match f with
+        | 0. -> "0"
+        | _ -> Float.to_string_hum ~strip_zero:true f ^ "em")
+    | `rem -> Float.to_string_hum ~strip_zero:true f ^ "rem"
+    | `px -> Float.to_string_hum ~strip_zero:true f ^ "px"
+    | `percent -> Float.to_string_hum ~strip_zero:true f ^ "%"
+  let display = function
+    | `block -> `Kv ("display", "block")
+    | `inline -> `Kv ("display", "inline")
+    | `inline_block -> `Kv ("display", "inline-block")
+    | `none -> `Kv ("display", "none")
+  let prop_lrtb name =
+    fun ?all ?lr ?tb ?l ?r ?t ?b () ->
+    [ +(match all with
+        | Some v -> [ `Kv (name, size v) ]
+        | None -> [])
+    ; +(match Option.first_some l lr with
+        | None -> []
+        | Some v -> [ `Kv (name ^ "-left", size v) ])
+    ; +(match Option.first_some r lr with
+        | None -> []
+        | Some v -> [ `Kv (name ^ "-right", size v) ])
+    ; +(match Option.first_some t tb with
+        | None -> []
+        | Some v -> [ `Kv (name ^ "-top", size v) ])
+    ; +(match Option.first_some b tb with
+        | None -> []
+        | Some v -> [ `Kv (name ^ "-bottom", size v) ])
+    ]
+  let margin ?all = prop_lrtb "margin" ?all
+  let margin_auto = `Kv ("margin", "auto")
+  let width' raw = `Kv ("width", raw)
+  let width f = width' (size f)
+  let width_auto = `Kv ("width", "auto")
+  let width_fit_content = `Kv ("width", "fit-content")
+  let height' raw = `Kv ("height", raw)
+  let height f = height' (size f)
+  let height_auto = `Kv ("height", "auto")
+  let padding ?all = prop_lrtb "padding" ?all
+  let font_family l = `Kv ("font-family", String.concat ~sep:"," l)
+  let pointer_events `none = `Kv ("pointer-events", "none")
+  let color s = `Kv ("color", s)
+  let text_decoration s = `Kv ("text-decoration", s)
+  let text_decoration_line `underline = `Kv ("text-decoration-line", "underline")
+  let background_color s = `Kv ("background-color", s)
+  let max_width' raw = `Kv ("max-width", raw)
+  let max_width f = max_width' (size f)
+  let min_width' raw = `Kv ("min-width", raw)
+  let min_width f = min_width' (size f)
+  let min_height' raw = `Kv ("min-height", raw)
+  let min_height f = min_height' (size f)
+  let list_style_type `None = `Kv ("list-style-type", "none")
+  let font_size' raw = `Kv ("font-size", raw)
+  let font_size f = font_size' (size f)
+  let font_weight `Bold = `Kv ("font-weight", "bold")
+  let border ?width ?style ?color ?radius () =
+    [ +(match width with
+        | None -> []
+        | Some f -> [ `Kv ("border-width", size f) ])
+    ; +(match style with
+        | None -> []
+        | Some `solid -> [ `Kv ("border-style", "solid") ])
+    ; +(match color with
+        | None -> []
+        | Some f -> [ `Kv ("border-color", f) ])
+    ; +(match radius with
+        | None -> []
+        | Some f -> [ `Kv ("border-radius", size f) ])
+    ]
+  let whitespace `pre_wrap = `Kv ("white-space", "pre-wrap")
+  let position ?all ?lr ?tb ?l ?r ?t ?b which =
+    let lr = Option.first_some lr all in
+    let tb = Option.first_some tb all in
+    [ (match which with
+       | `relative -> `Kv ("position", "relative")
+       | `absolute -> `Kv ("position", "absolute"))
+    ; +(match Option.first_some l lr with
+        | None -> []
+        | Some v -> [ `Kv ("left", size v) ])
+    ; +(match Option.first_some r lr with
+        | None -> []
+        | Some v -> [ `Kv ("right", size v) ])
+    ; +(match Option.first_some t tb with
+        | None -> []
+        | Some v -> [ `Kv ("top", size v) ])
+    ; +(match Option.first_some b tb with
+        | None -> []
+        | Some v -> [ `Kv ("bottom", size v) ])
+    ]
+
+  let aspect_ratio a b = `Kv ("aspect-ratio", sprintf "%d/%d" a b)
+  let float = function
+    | `Right -> `Kv ("float", "right")
+    | `Left -> `Kv ("float", "left")
+  let hyphens `auto = `Kv ("hyphens", "auto")
+  let flex_child  ?grow ?shrink ?basis () =
+    [ +(match grow with
+        | Some f -> [ `Kv ("flex-grow", Int.to_string f) ]
+        | None -> [])
+    ; +(match shrink with
+        | Some f -> [ `Kv ("flex-shrink", Int.to_string f) ]
+        | None -> [])
+    ; +(match basis with
+        | Some f -> [ `Kv ("flex-basis", size f) ]
+        | None -> [])
+    ]
+    
+  let flex ?wrap ?gap ?grow ?shrink ?basis ?row_gap ?column_gap direction =
+    [ `Kv ("display", "flex")
+    ; (match direction with
+       | `Row -> `Kv ("flex-direction", "row")
+       | `Column -> `Kv ("flex-direction", "column"))
+    ; +(match wrap with
+        | Some `Wrap -> [ `Kv ("flex-wrap", "wrap") ]
+        | None -> [])
+    ; +(match gap with
+        | Some f -> [ `Kv ("gap", size f) ]
+        | None -> [])
+    ; +(match row_gap with
+        | Some f -> [ `Kv ("row-gap", size f) ]
+        | None -> [])
+    ; +(match column_gap with
+        | Some f -> [ `Kv ("column-gap", size f) ]
+        | None -> [])
+    ; +(match grow with
+        | Some f -> [ `Kv ("flex-grow", Int.to_string f) ]
+        | None -> [])
+    ; +(match shrink with
+        | Some f -> [ `Kv ("flex-shrink", Int.to_string f) ]
+        | None -> [])
+    ; +(match basis with
+        | Some f -> [ `Kv ("flex-basis", size f) ]
+        | None -> [])
+    ]
+  let justify_content `center = `Kv ("justify-content", "center")
+  let text_align `center = `Kv ("text-align", "center")
+  let clear = function
+    | `left -> `Kv ("clear", "left")
+    | `right -> `Kv ("clear", "right")
+    | `both -> `Kv ("clear", "both")
+  let selector sel l =
+    match l with
+    | [] -> []
+    | _ :: _ -> [ `Sel (sel, "{\n" ^ to_string l ^ "}") ]
+  let raw1 s = `Raw s
+  let raw s = [ `Raw s ]
+  let _ = width_auto, height
+end
+
 type node =
   { classes : (string * string) list
   ; scripts : string list
