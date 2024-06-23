@@ -1192,7 +1192,15 @@ module Index = struct
               ; section_regles ()
               ; section ~attrs:[outils_def]
                   [ h2 [ text "Outils de mise en pratique" ]
-                  ; p ~cl:"margin-top:0" [ text "Nous proposons des outils pour utiliser cette proposition de rationalisation, que ce soit pour rédiger de nouveaux textes ou pour transcrire des textes existants." ]
+                  ; p ~cl:"margin-top:0"
+                      [ text "Pour rédiger de nouveaux textes en cette orthographe, \
+                              vous trouverez ici un vérificateur d'orthographe, un \
+                              clavier pour télephone, et un dictionnaire pour consulter \
+                              l'orthographe de n'importe quel mot." ]
+                  ; p ~cl:"margin-top:0"
+                      [ text "Pour transcrire des textes existants, vous pourrez \
+                              soumettre plus bas du texte, des documents, ou récupérer \
+                              un outil pour transcrire les pages internet à la volée." ]
                   ]
               ; section_dictionnaire ()
               ; section_transcription_interactive ()
