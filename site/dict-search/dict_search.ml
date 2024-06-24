@@ -28,13 +28,18 @@ let is_compat str =
         let i = ref 0 in
         while !i < String.length str; do
           (match String.get str !i with
-           | 'o' when !i + 1 < String.length str && Char.(=) str.[!i+1] 'e' ->
-              yield Re.(alt [ seq [ o_re; e_re ]; str "œ" ]);
-              i := !i + 1
            | 'a' -> yield Re.(alt [ str "a"; str "à"; str "â"; str "ä" ])
            | 'e' -> yield e_re
            | 'i' -> yield Re.(alt [ str "i"; str "î"; str "ï" ])
-           | 'o' -> yield o_re
+           | 'o' ->
+              if !i + 1 >= String.length str
+              then yield Re.(alt [ seq [ o_re ]; str "œ" ])
+              else
+                if Char.(=) str.[!i+1] 'e'
+                then (
+                  yield Re.(alt [ seq [ o_re; e_re ]; str "œ" ]);
+                  i := !i + 1)
+                else yield o_re
            | 'u' -> yield Re.(alt [ str "u"; str "ù"; str "û"; str "ü" ])
            | 'y' -> yield Re.(alt [ str "y"; str "ÿ" ])
            | 'c' -> yield Re.(alt [ str "c"; str "ç" ])

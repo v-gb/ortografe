@@ -49,7 +49,7 @@ let%expect_test "dict_search"  =
   search "choe";
   [%expect {| ((chœur queur)) |}];
   search "cho";
-  [%expect {| () |}];
+  [%expect {| ((chœur queur)) |}];
   search "chœ";
   [%expect {| ((chœur queur)) |}];
 
