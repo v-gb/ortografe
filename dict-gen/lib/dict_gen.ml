@@ -22,18 +22,6 @@ let root ~from =
      done;
      !from
 
-let group_preserve_order m alist =
-  let l = ref [] in
-  let tbl = Hashtbl.create ~size:(List.length alist) m in
-  List.iter alist ~f:(fun (k, v) ->
-      match Hashtbl.find tbl k with
-      | Some r -> r := v :: !r
-      | None ->
-         let r = ref [v] in
-         Hashtbl.add_exn tbl ~key:k ~data:r;
-         l := (k, r) :: !l);
-  List.rev_map !l ~f:(fun (k, r) -> k, List.rev !r)
-
 let create_dict_search ~post90 ~combined_erofa =
   let special_cases =
     [ "héro", "éro (drogue)"
@@ -105,8 +93,8 @@ let create_dict_search ~post90 ~combined_erofa =
     |> List.map ~f:(fun (pre_erofa, erofa) ->
            let post90 = Hashtbl.find post90 pre_erofa ||? pre_erofa in
            post90, (pre_erofa, erofa))
-    |> group_preserve_order (module String)
-    |> List.concat_map ~f:(fun (post90, l) ->
+    |> Map.of_alist_multi (module String)
+    |> Map.mapi ~f:(fun ~key:post90 ~data:l ->
            (* On a souvent multiples orthographes Érofa car combined_erofa contient des
               entrées du style apparaître->aparaitre and appara*i*tre->aparaitre, et
               donc erofas contient les deux valeurs à droite des flèches. Donc on
@@ -128,12 +116,15 @@ let create_dict_search ~post90 ~combined_erofa =
                   , (l2 : (string * string list) list)]);
              fail := true
            );
-           List.map l2 ~f:(fun (erofa', pre_erofas') ->
-               pre_erofas', post90, erofa'))
-    |> List.map ~f:(fun (pre_erofas, post90, _ as v) ->
-           match Hashtbl.find special_cases post90 with
-           | Some erofa' -> (pre_erofas, post90, erofa')
-           | None -> v)
+           List.map l2 ~f:Tuple.T2.swap)
+    |> Map.mapi ~f:(fun ~key:post90 ~data ->
+           List.map data ~f:(fun (pre_erofas, _ as v) ->
+               match Hashtbl.find special_cases post90 with
+               | Some erofa' -> (pre_erofas, erofa')
+               | None -> v))
+    |> Map.to_alist
+    |> List.concat_map ~f:(fun (post90, l) ->
+           List.map l ~f:(fun (a, b) -> (a, post90, b)))
   in
   if !fail then assert false;
   let q = Queue.create () in
