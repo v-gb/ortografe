@@ -24,6 +24,7 @@ and old not like 'bonneterie' -- 1990 pas pris en compte
 and old not like 'crécerelle' -- 1990 pas pris en compte -- https://ro.ccdmd.qc.ca/regles-et-liste-de-mots
 and not (old like 'prud’hom%' or old like 'prud''om%') -- 1990 pas pris en compte -- https://ro.ccdmd.qc.ca/regles/anomalies/familles/liste -- pas d'apostrophe
 and not old like 'appas' -- 1990 pas pris en compte -- https://ro.ccdmd.qc.ca/regles/anomalies/divers/liste
+and not old like 'paella' -- 1990 pas pris en compte -- https://ro.ccdmd.qc.ca/regles/accents-trema/emprunts/liste
 and old not like 'vacill%' -- entrée utilise une prononcation /l/, mais /j/ est plus courant
 and old not like 'sheikh' -- 1990 pas pris en compte
 and old not like 'œcuméni%' -- œ->eu. Autant utiliser é comme pour les autres œ
