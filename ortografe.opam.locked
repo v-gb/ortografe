@@ -40,8 +40,8 @@ depends: [
   "dream" {= "1.0.0~alpha5"}
   "dream-httpaf" {= "1.0.0~alpha2"}
   "dream-pure" {= "1.0.0~alpha2"}
-  "dune" {= "3.15.3"}
-  "dune-configurator" {= "3.15.3"}
+  "dune" {= "3.16.0"}
+  "dune-configurator" {= "3.16.0"}
   "duration" {= "0.2.1"}
   "eio" {= "1.1"}
   "eio_linux" {= "1.1"}
@@ -60,6 +60,8 @@ depends: [
   "graphql-lwt" {= "0.14.0"}
   "graphql_parser" {= "0.14.0"}
   "hmap" {= "0.8.1"}
+  "host-arch-x86_64" {= "1"}
+  "host-system-other" {= "1"}
   "hyper" {= "1.0.0~alpha2"}
   "int_repr" {= "v0.16.0"}
   "iomux" {= "0.3"}
@@ -169,7 +171,7 @@ depends: [
   "uuseg" {= "15.1.0"}
   "uutf" {= "1.0.3"}
   "variantslib" {= "v0.16.0"}
-  "yojson" {= "2.1.2"}
+  "yojson" {= "2.2.1"}
   "zipc" {= "0.2.0"}
 ]
 build: [
