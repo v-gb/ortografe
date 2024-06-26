@@ -13,7 +13,8 @@
 # - There are a number of corrections for coeur->cœur, which now become identity
 #   corrections. It might be better to drop these entirely, but they are not clearly
 #   hurting either so far.
-
+#
+# - The dictionary is not very complete. Maybe we could use Grammalecte instead.
 gunzip < main_fr.combined.gz \
     | ../doc-conversion/bin/ortografe_cli.exe conv -o heliboard_erofa.combined
 {
