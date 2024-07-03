@@ -688,6 +688,8 @@ let erofa_rule rules =
           let h_start =
             if String.is_prefix !aligned_row.row.ortho ~prefix:"déh"
             then String.length "déh" (* déhancher serait déshancher si le h n'était pas aspiré *)
+            else if String.is_prefix !aligned_row.row.ortho ~prefix:"éh"
+            then String.length "éh" (* éhonté *)
             else Bool.to_int !aligned_row.row.h_aspire
           in
           (* On sélectionne les graphèmes directement car la plupart des ch en particulier sont
