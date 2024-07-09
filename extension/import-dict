@@ -26,6 +26,7 @@ and not (old like 'prud’hom%' or old like 'prud''om%') -- 1990 pas pris en com
 and not old like 'appas' -- 1990 pas pris en compte -- https://ro.ccdmd.qc.ca/regles/anomalies/divers/liste
 and not old like 'paella' -- 1990 pas pris en compte -- https://ro.ccdmd.qc.ca/regles/accents-trema/emprunts/liste
 and old not like 'vacill%' -- entrée utilise une prononcation /l/, mais /j/ est plus courant
+and not (old like 'achène' or old like 'achaine') -- pris en compte de 1990 bancale -- https://ro.ccdmd.qc.ca/regles/recommandations/son-k/liste
 and old not like 'sheikh' -- 1990 pas pris en compte
 and old not like 'œcuméni%' -- œ->eu. Autant utiliser é comme pour les autres œ
 and not (old like 'douc%' and new like 'douss%') -- entrée non justifiée par les règles
