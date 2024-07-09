@@ -12,8 +12,11 @@
  *)
 
 type 'a t [@@deriving bin_io]
+
 val create : (('a -> string -> unit) -> unit) -> 'a t
-val search : 'a t -> string -> compare:('a -> 'a -> int) -> limit:int -> (string * 'a) list
+
+val search :
+  'a t -> string -> compare:('a -> 'a -> int) -> limit:int -> (string * 'a) list
 
 module Erofa : sig
   type index = int
@@ -25,11 +28,12 @@ module Erofa : sig
        (only meaningful when bit zero is also set)
      *)
 
-  type nonrec t =
-    (string list * string * string * int) array * index t
+  type nonrec t = (string list * string * string * int) array * index t
+
   val to_persist : t -> string
   val of_persist : string -> t
 
   type flags = { implied_plural : bool }
+
   val search : t -> string -> limit:int -> (string list * string * string * flags) list
 end

@@ -1,6 +1,9 @@
 (lang dune 3.12)
 (using directory-targets 0.1)
 
+(formatting
+ (enabled_for ocaml))
+
 (name ortografe)
 (generate_opam_files true)
 

@@ -1,15 +1,23 @@
 open Core
-open struct module Markup = Markup_t end
+
+open struct
+  module Markup = Markup_t
+end
 
 module Css = struct
-  type t = [ `Kv  of string * string | `Raw of string | `Sel of string * string ]
+  type t =
+    [ `Kv of string * string
+    | `Raw of string
+    | `Sel of string * string
+    ]
+
   type length = float * [ `em | `rem | `px | `percent ]
+
   let to_string l =
     List.map l ~f:(function
-        | `Raw r -> r
-        | `Sel (sel, v) -> [%string "%{sel} %{v}\n"]
-        | `Kv (k, v) -> [%string "%{k}: %{v};\n"]
-      )
+      | `Raw r -> r
+      | `Sel (sel, v) -> [%string "%{sel} %{v}\n"]
+      | `Kv (k, v) -> [%string "%{k}: %{v};\n"])
     |> String.concat
 
   let zero = (0., `em)
@@ -17,38 +25,37 @@ module Css = struct
   let rem f = (f, `rem)
   let px f = (f, `px)
   let percent f = (f, `percent)
+
   let size (f, unit) =
     match unit with
-    | `em ->
-       (match f with
-        | 0. -> "0"
-        | _ -> Float.to_string_hum ~strip_zero:true f ^ "em")
+    | `em -> (
+        match f with 0. -> "0" | _ -> Float.to_string_hum ~strip_zero:true f ^ "em")
     | `rem -> Float.to_string_hum ~strip_zero:true f ^ "rem"
     | `px -> Float.to_string_hum ~strip_zero:true f ^ "px"
     | `percent -> Float.to_string_hum ~strip_zero:true f ^ "%"
+
   let display = function
     | `block -> `Kv ("display", "block")
     | `inline -> `Kv ("display", "inline")
     | `inline_block -> `Kv ("display", "inline-block")
     | `none -> `Kv ("display", "none")
-  let prop_lrtb name =
-    fun ?all ?lr ?tb ?l ?r ?t ?b () ->
-    [ +(match all with
-        | Some v -> [ `Kv (name, size v) ]
-        | None -> [])
+
+  let prop_lrtb name ?all ?lr ?tb ?l ?r ?t ?b () =
+    [ +(match all with Some v -> [ `Kv (name, size v) ] | None -> [])
     ; +(match Option.first_some l lr with
-        | None -> []
-        | Some v -> [ `Kv (name ^ "-left", size v) ])
+       | None -> []
+       | Some v -> [ `Kv (name ^ "-left", size v) ])
     ; +(match Option.first_some r lr with
-        | None -> []
-        | Some v -> [ `Kv (name ^ "-right", size v) ])
+       | None -> []
+       | Some v -> [ `Kv (name ^ "-right", size v) ])
     ; +(match Option.first_some t tb with
-        | None -> []
-        | Some v -> [ `Kv (name ^ "-top", size v) ])
+       | None -> []
+       | Some v -> [ `Kv (name ^ "-top", size v) ])
     ; +(match Option.first_some b tb with
-        | None -> []
-        | Some v -> [ `Kv (name ^ "-bottom", size v) ])
+       | None -> []
+       | Some v -> [ `Kv (name ^ "-bottom", size v) ])
     ]
+
   let margin ?all = prop_lrtb "margin" ?all
   let margin_auto = `Kv ("margin", "auto")
   let width' raw = `Kv ("width", raw)
@@ -75,98 +82,78 @@ module Css = struct
   let font_size' raw = `Kv ("font-size", raw)
   let font_size f = font_size' (size f)
   let font_weight `Bold = `Kv ("font-weight", "bold")
+
   let border ?width ?style ?color ?radius () =
-    [ +(match width with
-        | None -> []
-        | Some f -> [ `Kv ("border-width", size f) ])
-    ; +(match style with
-        | None -> []
-        | Some `solid -> [ `Kv ("border-style", "solid") ])
-    ; +(match color with
-        | None -> []
-        | Some f -> [ `Kv ("border-color", f) ])
-    ; +(match radius with
-        | None -> []
-        | Some f -> [ `Kv ("border-radius", size f) ])
+    [ +(match width with None -> [] | Some f -> [ `Kv ("border-width", size f) ])
+    ; +(match style with None -> [] | Some `solid -> [ `Kv ("border-style", "solid") ])
+    ; +(match color with None -> [] | Some f -> [ `Kv ("border-color", f) ])
+    ; +(match radius with None -> [] | Some f -> [ `Kv ("border-radius", size f) ])
     ]
+
   let whitespace `pre_wrap = `Kv ("white-space", "pre-wrap")
+
   let position ?all ?lr ?tb ?l ?r ?t ?b which =
     let lr = Option.first_some lr all in
     let tb = Option.first_some tb all in
     [ (match which with
-       | `relative -> `Kv ("position", "relative")
-       | `absolute -> `Kv ("position", "absolute"))
+      | `relative -> `Kv ("position", "relative")
+      | `absolute -> `Kv ("position", "absolute"))
     ; +(match Option.first_some l lr with
-        | None -> []
-        | Some v -> [ `Kv ("left", size v) ])
+       | None -> []
+       | Some v -> [ `Kv ("left", size v) ])
     ; +(match Option.first_some r lr with
-        | None -> []
-        | Some v -> [ `Kv ("right", size v) ])
+       | None -> []
+       | Some v -> [ `Kv ("right", size v) ])
     ; +(match Option.first_some t tb with
-        | None -> []
-        | Some v -> [ `Kv ("top", size v) ])
+       | None -> []
+       | Some v -> [ `Kv ("top", size v) ])
     ; +(match Option.first_some b tb with
-        | None -> []
-        | Some v -> [ `Kv ("bottom", size v) ])
+       | None -> []
+       | Some v -> [ `Kv ("bottom", size v) ])
     ]
 
   let aspect_ratio a b = `Kv ("aspect-ratio", sprintf "%d/%d" a b)
-  let float = function
-    | `Right -> `Kv ("float", "right")
-    | `Left -> `Kv ("float", "left")
+  let float = function `Right -> `Kv ("float", "right") | `Left -> `Kv ("float", "left")
   let hyphens `auto = `Kv ("hyphens", "auto")
-  let flex_child  ?grow ?shrink ?basis () =
-    [ +(match grow with
-        | Some f -> [ `Kv ("flex-grow", Int.to_string f) ]
-        | None -> [])
+
+  let flex_child ?grow ?shrink ?basis () =
+    [ +(match grow with Some f -> [ `Kv ("flex-grow", Int.to_string f) ] | None -> [])
     ; +(match shrink with
-        | Some f -> [ `Kv ("flex-shrink", Int.to_string f) ]
-        | None -> [])
-    ; +(match basis with
-        | Some f -> [ `Kv ("flex-basis", size f) ]
-        | None -> [])
+       | Some f -> [ `Kv ("flex-shrink", Int.to_string f) ]
+       | None -> [])
+    ; +(match basis with Some f -> [ `Kv ("flex-basis", size f) ] | None -> [])
     ]
-    
+
   let flex ?wrap ?gap ?grow ?shrink ?basis ?row_gap ?column_gap direction =
     [ `Kv ("display", "flex")
     ; (match direction with
-       | `Row -> `Kv ("flex-direction", "row")
-       | `Column -> `Kv ("flex-direction", "column"))
-    ; +(match wrap with
-        | Some `Wrap -> [ `Kv ("flex-wrap", "wrap") ]
-        | None -> [])
-    ; +(match gap with
-        | Some f -> [ `Kv ("gap", size f) ]
-        | None -> [])
-    ; +(match row_gap with
-        | Some f -> [ `Kv ("row-gap", size f) ]
-        | None -> [])
-    ; +(match column_gap with
-        | Some f -> [ `Kv ("column-gap", size f) ]
-        | None -> [])
-    ; +(match grow with
-        | Some f -> [ `Kv ("flex-grow", Int.to_string f) ]
-        | None -> [])
+      | `Row -> `Kv ("flex-direction", "row")
+      | `Column -> `Kv ("flex-direction", "column"))
+    ; +(match wrap with Some `Wrap -> [ `Kv ("flex-wrap", "wrap") ] | None -> [])
+    ; +(match gap with Some f -> [ `Kv ("gap", size f) ] | None -> [])
+    ; +(match row_gap with Some f -> [ `Kv ("row-gap", size f) ] | None -> [])
+    ; +(match column_gap with Some f -> [ `Kv ("column-gap", size f) ] | None -> [])
+    ; +(match grow with Some f -> [ `Kv ("flex-grow", Int.to_string f) ] | None -> [])
     ; +(match shrink with
-        | Some f -> [ `Kv ("flex-shrink", Int.to_string f) ]
-        | None -> [])
-    ; +(match basis with
-        | Some f -> [ `Kv ("flex-basis", size f) ]
-        | None -> [])
+       | Some f -> [ `Kv ("flex-shrink", Int.to_string f) ]
+       | None -> [])
+    ; +(match basis with Some f -> [ `Kv ("flex-basis", size f) ] | None -> [])
     ]
+
   let justify_content `center = `Kv ("justify-content", "center")
   let text_align `center = `Kv ("text-align", "center")
+
   let clear = function
     | `left -> `Kv ("clear", "left")
     | `right -> `Kv ("clear", "right")
     | `both -> `Kv ("clear", "both")
+
   let selector sel l =
-    match l with
-    | [] -> []
-    | _ :: _ -> [ `Sel (sel, "{\n" ^ to_string l ^ "}") ]
+    match l with [] -> [] | _ :: _ -> [ `Sel (sel, "{\n" ^ to_string l ^ "}") ]
+
   let raw1 s = `Raw s
   let raw s = [ `Raw s ]
-  let _ = width_auto, height
+  let _ = (width_auto, height)
 end
 
 type node =
@@ -176,12 +163,9 @@ type node =
   }
 
 let trees_of_string ?(attrs = []) src : _ list =
-  let attrs =
-    List.map attrs ~f:(fun (k, v) -> ((Markup.Ns.html, k), v))
-  in
+  let attrs = List.map attrs ~f:(fun (k, v) -> ((Markup.Ns.html, k), v)) in
   let trees =
-    Markup.parse_html
-      (Markup.string src)
+    Markup.parse_html (Markup.string src)
     |> Markup.signals
     |> Markup.trim
     |> Markup.trees
@@ -195,13 +179,12 @@ let trees_of_string ?(attrs = []) src : _ list =
   in
   match trees with
   | `Element (a, attrs', children) :: rest ->
-     `Element (a, attrs @ attrs', children) :: rest
+      `Element (a, attrs @ attrs', children) :: rest
   | _ -> trees
 
 let map_node_nonrec map_a = function
-  | `Element (name, attrs, children) ->
-     `Element (name, attrs, List.map ~f:map_a children)
-  | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ as t -> t
+  | `Element (name, attrs, children) -> `Element (name, attrs, List.map ~f:map_a children)
+  | (`Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _) as t -> t
 
 let fold_node (n : node) ~init ~f =
   let rec fold acc n =
@@ -213,64 +196,50 @@ let fold_node (n : node) ~init ~f =
   fold init n
 
 let html h = { classes = []; scripts = []; html = h }
-
-let rec node_of_trees tree : node =
-  html (map_node_nonrec node_of_trees tree)
-let nodes_of_string ?attrs str =
-  List.map ~f:node_of_trees (trees_of_string ?attrs str)
+let rec node_of_trees tree : node = html (map_node_nonrec node_of_trees tree)
+let nodes_of_string ?attrs str = List.map ~f:node_of_trees (trees_of_string ?attrs str)
 
 let elt name ?cl ?(attrs = []) children : node =
   let attrs, classes =
     match cl with
-    | None -> attrs, []
+    | None -> (attrs, [])
     | Some style ->
-       let this_class =
-         name ^ "_" ^ String.prefix (Md5.to_hex (Md5.digest_string style)) 6
-       in
-       let attrs =
-         let rewrote = ref false in
-         let attrs =
-           List.map attrs ~f:(function
-               | ("class", v) ->
+        let this_class =
+          name ^ "_" ^ String.prefix (Md5.to_hex (Md5.digest_string style)) 6
+        in
+        let attrs =
+          let rewrote = ref false in
+          let attrs =
+            List.map attrs ~f:(function
+              | "class", v ->
                   rewrote := true;
                   ("class", this_class ^ " " ^ v)
-               | p -> p)
-         in
-         if !rewrote
-         then attrs
-         else ("class", this_class) :: attrs
-       in
-       attrs, [ this_class, style ]
+              | p -> p)
+          in
+          if !rewrote then attrs else ("class", this_class) :: attrs
+        in
+        (attrs, [ (this_class, style) ])
   in
-  let attrs =
-    List.map attrs ~f:(fun (k, v) -> ((Markup.Ns.html, k), v))
-  in
-  { html = `Element ((Markup.Ns.html, name), attrs, children)
-  ; classes
-  ; scripts = []
-  }
+  let attrs = List.map attrs ~f:(fun (k, v) -> ((Markup.Ns.html, k), v)) in
+  { html = `Element ((Markup.Ns.html, name), attrs, children); classes; scripts = [] }
+
 let leafelt name ?cl attrs : node = elt name ?cl ~attrs []
 let comment s : node = html (`Comment s)
+
 let text =
   let replace =
-    lazy (
-        let thin_nbws = "\u{202F}" in
-        let alist =
-          [ +List.map
-               [ " :"
-               ; " ?"
-               ; " !"
-               ; "« "
-               ; " »"
-               ] ~f:(fun s ->
-                 s, String.substr_replace_all s ~pattern:" " ~with_:thin_nbws)
-          ; "->", "→"
-          ]
-        in
-        let table = Hashtbl.of_alist_exn (module String) alist in
-        let re = Re.(compile (alt (List.map alist ~f:(fun (s, _) -> str s)))) in
-        fun s -> Re.replace re s ~f:(fun group ->
-                     Hashtbl.find_exn table (Re.Group.get group 0)))
+    lazy
+      (let thin_nbws = "\u{202F}" in
+       let alist =
+         [ +List.map [ " :"; " ?"; " !"; "« "; " »" ] ~f:(fun s ->
+                (s, String.substr_replace_all s ~pattern:" " ~with_:thin_nbws))
+         ; ("->", "→")
+         ]
+       in
+       let table = Hashtbl.of_alist_exn (module String) alist in
+       let re = Re.(compile (alt (List.map alist ~f:(fun (s, _) -> str s)))) in
+       fun s ->
+         Re.replace re s ~f:(fun group -> Hashtbl.find_exn table (Re.Group.get group 0)))
   in
   fun s -> html (`Text (force replace s))
 
@@ -278,15 +247,17 @@ let list' which ?cl ?attrs attrs_children =
   elt ?cl
     (match which with `ul -> "ul" | `ol -> "ol")
     ?attrs
-    (List.map attrs_children
-       ~f:(fun (attrs, children) ->
-         elt "li" ~attrs children))
+    (List.map attrs_children ~f:(fun (attrs, children) -> elt "li" ~attrs children))
+
 let list which ?cl ?attrs children =
-  list' which ?cl ?attrs (List.map children ~f:(fun x -> [], x))
+  list' which ?cl ?attrs (List.map children ~f:(fun x -> ([], x)))
 
 let br = elt "br" []
 let hr ?cl () = elt ?cl "hr" []
-let a ~href ?cl ?(attrs = []) children = elt "a" ?cl ~attrs:(["href", href] @ attrs) children
+
+let a ~href ?cl ?(attrs = []) children =
+  elt "a" ?cl ~attrs:([ ("href", href) ] @ attrs) children
+
 let div ?cl ?attrs children = elt "div" ?cl ?attrs children
 let h1 ?cl ?attrs children = elt "h1" ?cl ?attrs children
 let h2 ?cl ?attrs children = elt "h2" ?cl ?attrs children
@@ -298,43 +269,47 @@ let textarea ?cl ?attrs children = elt "textarea" ?cl ?attrs children
 let section ?cl ?attrs children = elt "section" ?cl ?attrs children
 let img ?cl src attrs = leafelt "img" ?cl (("src", src) :: attrs)
 let code ?cl ?attrs children = elt "code" ?cl ?attrs children
-let table ~header ?(cl="") l =
-  elt "table"
-    ~cl:("text-align:center;"^ cl)
+
+let table ~header ?(cl = "") l =
+  elt "table" ~cl:("text-align:center;" ^ cl)
     [ +(match header with
-        | None -> []
-        | Some h ->
-           [ elt "thead"
-               [ elt "tr" (List.map h ~f:(fun z -> elt "th" z)) ] ])
+       | None -> []
+       | Some h -> [ elt "thead" [ elt "tr" (List.map h ~f:(fun z -> elt "th" z)) ] ])
     ; elt "tbody"
         (List.map l ~f:(fun z -> elt "tr" (List.map z ~f:(fun zz -> elt "td" zz))))
     ]
+
 let flex_cl ?(wrap = false) dir =
   let dir = match dir with `Row -> "row" | `Column -> "column" in
   let wrap = if wrap then "wrap" else "nowrap" in
   [%string "display: flex; flex-dir: %{dir}; flex-wrap: %{wrap}; "]
+
 let pseudo_list ?cl ?attrs children : node list =
-  let cl = (cl ||? "") ^ "
-display:flex;
-flex-direction: row;
-gap:0.3em;
-margin-left: 0.7em;
-"
+  let cl =
+    (cl ||? "")
+    ^ "\ndisplay:flex;\nflex-direction: row;\ngap:0.3em;\nmargin-left: 0.7em;\n"
   in
   List.concat_mapi children ~f:(fun i (c, wrap) ->
-      wrap (div ~cl ?attrs
-              [ p ~cl:"margin:0;"
-                  [ span ~attrs:["style",
-                                 if i = 0
-                                 then "letter-spacing: -0.1em"
-                                 else "letter-spacing: -0.05em"]
-                      [ text [%string "%{i+1#Int}."] ] ]
-              ; c
-    ]))
-let id name =
-  "#" ^ name, ("id", name)
+      wrap
+        (div ~cl ?attrs
+           [ p ~cl:"margin:0;"
+               [ span
+                   ~attrs:
+                     [ ( "style"
+                       , if i = 0
+                         then "letter-spacing: -0.1em"
+                         else "letter-spacing: -0.05em" )
+                     ]
+                   [ text [%string "%{i+1#Int}."] ]
+               ]
+           ; c
+           ]))
+
+let id name = ("#" ^ name, ("id", name))
+
 let script src ~defer =
-  leafelt "script" [ "src", src; +(if defer then [ "defer", ""] else []) ]
+  leafelt "script" [ ("src", src); +(if defer then [ ("defer", "") ] else []) ]
+
 let style txt = elt "style" [ text txt ]
 
 let html ~lang ~head ?body_style ~body () =
@@ -346,36 +321,43 @@ let html ~lang ~head ?body_style ~body () =
   in
   let classes =
     let module M = struct
-        type t = string * string
-        let sexp_of_t _ = failwith "asd"
-        let compare (c1, v1) (c2, v2) =
-          let c = String.compare c1 c2 in
-          if c = 0 && String.(<>) v1 v2
-          then raise_s [%sexp "clash between classes",
-                        (v1 : string), (v2 : string)];
-          c
-        include (val Comparator.make ~sexp_of_t ~compare)
-      end in
+      type t = string * string
+
+      let sexp_of_t _ = failwith "asd"
+
+      let compare (c1, v1) (c2, v2) =
+        let c = String.compare c1 c2 in
+        if c = 0 && String.( <> ) v1 v2
+        then raise_s [%sexp "clash between classes", (v1 : string), (v2 : string)];
+        c
+
+      include (val Comparator.make ~sexp_of_t ~compare)
+    end in
     fold_node body ~init:[] ~f:(fun acc node -> List.rev_append node.classes acc)
     |> List.rev
     |> Set.stable_dedup_list (module M)
   in
-  elt "html" ~attrs:["lang", lang ]
+  elt "html"
+    ~attrs:[ ("lang", lang) ]
     [ elt "head"
         [ +head
         ; +List.map scripts ~f:(fun src -> script src ~defer:true)
-        ; +match classes with
+        ; +(match classes with
            | [] -> []
-           | _ -> [ style (classes
-                           |> List.map ~f:(fun (class_, value) ->
-                                  [%string ".%{class_} { %{value} }"])
-                           |> String.concat ~sep:"\n") ]
+           | _ ->
+               [ style
+                   (classes
+                   |> List.map ~f:(fun (class_, value) ->
+                          [%string ".%{class_} { %{value} }"])
+                   |> String.concat ~sep:"\n")
+               ])
         ]
     ; body
     ]
 
 let details ?cl ?summary_cl ?(open_ = false) summary body =
   elt ?cl "details"
-    ~attrs:(if open_ then [ "open", "" ] else [])
+    ~attrs:(if open_ then [ ("open", "") ] else [])
     (elt ?cl:summary_cl "summary" summary :: body)
+
 let cite ?cl body = elt ?cl "cite" body

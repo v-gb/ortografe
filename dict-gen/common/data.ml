@@ -1,28 +1,35 @@
 open Base
 
 module Csv_header = struct
-  type 'a t = (string, int) Hashtbl.t -> (string array -> 'a)
+  type 'a t = (string, int) Hashtbl.t -> string array -> 'a
+
   let field name f =
+    ();
     fun header ->
       match Hashtbl.find header name with
       | None -> failwith ("no header " ^ name)
-      | Some i -> (fun a ->
-        try f a.(i)
-        with e -> raise_s [%sexp (e : exn), "in line", (a : string array)])
-  let return a : _ t = fun _ -> fun _ -> a
+      | Some i -> (
+          fun a ->
+            try f a.(i)
+            with e -> raise_s [%sexp (e : exn), "in line", (a : string array)])
+
+  let return a : _ t = fun _ : _ -> fun _ -> a
   let _ = return
+
   let both t1 t2 =
+    ();
     fun header ->
-    let f1 = t1 header and f2 = t2 header in
-    fun row ->
-    f1 row, f2 row
+      let f1 = t1 header and f2 = t2 header in
+      fun row -> (f1 row, f2 row)
+
   let map t f =
+    ();
     fun header ->
-    let f' = t header in
-    fun row ->
-    f (f' row)
-  let (let+) = map
-  let (and+) = both
+      let f' = t header in
+      fun row -> f (f' row)
+
+  let ( let+ ) = map
+  let ( and+ ) = both
 
   let parse_string t ~header ~separator str =
     (* The csvs we care about have no quoting, and this is lighter than compiler the csv
@@ -30,16 +37,14 @@ module Csv_header = struct
     let rows = String.split_lines str in
     let header, rows =
       match header with
-      | `In_string -> String.split ~on:separator (List.hd_exn rows), List.tl_exn rows
-      | `Header h -> h, rows
+      | `In_string -> (String.split ~on:separator (List.hd_exn rows), List.tl_exn rows)
+      | `Header h -> (h, rows)
     in
     let index_by_name =
-      List.mapi header ~f:(fun i h -> h, i)
-      |> Hashtbl.of_alist_exn (module String)
+      List.mapi header ~f:(fun i h -> (h, i)) |> Hashtbl.of_alist_exn (module String)
     in
     let f = t index_by_name in
-    List.map rows ~f:(fun row ->
-        f (Array.of_list (String.split row ~on:separator)))
+    List.map rows ~f:(fun row -> f (Array.of_list (String.split row ~on:separator)))
 end
 
 module Lexique = struct
@@ -50,26 +55,25 @@ module Lexique = struct
     ; h_aspire : bool
     }
   [@@deriving sexp_of]
+
   type t = row list
 
   let parse src =
-    Csv_header.parse_string
-      ~header:`In_string
-      ~separator:'\t'
+    Csv_header.parse_string ~header:`In_string ~separator:'\t'
       Csv_header.(
-      let+ ortho = field "ortho" Fn.id
-      and+ phon = field "phon" Fn.id
-      and+ lemme = field "lemme" Fn.id
-      and+ h_aspire =
-        field "h_aspire"
-          (function "t" -> true
-                  | "f" -> false
-                  | s -> failwith ("unknown value of h_aspire: " ^ s))
-      in
-      { ortho; phon; lemme; h_aspire })
+        let+ ortho = field "ortho" Fn.id
+        and+ phon = field "phon" Fn.id
+        and+ lemme = field "lemme" Fn.id
+        and+ h_aspire =
+          field "h_aspire" (function
+            | "t" -> true
+            | "f" -> false
+            | s -> failwith ("unknown value of h_aspire: " ^ s))
+        in
+        { ortho; phon; lemme; h_aspire })
       src
 
-  let not_usable_words () =
+  let[@ocamlformat "disable"] not_usable_words () =
     Hash_set.of_list (module String) [
         "monsieur"; "gars"; "ok"; "messieurs"; "mme"; "mlle";
         "cool"; "hum"; "job"; "foot"; "führer"; "bye"; "pizza";
@@ -375,7 +379,7 @@ let read_key_value_comma_sep_file str =
   let h = Hashtbl.create (module String) ~size:(List.length lines) in
   List.iter lines ~f:(fun line ->
       match String.split line ~on:',' with
-      | [key; data] -> ignore (Hashtbl.add h ~key ~data : [ `Ok | `Duplicate ])
+      | [ key; data ] -> ignore (Hashtbl.add h ~key ~data : [ `Ok | `Duplicate ])
       | _ -> raise_s [%sexp "bad line", (line : string)]);
   h
 

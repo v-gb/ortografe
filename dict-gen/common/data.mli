@@ -10,8 +10,8 @@ module Lexique : sig
   [@@deriving sexp_of]
 
   type t = row list
-  val parse : string -> t
 
+  val parse : string -> t
   val not_usable_words : unit -> string Hash_set.t
 end
 

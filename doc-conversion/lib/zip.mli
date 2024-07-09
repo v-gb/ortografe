@@ -2,8 +2,9 @@
    limit the risk of DOS. *)
 
 val max_size : int ref
-val map
-    : ?progress:(int -> unit)
-   -> string
-   -> (path:string -> (contents:string -> string) option)
-   -> string
+
+val map :
+     ?progress:(int -> unit)
+  -> string
+  -> (path:string -> (contents:string -> string) option)
+  -> string
