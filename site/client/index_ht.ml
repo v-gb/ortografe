@@ -62,7 +62,7 @@ let exp_hidden = "exp-hidden"
 let exp_hidden_class = "class", exp_hidden
 
 let navbar l =
-  let a = a ~cl:"display: block;
+  let a = a ~cl:{|display: block;
                  margin: 0;
                  padding: 20px 20px 20px;
                  &:link, &:visited {
@@ -73,39 +73,39 @@ let navbar l =
                  &:hover {
                  text-decoration-line: underline;
                  }
-                 "
+                 |}
   in
   elt "nav" ~cl:"background-color: #F5F5F5;"
     [ div ~cl:"max-width: 55em; margin: auto; "
-        [ list `ul ~cl:"margin: 0;
+        [ list `ul ~cl:{|margin: 0;
                         padding: 0;
                         list-style-type: none;
                         font-size: 1.1em;
                         font-weight: bold;
                         display:flex;
-                        flex-direction: row;"
+                        flex-direction: row;|}
             (List.map l ~f:(fun (href, content) -> [ a ~href content ]))
         ]
     ]
 
 let h1 ?cl children = h1 ~cl:(
-  "margin: 1.67em 0;
+  {|margin: 1.67em 0;
    font-family: sans-serif;
    font-size: calc( 1.4em + (5 - 1.4) * ( (100cqw - 400px) / ( 800 - 400) ));
-" ^ (cl ||? "")) children
+   |} ^ (cl ||? "")) children
 
-let h2 children = h2 ~cl:"
+let h2 children = h2 ~cl:{|
   margin-top: 1em;
   margin-bottom: 0.3em;
   font-size: 2.5rem;
   font-family: sans-serif;
-" children
+  |} children
 
-let h3 children = h3 ~cl:"
+let h3 children = h3 ~cl:{|
   margin-top: 2.2em;
   margin-bottom: 0.8em;
   font-size: 1.3rem;
-" children
+|} children
 
 module Index = struct
   let regles_ref, regles_def = id "regles"
@@ -141,7 +141,7 @@ module Index = struct
             (* Svg and some of the styling taken from youtube's embed iframes instead of
              using the actual iframe, because the iframe itself loads 1MB of stuff and
              slows the loading of the page. *)
-            ; div ~cl:"
+            ; div ~cl:{|
                        position: absolute;
                        left: 50%;
                        top: 50%;
@@ -150,7 +150,7 @@ module Index = struct
                        margin-left: -12.5%;
                        margin-top: -11.5%;
                        pointer-events: none;
-                       "
+                       |}
                 (nodes_of_string {|<svg height="100%" version="1.1" viewBox="0 0 68 48" width="100%"><path class="ytp-large-play-button-bg" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#f00"></path><path d="M 45,24 27,14 27,34" fill="#fff"></path></svg>|})
             ]
         ; p
@@ -169,7 +169,7 @@ module Index = struct
                              textes suivants avant de lire les règles !" ]
             ]
         ]
-    ; +books ~attrs:["style", "
+    ; +books ~attrs:["style", {|
     margin-left: auto;
     margin-right: auto;
     max-width: 40em;
@@ -183,7 +183,7 @@ module Index = struct
     justify-content: center;
     text-align:center;
     clear: both
-  "]
+|}]
     ; p ~cl:"font-size: 0.8em;"
         [ text "Notez que la transcription est automatique, et peut faire des erreurs.\n"
         ; text "Notez également qu'Érofa est bâtie sur les rectifications de \
@@ -198,24 +198,24 @@ module Index = struct
       | `Body str -> [ text str ], []
       | `Placeholder str -> [], [ "placeholder", str ]
     in
-    div ~cl:"
+    div ~cl:{|
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 1em;
-  "
+    |}
       [ textarea
-          ~cl:"
+          ~cl:{|
     background-color: #FAF9F6;
     flex: 1 1 0px;
     min-width: 15em;
     min-height: 6em;
     max-width: 30em;
-  "
+    |}
           ~attrs:["id", id_textarea; +textarea_placeholder]
           textarea_body
       ; div
-          ~cl:"
+          ~cl:{|
     white-space: pre-wrap;
     flex: 1 1 0px;
     min-width: 15em;
@@ -225,7 +225,7 @@ module Index = struct
     background-color: #e5fbe5;
     padding: 3px;
     border-radius: 6px;
-  "
+    |}
           ~attrs:[ "id", id_converted_text
                  ; "class", "notranscribe"] []
       ]
@@ -248,7 +248,7 @@ module Index = struct
         | `green -> "#b9f4b9", "#e5fbe5"
         | `grey -> "grey", "#FAF9F6"
       in
-      [%string "
+      [%string {|
     border: 2px solid %{border_color};
     background-color: %{background_color};
     padding-top: 1px;
@@ -258,7 +258,7 @@ module Index = struct
     border-radius: 4px;
     margin-top: 0.1em;
     margin-bottom: 0.1em;
-  "] in
+    |}] in
     let words txt ws1 ws2 =
       text txt,
       (fun x ->
@@ -396,15 +396,15 @@ module Index = struct
          ])
 
   let image_list' l =
-    let large_icon = "
+    let large_icon = {|
     margin-right: calc(0.2 * min(5em, 15%));
     margin: 3px calc(0.2 * min(5em, 15%)) 3px 3px;
     float: left;
     width: calc(min(5em, 15%));
     height: auto;
-  " in
+    |} in
     list' `ul
-      ~cl:"
+      ~cl:{|
     list-style: none;
     display: flex;
     flex-flow: row wrap;
@@ -413,7 +413,7 @@ module Index = struct
         max-width: 25em;
         width: 100%;
     }
-  "
+    |}
       (List.map l ~f:(fun (attrs, img, desc) ->
          attrs, (img ~cl:large_icon :: desc)))
 
@@ -786,14 +786,14 @@ module Index = struct
            [ text "Données : "
            ; a ~href:"dict.csv"
                ~attrs:[ "id", "download-dict" ]
-               ~cl:[%string "&.loading {
+               ~cl:[%string {|&.loading {
                                border-radius: 6px;
                                background: linear-gradient(to right,
                                  white 0 var(--progress),
                                  %{green_pale} var(--progress) 100%);
                                border: 2px solid %{green};
                                padding: 0 3px 3px 3px;
-                             }"]
+                             }|}]
                [ text "csv" ]
            ; text " contenant l'orthographe avant/après."
            ]
@@ -848,11 +848,11 @@ module Index = struct
                 ]
             ; hr
             ]
-          ; [ a ~cl:"&:visited, &:link { text-decoration-line: none; }
+          ; [ a ~cl:{|&:visited, &:link { text-decoration-line: none; }
                      border-radius: 4px;
                      background-color: #e5fbe5;
                      border: 1.5px solid;
-                     padding: 1px 4px;"
+                     padding: 1px 4px;|}
                 ~href:"http://erofa.free.fr/index.php?option=com_content&view=article&id=56&Itemid=67"
                 [ text "Rejoignez" ]
             ; text " l'"
