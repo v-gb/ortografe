@@ -128,88 +128,80 @@ let keep_regardless_exn rules (row : Data.Lexique.row) =
   | Error s -> raise_s s
   | Ok search_res2 -> { row; alignment = search_res2 }
 
-let rewrite_e_double_consonants =
-  let rebuild_section ortho phon (p1 : Rules.path_elt) (p2 : Rules.path_elt) left_bit
-      right_bit =
-    let left_phon = String.prefix phon p1.j in
-    let right_phon = String.drop_prefix phon p2.j in
-    let e_phon, e_ortho =
-      if Rules.accent_aigu right_phon then ("e", "é") else ("E", "è")
-    in
-    let ortho' =
-      String.concat
-        [ String.prefix ortho p1.i
-        ; left_bit
-        ; e_ortho
-        ; right_bit
-        ; String.drop_prefix ortho (p2.i + String.length p2.graphem)
-        ]
-    in
-    let phon' = String.concat [ left_phon; e_phon; right_phon ] in
-    (ortho', phon')
+let accent_aigu right_phon =
+  if Rules.accent_aigu right_phon then ("e", "é") else ("E", "è")
+
+let replace_graphems env aligned_row
+    ((paths_repl : Rules.path_elt list), middle_ortho, middle_phon) =
+  let phon = aligned_row.row.phon in
+  let ortho = aligned_row.row.ortho in
+  let p_first = List.hd_exn paths_repl in
+  let p_last = List.last_exn paths_repl in
+  let left_phon = String.prefix phon p_first.j in
+  let right_phon = String.drop_prefix phon (p_last.j + String.length p_last.phonem) in
+  let ortho' =
+    String.concat
+      [ String.prefix ortho p_first.i
+      ; middle_ortho
+      ; String.drop_prefix ortho (p_last.i + String.length p_last.graphem)
+      ]
   in
-  fun ~filter env (aligned_row : aligned_row) ->
-    let aligned_row = ref aligned_row in
-    let keep_going = ref true in
-    while !keep_going do
-      keep_going := false;
-      let aligned_row1 = !aligned_row in
-      let rec loop : Rules.path_elt list -> _ = function
-        | ({ graphem = "e"; phonem = "e" | "E"; _ } as p1)
-          :: ({ graphem =
-                  ( "bb" | "cc" | "dd" | "ff" | "gg" | "ll" | "mm" | "nn" | "pp" | "rr"
-                  | "tt" | "zz" ) as consonants
-              ; phonem
-              ; _
-              } as p2)
-          :: rest
-          when String.length phonem =$ 1 && filter consonants.[0] -> (
-            let ortho2, phon2 =
-              rebuild_section aligned_row1.row.ortho aligned_row1.row.phon p1 p2 ""
-                (String.prefix p2.graphem 1)
-            in
-            match keep_if_plausible_phon_opt env aligned_row1 ortho2 phon2 with
-            | Some aligned_row2 ->
-                aligned_row := aligned_row2;
-                keep_going := true
-            | None -> loop rest)
-        | ({ graphem = ("enn" | "emm") as consonants
-           ; phonem = "en" | "En" | "em" | "Em"
-           ; j
-           ; _
-           } as p1)
-          :: rest
-          when filter consonants.[1] -> (
-            let consonant = p1.graphem #: (1, 2) in
-            let left_phon = String.prefix aligned_row1.row.phon j in
-            let right_phon =
-              consonant
-              ^ String.drop_prefix aligned_row1.row.phon (p1.j + String.length p1.phonem)
-            in
-            let e_phon, e_ortho =
-              if Rules.accent_aigu right_phon then ("e", "é") else ("E", "è")
-            in
-            let ortho2 =
-              String.concat
-                [ String.prefix aligned_row1.row.ortho p1.i
-                ; e_ortho
-                ; consonant
-                ; String.drop_prefix aligned_row1.row.ortho
-                    (p1.i + String.length p1.graphem)
-                ]
-            in
-            let phon2 = String.concat [ left_phon; e_phon; right_phon ] in
-            match keep_if_plausible_phon_opt env aligned_row1 ortho2 phon2 with
-            | Some aligned_row2 ->
-                aligned_row := aligned_row2;
-                keep_going := true
-            | None -> loop rest)
-        | _ :: rest -> loop rest
-        | [] -> ()
-      in
-      loop aligned_row1.alignment.path
-    done;
-    !aligned_row
+  let phon' = String.concat [ left_phon; middle_phon; right_phon ] in
+  keep_if_plausible_phon_opt env aligned_row ortho' phon'
+
+let rewrite_e_double_consonants ~filter env (aligned_row : aligned_row) =
+  let aligned_row = ref aligned_row in
+  let keep_going = ref true in
+  while !keep_going do
+    keep_going := false;
+    let aligned_row1 = !aligned_row in
+    let rec loop : Rules.path_elt list -> _ = function
+      | ({ graphem = "e"; phonem = "e" | "E"; _ } as p1)
+        :: ({ graphem =
+                ( "bb" | "cc" | "dd" | "ff" | "gg" | "ll" | "mm" | "nn" | "pp" | "rr"
+                | "tt" | "zz" ) as consonants
+            ; phonem
+            ; _
+            } as p2)
+        :: rest
+        when String.length phonem =$ 1 && filter consonants.[0] -> (
+          let e_phon, e_ortho =
+            let right_phon = String.drop_prefix aligned_row1.row.phon p2.j in
+            accent_aigu right_phon
+          in
+          match
+            replace_graphems env aligned_row1
+              ([ p1; p2 ], e_ortho ^ String.prefix p2.graphem 1, e_phon ^ p2.phonem)
+          with
+          | Some aligned_row2 ->
+              aligned_row := aligned_row2;
+              keep_going := true
+          | None -> loop rest)
+      | ({ graphem = ("enn" | "emm") as consonants
+         ; phonem = "en" | "En" | "em" | "Em"
+         ; _
+         } as p1)
+        :: rest
+        when filter consonants.[1] -> (
+          let consonant = p1.graphem #: (1, 2) in
+          let e_phon, e_ortho =
+            let right_phon = String.drop_prefix aligned_row1.row.phon (p1.j + 1) in
+            accent_aigu right_phon
+          in
+          match
+            replace_graphems env aligned_row1
+              ([ p1 ], e_ortho ^ consonant, e_phon ^ consonant)
+          with
+          | Some aligned_row2 ->
+              aligned_row := aligned_row2;
+              keep_going := true
+          | None -> loop rest)
+      | _ :: rest -> loop rest
+      | [] -> ()
+    in
+    loop aligned_row1.alignment.path
+  done;
+  !aligned_row
 
 let rewrite_graphem' ?(start = 0) env aligned_row ~filter =
   let keep_going = ref true in
