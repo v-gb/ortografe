@@ -749,6 +749,14 @@ let erofa =
     ~prefilter:(fun () -> `Re (force erofa_prefilter'))
     erofa_rule
 
+let rewrite_e_circumflex env (aligned_row : aligned_row) =
+  repeat_until_none ~init:aligned_row (fun aligned_row ->
+      List.find_map aligned_row.alignment.path ~f:(function
+        | { graphem = "ê"; phonem = "e" | "E"; _ } as p1 ->
+            let e_phon, e_ortho = accent_aigu aligned_row p1 in
+            replace_graphems env aligned_row ([ p1 ], e_ortho, e_phon)
+        | _ -> None))
+
 let _ : rule =
   new_rule' "circonflexe/" "@arrêt -> @arret, @arrêter -> @arréter, @arrête -> @arrète"
     ~prefilter:(fun () -> `Re Re.(alt [ str "â"; str "ê"; str "î"; str "ô"; str "û" ]))
@@ -762,8 +770,7 @@ let _ : rule =
         let aligned_row = ref aligned_row in
         aligned_row := rewrite env !aligned_row ~target:pattern_a ~repl:"a";
         aligned_row := rewrite env !aligned_row ~target:pattern_e ~repl:"e";
-        aligned_row := rewrite env !aligned_row ~target:pattern_e ~repl:"é";
-        aligned_row := rewrite env !aligned_row ~target:pattern_e ~repl:"è";
+        aligned_row := rewrite_e_circumflex env !aligned_row;
         aligned_row := rewrite env !aligned_row ~target:pattern_i ~repl:"i";
         aligned_row := rewrite env !aligned_row ~target:pattern_o ~repl:"o";
         aligned_row := rewrite env !aligned_row ~target:pattern_u ~repl:"u";
