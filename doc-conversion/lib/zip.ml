@@ -37,9 +37,11 @@ let map ?(progress = ignore) src f =
         let new_file =
           match Zipc.File.compression file with
           | Stored ->
-              Zipc.File.stored_of_binary_string new_content |> Core.Result.ok_or_failwith
+              Zipc.File.stored_of_binary_string new_content
+              |> Core.Result.ok_or_failwith
           | Deflate ->
-              Zipc.File.deflate_of_binary_string new_content |> Core.Result.ok_or_failwith
+              Zipc.File.deflate_of_binary_string new_content
+              |> Core.Result.ok_or_failwith
           | _ -> failwith "unknown compression type, should have failed earlier"
         in
         let new_member =

@@ -17,4 +17,5 @@ type options =
   ; plurals_in_s : bool
   }
 
-type 'a convert = ?progress:(int -> unit) -> options:options -> string -> dst:'a out -> 'a
+type 'a convert =
+  ?progress:(int -> unit) -> options:options -> string -> dst:'a out -> 'a

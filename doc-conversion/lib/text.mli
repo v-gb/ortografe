@@ -8,7 +8,9 @@ module Interleaved : sig
       structure (xml tags in practice), and tries to rewrite all words and put back all 
       the document around the converted words. *)
 
-  val create : embed:(string -> 'structure) -> convert:(string -> string) -> 'structure t
+  val create :
+    embed:(string -> 'structure) -> convert:(string -> string) -> 'structure t
+
   val emit_structure : 's t -> 's -> [< `Flush | `Space | `Not_special ] -> 's list
   val emit_text : 's t -> string -> 's list
 end

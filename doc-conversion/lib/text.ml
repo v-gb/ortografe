@@ -7,7 +7,9 @@ let nfc str =
 
 let is_letter c =
   (* http://www.unicode.org/reports/tr44/#General_Category_Values *)
-  match Uucp.Gc.general_category c with `Ll | `Lm | `Lo | `Lt | `Lu -> true | _ -> false
+  match Uucp.Gc.general_category c with
+  | `Ll | `Lm | `Lo | `Lt | `Lu -> true
+  | _ -> false
 
 let is_ascii c f = Uchar.is_char c && f (Uchar.to_char c)
 
@@ -185,7 +187,9 @@ let iter_pure_text ~options src ~f =
                     match if options.convert_uppercase then lowercase w else None with
                     | None -> (wu, fun w -> capitalize w ||? w)
                     | Some wl ->
-                        if match capitalize wl with None -> false | Some c -> mem dict c
+                        if match capitalize wl with
+                           | None -> false
+                           | Some c -> mem dict c
                         then ("", fun x -> x)
                         else (wl, fun w -> uppercase_as_much_as_possible w ||? w)))
           in

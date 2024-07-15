@@ -78,8 +78,8 @@ let main more_cmd =
         (C.Arg.flag
            (C.Arg.info
               ~doc:
-                "supprime le fichier d'entrée puis le réécrit en sortie. ATTENTION à ne \
-                 pas perdre vos données"
+                "supprime le fichier d'entrée puis le réécrit en sortie. ATTENTION à \
+                 ne pas perdre vos données"
               [ "in-place" ]))
     in
     if Option.is_some output
@@ -96,8 +96,8 @@ let main more_cmd =
       (arg_option C.Arg.string
          (C.Arg.info ~docv:"TYPE" [ "type" ]
             ~doc:
-              "comment traiter le fichier. --type txt veut dire traiter le fichier comme \
-               un .txt même s'il n'est pas nommé .txt"))
+              "comment traiter le fichier. --type txt veut dire traiter le fichier \
+               comme un .txt même s'il n'est pas nommé .txt"))
   in
   let one_input_file =
     C.Arg.value
@@ -111,16 +111,12 @@ let main more_cmd =
              ~man:
                [ `S C.Manpage.s_description
                ; `P
-                   "Extrait le texte du document INPUT_FILE (ou stdin si non\n\
-                   \                        spécifié) sous forme d'une liste de chaines, \
-                    et l'imprime dans\n\
-                   \                        OUTPUT_FILE. Les chaines de OUTPUT_FILE \
-                    peuvent ensuite être modifiées\n\
-                   \                        de façon quelconque (mais en préservant leur \
-                    nombres), puis être réinsérées\n\
-                   \                        dans INPUT_FILE à l'aide de $(iname) insert.\n\n\
-                   \                        Cela permet de réécrire le texte d'un \
-                    document de façon arbitraire."
+                   "Extrait le texte du document INPUT_FILE (ou stdin si non spécifié) \
+                    sous forme d'une liste de chaines, et l'imprime dans OUTPUT_FILE. \
+                    Les chaines de OUTPUT_FILE peuvent ensuite être modifiées de façon \
+                    quelconque (mais en préservant leur nombres), puis être réinsérées \
+                    dans INPUT_FILE à l'aide de $(iname) insert. Cela permet de \
+                    réécrire le texte d'un document de façon arbitraire."
                ; `P "Exemple :"
                ; `Pre "$(iname) foo.docx \\ "
                ; `Noblank
@@ -129,7 +125,8 @@ let main more_cmd =
                ; `Pre "  | $(mname) insert foo.doc -o foo2.docx"
                ; `Noblank
                ; `P
-                   "(copie foo.docx en foo2.docx en changeant « aujourd'hui » en « hui »)"
+                   "(copie foo.docx en foo2.docx en changeant « aujourd'hui » en « hui \
+                    »)"
                ]
              "extract")
           (let+ input = one_input_file
@@ -141,13 +138,10 @@ let main more_cmd =
              ~man:
                [ `S C.Manpage.s_description
                ; `P
-                   "Remplace le texte du document INPUT_FILE (ou stdin si non\n\
-                   \                        spécifié) par le texte de TEXT_INPUT_FILE \
-                    (ou stdin si non\n\
-                   \                        spécifié) et écrit le résultat dans \
-                    OUTPUT_FILE.\n\
-                   \                        Voir l'aide de $(mname) extract pour un \
-                    exemple d'utilisation."
+                   "Remplace le texte du document INPUT_FILE (ou stdin si non \
+                    spécifié) par le texte de TEXT_INPUT_FILE (ou stdin si non \
+                    spécifié) et écrit le résultat dans OUTPUT_FILE. Voir l'aide de \
+                    $(mname) extract pour un exemple d'utilisation."
                ]
              "insert")
           (let+ input = one_input_file
@@ -161,26 +155,24 @@ let main more_cmd =
            if Option.is_none input && Option.is_none text_input
            then
              failwith
-               "must specify either INPUT_FILE or TEXT_INPUT_FILE, otherwise they'd both \
-                be read from stdin";
+               "must specify either INPUT_FILE or TEXT_INPUT_FILE, otherwise they'd \
+                both be read from stdin";
            ext_conv ?src_type:input_type input
              (match output with
              | `File opt -> opt
              | `In_place ->
-                 Some (input ||? failwith "--in-place only makes sense with an INPUT_FILE"))
+                 Some
+                   (input ||? failwith "--in-place only makes sense with an INPUT_FILE"))
              (`Insert text_input))
       ; C.Cmd.v
           (C.Cmd.info ~doc:"transcrit des documents vers l'orthographe Érofa (ou autre)"
              ~man:
                [ `S C.Manpage.s_description
                ; `P
-                   "Transcrit le texte du document INPUT_FILE (ou stdin si non\n\
-                   \                        spécifié) en OUTPUT_FILE (ou un nom dérivé \
-                    de INPUT_FILE si non\n\
-                   \                        spécifié, ou stdout). La transcription \
-                    utilise l'orthographe Érofa\n\
-                   \                        à moins qu'une autre orthographe ne soit \
-                    sélectionnée."
+                   "Transcrit le texte du document INPUT_FILE (ou stdin si non \
+                    spécifié) en OUTPUT_FILE (ou un nom dérivé de INPUT_FILE si non \
+                    spécifié, ou stdout). La transcription utilise l'orthographe Érofa \
+                    à moins qu'une autre orthographe ne soit sélectionnée."
                ; `P "Exemples :"
                ; `Pre "$(iname) foo.docx"
                ; `Noblank
@@ -254,7 +246,8 @@ let main more_cmd =
                convert ~in_:None
                  ~out:
                    (match output with
-                   | `In_place -> failwith "--in-place only makes sense with INPUT_FILEs"
+                   | `In_place ->
+                       failwith "--in-place only makes sense with INPUT_FILEs"
                    | `File opt -> opt)
            | _ :: _ ->
                if List.length args > 1

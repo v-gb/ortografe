@@ -5,6 +5,6 @@ dock-collection-brackets = false
 break-infix = fit-or-vertical
 # cases-exp-indent = 2
 if-then-else = keyword-first
-margin = 90
+margin = 88
 type-decl = sparse
 # break-colon = before

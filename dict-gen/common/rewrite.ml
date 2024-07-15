@@ -77,7 +77,8 @@ let keep_if_plausible_phon_opt env (aligned_row : aligned_row) ortho2 phon2 =
   | Ok search_res2
     when match debug with
          | None ->
-             search_res2.surprise <=$ aligned_row.alignment.surprise && env.accept ortho2
+             search_res2.surprise <=$ aligned_row.alignment.surprise
+             && env.accept ortho2
          | Some f ->
              let b1 = search_res2.surprise <=$ aligned_row.alignment.surprise in
              let b2 = b1 && env.accept ortho2 in
@@ -96,7 +97,8 @@ let rewrite ?(start = 0) env (aligned_row : aligned_row) ~target ~repl =
     let aligned_row1 = !aligned_row in
     let row1 = aligned_row1.row in
     match
-      string_search_pattern_replace_first_opt target ~in_:row1.ortho ~with_:repl ~pos:!pos
+      string_search_pattern_replace_first_opt target ~in_:row1.ortho ~with_:repl
+        ~pos:!pos
     with
     | None -> pos := String.length row1.ortho
     | Some (ortho2, match_i) ->
@@ -216,7 +218,8 @@ let rewrite_graphem' ?(start = 0) env aligned_row ~filter =
     keep_going := false;
     let aligned_row1 = !aligned_row in
     let (None | Some ()) =
-      List.find_mapi aligned_row1.alignment.path ~f:(fun k (path_elt : Rules.path_elt) ->
+      List.find_mapi aligned_row1.alignment.path
+        ~f:(fun k (path_elt : Rules.path_elt) ->
           if path_elt.i <$ start
           then None
           else
@@ -460,15 +463,16 @@ type rule =
 
 let all_builtin = ref []
 
-let new_rule ?(supports_repeated_rewrites = true) ?(plurals_in_s = true) ?(problems = [])
-    name doc ~prefilter f =
+let new_rule ?(supports_repeated_rewrites = true) ?(plurals_in_s = true)
+    ?(problems = []) name doc ~prefilter f =
   let rule =
     { name; doc; problems; f; prefilter; supports_repeated_rewrites; plurals_in_s }
   in
   all_builtin := rule :: !all_builtin;
   rule
 
-let new_rule' ?supports_repeated_rewrites name ?plurals_in_s ?problems doc ~prefilter f =
+let new_rule' ?supports_repeated_rewrites name ?plurals_in_s ?problems doc ~prefilter f
+    =
   new_rule name ?supports_repeated_rewrites ?plurals_in_s ?problems doc ~prefilter
     (fun rules ->
       let f1 = f () in
@@ -685,7 +689,8 @@ let erofa_rule rules =
                 (* on vérifie que x est bien silencieux, pas remplaceable par s, comme
                    dans coccyx *)
                 match keep_if_plausible_opt env !aligned_row rest with
-                | Some _ -> aligned_row := keep_if_plausible env !aligned_row (rest ^ "s")
+                | Some _ ->
+                    aligned_row := keep_if_plausible env !aligned_row (rest ^ "s")
                 | None -> ())
             | None -> ());
             List.iter
@@ -855,7 +860,8 @@ let que__c =
         !aligned_row)
 
 let _ : rule =
-  new_rule' "sc-sch/c-ch" "@science -> @cience, @fasciste -> @fachiste, @schéma -> @chéma"
+  new_rule' "sc-sch/c-ch"
+    "@science -> @cience, @fasciste -> @fachiste, @schéma -> @chéma"
     ~prefilter:(fun () -> `Re (Re.str "sc"))
     (fun () ->
       let pattern_esc = String.Search_pattern.create "esc" in
@@ -1036,7 +1042,9 @@ let _ : rule =
               match p.graphem with
               | ("il$" | "ils$" | "ill" | "illi" | "eil$" | "eils$" | "eill" | "eilli")
                 when not (String.mem p.phonem 'l') ->
-                  let suffix1 = match p.graphem with "il$" | "ils$" -> "e" | _ -> "" in
+                  let suffix1 =
+                    match p.graphem with "il$" | "ils$" -> "e" | _ -> ""
+                  in
                   let suffix2 =
                     if String.is_suffix p.graphem ~suffix:"s$" then "s" else ""
                   in
@@ -1127,7 +1135,8 @@ let _ : rule list =
                     | "cc", "k" -> [ "c" ]
                     | "cc", "ks" -> [ "cç" ]
                     | "ch", "k" ->
-                        [ "c" ] (* la phase d'après déterminera si un k est nécessaire *)
+                        [ "c" ]
+                        (* la phase d'après déterminera si un k est nécessaire *)
                     | "c", "k" -> [ "c" ]
                     | "c", "s" -> [ "ç" ]
                     | "x", ("gz" | "ks") -> [ "x" ]
@@ -1135,7 +1144,8 @@ let _ : rule list =
                     | _ ->
                         map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem))
                 |> Array.of_list
-              with e -> raise_s [%sexp (e : exn), (aligned_row.row : Data.Lexique.row)]
+              with e ->
+                raise_s [%sexp (e : exn), (aligned_row.row : Data.Lexique.row)]
             in
             let ortho =
               let last_uchar str = Rules.( #:: ) str (String.length str, -1) in
@@ -1159,7 +1169,9 @@ let _ : rule list =
                     (* prend le grapheme complet d'avant parce que dans «langue», le n
                        est déjà un graphème avec le «a», et donc il ne fait pas de
                        graphème avec le g *)
-                    let digraph = graphems.(i - 1) ^ Rules.str_of_uchar (first_uchar g) in
+                    let digraph =
+                      graphems.(i - 1) ^ Rules.str_of_uchar (first_uchar g)
+                    in
                     if Hashtbl.mem reverse_mapping digraph then "·" ^ g else g)
               |> Array.to_list
               |> String.concat
@@ -1183,8 +1195,8 @@ let _ : rule list =
                    avec les articles, on écrit un z en exposant après les articles, pour
                    indiquer "z optionnel". *)
                 match aligned_row.row.ortho with
-                | "ces" | "des" | "les" | "mes" | "ses" | "tes" | "nous" | "vous" | "ils"
-                | "elles" | "aux" ->
+                | "ces" | "des" | "les" | "mes" | "ses" | "tes" | "nous" | "vous"
+                | "ils" | "elles" | "aux" ->
                     ortho ^ "\u{1DBB}"
                 | _ -> ortho
             in
@@ -1196,9 +1208,9 @@ let _ : rule =
     ~problems:
       [ "Les liaisons ne sont pas écrites."
       ; "Les apostrophes ne sont pas supprimées dans les apocopes (« j'aime »)."
-      ; "Les cas difficiles pour tout outil : la prononciation des vers (« le lion » ou \
-         « le liyon »), des homophones (« les poules couvent au couvent »), les mots \
-         manquants du lexique de l'outil."
+      ; "Les cas difficiles pour tout outil : la prononciation des vers (« le lion » \
+         ou « le liyon »), des homophones (« les poules couvent au couvent »), les \
+         mots manquants du lexique de l'outil."
       ]
     ~prefilter:(fun () -> `All)
     (fun () ->
@@ -1260,8 +1272,8 @@ let (_ : rule), ou__omega =
   let f w name =
     new_rule' ("ou/" ^ name)
       [%string
-        "créer une lettre @ou en utilisant @%{w}, @loup -> @l%{w}p, @ouest -> @%{w}est, \
-         @aquatique -> @aq%{w}atique"]
+        "créer une lettre @ou en utilisant @%{w}, @loup -> @l%{w}p, @ouest -> \
+         @%{w}est, @aquatique -> @aq%{w}atique"]
       ~prefilter:(fun () ->
         `Re (Re.alt [ Re.str "ou"; Re.str "où"; Re.str "oû"; Re.str "qu"; Re.str "gu" ]))
       (fun () ->
@@ -1309,7 +1321,8 @@ let _ : rule option =
                (fun aligned_row ->
                  let aligned_row = ref aligned_row in
                  aligned_row :=
-                   rewrite { rules; accept } !aligned_row ~target:pattern_icirc ~repl:"i";
+                   rewrite { rules; accept } !aligned_row ~target:pattern_icirc
+                     ~repl:"i";
                  let path = !aligned_row.alignment.path in
                  let path =
                    List.map path ~f:(fun path_elt ->
@@ -1468,8 +1481,8 @@ let compose_rules rules ~which_rules =
     let rank rule =
       if rule.name = emment__ament.name (* avant qua/ca car on crée des qua *)
       then -3
-      else if rule.name
-              = qua_o__ca_o.name (* avant qu__q sinon les qua ont été tranformés en qa *)
+      else if rule.name = qua_o__ca_o.name
+              (* avant qu__q sinon les qua ont été tranformés en qa *)
               || rule.name = que__c.name
       then -2
       else if rule.name = qu__q.name || rule.name = qu__qou.name
@@ -1482,7 +1495,8 @@ let compose_rules rules ~which_rules =
   in
   match which_rules with
   | [ rule ] when rule.name = erofa.name ->
-      ((erofa_rule rules).compute, fun word phon -> find_relevant_patterns word phon <>$ 0)
+      ( (erofa_rule rules).compute
+      , fun word phon -> find_relevant_patterns word phon <>$ 0 )
   | _ ->
       let compute =
         match which_rules with
@@ -1530,8 +1544,8 @@ let staged_gen ?(fix_oe = false) ~rules:which_rules () =
           in
           (rule aligned_row).row.ortho
 
-let gen ?progress ?(fix_oe = false) ?(not_understood = `Ignore) ~rules:which_rules lexique
-    f =
+let gen ?progress ?(fix_oe = false) ?(not_understood = `Ignore) ~rules:which_rules
+    lexique f =
   let rules = Rules.create () in
   let skip = load_skip () in
   let rule, prefilter = compose_rules rules ~which_rules in
@@ -1544,7 +1558,8 @@ let gen ?progress ?(fix_oe = false) ?(not_understood = `Ignore) ~rules:which_rul
   List.iter lexique ~f:(fun row ->
       total := !total + 1;
       (if !total % chunk_size =$ 0
-       then match progress with None -> () | Some f -> f (!total * 100 / length_lexique));
+       then
+         match progress with None -> () | Some f -> f (!total * 100 / length_lexique));
       if not (skip row)
       then (
         considered := !considered + 1;

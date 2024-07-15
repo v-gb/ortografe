@@ -12,7 +12,8 @@ type 'a out =
   | String : string out
   | Ignore : unit out
 
-type 'a convert = ?progress:(int -> unit) -> options:options -> string -> dst:'a out -> 'a
+type 'a convert =
+  ?progress:(int -> unit) -> options:options -> string -> dst:'a out -> 'a
 
 val max_size : int ref
 val pure_text : ?convert_text:(string -> string) -> ?buf:Buffer.t -> _ convert
@@ -20,7 +21,10 @@ val html : ?convert_text:(string -> string) -> _ convert
 val htmlz : ?convert_text:(string -> string) -> _ convert
 val officeopenxml : [< `Docx | `Pptx ] -> ?convert_text:(string -> string) -> _ convert
 val epub : ?convert_text:(string -> string) -> _ convert
-val officeopenxml_old : [< `Doc | `Ppt ] -> ?convert_text:(string -> string) -> _ convert
+
+val officeopenxml_old :
+  [< `Doc | `Ppt ] -> ?convert_text:(string -> string) -> _ convert
+
 val opendocument : ?convert_text:(string -> string) -> _ convert
 
 val convert_string :

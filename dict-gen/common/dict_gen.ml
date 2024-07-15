@@ -206,8 +206,8 @@ let html_doc =
            in
            [%string "<a href=\"%{url}\">%{display_url}</a>"])
 
-let all_selection_html ~url_prefix ~id_prefix ~name_prefix ?(checked = Fn.const false) ()
-    =
+let all_selection_html ~url_prefix ~id_prefix ~name_prefix ?(checked = Fn.const false)
+    () =
   let builtin =
     List.map (force all_builtin) ~f:(fun rule ->
         let checked = if checked rule then " checked" else "" in
@@ -302,7 +302,9 @@ let merge_metadata_right_biased m1 m2 =
 
 let interpret_rules rules =
   let erofa = `Builtin "erofa" in
-  let rules = if List.is_empty rules then [ `Rewrite erofa; `Rect1990; `Oe ] else rules in
+  let rules =
+    if List.is_empty rules then [ `Rewrite erofa; `Rect1990; `Oe ] else rules
+  in
   let has_erofa = List.mem rules (`Rewrite erofa) ~equal:[%compare.equal: rule] in
   let rewrite_rules, oe, rect1990 =
     let oe = ref false in
@@ -344,7 +346,8 @@ let gen ?(profile = false) ?progress ~rules ~all ~output ~json_to_string data =
     match data with
     | `Values { post90; lexique } -> (post90, lexique)
     | `Embedded { data_lexique_Lexique383_gen_tsv; extension_dict1990_gen_csv } ->
-        ( time ~profile "read1990" (fun () -> Data.parse_post90 extension_dict1990_gen_csv)
+        ( time ~profile "read1990" (fun () ->
+              Data.parse_post90 extension_dict1990_gen_csv)
         , time ~profile "readerofa" (fun () ->
               Data.Lexique.parse data_lexique_Lexique383_gen_tsv) )
   in

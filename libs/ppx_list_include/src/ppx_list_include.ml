@@ -54,7 +54,9 @@ let list_literal e =
              let loc = e.pexp_loc in
              let e =
                Ast_builder.Default.elist ~loc
-                 (List.map (function `Dyn e -> e | `Literal (loc, l) -> elist ~loc l) l)
+                 (List.map
+                    (function `Dyn e -> e | `Literal (loc, l) -> elist ~loc l)
+                    l)
              in
              (* Maybe we should use Base.List.concat, because Stdlib.List.concat
                 is not tail rec, and rebuilds the last element of the list because

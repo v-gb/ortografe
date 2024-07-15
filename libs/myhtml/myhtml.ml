@@ -85,7 +85,9 @@ module Css = struct
 
   let border ?width ?style ?color ?radius () =
     [ +(match width with None -> [] | Some f -> [ `Kv ("border-width", size f) ])
-    ; +(match style with None -> [] | Some `solid -> [ `Kv ("border-style", "solid") ])
+    ; +(match style with
+       | None -> []
+       | Some `solid -> [ `Kv ("border-style", "solid") ])
     ; +(match color with None -> [] | Some f -> [ `Kv ("border-color", f) ])
     ; +(match radius with None -> [] | Some f -> [ `Kv ("border-radius", size f) ])
     ]
@@ -113,7 +115,11 @@ module Css = struct
     ]
 
   let aspect_ratio a b = `Kv ("aspect-ratio", sprintf "%d/%d" a b)
-  let float = function `Right -> `Kv ("float", "right") | `Left -> `Kv ("float", "left")
+
+  let float = function
+    | `Right -> `Kv ("float", "right")
+    | `Left -> `Kv ("float", "left")
+
   let hyphens `auto = `Kv ("hyphens", "auto")
 
   let flex_child ?grow ?shrink ?basis () =
@@ -183,7 +189,8 @@ let trees_of_string ?(attrs = []) src : _ list =
   | _ -> trees
 
 let map_node_nonrec map_a = function
-  | `Element (name, attrs, children) -> `Element (name, attrs, List.map ~f:map_a children)
+  | `Element (name, attrs, children) ->
+      `Element (name, attrs, List.map ~f:map_a children)
   | (`Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _) as t -> t
 
 let fold_node (n : node) ~init ~f =

@@ -18,6 +18,8 @@ let read src filename =
   | `Str str -> str
   | `Root root -> Eio.Path.load (in_build_dir ~root filename)
 
-let load_erofa src = Data.parse_erofa (read src "extension/dict.external-sources.gen.csv")
+let load_erofa src =
+  Data.parse_erofa (read src "extension/dict.external-sources.gen.csv")
+
 let load_post90 src = Data.parse_post90 (read src "extension/dict1990.gen.csv")
 let load_lexique src = Data.Lexique.parse (read src "data/lexique/Lexique383.gen.tsv")

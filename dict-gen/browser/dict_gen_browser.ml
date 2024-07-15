@@ -46,7 +46,9 @@ let currently_selected_rules id_prefix =
     |> Jv.to_string
     |> Dict_gen_common.Dict_gen.custom_rule
   in
-  let selected_rules : selected_rules = Option.to_list custom_rule @ selected_builtins in
+  let selected_rules : selected_rules =
+    Option.to_list custom_rule @ selected_builtins
+  in
   let selection_text =
     if List.is_empty selected_rules
     then "rien de sélectionné"
@@ -120,10 +122,12 @@ let staged_generate cache rules_params dict_blob =
         in
         let selection_rules, selection_text, _ = currently_selected_rules in
         let dict =
-          cached cache "dict" ~eq:[%equal: string * (_ * int)] (selection_text, next_stage)
-            (fun _ (_selection_text, (next_stage, _)) -> next_stage selection_rules)
+          cached cache "dict" ~eq:[%equal: string * (_ * int)]
+            (selection_text, next_stage) (fun _ (_selection_text, (next_stage, _)) ->
+              next_stage selection_rules)
         in
-        Fut.ok (Some (dict, if List.is_empty selection_rules then `Empty else `Nonempty))
+        Fut.ok
+          (Some (dict, if List.is_empty selection_rules then `Empty else `Nonempty))
   in
   let* custom_dict =
     match dict_blob with

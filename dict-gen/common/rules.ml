@@ -62,7 +62,8 @@ let ( #:: ) str (i, n) =
     let i = ref i in
     for _ = 1 to n do
       if !i <$ String.length str
-      then i := !i + Stdlib.Uchar.utf_decode_length (Stdlib.String.get_utf_8_uchar str !i)
+      then
+        i := !i + Stdlib.Uchar.utf_decode_length (Stdlib.String.get_utf_8_uchar str !i)
     done;
     if !i >=$ String.length str
     then Stdlib.Uchar.rep
@@ -216,7 +217,8 @@ let create () : t =
     ; ("ill", Core)
     ; ("illi", Core_optional (* joaillier, mais pas milliseconde, donc optionnel *))
     ]
-    ~f:(fun (digraph, imp) -> new_fixed digraph [ ("il", imp); ("ij", imp); ("j", imp) ]);
+    ~f:(fun (digraph, imp) ->
+      new_fixed digraph [ ("il", imp); ("ij", imp); ("j", imp) ]);
   new_fixed "il" [ ("il", Core); ("ij", Surprising); ("j", Surprising) ];
   (* gentilhomme *)
   List.iter [ "eil$"; "eils$"; "eill"; "eilli" ] ~f:(fun digraph ->
@@ -514,7 +516,9 @@ let create () : t =
      let r_non_nasal_preferred = r_non_nasal @ [ (nasal, Surprising) ] in
      new_fixed (x ^ "mm") r_non_nasal;
      new_ (x ^ "m") (fun word _ j ->
-         match word #: (j, j + 1) with "b" | "p" -> r_nasal | _ -> r_non_nasal_preferred)
+         match word #: (j, j + 1) with
+         | "b" | "p" -> r_nasal
+         | _ -> r_non_nasal_preferred)
    in
    rule_xm "a" [ "a" ] "@";
    rule_xm "ai" [ "e"; "E" ] "5";
@@ -612,7 +616,9 @@ let search (rules : t) word phon =
       let i, j, surprise, path = Heap.pop_minimum pqueue in
       if i >=$ String.length word
       then
-        if j =$ String.length phon then Ok { path = List.rev path; surprise } else loop ()
+        if j =$ String.length phon
+        then Ok { path = List.rev path; surprise }
+        else loop ()
       else (
         if [%compare: int * int] (j, i) (snd !furthest, fst !furthest) >$ 0
         then furthest := (i, j);
@@ -638,8 +644,8 @@ let search (rules : t) word phon =
                       | Core | Core_optional -> (
                           match !longest_matching_core_graphem with
                           | None -> 0
-                          | Some longest -> Bool.to_int (String.length graphem <$ longest)
-                          )
+                          | Some longest ->
+                              Bool.to_int (String.length graphem <$ longest))
                       | Surprising -> 1
                     in
                     Heap.add pqueue

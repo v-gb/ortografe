@@ -142,7 +142,11 @@ val list' :
   -> node
 
 val list :
-  [< `ol | `ul ] -> ?cl:string -> ?attrs:(string * string) list -> node list list -> node
+     [< `ol | `ul ]
+  -> ?cl:string
+  -> ?attrs:(string * string) list
+  -> node list list
+  -> node
 
 val pseudo_list :
      ?cl:string

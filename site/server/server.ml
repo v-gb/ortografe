@@ -114,13 +114,16 @@ let respond_error_text status str =
     Dream.response ~status
       ~headers:[ ("Content-Type", Dream.text_html) ]
       (html_of_response
-         ~title_unescaped:(Printf.sprintf "Error %d: %s" code (Dream.html_escape reason))
+         ~title_unescaped:
+           (Printf.sprintf "Error %d: %s" code (Dream.html_escape reason))
          ~body_unescaped:(Dream.html_escape str))
   in
   Dream.set_field response error_has_body ();
   Lwt.return response
 
-let hum_size_of_bytes n = Core.Byte_units.Short.to_string (Core.Byte_units.of_bytes_int n)
+let hum_size_of_bytes n =
+  Core.Byte_units.Short.to_string (Core.Byte_units.of_bytes_int n)
+
 let stream_end = Dream.new_field ~name:"stream-end" ()
 
 let actual_from_system root disk_path _request =
@@ -182,7 +185,8 @@ let from_filesystem root path request =
     if has_compressed_version
        && List.exists
             (fun s ->
-              String.split_on_char ',' s |> List.exists (fun s -> String.trim s = "gzip"))
+              String.split_on_char ',' s
+              |> List.exists (fun s -> String.trim s = "gzip"))
             (Dream.headers request "Accept-Encoding")
     then (path ^ ".gz", [ ("Content-Encoding", "gzip") ] @ Dream.mime_lookup path)
     else (path, [])
@@ -401,8 +405,8 @@ let get_dict () =
                      the floor instead of turning it into oe, which is less fine, so do it
                      ourselves. *)
                   Dream.to_percent_encoded
-                    (Core.String.Search_pattern.replace_all (Lazy.force oe_pattern) ~in_:b
-                       ~with_:"oe")
+                    (Core.String.Search_pattern.replace_all (Lazy.force oe_pattern)
+                       ~in_:b ~with_:"oe")
                 in
                 [%string
                   {|<a href="https://dictionnaire.lerobert.com/definition/%{b_for_url}" style="background-color: #e22027; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;">R</a>|}]
@@ -446,7 +450,8 @@ let post_conv ~max_input_size ~staged request =
                 match name with
                 | "custom" -> (
                     match values with
-                    | (_, value) :: _ -> Left (Dict_gen_common.Dict_gen.custom_rule value)
+                    | (_, value) :: _ ->
+                        Left (Dict_gen_common.Dict_gen.custom_rule value)
                     | _ -> Left None)
                 | _ -> (
                     match Dict_gen_common.Dict_gen.of_name_builtin name with
@@ -508,7 +513,8 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
   Ortografe.max_size := max_input_size * 2;
   (* xml can be quite large when decompressed *)
   let static_root, `In_container in_container = where_to_find_static_files () in
-  Dream.run ?port ?tls ~interface:"0.0.0.0" (* apparently only listens on lo otherwise *)
+  Dream.run ?port ?tls
+    ~interface:"0.0.0.0" (* apparently only listens on lo otherwise *)
     ~error_handler:(Dream.error_template my_error_template)
   @@ (if in_container (* approximates "in prod" *) then define_client_ip else Fun.id)
   @@ (if log then logger `Short else Fun.id)

@@ -19,7 +19,9 @@ let head ~root ~attrs ~title ~description () =
   ; +(if root
       then
         [ leafelt "meta" (* bing *)
-            [ ("name", "msvalidate.01"); ("content", "528A9A3C7E6F9E5C349FB47AB8447469") ]
+            [ ("name", "msvalidate.01")
+            ; ("content", "528A9A3C7E6F9E5C349FB47AB8447469")
+            ]
         ; leafelt "meta" (* gsearch for https://ortografe-server.fly.dev *)
             [ ("name", "google-site-verification")
             ; ("content", "cium7Nf85Z4I0Wj9O3Ck5ZwwkUzUQ_h_cwcwJHEUug8")
@@ -124,7 +126,8 @@ let h3 children =
   margin-top: 2.2em;
   margin-bottom: 0.8em;
   font-size: 1.3rem;
-|} children
+|}
+    children
 
 module Index = struct
   let regles_ref, regles_def = id "regles"
@@ -180,8 +183,8 @@ module Index = struct
             [ text "Les linguistes de l'"
             ; a ~href:"http://erofa.free.fr/" [ text "association Érofa" ]
             ; text
-                " proposent trois règles qui rationalisent quelques points difficiles de \
-                 l'orthographe du français."
+                " proposent trois règles qui rationalisent quelques points difficiles \
+                 de l'orthographe du français."
             ]
         ; p
             [ text
@@ -217,10 +220,11 @@ module Index = struct
              )
            ]
     ; p ~cl:"font-size: 0.8em;"
-        [ text "Notez que la transcription est automatique, et peut faire des erreurs.\n"
+        [ text
+            "Notez que la transcription est automatique, et peut faire des erreurs.\n"
         ; text
-            "Notez également qu'Érofa est bâtie sur les rectifications de 1990, qui sont \
-             donc appliquées."
+            "Notez également qu'Érofa est bâtie sur les rectifications de 1990, qui \
+             sont donc appliquées."
         ]
     ]
 
@@ -280,7 +284,9 @@ module Index = struct
   let section_regles () =
     let transcription color =
       let border_color, background_color =
-        match color with `green -> ("#b9f4b9", "#e5fbe5") | `grey -> ("grey", "#FAF9F6")
+        match color with
+        | `green -> ("#b9f4b9", "#e5fbe5")
+        | `grey -> ("grey", "#FAF9F6")
       in
       [%string
         {|
@@ -372,7 +378,8 @@ module Index = struct
              }|}
           []
       ; p ~cl:"font-size: 0.8em;"
-          [ text "Il est possible qu'il y ait quelques erreurs sur des mots peu communs."
+          [ text
+              "Il est possible qu'il y ait quelques erreurs sur des mots peu communs."
           ]
       ]
 
@@ -383,7 +390,8 @@ module Index = struct
           [ p [ strong [ text "Cette fonctionalité requiert du javascript." ] ] ]
       ; interactive_transcription ~id_textarea:"user-text"
           ~id_converted_text:"converted-text"
-          ~initial_text:(`Body "Babar a une mémoire exceptionnelle, car c'est un éléph…")
+          ~initial_text:
+            (`Body "Babar a une mémoire exceptionnelle, car c'est un éléph…")
       ]
 
   let email_link children = elt "a" ~attrs:[ ("class", "mailelt") ] children
@@ -487,8 +495,8 @@ module Index = struct
             img "/static/pdf.svg" ~cl
               [ ("alt", "PDF file icon"); ("width", "544"); ("height", "580") ])
         , [ text
-              "Pas supporté directement. Soumettez soit le fichier dont est tiré le PDF \
-               (préférable), ou un fichier Word recréé depuis le PDF (voir "
+              "Pas supporté directement. Soumettez soit le fichier dont est tiré le \
+               PDF (préférable), ou un fichier Word recréé depuis le PDF (voir "
           ; a ~href:"https://www.adobe.com/acrobat/online/pdf-to-word.html"
               [ text "Adobe" ]
           ; text " ou "
@@ -565,15 +573,16 @@ module Index = struct
          a ~href:src
            [ img src ~cl:"max-width:min(35em,100%); height:auto"
                [ ( "alt"
-                 , "Capture d'écran de page Éléphant de Wikipédia en orthographe Érofa" )
+                 , "Capture d'écran de page Éléphant de Wikipédia en orthographe Érofa"
+                 )
                ; ("width", "1280")
                ; ("height", "800")
                ]
            ])
       ; p
           [ text
-              "Lisez internet en orthographe rationalisée avec une extension pour votre \
-               navigateur :"
+              "Lisez internet en orthographe rationalisée avec une extension pour \
+               votre navigateur :"
           ]
       ; image_list'
           [ ( [ ("class", "for-chrome") ]
@@ -643,8 +652,8 @@ module Index = struct
       ; p
           [ text
               "Pour éviter les soulignages rouges intempestifs, nous fournissons des \
-               extensions pour que les outils suivants reconnaissent l'orthographe Érofa \
-               :"
+               extensions pour que les outils suivants reconnaissent l'orthographe \
+               Érofa :"
           ]
       ; image_list'
           [ ( []
@@ -679,9 +688,9 @@ module Index = struct
             [ text
                 "La plupart des claviers virtuels pour téléphone s'adaptent à votre \
                  orthographe : après avoir tapé les mots quelques fois en orthographe \
-                 Érofa, ces orthographes vont seront proposés. Mais pour ne pas avoir à \
-                 apprendre toute l'orthographe à votre clavier, et aussi pour que vous \
-                 puissiez choisir quand écrire en Érofa, nous vous proposons un \
+                 Érofa, ces orthographes vont seront proposés. Mais pour ne pas avoir \
+                 à apprendre toute l'orthographe à votre clavier, et aussi pour que \
+                 vous puissiez choisir quand écrire en Érofa, nous vous proposons un \
                  dictionnaire pour le clavier HeliBoard pour Android."
             ; details
                 [ text "Instructions pour l'utiliser." ]
@@ -731,10 +740,11 @@ module Index = struct
                       ]
                     ]
                 ; text
-                    "Pour repasser en orthographe usuelle, quand le clavier est visible, \
-                     cliquez sur l'icône de clavier en bas à droite et sélectionnez \
-                     votre ancien clavier (probablement Gboard). Et pour repasser en \
-                     Érofa, même manipulation, mais sélectionnez HeliBoard."
+                    "Pour repasser en orthographe usuelle, quand le clavier est \
+                     visible, cliquez sur l'icône de clavier en bas à droite et \
+                     sélectionnez votre ancien clavier (probablement Gboard). Et pour \
+                     repasser en Érofa, même manipulation, mais sélectionnez \
+                     HeliBoard."
                 ]
             ]
           (* Avec gboard, le fait qu'on ne puisse pas supprimer les entrées de façon
@@ -763,9 +773,9 @@ module Index = struct
             [ text
                 "Les accents sont plus fréquents avec l'orthographe Érofa. Pour les \
                  rares personnes qui utilisent un clavier QWERTY américain sans accès \
-                 aux accents, sous Ubuntu nous vous suggérons la disposition de clavier \
-                 « French (US) » (seule AltGr change, et permet d'écrire tous les signes \
-                 du français, sans touches mortes)."
+                 aux accents, sous Ubuntu nous vous suggérons la disposition de \
+                 clavier « French (US) » (seule AltGr change, et permet d'écrire tous \
+                 les signes du français, sans touches mortes)."
             ]
         ]
     ]
@@ -811,8 +821,9 @@ module Index = struct
            ])
       ; p
           [ text
-              "Notez que ces autres orthographes ne sont pas des recommendations (ni des \
-               futures recommendations), simplement des possibilités d'expérimentation."
+              "Notez que ces autres orthographes ne sont pas des recommendations (ni \
+               des futures recommendations), simplement des possibilités \
+               d'expérimentation."
           ]
       ; submit_file
           (fun button ->
@@ -827,9 +838,10 @@ module Index = struct
                 ; a
                     ~attrs:
                       [ ( "style"
-                        , "background-color: #1e90ff; border-radius: 50%; color: white; \
-                           font-weight: bold; text-align:center; display: inline-block; \
-                           width: 1.3em; height: 1.3em; text-decoration: none;" )
+                        , "background-color: #1e90ff; border-radius: 50%; color: \
+                           white; font-weight: bold; text-align:center; display: \
+                           inline-block; width: 1.3em; height: 1.3em; text-decoration: \
+                           none;" )
                       ; ("target", "_blank")
                       ]
                     ~href:"/static/dict-format.html"
@@ -931,8 +943,8 @@ module Index = struct
                   ]
                 ; [ a ~href:"/static/erofa-texte.pdf#page=17"
                       [ text
-                          "Explications de l'histoire de l'orthographe et pourquoi cette \
-                           réforme"
+                          "Explications de l'histoire de l'orthographe et pourquoi \
+                           cette réforme"
                       ]
                   ; text " (26 pages)"
                   ]
@@ -940,7 +952,8 @@ module Index = struct
                       ~href:
                         "http://www.lambert-lucas.com/wp-content/uploads/2022/11/OA-dictionnaire-EROFA.pdf"
                       [ text
-                          "Tous les articles précédents, plus une liste des mots modifiés"
+                          "Tous les articles précédents, plus une liste des mots \
+                           modifiés"
                       ]
                   ]
                 ]
@@ -966,9 +979,9 @@ module Index = struct
                 [ cite [ text "Orthographe : qui a peur de la réforme ?" ] ]
             ; text
                 " (de Marie-Louise Moreau et Georges Legros) explique un tas de choses \
-                 sur l'orthographe : pourquoi l'orthographe est comme elle est, comment \
-                 elle a évolué dans le passé, les idées fausses qu'on s'en fait, les \
-                 craintes que génèrent une réforme, etc."
+                 sur l'orthographe : pourquoi l'orthographe est comme elle est, \
+                 comment elle a évolué dans le passé, les idées fausses qu'on s'en \
+                 fait, les craintes que génèrent une réforme, etc."
             ; hr
             ]
           ; [ p ~cl:"margin-top: 0; margin-bottom: 0.2em"
@@ -986,25 +999,26 @@ module Index = struct
                                  des dictionnaires personnalisés, ajout de du \
                                  dictionnaire consultable en ligne."
                             ]
-                          ; [ text "À ce stade, les outils sont essentiellement finis." ]
+                          ; [ text "À ce stade, les outils sont essentiellement finis."
+                            ]
                           ; [ text
                                 "2024-05 : support de transcriptions de document côté \
                                  client, amélioration de l'apparence du site"
                             ]
                           ; [ text
-                                "2024-01 - 2024-04 : support des rectifications de 1990, \
-                                 ajout de la transcription de documents, extension pour \
-                                 Safari, support d'orthographes autres que l'orthographe \
-                                 Érofa dans le site et dans les extensions, impression \
-                                 d'un livre classique en orthographe Érofa (Alice au \
-                                 pays des merveilles)."
+                                "2024-01 - 2024-04 : support des rectifications de \
+                                 1990, ajout de la transcription de documents, \
+                                 extension pour Safari, support d'orthographes autres \
+                                 que l'orthographe Érofa dans le site et dans les \
+                                 extensions, impression d'un livre classique en \
+                                 orthographe Érofa (Alice au pays des merveilles)."
                             ]
                           ; [ text
                                 "2023-10 - 2024-01 : extension pour Chrome, la \
-                                 transcription inclut maintenant les mots dérivés comme \
-                                 les conjugaisons (grâce l'application informatisée des \
-                                 règles Érofa à un lexique), création du site avec la \
-                                 transcription interactive"
+                                 transcription inclut maintenant les mots dérivés \
+                                 comme les conjugaisons (grâce l'application \
+                                 informatisée des règles Érofa à un lexique), création \
+                                 du site avec la transcription interactive"
                             ]
                           ; [ text "2023-10 : extension pour Firefox" ]
                           ]
@@ -1015,8 +1029,8 @@ module Index = struct
                       [ div ~cl:"padding-left: 2em"
                           [ p
                               [ text
-                                  "Les outils de cette page utilisent des dictionnaires \
-                                   construits à partir d'Érofa ("
+                                  "Les outils de cette page utilisent des \
+                                   dictionnaires construits à partir d'Érofa ("
                               ; a
                                   ~href:
                                     "http://erofa.free.fr/index.php?option=com_content&view=article&id=59&Itemid=68"
@@ -1033,9 +1047,10 @@ module Index = struct
                               ]
                           ; p
                               [ text
-                                  "Vous pouvez retrouver l'origine des icônes utilisées \
-                                   dans cette page sur la page wikipédia dudit programme \
-                                   ou format. Les quelques cas plus dures sont "
+                                  "Vous pouvez retrouver l'origine des icônes \
+                                   utilisées dans cette page sur la page wikipédia \
+                                   dudit programme ou format. Les quelques cas plus \
+                                   dures sont "
                               ; a
                                   ~href:
                                     "https://commons.wikimedia.org/wiki/File:Text-txt.svg"
@@ -1079,8 +1094,8 @@ module Index = struct
   let head () =
     head ~root:true ~title:"Orthographe rationnelle"
       ~description:
-        "Outils pour utiliser l'orthographe rationalisée du français Érofa. Ou d'autres \
-         orthographes, comme celle des rectifications de 1990."
+        "Outils pour utiliser l'orthographe rationalisée du français Érofa. Ou \
+         d'autres orthographes, comme celle des rectifications de 1990."
       ~attrs:
         [ script "/static/dict.js" ~defer:true
         ; script "/static/rewrite.js" ~defer:true
@@ -1102,16 +1117,16 @@ module Index = struct
                     [ h2 [ text "Outils de mise en pratique" ]
                     ; p ~cl:"margin-top:0"
                         [ text
-                            "Pour rédiger de nouveaux textes en cette orthographe, vous \
-                             trouverez ici un vérificateur d'orthographe, un clavier \
-                             pour télephone, et un dictionnaire pour consulter \
+                            "Pour rédiger de nouveaux textes en cette orthographe, \
+                             vous trouverez ici un vérificateur d'orthographe, un \
+                             clavier pour télephone, et un dictionnaire pour consulter \
                              l'orthographe de n'importe quel mot."
                         ]
                     ; p ~cl:"margin-top:0"
                         [ text
                             "Pour transcrire des textes existants, vous pourrez \
-                             soumettre plus bas du texte, des documents, ou récupérer un \
-                             outil pour transcrire les pages internet à la volée."
+                             soumettre plus bas du texte, des documents, ou récupérer \
+                             un outil pour transcrire les pages internet à la volée."
                         ]
                     ]
                 ; section_dictionnaire ()
@@ -1186,7 +1201,8 @@ module Regles_alfonic = struct
                     ; Index.submit_file (fun button ->
                           [ div ~cl:"display: none"
                               (Dict_gen_common.Dict_gen.all_selection_html
-                                 ~url_prefix:"/static/" ~name_prefix:"" ~id_prefix:"conv-"
+                                 ~url_prefix:"/static/" ~name_prefix:""
+                                 ~id_prefix:"conv-"
                                  ~checked:(fun r ->
                                    Set.mem rules_set (Dict_gen_common.Dict_gen.name r))
                                  ()

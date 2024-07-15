@@ -30,7 +30,9 @@ let equal_string_sp s1 s2 = String.( = ) (s1 ^ "s") s2
 let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
   let regular_plurals =
     let h =
-      Hashtbl.of_alist_multi (module String) (List.map lexique ~f:(fun x -> (x.lemme, x)))
+      Hashtbl.of_alist_multi
+        (module String)
+        (List.map lexique ~f:(fun x -> (x.lemme, x)))
     in
     Of_iter.list (fun yield ->
         Hashtbl.iter h ~f:(fun data ->
@@ -61,7 +63,8 @@ let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
     |> (fun m ->
          Map.iter m ~f:(function
            | [] | [ _ ] -> ()
-           | _ :: _ :: _ as l -> List.iter l ~f:(fun (conflicts, _) -> conflicts := true));
+           | _ :: _ :: _ as l ->
+               List.iter l ~f:(fun (conflicts, _) -> conflicts := true));
          m)
     |> Map.filter_map ~f:(function
          | [ (conflicts, s) ] -> if !conflicts then None else Some s
@@ -315,7 +318,8 @@ let gen_cmd ?embedded ?doc name =
      and+ write =
        C.Arg.value
          (C.Arg.opt (C.Arg.some C.Arg.string) None
-            (C.Arg.info ~doc:"écrire le dictionnaire dans le fichier spécifié" [ "write" ]))
+            (C.Arg.info ~doc:"écrire le dictionnaire dans le fichier spécifié"
+               [ "write" ]))
      and+ diff =
        C.Arg.value
          (C.Arg.opt (C.Arg.some C.Arg.string) None
@@ -328,7 +332,8 @@ let gen_cmd ?embedded ?doc name =
      Eio_main.run (fun env ->
          try gen ?embedded ~env ~rules ~all ~write ~diff ~drop ()
          with
-         | Eio.Exn.Io (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _)
+         | Eio.Exn.Io
+             (Eio.Net.E (Connection_reset (Eio_unix.Unix_error (EPIPE, _, _))), _)
          ->
            ()))
 
@@ -368,7 +373,8 @@ let main () =
            and+ dict_search =
              C.Arg.value
                (C.Arg.flag
-                  (C.Arg.info ~doc:"afficher un Dict_search.t persisté" [ "dict-search" ]))
+                  (C.Arg.info ~doc:"afficher un Dict_search.t persisté"
+                     [ "dict-search" ]))
            in
            Eio_main.run (fun env ->
                let root = root ~from:(Eio.Stdenv.fs env) in

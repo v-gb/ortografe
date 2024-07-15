@@ -91,7 +91,8 @@ let known_exts =
   ; (".htmlz", "application/octet-stream")
   ; (".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
   ; (".ppt", "application/vnd.ms-powerpoint")
-  ; (".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation")
+  ; ( ".pptx"
+    , "application/vnd.openxmlformats-officedocument.presentationml.presentation" )
   ; (".doc", "application/msword")
   ; (".odt", "application/vnd.oasis.opendocument.text")
   ; (".odp", "application/vnd.oasis.opendocument.presentation")
@@ -214,7 +215,8 @@ let ext_conv ?src_type src dst inex =
         match inex with
         | `Extract ->
             fun s ->
-              output_string dst (string_of_sexp_always_quote_avoid_escapes (Atom s) ^ "\n");
+              output_string dst
+                (string_of_sexp_always_quote_avoid_escapes (Atom s) ^ "\n");
               ""
         | `Insert f ->
             let strs =

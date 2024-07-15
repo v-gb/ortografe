@@ -34,7 +34,8 @@ let drop_squigglies signals =
       | `Start_element (name, _) ->
           Stack.push stack
             (not
-               ([%compare.equal: string * string] name (More_markup.docx_ns, "proofErr")));
+               ([%compare.equal: string * string] name
+                  (More_markup.docx_ns, "proofErr")));
           Stack.top_exn stack
       | `End_element ->
           let b = Stack.top_exn stack in
@@ -102,7 +103,8 @@ let convert which ?convert_text ?progress ~options src ~dst =
       if files_to_rewrite path
       then
         Some
-          (fun ~contents -> convert_xml ?convert_text which ~options contents ~dst:String)
+          (fun ~contents ->
+            convert_xml ?convert_text which ~options contents ~dst:String)
       else None)
   |> write_out dst
 
@@ -122,8 +124,8 @@ let convert_old which ?convert_text ?progress ~options src ~dst =
   | Other _ ->
       failwith
         [%string
-          "Les fichiers « .%{old_ext} » ne sont pas supportés ici (format trop ancien). \
-           Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."]);
+          "Les fichiers « .%{old_ext} » ne sont pas supportés ici (format trop \
+           ancien). Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."]);
   (* Should put a memory limit, perhaps with the cgroup exe? At least, in prod the OOM
      killer is selecting the open office process, not the server. *)
   let d = Filename.temp_dir "ortografe" "tmp" in
@@ -141,8 +143,8 @@ let convert_old which ?convert_text ?progress ~options src ~dst =
             Some
               (Failure
                  [%string
-                   "Les fichiers « .%{old_ext} » ne sont plus supportés ici (format trop \
-                    ancien). Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."])
+                   "Les fichiers « .%{old_ext} » ne sont plus supportés ici (format \
+                    trop ancien). Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."])
         | 137 (* SIGKILL *) ->
             Some
               (Failure

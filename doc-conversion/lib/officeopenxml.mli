@@ -6,4 +6,6 @@ val convert_xml :
   [< `Docx | `Pptx ] -> ?convert_text:(string -> string) -> _ Common.convert
 
 val convert : [< `Docx | `Pptx ] -> ?convert_text:(string -> string) -> _ Common.convert
-val convert_old : [< `Doc | `Ppt ] -> ?convert_text:(string -> string) -> _ Common.convert
+
+val convert_old :
+  [< `Doc | `Ppt ] -> ?convert_text:(string -> string) -> _ Common.convert

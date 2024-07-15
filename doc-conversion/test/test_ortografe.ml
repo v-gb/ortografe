@@ -397,8 +397,8 @@ let%expect_test "just large file" =
   force set_vm_limit;
   Sys_unix.command_exn
     "if ! [ -f /tmp/zip-bomb/large.zip ]; then head -c 5000000000 /dev/zero > \
-     /tmp/zip-bomb/large && zip -q /tmp/zip-bomb/large.zip /tmp/zip-bomb/large && rm -f \
-     /tmp/zip-bomb/large; fi";
+     /tmp/zip-bomb/large && zip -q /tmp/zip-bomb/large.zip /tmp/zip-bomb/large && rm \
+     -f /tmp/zip-bomb/large; fi";
   let result, duration =
     time (fun () ->
         Result.try_with (fun () ->

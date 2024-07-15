@@ -41,7 +41,8 @@ let json_of_string str =
             else
               Jv.It.fold_bindings ~key:Jv.to_string ~value:conv
                 (fun k v acc -> (k, v) :: acc)
-                (Jv.It.iterator (Jv.call (Jv.get Jv.global "Object") "entries" [| jv |]))
+                (Jv.It.iterator
+                   (Jv.call (Jv.get Jv.global "Object") "entries" [| jv |]))
                 []
               |> List.rev
               |> `Assoc __

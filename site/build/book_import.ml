@@ -111,7 +111,8 @@ let convert_wikisource epub ~url ~dst =
            ereader would provide its own). So add CSS settings to make the look of the
            converted xhtml and the wikisource html similar. *)
         match Filename.basename path with
-        | f when String.is_suffix f ~suffix:".html" || String.is_suffix f ~suffix:".xhtml"
+        | f
+          when String.is_suffix f ~suffix:".html" || String.is_suffix f ~suffix:".xhtml"
           ->
             Some (fun ~contents -> make_the_html_mobile_friendly ~url contents)
         | "main.css" ->
@@ -146,7 +147,8 @@ let convert_gutenberg zip ~url ~dst =
            ereader would provide its own). So add CSS settings to make the look of the
            converted xhtml and the wikisource html similar. *)
         match Filename.basename path with
-        | f when String.is_suffix f ~suffix:".html" || String.is_suffix f ~suffix:".xhtml"
+        | f
+          when String.is_suffix f ~suffix:".html" || String.is_suffix f ~suffix:".xhtml"
           ->
             Some (fun ~contents -> make_the_html_mobile_friendly ~url contents)
         | _ -> None)
@@ -292,7 +294,8 @@ let guess_main_file ~url ~data =
   | [ f ] -> f
   | files ->
       raise_s
-        [%sexp "can't find main .html file for", (url : string), ~~(files : string list)]
+        [%sexp
+          "can't find main .html file for", (url : string), ~~(files : string list)]
 
 let html_li ~url:_ ~author ~user_title ~title ~main_file =
   let rel_url =
