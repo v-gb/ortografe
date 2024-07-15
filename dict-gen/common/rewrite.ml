@@ -154,7 +154,7 @@ let rewrite_e_double_consonants =
     while !keep_going do
       keep_going := false;
       let aligned_row1 = !aligned_row in
-      let rec loop k : Rules.path_elt list -> _ = function
+      let rec loop : Rules.path_elt list -> _ = function
         | ({ graphem = "e"; phonem = "e" | "E"; _ } as p1)
           :: ({ graphem =
                   ( "bb" | "cc" | "dd" | "ff" | "gg" | "ll" | "mm" | "nn" | "pp" | "rr"
@@ -172,7 +172,7 @@ let rewrite_e_double_consonants =
             | Some aligned_row2 ->
                 aligned_row := aligned_row2;
                 keep_going := true
-            | None -> loop (k + 2) rest)
+            | None -> loop rest)
         | ({ graphem = ("enn" | "emm") as consonants
            ; phonem = "en" | "En" | "em" | "Em"
            ; j
@@ -203,11 +203,11 @@ let rewrite_e_double_consonants =
             | Some aligned_row2 ->
                 aligned_row := aligned_row2;
                 keep_going := true
-            | None -> loop (k + 1) rest)
-        | _ :: rest -> loop (k + 1) rest
+            | None -> loop rest)
+        | _ :: rest -> loop rest
         | [] -> ()
       in
-      loop 0 aligned_row1.alignment.path
+      loop aligned_row1.alignment.path
     done;
     !aligned_row
 
