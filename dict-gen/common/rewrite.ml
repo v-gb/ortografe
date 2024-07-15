@@ -149,59 +149,48 @@ let replace_graphems env aligned_row
   let phon' = String.concat [ left_phon; middle_phon; right_phon ] in
   keep_if_plausible_phon_opt env aligned_row ortho' phon'
 
+let rec list_find_map_with_tail l f =
+  match l with
+  | [] -> None
+  | hd :: tl -> (
+      match f hd tl with None -> list_find_map_with_tail tl f | Some _ as opt -> opt)
+
+let rec repeat_until_none ~init:acc f =
+  match f acc with None -> acc | Some acc -> repeat_until_none ~init:acc f
+
 let rewrite_e_double_consonants ~filter env (aligned_row : aligned_row) =
-  let aligned_row = ref aligned_row in
-  let keep_going = ref true in
-  while !keep_going do
-    keep_going := false;
-    let aligned_row1 = !aligned_row in
-    let rec loop : Rules.path_elt list -> _ = function
-      | ({ graphem = "e"; phonem = "e" | "E"; _ } as p1)
-        :: ({ graphem =
-                ( "bb" | "cc" | "dd" | "ff" | "gg" | "ll" | "mm" | "nn" | "pp" | "rr"
-                | "tt" | "zz" ) as consonants
-            ; phonem
-            ; _
-            } as p2)
-        :: rest
-        when String.length phonem =$ 1 && filter consonants.[0] -> (
-          let e_phon, e_ortho =
-            let right_phon = String.drop_prefix aligned_row1.row.phon p2.j in
-            accent_aigu right_phon
-          in
-          match
-            replace_graphems env aligned_row1
-              ([ p1; p2 ], e_ortho ^ String.prefix p2.graphem 1, e_phon ^ p2.phonem)
-          with
-          | Some aligned_row2 ->
-              aligned_row := aligned_row2;
-              keep_going := true
-          | None -> loop rest)
-      | ({ graphem = ("enn" | "emm") as consonants
-         ; phonem = "en" | "En" | "em" | "Em"
-         ; _
-         } as p1)
-        :: rest
-        when filter consonants.[1] -> (
-          let consonant = p1.graphem #: (1, 2) in
-          let e_phon, e_ortho =
-            let right_phon = String.drop_prefix aligned_row1.row.phon (p1.j + 1) in
-            accent_aigu right_phon
-          in
-          match
-            replace_graphems env aligned_row1
-              ([ p1 ], e_ortho ^ consonant, e_phon ^ consonant)
-          with
-          | Some aligned_row2 ->
-              aligned_row := aligned_row2;
-              keep_going := true
-          | None -> loop rest)
-      | _ :: rest -> loop rest
-      | [] -> ()
-    in
-    loop aligned_row1.alignment.path
-  done;
-  !aligned_row
+  repeat_until_none ~init:aligned_row (fun aligned_row ->
+      list_find_map_with_tail aligned_row.alignment.path (fun first tail ->
+          match (first, tail) with
+          | ( ({ graphem = "e"; phonem = "e" | "E"; _ } as p1)
+            , ({ graphem =
+                   ( "bb" | "cc" | "dd" | "ff" | "gg" | "ll" | "mm" | "nn" | "pp" | "rr"
+                   | "tt" | "zz" ) as consonants
+               ; phonem
+               ; _
+               } as p2)
+              :: _ )
+            when String.length phonem =$ 1 && filter consonants.[0] ->
+              let e_phon, e_ortho =
+                let right_phon = String.drop_prefix aligned_row.row.phon p2.j in
+                accent_aigu right_phon
+              in
+              replace_graphems env aligned_row
+                ([ p1; p2 ], e_ortho ^ String.prefix p2.graphem 1, e_phon ^ p2.phonem)
+          | ( ({ graphem = ("enn" | "emm") as consonants
+               ; phonem = "en" | "En" | "em" | "Em"
+               ; _
+               } as p1)
+            , _ )
+            when filter consonants.[1] ->
+              let consonant = p1.graphem #: (1, 2) in
+              let e_phon, e_ortho =
+                let right_phon = String.drop_prefix aligned_row.row.phon (p1.j + 1) in
+                accent_aigu right_phon
+              in
+              replace_graphems env aligned_row
+                ([ p1 ], e_ortho ^ consonant, e_phon ^ consonant)
+          | _ -> None))
 
 let rewrite_graphem' ?(start = 0) env aligned_row ~filter =
   let keep_going = ref true in
