@@ -771,6 +771,26 @@ let erofa =
     ~prefilter:(fun () -> `Re (force erofa_prefilter'))
     erofa_rule
 
+let _ : rule =
+  new_rule' "circonflexe/" "@arrêt -> @arret, @arrêter -> @arréter, @arrête -> @arrète"
+    ~prefilter:(fun () -> `Re Re.(alt [ str "â"; str "ê"; str "î"; str "ô"; str "û" ]))
+    (fun () ->
+      let pattern_a = String.Search_pattern.create "â" in
+      let pattern_e = String.Search_pattern.create "ê" in
+      let pattern_i = String.Search_pattern.create "î" in
+      let pattern_o = String.Search_pattern.create "ô" in
+      let pattern_u = String.Search_pattern.create "û" in
+      fun env aligned_row ->
+        let aligned_row = ref aligned_row in
+        aligned_row := rewrite env !aligned_row ~target:pattern_a ~repl:"a";
+        aligned_row := rewrite env !aligned_row ~target:pattern_e ~repl:"e";
+        aligned_row := rewrite env !aligned_row ~target:pattern_e ~repl:"é";
+        aligned_row := rewrite env !aligned_row ~target:pattern_e ~repl:"è";
+        aligned_row := rewrite env !aligned_row ~target:pattern_i ~repl:"i";
+        aligned_row := rewrite env !aligned_row ~target:pattern_o ~repl:"o";
+        aligned_row := rewrite env !aligned_row ~target:pattern_u ~repl:"u";
+        !aligned_row)
+
 let qu__q =
   new_rule' "qu/q" "@aquatique -> @aquatiqe"
     ~prefilter:(fun () -> `Re (Re.str "qu"))

@@ -31,9 +31,10 @@ val search : t -> string -> string -> (search_res, Sexplib.Sexp.t) Result.t
 (** A few utility functions *)
 
 val accent_aigu : string -> bool
-(** Given the phonems that follow the phonem for an «e» letter, compute whether e's syllable
-    is closed or open, that is, which of é or è you should expect is to be pronounced
-    as (although it would probably work the same for other pairs of open/closed vowels). *)
+(** Given the phonems that follow the phonem for an «e» letter, compute whether e's
+    syllable is closed or open, that is, which of é or è you should expect it to be
+    pronounced as (although it would probably work the same for other pairs of
+    open/closed vowels). *)
 
 val ( #: ) : string -> int * int -> string
 val ( #:: ) : string -> int * int -> Uchar.t
