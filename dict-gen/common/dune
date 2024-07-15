@@ -5,6 +5,7 @@
    base
    re
    sexplib
+   string_comparison
  )
  (preprocess (pps ppx_compare ;; drop ppx_jane, to avoid the toplevel inline tests side effects
                   ppx_sexp_conv

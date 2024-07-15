@@ -1,0 +1,3 @@
+(library
+ (name string_comparison)
+ (libraries base))

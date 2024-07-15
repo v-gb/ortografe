@@ -1,25 +1,10 @@
 open Base
-
-let ( >$ ) = ( > )
-let ( <$ ) = ( < )
-let ( =$ ) = ( = )
-let ( <>$ ) = ( <> )
-let ( <=$ ) = ( <= )
-let ( >=$ ) = ( >= )
-let ( > ) = String.( > )
-let ( < ) = String.( < )
-let ( = ) = String.( = )
-let ( <> ) = String.( <> )
-let ( <= ) = String.( <= )
-let ( >= ) = String.( >= )
-
-let[@ocamlformat "disable"] _ =
-  ((>$), (<$), (=$), (<>$), (<=$), (>=$), (>), (<), (=), (<>), (<=), (>=))
+open String_comparison
 
 let utf8_exists_non_shortcut str ~f =
   let found = ref false in
   let i = ref 0 in
-  while !i <$ String.length str do
+  while !i < String.length str do
     let decode = Stdlib.String.get_utf_8_uchar str !i in
     found := !found || f (Stdlib.Uchar.utf_decode_uchar decode);
     i := !i + Stdlib.Uchar.utf_decode_length decode
@@ -28,7 +13,7 @@ let utf8_exists_non_shortcut str ~f =
 
 let uchar_of_str str =
   let utf_decode = Stdlib.String.get_utf_8_uchar str 0 in
-  assert (Stdlib.Uchar.utf_decode_length utf_decode =$ String.length str);
+  assert (Stdlib.Uchar.utf_decode_length utf_decode = String.length str);
   Stdlib.Uchar.utf_decode_uchar utf_decode
 
 let _ = uchar_of_str
@@ -48,32 +33,32 @@ let sub str a b =
 let ( #: ) str (a, b) = sub str a b
 
 let prev_uchar str i =
-  if i >=$ 1 && Char.( < ) str.[i - 1] '\128'
+  if i >= 1 && Char.( < ) str.[i - 1] '\128'
   then i - 1
-  else if i >=$ 2 && Char.( >= ) str.[i - 2] '\192'
+  else if i >= 2 && Char.( >= ) str.[i - 2] '\192'
   then i - 2
-  else if i >=$ 3 && Char.( >= ) str.[i - 3] '\224'
+  else if i >= 3 && Char.( >= ) str.[i - 3] '\224'
   then i - 3
   else i - 4
 
 let ( #:: ) str (i, n) =
-  if n >=$ 0
+  if n >= 0
   then (
     let i = ref i in
     for _ = 1 to n do
-      if !i <$ String.length str
+      if !i < String.length str
       then
         i := !i + Stdlib.Uchar.utf_decode_length (Stdlib.String.get_utf_8_uchar str !i)
     done;
-    if !i >=$ String.length str
+    if !i >= String.length str
     then Stdlib.Uchar.rep
     else Stdlib.Uchar.utf_decode_uchar (Stdlib.String.get_utf_8_uchar str !i))
   else
     let i = ref i in
     for _ = 1 to -n do
-      if !i >=$ 0 then i := prev_uchar str !i
+      if !i >= 0 then i := prev_uchar str !i
     done;
-    if !i <$ 0
+    if !i < 0
     then Stdlib.Uchar.rep
     else Stdlib.Uchar.utf_decode_uchar (Stdlib.String.get_utf_8_uchar str !i)
 
@@ -229,7 +214,7 @@ let create () : t =
   new_ "s" (fun word i j ->
       if in_ortho_vowels word #:: (j, 0) && in_ortho_vowels word #:: (i, -1)
       then [ ("z", Core); ("s", Surprising) ]
-      else if word #: (j, j + 1) = "m" || word #: (i - 4, i) = "tran"
+      else if word #: (j, j + 1) =: "m" || word #: (i - 4, i) =: "tran"
       then
         (* I think this is mostly wrong, but lexique has dubious prononciations *)
         [ ("z", Core); ("s", Core) ]
@@ -241,12 +226,14 @@ let create () : t =
 
   (* T *)
   new_ "t" (fun word _ j ->
-      if word #: (j, j + 1) = "i" then [ ("s", Core); ("t", Core) ] else [ ("t", Core) ]);
+      if word #: (j, j + 1) =: "i"
+      then [ ("s", Core); ("t", Core) ]
+      else [ ("t", Core) ]);
   List.iter [ "t$"; "ts$" ] ~f:(fun digraph ->
       new_ digraph (fun word i _ ->
           (* Le cas surprising nous permet de dire que mamout avec un t prononcé est
              surprenant/douteux *)
-          if word #: (i - 2, i) = "ac"
+          if word #: (i - 2, i) =: "ac"
           then [ ("", Core); ("t", Core) ]
           else [ ("", Core); ("t", Surprising) ]));
   new_fixed "th" [ ("t", Core); ("", Surprising) ] (* asthme *);
@@ -325,7 +312,7 @@ let create () : t =
       |> List.map ~f:(fun (a, b) -> a ^ b))
   in
   new_ "e" (fun word i j ->
-      if String.length word >$ j
+      if String.length word > j
          && Uchar.( = ) word #:: (j, 0) word #:: (j, 1)
          && not (in_ortho_vowels word #:: (j, 0))
       then
@@ -338,8 +325,8 @@ let create () : t =
         let _ = i in
         if in_ortho_vowels word #:: (j, 0) (* pas le droit d'enlever le h de dehors *)
         then [ ("", Core) ]
-        else if String.length word =$ j (* un e en fin de mot n'est jamais é ou è *)
-                || (String.length word =$ j + 1 && Char.( = ) word.[j] 's')
+        else if String.length word = j (* un e en fin de mot n'est jamais é ou è *)
+                || (String.length word = j + 1 && Char.( = ) word.[j] 's')
         then [ ("2", Core); ("°", Core); ("", Core) ]
         else
           let syllable_is_unfinished =
@@ -349,7 +336,7 @@ let create () : t =
                || Uchar.( = ) word #:: (j, 0) !!"x")
             && (not (Hash_set.mem syllable_starts word #: (j, j + 2)))
             && not
-                 ((word #: (j, j + 2) = "ch" || word #: (j, j + 2) = "th")
+                 ((word #: (j, j + 2) =: "ch" || word #: (j, j + 2) =: "th")
                  && in_ortho_vowels word #:: (j, 2))
           in
           if syllable_is_unfinished
@@ -397,9 +384,9 @@ let create () : t =
   new_ "i" (fun word i j ->
       (* really want to look at past phonem, not past letter here. Even past phonem is a
          problem, because of syllable boundary *)
-      if i =$ 0
+      if i = 0
       then [ ("j", Core); ("i", Core) ]
-      else if j <$ String.length word && not (in_ortho_vowels word #:: (j, 0))
+      else if j < String.length word && not (in_ortho_vowels word #:: (j, 0))
       then
         [ ("i", Core) ]
         (* on ne permet pas le son en face d'une consonne, pour éviter
@@ -432,9 +419,9 @@ let create () : t =
              général, mais j'ai pas vu de problème avec le fait d'être aussi permissif
              pour l'instant*)
           if true
-             || i =$ 0
+             || i = 0
              || (not (in_ortho_vowels word #:: (i, -1)))
-             || word #: (i - 2, i) = "qu"
+             || word #: (i - 2, i) =: "qu"
           then [ ("u", Core); ("w", Core) ]
           else [ ("u", Core) ]));
   new_fixed "oux$" [ ("u", Core) ];
@@ -448,7 +435,7 @@ let create () : t =
 
   (* U *)
   new_ "u" (fun word i _ ->
-      if i =$ 0 || not (in_ortho_vowels word #:: (i, -1))
+      if i = 0 || not (in_ortho_vowels word #:: (i, -1))
       then
         [ ("y", Core)
         ; ("8", Core)
@@ -579,7 +566,7 @@ let to_string { path; surprise } =
   in
   let graphemes =
     List.map path ~f:(fun p ->
-        if String.( = ) p.phonem "" then "[32m" ^ p.graphem ^ "[39m" else p.graphem)
+        if p.phonem =: "" then "[32m" ^ p.graphem ^ "[39m" else p.graphem)
     |> String.concat ~sep:"|"
   in
   let phonemes = List.map path ~f:__.phonem |> String.concat ~sep:"|" in
@@ -614,13 +601,13 @@ let search (rules : t) word phon =
           , (String.drop_prefix phon (snd !furthest) : string)]
     else
       let i, j, surprise, path = Heap.pop_minimum pqueue in
-      if i >=$ String.length word
+      if i >= String.length word
       then
-        if j =$ String.length phon
+        if j = String.length phon
         then Ok { path = List.rev path; surprise }
         else loop ()
       else (
-        if [%compare: int * int] (j, i) (snd !furthest, fst !furthest) >$ 0
+        if [%compare: int * int] (j, i) (snd !furthest, fst !furthest) > 0
         then furthest := (i, j);
         let longest_matching_core_graphem = ref None in
         Array.iter
@@ -644,8 +631,8 @@ let search (rules : t) word phon =
                       | Core | Core_optional -> (
                           match !longest_matching_core_graphem with
                           | None -> 0
-                          | Some longest ->
-                              Bool.to_int (String.length graphem <$ longest))
+                          | Some longest -> Bool.to_int (String.length graphem < longest)
+                          )
                       | Surprising -> 1
                     in
                     Heap.add pqueue
