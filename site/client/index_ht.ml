@@ -984,6 +984,14 @@ module Index = struct
                  fait, les craintes que génèrent une réforme, etc."
             ; hr
             ]
+          ; [ text "Allez voir les "
+            ; a ~href:"https://www.tract-linguistes.org" [ text "linguistes atterrés" ]
+            ; text ", qui "
+            ; a ~href:"https://www.tract-linguistes.org/reforme/"
+                [ text "recommandent une partie des propositions Érofa" ]
+            ; text " (pluriels en s plutôt qu'en x, accord du participe passé)."
+            ; hr
+            ]
           ; [ p ~cl:"margin-top: 0; margin-bottom: 0.2em"
                 [ text "Sur le site et les outils :" ]
             ; list `ul
