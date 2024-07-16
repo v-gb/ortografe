@@ -22,6 +22,7 @@ function detab {
 {
     grep0 -H -E "^$pattern$tab" data/lexique/Lexique383-full.gen.tsv | cut -d "$tab" -f -5 | detab
     grep0 -H -E "^$pattern," data/wiktionnaire/{1990.csv,1990-corrections.csv}
+    grep0 -H -E "^$pattern," data/lexique/1990.csv
     grep0 -H -E "^$pattern$tab" data/lexique/Lexique383.gen.tsv | detab
     grep0 -H -E "^[^,]*,$pattern," data/erofa/DOR.csv | sed 's/^\([^:]*:\)[^,]*,/\1/'
     grep0 -H -E "^$pattern,"  data/homemade/{1990-extra.csv,lexique-extra.csv}
