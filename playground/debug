@@ -1,0 +1,35 @@
+#!/bin/bash
+set -e -u -o pipefail
+cd $(jj workspace root)/_build/default
+pattern="$1"
+tab=$'\t'
+
+function grep0 {
+    set +e
+    grep "$@"
+    local code=$?
+    set -e
+    if [ $code = 1 ]; then
+        code=0
+    fi
+    return $code
+}
+
+function detab {
+    sed "s/\t/,/g"
+}
+
+{
+    grep0 -H -E "^$pattern$tab" data/lexique/Lexique383-full.gen.tsv | cut -d "$tab" -f -5 | detab
+    grep0 -H -E "^$pattern," data/wiktionnaire/{1990.csv,1990-corrections.csv}
+    grep0 -H -E "^$pattern$tab" data/lexique/Lexique383.gen.tsv | detab
+    grep0 -H -E "^[^,]*,$pattern," data/erofa/DOR.csv | sed 's/^\([^:]*:\)[^,]*,/\1/'
+    grep0 -H -E "^$pattern,"  data/homemade/{1990-extra.csv,lexique-extra.csv}
+    grep0 -H -E "^$pattern," extension/dict{,1990}.gen.csv
+    (cd ../../; _build/default/dict-gen/bin/dict_gen.exe \
+                    gen --1990 --erofa --oe 2> /dev/null \
+        | grep0 -E "^$pattern," \
+        | while read line; do
+        echo "fully-gen-erofa:$line"
+     done)
+} | column -t -s ":,"
