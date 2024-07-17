@@ -234,6 +234,15 @@ let logger = function
   | `Long -> Dream.logger
   | `Short ->
       let open Core in
+      let ofday time_ns =
+        time_ns
+        |> Time_ns.to_int63_ns_since_epoch
+        |> Int63.to_int_exn
+        |> (fun i -> i mod (86400 * 1_000_000_000))
+        |> Time_ns.Span.of_int_ns
+        |> Time_ns.Ofday.of_span_since_start_of_day_exn
+        |> Time_ns.Ofday.to_millisecond_string
+      in
       let next_id =
         let r = ref (-1) in
         fun () ->
@@ -253,15 +262,6 @@ let logger = function
         then handler request
         else
           let before = Time_ns.now () in
-          let ofday =
-            Time_ns.now ()
-            |> Time_ns.to_int63_ns_since_epoch
-            |> Int63.to_int_exn
-            |> (fun i -> i mod (86400 * 1_000_000_000))
-            |> Time_ns.Span.of_int_ns
-            |> Time_ns.Ofday.of_span_since_start_of_day_exn
-            |> Time_ns.Ofday.to_millisecond_string
-          in
           let method_ = Dream.method_to_string (Dream.method_ request) in
           let user_agent =
             let user_agent = String.concat (Dream.headers request "User-Agent") in
@@ -280,15 +280,14 @@ let logger = function
           in
           Stdlib.prerr_endline
             [%string
-              "%{ofday} %{method_} %{id#Int} %{client} %{Dream.target request}  \
+              "%{ofday before} %{method_} %{id#Int} %{client} %{Dream.target request}  \
                %{user_agent}"];
           Stdlib.flush stderr;
           Lwt.try_bind
             (fun () -> handler request)
             (fun response ->
-              let duration =
-                Time_ns.Span.to_int_us (Time_ns.diff (Time_ns.now ()) before)
-              in
+              let after1 = Time_ns.now () in
+              let duration = Time_ns.Span.to_int_us (Time_ns.diff after1 before) in
               let status = Dream.status response in
               let bcolor, ecolor =
                 if Dream.is_server_error status
@@ -299,7 +298,7 @@ let logger = function
               in
               Stdlib.prerr_endline
                 [%string
-                  "%{ofday} %{bcolor}%{Dream.status_to_int status#Int}%{ecolor} \
+                  "%{ofday after1} %{bcolor}%{Dream.status_to_int status#Int}%{ecolor} \
                    %{id#Int} %{client} in %{duration#Int}us"];
               Stdlib.flush stderr;
               (match Dream.field response stream_end with
@@ -308,13 +307,14 @@ let logger = function
                   ignore
                     (Lwt.on_termination promise (fun () ->
                          let bcolor, ecolor = ("[35m", "[39m") in
+                         let after2 = Time_ns.now () in
                          let duration =
-                           Time_ns.Span.to_int_us (Time_ns.diff (Time_ns.now ()) before)
+                           Time_ns.Span.to_int_us (Time_ns.diff after2 before)
                          in
                          Stdlib.prerr_endline
                            [%string
-                             "%{ofday} %{bcolor}DON%{ecolor} %{id#Int} %{client} in \
-                              %{duration#Int}us"];
+                             "%{ofday after2} %{bcolor}DON%{ecolor} %{id#Int} \
+                              %{client} in %{duration#Int}us"];
                          Stdlib.flush stderr)));
               Lwt.return response)
             (fun exn ->
