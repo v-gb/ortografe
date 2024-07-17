@@ -13,4 +13,5 @@
                   ppx_string
                   ppx_uchar_literal
                   ppx_lazy_option_op
-                  ppx_partial)))
+                  ppx_partial
+                  ppx_pipebang)))

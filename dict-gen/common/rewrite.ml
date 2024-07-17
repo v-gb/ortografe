@@ -112,9 +112,12 @@ let keep_regardless_exn rules (row : Data.Lexique.row) =
   | Error s -> raise_s s
   | Ok search_res2 -> { row; alignment = search_res2 }
 
-let accent_aigu (aligned_row : aligned_row) (e_graphem : Rules.path_elt) =
+let accent_aigu (aligned_row : aligned_row) from =
   let right_phon =
-    String.drop_prefix aligned_row.row.phon (e_graphem.j + (* e/E *) 1)
+    match from with
+    | `Path_elt_starting_in_e (e_graphem : Rules.path_elt) ->
+        String.drop_prefix aligned_row.row.phon (e_graphem.j + (* e/E *) 1)
+    | `Right_phon p -> p
   in
   if Rules.accent_aigu right_phon then ("e", "é") else ("E", "è")
 
@@ -145,30 +148,30 @@ let rec list_find_map_with_tail l f =
 let rec repeat_until_none ~init:acc f =
   match f acc with None -> acc | Some acc -> repeat_until_none ~init:acc f
 
-let rewrite_e_double_consonants ~filter env (aligned_row : aligned_row) =
+let rewrite_e_double_consonants env (aligned_row : aligned_row) =
   repeat_until_none ~init:aligned_row (fun aligned_row ->
       list_find_map_with_tail aligned_row.alignment.path (fun first tail ->
           match (first, tail) with
           | ( ({ graphem = "e"; phonem = "e" | "E"; _ } as p1)
             , ({ graphem =
                    ( "bb" | "cc" | "dd" | "ff" | "gg" | "ll" | "mm" | "nn" | "pp" | "rr"
-                   | "tt" | "zz" ) as consonants
+                   | "tt" | "zz" )
                ; phonem
                ; _
                } as p2)
               :: _ )
-            when String.length phonem = 1 && filter consonants.[0] ->
-              let e_phon, e_ortho = accent_aigu aligned_row p1 in
+            when String.length phonem = 1 ->
+              let e_phon, e_ortho =
+                accent_aigu aligned_row (`Path_elt_starting_in_e p1)
+              in
               replace_graphems env aligned_row
                 ([ p1; p2 ], e_ortho ^ String.prefix p2.graphem 1, e_phon ^ p2.phonem)
-          | ( ({ graphem = ("enn" | "emm") as consonants
-               ; phonem = "en" | "En" | "em" | "Em"
-               ; _
-               } as p1)
-            , _ )
-            when filter consonants.[1] ->
+          | ( ({ graphem = "enn" | "emm"; phonem = "en" | "En" | "em" | "Em"; _ } as p1)
+            , _ ) ->
               let consonant = p1.graphem #: (1, 2) in
-              let e_phon, e_ortho = accent_aigu aligned_row p1 in
+              let e_phon, e_ortho =
+                accent_aigu aligned_row (`Path_elt_starting_in_e p1)
+              in
               replace_graphems env aligned_row
                 ([ p1 ], e_ortho ^ consonant, e_phon ^ consonant)
           | _ -> None))
@@ -720,8 +723,7 @@ let erofa_rule rules =
                   | _ -> None));
           if bits land bit_pattern_all_double_consonants <> 0
           then (
-            aligned_row :=
-              rewrite_e_double_consonants ~filter:(fun _ -> true) env !aligned_row;
+            aligned_row := rewrite_e_double_consonants env !aligned_row;
             List.iter patterns_double_consonants ~f:(fun (bit, target, repl) ->
                 if bits land (1 lsl bit) <> 0
                 then aligned_row := rewrite env !aligned_row ~target ~repl));
@@ -737,7 +739,9 @@ let rewrite_e_circumflex env (aligned_row : aligned_row) =
   repeat_until_none ~init:aligned_row (fun aligned_row ->
       List.find_map aligned_row.alignment.path ~f:(function
         | { graphem = "ê"; phonem = "e" | "E"; _ } as p1 ->
-            let e_phon, e_ortho = accent_aigu aligned_row p1 in
+            let e_phon, e_ortho =
+              accent_aigu aligned_row (`Path_elt_starting_in_e p1)
+            in
             replace_graphems env aligned_row ([ p1 ], e_ortho, e_phon)
         | _ -> None))
 
@@ -1410,6 +1414,59 @@ let supports_repeated_rewrites rule = rule.supports_repeated_rewrites
 let plurals_in_s rule = rule.plurals_in_s
 let all_builtin = lazy (List.rev !all_builtin)
 
+let overlapping_graphems aligned_row start end_ =
+  aligned_row.alignment.path
+  |> List.drop_while ~f:(fun path_elt ->
+         path_elt.i + String.length path_elt.graphem <= start)
+  |> List.take_while ~f:(fun path_elt -> path_elt.i < end_)
+
+let rec find_map_unfold unfold ~init:acc ~f =
+  match unfold acc with
+  | None -> None
+  | Some acc -> (
+      match f acc with
+      | None -> find_map_unfold unfold ~init:acc ~f
+      | Some _ as opt -> opt)
+
+let rewrite_E env aligned_row ~target:from ~repl:to_ =
+  repeat_until_none ~init:aligned_row (fun aligned_row ->
+      find_map_unfold ~init:(-1)
+        (fun last_pos ->
+          String.Search_pattern.index ~pos:(last_pos + 1) from
+            ~in_:aligned_row.row.ortho)
+        ~f:(fun i_from_start ->
+          let i_from_end =
+            i_from_start + String.length (String.Search_pattern.pattern from)
+          in
+          let path_elts = overlapping_graphems aligned_row i_from_start i_from_end in
+          let phonems = List.map path_elts ~f:__.phonem |> String.concat in
+          let is_eE = function 'e' | 'E' -> true | _ -> false in
+          match
+            if String.count phonems ~f:is_eE = 1
+            then String.lfindi phonems ~f:(fun _ c -> is_eE c)
+            else None
+          with
+          | None -> None
+          | Some j_eE_rel ->
+              let j_eE = (List.hd_exn path_elts).j + j_eE_rel in
+              let left_phon = String.prefix aligned_row.row.phon j_eE in
+              let right_phon = String.drop_prefix aligned_row.row.phon (j_eE + 1) in
+              let e_phon, e_ortho = accent_aigu aligned_row (`Right_phon right_phon) in
+              let phon2 = String.concat [ left_phon; e_phon; right_phon ] in
+              let to2 =
+                String.concat_map to_ ~f:(function
+                  | 'E' -> e_ortho
+                  | c -> String.of_char c)
+              in
+              let ortho2 =
+                String.concat
+                  [ String.prefix aligned_row.row.ortho i_from_start
+                  ; to2
+                  ; String.drop_prefix aligned_row.row.ortho i_from_end
+                  ]
+              in
+              keep_if_plausible_phon_opt env aligned_row ortho2 phon2))
+
 let custom_rule from_tos =
   (* Not sure if the code would support empty patterns, so prevent that
      in case it could cause a problem of some kind (infinite loop, say). *)
@@ -1425,32 +1482,20 @@ let custom_rule from_tos =
   ; f =
       (fun rules ->
         let env = { rules; accept = Fn.const true } in
-        let e_double_consonants, from_tos =
-          List.partition_map from_tos ~f:(fun (from, to_) ->
-              if String.length from = 3
-                 && String.length to_ = 2
-                 && Char.( = ) from.[0] 'e'
-                 && Char.( = ) to_.[0] 'E'
-                 && Char.( = ) from.[1] from.[2]
-                 && Char.( = ) from.[1] to_.[1]
-              then First from.[1]
-              else Second (String.Search_pattern.create from, to_))
-        in
-        let e_double_consonants =
-          let set = Set.of_list (module Char) e_double_consonants in
-          if Set.is_empty set then None else Some (Set.mem set)
+        let from_tos =
+          List.map from_tos ~f:(fun (from, to_) ->
+              ( String.Search_pattern.create from
+              , to_
+              , if String.count to_ ~f:(Char.( = ) 'E') = 1 then `E else `Regular ))
         in
         { rules
         ; compute =
             (fun aligned_row ->
-              let aligned_row = ref aligned_row in
-              List.iter from_tos ~f:(fun (from, to_) ->
-                  aligned_row := rewrite env !aligned_row ~target:from ~repl:to_);
-              (match e_double_consonants with
-              | None -> ()
-              | Some filter ->
-                  aligned_row := rewrite_e_double_consonants ~filter env !aligned_row);
-              !aligned_row)
+              List.fold_left ~init:aligned_row from_tos
+                ~f:(fun aligned_row (from, to_, kind) ->
+                  match kind with
+                  | `Regular -> rewrite env aligned_row ~target:from ~repl:to_
+                  | `E -> rewrite_E env aligned_row ~target:from ~repl:to_))
         })
   ; supports_repeated_rewrites = true
   ; plurals_in_s = true
