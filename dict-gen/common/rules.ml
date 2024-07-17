@@ -660,8 +660,10 @@ let[@ocamlformat "disable"] accent_aigu =
          ])
   in
   fun right_phon ->
-    if Uchar.( = ) right_phon #:: (0, 1) Stdlib.Uchar.rep (* length = 1 *)
-    then false (* cette -> è *)
+    if Uchar.( = ) right_phon #:: (0, 1) Stdlib.Uchar.rep (* length <= 1 *)
+    then
+      String.is_empty right_phon  (* true: arrêt -> é
+                                     false: cette -> è *)
     else if in_phon_vowels right_phon #:: (0, 1)
             ||
             let uc = right_phon #:: (0, 1) in
