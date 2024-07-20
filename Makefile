@@ -27,7 +27,7 @@ run-container: build-container
 fly-deploy: build-container-jsopt
 	fly deploy
 
-.PHONY: update-opam update-lock-file
+.PHONY: update-opam update-lock-file upgrade-opam
 update-opam:
 	@ # it's a mystery why you have to run dune describe external-lib-deps
 	@ # and tell dune to put that in the opam file, rather than have dune just do it
@@ -35,6 +35,13 @@ update-opam:
 update-lock-file:
 	rm -f ortografe.opam.locked
 	opam lock ./ortografe.opam
+upgrade-opam:
+	opam upgrade
+	make all
+	make update-opam
+	make all
+	make update-lock-file
+	make all
 
 .PHONY: first-install
 first-install:
