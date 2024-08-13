@@ -8,7 +8,7 @@ let load_dict str =
       match String.split_on_char ',' str with
       | [] | [ "" ] -> ()
       | [ a; b ] -> Hashtbl.replace h a b
-      | _ -> failwith ("wtf " ^ str))
+      | _ -> failwith ("what " ^ str))
     l;
   h
 
