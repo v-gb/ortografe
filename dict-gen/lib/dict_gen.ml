@@ -310,7 +310,7 @@ let gen ~env ?(embedded : Dict_gen.embedded option) ~rules ~all ~write ~diff ~dr
 
 let gen_cmd ?embedded ?doc name =
   let module C = Cmdliner in
-  let open Cmdliner_bindops in
+  let open Cmdliner.Term.Syntax in
   C.Cmd.v (C.Cmd.info ?doc name)
     (let+ rules = Dict_gen_nonbrowser.rules_cli ()
      and+ all =
@@ -350,7 +350,7 @@ let check (lexique : Data.Lexique.t) ~skip =
 let main () =
   Sexp_with_utf8.linkme;
   let module C = Cmdliner in
-  let open Cmdliner_bindops in
+  let open Cmdliner.Term.Syntax in
   let cmd =
     C.Cmd.group (C.Cmd.info "dict-gen")
       [ C.Cmd.v (C.Cmd.info "check-rules")
@@ -369,8 +369,7 @@ let main () =
                check lexique ~skip:(Rewrite.load_skip ())))
       ; gen_cmd "gen"
       ; C.Cmd.v (C.Cmd.info "erofa-ext")
-          (let+ () = return ()
-           and+ dict_search =
+          (let+ dict_search =
              C.Arg.value
                (C.Arg.flag
                   (C.Arg.info ~doc:"afficher un Dict_search.t persisté"

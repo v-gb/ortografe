@@ -3,10 +3,11 @@ module Dict_gen = Dict_gen_common.Dict_gen
 
 let rules_cli () =
   let module C = Cmdliner in
-  let open Cmdliner_bindops in
+  let open Cmdliner.Term.Syntax in
   let docs = "Sélection du dictionnaire de réécriture" in
   let+ rules =
-    List.fold_right ~init:(return []) (force Dict_gen.all_builtin) ~f:(fun rule acc ->
+    List.fold_right ~init:(C.Term.const []) (force Dict_gen.all_builtin)
+      ~f:(fun rule acc ->
         let+ present =
           C.Arg.value
             (C.Arg.flag

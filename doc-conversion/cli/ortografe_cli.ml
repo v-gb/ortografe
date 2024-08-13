@@ -34,7 +34,7 @@ let load_rules rules ~prebuild =
 
 let bench =
   let module C = Cmdliner in
-  let open Cmdliner_bindops in
+  let open Cmdliner.Term.Syntax in
   C.Cmd.v (C.Cmd.info ~doc:"" "bench")
     (let+ arg1 =
        C.Arg.value
@@ -64,7 +64,7 @@ let ext_conv ?src_type src dst which = Ortografe.ext_conv ?src_type src dst whic
 
 let main more_cmd =
   let module C = Cmdliner in
-  let open Cmdliner_bindops in
+  let open Cmdliner.Term.Syntax in
   let arg_option arg info = C.Arg.opt (C.Arg.some arg) None info in
   let output_file =
     C.Arg.value

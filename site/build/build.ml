@@ -1,10 +1,10 @@
 let main () =
   let module C = Cmdliner in
-  let open Cmdliner_bindops in
+  let open Cmdliner.Term.Syntax in
   let cmd =
     C.Cmd.group (C.Cmd.info "build")
       [ C.Cmd.v (C.Cmd.info "download-all")
-          (let+ () = return () in
+          (let+ () = C.Term.const () in
            Book_import.download_all ~root:(Core.Sys.getenv_exn "DUNEROOT"))
       ; C.Cmd.v (C.Cmd.info "convert-all")
           (let+ books_tar =

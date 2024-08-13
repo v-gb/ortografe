@@ -2,7 +2,6 @@
  (name dict_gen_nonbrowser)
  (libraries
    cmdliner
-   cmdliner_bindops
    core
    dict_gen_common
  )

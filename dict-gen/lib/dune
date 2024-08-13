@@ -2,7 +2,6 @@
  (name dict_gen)
  (libraries
    cmdliner
-   cmdliner_bindops
    core
    core_unix
    dict_gen_common

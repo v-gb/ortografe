@@ -544,7 +544,7 @@ let run_for_bench ~log ?port ?tls () =
 
 let main () =
   let module C = Cmdliner in
-  let open Cmdliner_bindops in
+  let open Cmdliner.Term.Syntax in
   let cmd =
     C.Cmd.group (C.Cmd.info "ortografe")
       [ C.Cmd.v (C.Cmd.info "serve")
