@@ -36,7 +36,7 @@ let head ~root ~attrs ~title ~description () =
   ; leafelt "meta" [ ("name", "description"); ("content", description) ]
     (* It would be good to have the open-graph stuff
      *  https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML *)
-  ; leafelt "link" [ ("rel", "icon"); ("href", "/static/favicon.png") ]
+  ; leafelt "link" [ ("rel", "icon"); ("href", "/static/favicon.svg") ]
   ; +attrs
   ; style
       {|
@@ -1077,8 +1077,8 @@ module Index = struct
                               ]
                           ; p
                               [ text "Le favicon provient de "
-                              ; a ~href:"https://icons8.com/icon/hGBTBdUownyO/quill-pen"
-                                  [ text "icons8" ]
+                              ; a ~href:"https://www.freepik.com/free-vector/quill-pen-logo-design_34630377.htm#fromView=search&page=1&position=41&uuid=f092ab97-d7e7-4489-a6df-150bdfc5d74c"
+                                  [ text "freepik" ]
                               ; text "."
                               ]
                           ]
