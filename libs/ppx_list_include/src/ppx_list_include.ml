@@ -8,22 +8,6 @@ let rec extract_list_literal rev_acc e =
 
 let extract_list_literal e = extract_list_literal [] e
 
-open struct
-  open Ast_builder.Default
-
-  (* this ?tail argument should go into ppxlib *)
-  let rec elist ~loc ?tail l =
-    match l with
-    | [] -> (
-        match tail with
-        | Some tail -> tail
-        | None -> pexp_construct ~loc (Located.mk ~loc (Longident.Lident "[]")) None)
-    | x :: l ->
-        pexp_construct ~loc
-          (Located.mk ~loc (Longident.Lident "::"))
-          (Some (pexp_tuple ~loc [ x; elist ~loc ?tail l ]))
-end
-
 let add_list_literal (x, xs) =
   match x with [] -> xs | first :: _ -> `Literal (first.pexp_loc, x) :: xs
 
@@ -44,8 +28,8 @@ let list_literal e =
          ([], match tail with None -> [] | Some e -> [ `Dyn e ])
     |> add_list_literal
     |> (function
-         | [ `Literal (loc, l) ] -> elist ~loc l
-         | [ `Literal (loc, l); `Dyn tail ] -> elist ~loc l ~tail
+         | [ `Literal (loc, l) ] -> Ast_builder.Default.elist ~loc l
+         | [ `Literal (loc, l); `Dyn tail ] -> Ast_builder.Default.elist_tail ~loc l tail
          | [ `Dyn e ] ->
              (* Don't optimize type errors away in things like [+""] *)
              let loc = e.pexp_loc in
@@ -55,7 +39,8 @@ let list_literal e =
              let e =
                Ast_builder.Default.elist ~loc
                  (List.map
-                    (function `Dyn e -> e | `Literal (loc, l) -> elist ~loc l)
+                    (function `Dyn e -> e
+                            | `Literal (loc, l) -> Ast_builder.Default.elist ~loc l)
                     l)
              in
              (* Maybe we should use Base.List.concat, because Stdlib.List.concat
