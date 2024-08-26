@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e -u -o pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"/src
-trap 'rm -f Emblem_of_La_Francophonie.tmp.png' EXIT
+trap 'rm -f icon.tmp.png' EXIT
 
 # chrome webstore really want 128 * 128, not svg, where the image itself is 96*96
 # and there's padding around
-inkscape -w 96 -h 96 Emblem_of_La_Francophonie.svg -o Emblem_of_La_Francophonie.tmp.png
-convert -background none -gravity center Emblem_of_La_Francophonie.tmp.png -extent 128x128 Emblem_of_La_Francophonie.128padded.png
+inkscape -w 96 -h 96 icon.svg -o icon.tmp.png
+convert -background none -gravity center icon.tmp.png -extent 128x128 icon.128padded.png
 
 # Somehow the svg isn't square
-inkscape -w 64 -h 64 Emblem_of_La_Francophonie.svg -o Emblem_of_La_Francophonie.64.png
-inkscape -w 128 -h 128 Emblem_of_La_Francophonie.svg -o Emblem_of_La_Francophonie.128.png
+inkscape -w 64 -h 64 icon.svg -o icon.64.png
+inkscape -w 128 -h 128 icon.svg -o icon.128.png

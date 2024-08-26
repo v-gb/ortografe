@@ -4,12 +4,15 @@
 (copy_files (files %{project_root}/data/lexique/Lexique383.gen.tsv))
          
 (rule
+ (action (copy %{project_root}/site/static/favicon.svg icon.svg)))
+
+(rule
  (targets
-   Emblem_of_La_Francophonie.128padded.png
-   Emblem_of_La_Francophonie.128.png
-   Emblem_of_La_Francophonie.64.png
+   icon.128padded.png
+   icon.128.png
+   icon.64.png
  )
- (deps    Emblem_of_La_Francophonie.svg (sandbox always))
+ (deps    icon.svg (sandbox always))
  (action  (run ../make-icon)))
 
 (rule

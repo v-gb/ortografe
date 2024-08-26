@@ -16,14 +16,14 @@
         }
     },
     "icons": {
-        "64": "Emblem_of_La_Francophonie.64.png",
-        "128": "Emblem_of_La_Francophonie.128.png"
+        "64": "icon.64.png",
+        "128": "icon.128.png"
     },
 
     "action": {
         "default_icon": {
-            "64": "Emblem_of_La_Francophonie.64.png",
-            "128": "Emblem_of_La_Francophonie.128.png"
+            "64": "icon.64.png",
+            "128": "icon.128.png"
         },
         "default_popup": "options.html#popup"
     },
