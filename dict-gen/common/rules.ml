@@ -75,6 +75,15 @@ let[@ocamlformat "disable"] ortho_vowels =
 
 let in_ortho_vowels s = Hash_set.mem ortho_vowels s
 
+let ends_in_ortho_vowel word i =
+  (* The edge case to deal with the accent plat is a result of the assumption that all
+     characters in French take one codepoint (in NFC). Ideally we'd remove that
+     assumption. We don't need this special case when looking if the position is followed
+     by a vowel, since the codepoint for the vowel precedes the codepoint for the accent.
+  *)
+  let c = word #:: (i, -1) in
+  in_ortho_vowels c || (Uchar.( = ) c !!"\u{0304}" && in_ortho_vowels word #:: (i, -2))
+
 let[@ocamlformat "disable"] phon_vowels =
   Hash_set.of_list
     (module Uchar)
@@ -100,6 +109,7 @@ type rule = string * rule_fun
 type t = (char, rule array) Hashtbl.t
 
 let create () : t =
+  let plat = Some "\u{0304}" in
   let r : rule list ref = ref [] in
   let new_ a f = r := (a, f) :: !r in
   let new_fixed graphem l = new_ graphem (fun _ _ _ -> l) in
@@ -108,6 +118,8 @@ let create () : t =
   new_fixed "'" [ ("", Core) ];
   new_fixed "-" [ ("", Core) ];
   new_fixed " " [ ("", Core) ];
+  Option.iter plat ~f:(fun plat -> new_fixed plat [])
+  (* un accent plat tout seul n'est pas possible *);
 
   (* consonnes simples *)
   new_ "b" (fun word _ j ->
@@ -212,7 +224,7 @@ let create () : t =
   (* S *)
   new_fixed "ss" [ ("s", Core) ];
   new_ "s" (fun word i j ->
-      if in_ortho_vowels word #:: (j, 0) && in_ortho_vowels word #:: (i, -1)
+      if in_ortho_vowels word #:: (j, 0) && ends_in_ortho_vowel word i
       then [ ("z", Core); ("s", Surprising) ]
       else if word #: (j, j + 1) =: "m" || word #: (i - 4, i) =: "tran"
       then
@@ -272,6 +284,7 @@ let create () : t =
   new_fixed "â" [ ("a", Core) ];
   new_fixed "ä" [ ("a", Core) ];
   new_fixed "a" [ ("a", Core) ];
+  Option.iter plat ~f:(fun plat -> new_fixed ("a" ^ plat) [ ("a", Core) ]);
   new_fixed "au" [ ("o", Core) ];
   new_ "aux" (fun word _ j ->
       (* wish I could say "otherwise treat it as not a graphem" *)
@@ -302,6 +315,7 @@ let create () : t =
     ];
   new_fixed "ë" [ ("e", Core) ];
   new_fixed "ê" [ ("e", Core); ("E", Core) ];
+  Option.iter plat ~f:(fun plat -> new_fixed ("e" ^ plat) [ ("e", Core); ("E", Core) ]);
   new_fixed "é" [ ("e", Core); ("E", Surprising (* médecin *)) ];
   let syllable_starts =
     Hash_set.of_list
@@ -377,8 +391,8 @@ let create () : t =
 
   (* I *)
   new_fixed "î" [ ("i", Core) ];
-  new_fixed "ï" [ ("i", Core) ];
-  (* maïs *)
+  new_fixed "ï" [ ("i", Core) ] (* maïs *);
+  Option.iter plat ~f:(fun plat -> new_fixed ("i" ^ plat) [ ("i", Core) ]);
   new_fixed "ï" [ ("j", Core) ];
   (* paranoïaque *)
   new_ "i" (fun word i j ->
@@ -391,7 +405,7 @@ let create () : t =
         [ ("i", Core) ]
         (* on ne permet pas le son en face d'une consonne, pour éviter
            que «sommeil» puisse être interprété avec i/j/ et l silencieux *)
-      else if in_ortho_vowels word #:: (i, -1) (* évite tuyau -> tuiau *)
+      else if ends_in_ortho_vowel word i (* évite tuyau -> tuiau *)
       then [ ("j", Core); ("i", Core) ]
       else
         (* Pas facile d'éviter d'éviter de permettre à i de prendre le son y.
@@ -400,6 +414,7 @@ let create () : t =
 
   (* O *)
   new_fixed "o" [ ("o", Core); ("O", Core) ];
+  Option.iter plat ~f:(fun plat -> new_fixed ("o" ^ plat) [ ("o", Core); ("O", Core) ]);
   new_fixed "ô" [ ("o", Core) ];
   new_fixed "ö" [ ("o", Core) ];
   new_fixed "oo"
@@ -413,14 +428,16 @@ let create () : t =
   new_fixed "oix$" [ ("wa", Core) ];
   new_fixed "oy"
     [ ("oj", Core); ("Oj", Core); ("wa", Core); ("waj", Core); ("wai", Core) ];
-  List.iter [ "ou"; "oû"; "où" ] ~f:(fun digraph ->
+  List.iter
+    [ "ou"; "oû"; "où"; +(match plat with None -> [] | Some plat -> [ "ou" ^ plat ]) ]
+    ~f:(fun digraph ->
       new_ digraph (fun word i _ ->
           (* [true ||] pour faire marcher cacahouète. Pas sûr que ça vaille le coup en
              général, mais j'ai pas vu de problème avec le fait d'être aussi permissif
              pour l'instant*)
           if true
              || i = 0
-             || (not (in_ortho_vowels word #:: (i, -1)))
+             || (not (ends_in_ortho_vowel word i))
              || word #: (i - 2, i) =: "qu"
           then [ ("u", Core); ("w", Core) ]
           else [ ("u", Core) ]));
@@ -435,7 +452,7 @@ let create () : t =
 
   (* U *)
   new_ "u" (fun word i _ ->
-      if i = 0 || not (in_ortho_vowels word #:: (i, -1))
+      if i = 0 || not (ends_in_ortho_vowel word i)
       then
         [ ("y", Core)
         ; ("8", Core)
@@ -445,6 +462,7 @@ let create () : t =
       else [ ("y", Core) ]);
   new_fixed "û" [ ("y", Core) ];
   new_fixed "ù" [ ("y", Core) ];
+  Option.iter plat ~f:(fun plat -> new_fixed ("u" ^ plat) [ ("y", Core) ]);
   new_fixed "ü" [ ("y", Core) ];
   new_fixed "us$" [ ("y", Core (* aigus *)); ("ys", Surprising (* bonus *)) ];
   List.iter [ "um"; "ums$" ] ~f:(fun digraph ->

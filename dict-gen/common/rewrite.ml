@@ -1050,6 +1050,45 @@ let _ : rule =
         in
         keep_if_plausible env aligned_row new_ortho)
 
+let accent_plat =
+  new_rule' "accent-plat"
+    "remplace tous les accents aigus, graves et circonflexes par des accents plats : \
+     été -> e\u{0304}te\u{0304}, être -> e\u{0304}tre, à -> a\u{0304}"
+    (* inspiré par
+       https://lactualite.com/societe/a-bas-les-accents-graves-aigus-et-circonflexes/
+       On laisse les trémas tels quels par contre, car ça pose pas mal d'autres questions
+       de toucher ça. *)
+    ~prefilter:(fun () ->
+      `Re
+        (Re.alt
+           [ Re.str "à"
+           ; Re.str "â"
+           ; Re.str "é"
+           ; Re.str "è"
+           ; Re.str "ê"
+           ; Re.str "î"
+           ; Re.str "ô"
+           ; Re.str "ù"
+           ; Re.str "û"
+           ]))
+    (fun () ->
+      let patterns =
+        let plat = "\u{0304}" in
+        [ (String.Search_pattern.create "à", "a" ^ plat)
+        ; (String.Search_pattern.create "â", "a" ^ plat)
+        ; (String.Search_pattern.create "é", "e" ^ plat)
+        ; (String.Search_pattern.create "è", "e" ^ plat)
+        ; (String.Search_pattern.create "ê", "e" ^ plat)
+        ; (String.Search_pattern.create "î", "i" ^ plat)
+        ; (String.Search_pattern.create "ô", "o" ^ plat)
+        ; (String.Search_pattern.create "ù", "u" ^ plat)
+        ; (String.Search_pattern.create "û", "u" ^ plat)
+        ]
+      in
+      fun env aligned_row ->
+        List.fold patterns ~init:aligned_row ~f:(fun aligned_row (target, repl) ->
+            rewrite env aligned_row ~target ~repl))
+
 let dummy_search_res : Rules.search_res = { path = []; surprise = 0 }
 
 let _ : rule list =
@@ -1522,8 +1561,10 @@ let compose_rules rules ~which_rules =
       then -2
       else if rule.name =: qu__q.name || rule.name =: qu__qou.name
       then -1
+      else if rule.name =: accent_plat.name
+      then 1
       else if rule.name =: ou__omega.name
-      then 1 (* créer des caractéres qui n'existent pas en français *)
+      then 2 (* créer des caractéres qui n'existent pas en français *)
       else 0
     in
     List.stable_sort which_rules ~compare:(fun r1 r2 -> Int.compare (rank r1) (rank r2))
