@@ -1058,7 +1058,7 @@ let accent_plat =
   in
   new_rule' "accent-plat"
     "remplace tous les accents aigus, graves et circonflexes par des accents plats : \
-     été -> e\u{0304}te\u{0304}, être -> e\u{0304}tre, à -> a\u{0304}"
+     @été -> @e\u{0304}te\u{0304}, @être -> @e\u{0304}tre, @à -> @a\u{0304}"
     (* inspiré par
        https://lactualite.com/societe/a-bas-les-accents-graves-aigus-et-circonflexes/
        On laisse les trémas tels quels par contre, car ça pose pas mal d'autres questions
