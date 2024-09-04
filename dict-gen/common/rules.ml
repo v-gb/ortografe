@@ -313,7 +313,7 @@ let create () : t =
         (* Quand on ajuste le lexique avec l'orthographe post
            90 sans ajuster la phonétique en même temps. *) )
     ];
-  new_fixed "ë" [ ("e", Core) ];
+  new_fixed "ë" [ ("e", Core); ("E", Core) ];
   new_fixed "ê" [ ("e", Core); ("E", Core) ];
   Option.iter plat ~f:(fun plat -> new_fixed ("e" ^ plat) [ ("e", Core); ("E", Core) ]);
   new_fixed "é" [ ("e", Core); ("E", Surprising (* médecin *)) ];
@@ -446,8 +446,14 @@ let create () : t =
   new_fixed "oell" [ ("wal", Core) ];
   (* moelleux et compagnie *)
   List.iter [ "oe"; "œ" ] ~f:(fun oe ->
+      (* Core_optional is a workaround for the problem that noël->noēl is otherwise
+         considered surprising because is looks like it starts with "oe" when it
+         really doesn't. *)
       new_fixed oe
-        [ ("e", Core (* foetus *)); ("2", Core (* oedeme *)); ("9", Core (* oeil *)) ]);
+        [ ("e", Core_optional (* foetus *))
+        ; ("2", Core_optional (* oedeme *))
+        ; ("9", Core_optional (* oeil *))
+        ]);
   new_fixed "oê" [ ("wa", Surprising) ] (* poêle *);
 
   (* U *)

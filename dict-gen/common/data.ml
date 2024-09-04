@@ -94,7 +94,7 @@ module Lexique = struct
         "cake"; "pancake"; "ace"; "sniper"; "ranger";
         "shampooing"; "macho"; "audition"; "full"; "zoom";
         "jumper"; "mail"; "cheeseburger"; "duce"; "jogging";
-        "boomer"; "boomerang"; "mister"; "noël"; "skate"; "bey";
+        "boomer"; "boomerang"; "mister"; "skate"; "bey";
         "sushi"; "masters"; "footballeur"; "pizzeria"; "flirt";
         "piazza"; "shooter"; "speech"; "jack"; "kibboutz";
         "cappuccino"; "reggae"; "country"; "fritz"; "ney";

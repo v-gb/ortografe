@@ -1066,6 +1066,7 @@ let accent_plat =
            ; Re.str "é"
            ; Re.str "è"
            ; Re.str "ê"
+           ; Re.str "ë"
            ; Re.str "î"
            ; Re.str "ô"
            ; Re.str "ù"
@@ -1079,6 +1080,7 @@ let accent_plat =
         ; (String.Search_pattern.create "é", "e" ^ plat)
         ; (String.Search_pattern.create "è", "e" ^ plat)
         ; (String.Search_pattern.create "ê", "e" ^ plat)
+        ; (String.Search_pattern.create "ë", "e" ^ plat)
         ; (String.Search_pattern.create "î", "i" ^ plat)
         ; (String.Search_pattern.create "ô", "o" ^ plat)
         ; (String.Search_pattern.create "ù", "u" ^ plat)
