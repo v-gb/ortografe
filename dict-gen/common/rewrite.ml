@@ -1047,7 +1047,15 @@ let _ : rule =
         in
         keep_if_plausible env aligned_row new_ortho)
 
+let dummy_search_res : Rules.search_res = { path = []; surprise = 0 }
+let is_dummy_search_res (s : Rules.search_res) = List.is_empty s.path
+
 let accent_plat =
+  let systematic =
+    false
+    (* Avec [systematic], on accentue tous les e prononcés é/è, comme dans «messe». On se
+       retrouve avec «chērcher» par contre, ce qui me semble douteux. *)
+  in
   new_rule' "accent-plat"
     "remplace tous les accents aigus, graves et circonflexes par des accents plats : \
      été -> e\u{0304}te\u{0304}, être -> e\u{0304}tre, à -> a\u{0304}"
@@ -1060,6 +1068,7 @@ let accent_plat =
         (Re.alt
            [ Re.str "à"
            ; Re.str "â"
+           ; (if systematic then Re.str "e" else Re.empty)
            ; Re.str "é"
            ; Re.str "è"
            ; Re.str "ê"
@@ -1070,8 +1079,8 @@ let accent_plat =
            ; Re.str "û"
            ]))
     (fun () ->
+      let plat = "\u{0304}" in
       let patterns =
-        let plat = "\u{0304}" in
         [ (String.Search_pattern.create "à", "a" ^ plat)
         ; (String.Search_pattern.create "â", "a" ^ plat)
         ; (String.Search_pattern.create "é", "e" ^ plat)
@@ -1085,154 +1094,164 @@ let accent_plat =
         ]
       in
       fun env aligned_row ->
-        List.fold patterns ~init:aligned_row ~f:(fun aligned_row (target, repl) ->
-            rewrite env aligned_row ~target ~repl))
+        if is_dummy_search_res aligned_row.alignment
+        then
+          (* allow this to work after ortograf.net *)
+          { aligned_row with
+            row =
+              { aligned_row.row with
+                ortho =
+                  List.fold patterns ~init:aligned_row.row.ortho
+                    ~f:(fun ortho (target, repl) ->
+                      String.Search_pattern.replace_all target ~in_:ortho ~with_:repl)
+              }
+          }
+        else
+          let aligned_row =
+            List.fold patterns ~init:aligned_row ~f:(fun aligned_row (target, repl) ->
+                rewrite env aligned_row ~target ~repl)
+          in
+          if systematic
+          then
+            rewrite_graphem' env aligned_row ~filter:(fun path_elt ->
+                match (path_elt.graphem, path_elt.phonem) with
+                | "e", ("e" | "E") -> Some ("e" ^ plat)
+                | _ -> None)
+          else aligned_row)
 
-let dummy_search_res : Rules.search_res = { path = []; surprise = 0 }
-
-let _ : rule list =
+let _ : rule =
   let pluriel_en_plus = true in
-  let e_accente_unique = match `A with `A -> "e\u{0304}" | `B -> "é" | `C -> "ê" in
-  List.map [ false; true ] ~f:(fun e_unique ->
-      new_rule' ~supports_repeated_rewrites:false ~plurals_in_s:false
-        ("ortograf.net" ^ if e_unique then "-e-unique" else "")
-        ("les règles de http://www.ortograf.net/"
-        ^ if e_unique then ", mais sans distinction entre é et è" else "")
-        ~prefilter:(fun () -> `All)
-        (fun () ->
-          (* problème :
-             - trop d'accent grave sur les e en général. On pourrait au moins appliquer
-             la même idée que les règles Érofa pour améliorer ça.
-          *)
-          let graphem_by_phonem =
-            Hashtbl.of_alist_exn
-              (module Uchar)
-              [ (!!"a", "a")
-              ; (!!"e", if e_unique then e_accente_unique else "é")
-              ; (!!"E", if e_unique then e_accente_unique else "è")
-              ; (!!"2", "eu")
-              ; (!!"9", "eu")
-              ; (!!"°", "e")
-              ; (!!"@", "an")
-              ; (!!"5", "in")
-              ; (!!"§", "on")
-              ; (!!"1", "un")
-              ; (!!"i", "i")
-              ; (!!"y", "u")
-              ; (!!"8", "u")
-              ; (!!"u", "ou")
-              ; (!!"o", "o")
-              ; (!!"O", "o")
-              ; (!!"b", "b")
-              ; (!!"S", "ch")
-              ; (!!"d", "d")
-              ; (!!"f", "f")
-              ; (!!"g", "g")
-              ; (!!"N", "gn")
-              ; (!!"G", "ng")
-              ; (!!"Z", "j")
-              ; (!!"k", "k")
-              ; (!!"l", "l")
-              ; (!!"m", "m")
-              ; (!!"n", "n")
-              ; (!!"p", "p")
-              ; (!!"R", "r")
-              ; (!!"s", "s")
-              ; (!!"t", "t")
-              ; (!!"v", "v")
-              ; (!!"w", "ou")
-              ; (!!"j", "y")
-              ; (!!"z", "z")
-              ]
-          in
-          let reverse_mapping =
-            Hashtbl.to_alist graphem_by_phonem
-            |> List.map ~f:(fun (a, b) -> (b, a))
-            |> Hashtbl.of_alist_multi (module String)
-          in
-          fun _env aligned_row ->
-            let graphems =
-              try
-                List.concat_map aligned_row.alignment.path ~f:(fun p ->
-                    match (p.graphem, p.phonem) with
-                    | "b", "p" -> [ "b" ]
-                    | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
-                    | ("q" | "qu"), "k" -> [ "q" ]
-                    | "qu", ("ku" | "kw") -> [ "qou" ]
-                    | ("en" | "ent" | "ent$" | "em"), "@" -> [ "en" ]
-                    | "en", "@n" -> [ "enn" ]
-                    | "enn", "@n" -> [ "en" ]
-                    | "sc", "sk" -> [ p.graphem ]
-                    | "cc", "k" -> [ "c" ]
-                    | "cc", "ks" -> [ "cç" ]
-                    | "ch", "k" ->
-                        [ "c" ]
-                        (* la phase d'après déterminera si un k est nécessaire *)
-                    | "c", "k" -> [ "c" ]
-                    | "c", "s" -> [ "ç" ]
-                    | "x", ("gz" | "ks") -> [ "x" ]
-                    | "e", "" -> [ "e" ]
-                    | _ ->
-                        map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem))
-                |> Array.of_list
-              with e ->
-                raise_s [%sexp (e : exn), (aligned_row.row : Data.Lexique.row)]
-            in
-            let ortho =
-              let last_uchar str = Rules.( #:: ) str (String.length str, -1) in
-              let first_uchar str = Rules.( #:: ) str (0, 0) in
-              Array.mapi graphems ~f:(fun i g ->
-                  if g =: "c"
-                     && i + 1 < Array.length graphems
-                     && Rules.in_ortho_weak_vowels (first_uchar graphems.(i + 1))
-                  then "k" (* africain deviendrai afrincin sinon *)
-                  else if i = 0
-                  then g
-                  else if g =: "n"
-                          && Rules.in_ortho_vowels (last_uchar graphems.(i - 1))
-                  then
-                    if i + 1 < Array.length graphems
-                       && Rules.in_ortho_vowels (first_uchar graphems.(i + 1))
-                    then g
-                    else if i + 1 = Array.length graphems
-                    then g ^ "e"
-                    else "·" ^ g
-                  else
-                    (* prend le grapheme complet d'avant parce que dans «langue», le n
-                       est déjà un graphème avec le «a», et donc il ne fait pas de
-                       graphème avec le g *)
-                    let digraph =
-                      graphems.(i - 1) ^ Rules.str_of_uchar (first_uchar g)
-                    in
-                    if Hashtbl.mem reverse_mapping digraph then "·" ^ g else g)
-              |> Array.to_list
-              |> String.concat
-            in
-            let ortho =
-              if pluriel_en_plus
+  new_rule' ~supports_repeated_rewrites:false ~plurals_in_s:false "ortograf.net"
+    "les règles de http://www.ortograf.net/"
+    ~prefilter:(fun () -> `All)
+    (fun () ->
+      (* problème :
+         - trop d'accent grave sur les e en général. On pourrait au moins appliquer
+           la même idée que les règles Érofa pour améliorer ça.
+      *)
+      let graphem_by_phonem =
+        Hashtbl.of_alist_exn
+          (module Uchar)
+          [ (!!"a", "a")
+          ; (!!"e", "é")
+          ; (!!"E", "è")
+          ; (!!"2", "eu")
+          ; (!!"9", "eu")
+          ; (!!"°", "e")
+          ; (!!"@", "an")
+          ; (!!"5", "in")
+          ; (!!"§", "on")
+          ; (!!"1", "un")
+          ; (!!"i", "i")
+          ; (!!"y", "u")
+          ; (!!"8", "u")
+          ; (!!"u", "ou")
+          ; (!!"o", "o")
+          ; (!!"O", "o")
+          ; (!!"b", "b")
+          ; (!!"S", "ch")
+          ; (!!"d", "d")
+          ; (!!"f", "f")
+          ; (!!"g", "g")
+          ; (!!"N", "gn")
+          ; (!!"G", "ng")
+          ; (!!"Z", "j")
+          ; (!!"k", "k")
+          ; (!!"l", "l")
+          ; (!!"m", "m")
+          ; (!!"n", "n")
+          ; (!!"p", "p")
+          ; (!!"R", "r")
+          ; (!!"s", "s")
+          ; (!!"t", "t")
+          ; (!!"v", "v")
+          ; (!!"w", "ou")
+          ; (!!"j", "y")
+          ; (!!"z", "z")
+          ]
+      in
+      let reverse_mapping =
+        Hashtbl.to_alist graphem_by_phonem
+        |> List.map ~f:(fun (a, b) -> (b, a))
+        |> Hashtbl.of_alist_multi (module String)
+      in
+      fun _env aligned_row ->
+        let graphems =
+          try
+            List.concat_map aligned_row.alignment.path ~f:(fun p ->
+                match (p.graphem, p.phonem) with
+                | "b", "p" -> [ "b" ]
+                | ("i" | "oi" | "ç" | "'" | "-" | " " | "ss"), _ -> [ p.graphem ]
+                | ("q" | "qu"), "k" -> [ "q" ]
+                | "qu", ("ku" | "kw") -> [ "qou" ]
+                | ("en" | "ent" | "ent$" | "em"), "@" -> [ "en" ]
+                | "en", "@n" -> [ "enn" ]
+                | "enn", "@n" -> [ "en" ]
+                | "sc", "sk" -> [ p.graphem ]
+                | "cc", "k" -> [ "c" ]
+                | "cc", "ks" -> [ "cç" ]
+                | "ch", "k" -> [ "c" ]
+                (* la phase d'après déterminera si un k est nécessaire *)
+                | "c", "k" -> [ "c" ]
+                | "c", "s" -> [ "ç" ]
+                | "x", ("gz" | "ks") -> [ "x" ]
+                | "e", "" -> [ "e" ]
+                | _ -> map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem))
+            |> Array.of_list
+          with e -> raise_s [%sexp (e : exn), (aligned_row.row : Data.Lexique.row)]
+        in
+        let ortho =
+          let last_uchar str = Rules.( #:: ) str (String.length str, -1) in
+          let first_uchar str = Rules.( #:: ) str (0, 0) in
+          Array.mapi graphems ~f:(fun i g ->
+              if g =: "c"
+                 && i + 1 < Array.length graphems
+                 && Rules.in_ortho_weak_vowels (first_uchar graphems.(i + 1))
+              then "k" (* africain deviendrai afrincin sinon *)
+              else if i = 0
+              then g
+              else if g =: "n" && Rules.in_ortho_vowels (last_uchar graphems.(i - 1))
               then
-                if String.is_suffix aligned_row.row.ortho ~suffix:"s"
-                   && aligned_row.row.ortho =: aligned_row.row.lemme ^ "s"
-                then ortho ^ "+"
-                else
-                  (* le lemme de "les" est "les" et pas "le" ? Bizarre. *)
-                  match aligned_row.row.ortho with
-                  | "ces" | "des" | "les" | "mes" | "ses" | "tes" | "nous" | "vous"
-                  | "ils" | "elles" | "aux" ->
-                      ortho ^ "+"
-                  | _ -> ortho
+                if i + 1 < Array.length graphems
+                   && Rules.in_ortho_vowels (first_uchar graphems.(i + 1))
+                then g
+                else if i + 1 = Array.length graphems
+                then g ^ "e"
+                else "·" ^ g
               else
-                (* On ne peut pas gérer les liaisons avec une réécriture mot à mot comme on
-                   fait. Comme les principales (ou seules ?) qui sont obligatoires sont
-                   avec les articles, on écrit un z en exposant après les articles, pour
-                   indiquer "z optionnel". *)
-                match aligned_row.row.ortho with
-                | "ces" | "des" | "les" | "mes" | "ses" | "tes" | "nous" | "vous"
-                | "ils" | "elles" | "aux" ->
-                    ortho ^ "\u{1DBB}"
-                | _ -> ortho
-            in
-            { row = { aligned_row.row with ortho }; alignment = dummy_search_res }))
+                (* prend le grapheme complet d'avant parce que dans «langue», le n
+                         est déjà un graphème avec le «a», et donc il ne fait pas de
+                         graphème avec le g *)
+                let digraph = graphems.(i - 1) ^ Rules.str_of_uchar (first_uchar g) in
+                if Hashtbl.mem reverse_mapping digraph then "·" ^ g else g)
+          |> Array.to_list
+          |> String.concat
+        in
+        let ortho =
+          if pluriel_en_plus
+          then
+            if String.is_suffix aligned_row.row.ortho ~suffix:"s"
+               && aligned_row.row.ortho =: aligned_row.row.lemme ^ "s"
+            then ortho ^ "+"
+            else
+              (* le lemme de "les" est "les" et pas "le" ? Bizarre. *)
+              match aligned_row.row.ortho with
+              | "ces" | "des" | "les" | "mes" | "ses" | "tes" | "nous" | "vous" | "ils"
+              | "elles" | "aux" ->
+                  ortho ^ "+"
+              | _ -> ortho
+          else
+            (* On ne peut pas gérer les liaisons avec une réécriture mot à mot comme on
+                     fait. Comme les principales (ou seules ?) qui sont obligatoires sont
+                     avec les articles, on écrit un z en exposant après les articles, pour
+                     indiquer "z optionnel". *)
+            match aligned_row.row.ortho with
+            | "ces" | "des" | "les" | "mes" | "ses" | "tes" | "nous" | "vous" | "ils"
+            | "elles" | "aux" ->
+                ortho ^ "\u{1DBB}"
+            | _ -> ortho
+        in
+        { row = { aligned_row.row with ortho }; alignment = dummy_search_res })
 
 let _ : rule =
   new_rule' ~supports_repeated_rewrites:false ~plurals_in_s:false "alfonic"
