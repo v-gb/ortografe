@@ -41,3 +41,18 @@ val ( #:: ) : string -> int * int -> Uchar.t
 val in_ortho_weak_vowels : Uchar.t -> bool
 val in_ortho_vowels : Uchar.t -> bool
 val str_of_uchar : Uchar.t -> string
+
+(** *)
+
+val a_macron : Uchar.t
+val e_macron : Uchar.t
+val i_macron : Uchar.t
+val o_macron : Uchar.t
+val u_macron : Uchar.t
+val y_macron : Uchar.t
+val a_macron_str : string
+val e_macron_str : string
+val i_macron_str : string
+val o_macron_str : string
+val u_macron_str : string
+val y_macron_str : string

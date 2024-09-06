@@ -1,6 +1,14 @@
 open Base
 open String_comparison
 
+(* nfc versions of the letters *)
+let a_macron, a_macron_str = (!!"ā", "ā")
+let e_macron, e_macron_str = (!!"ē", "ē")
+let i_macron, i_macron_str = (!!"ī", "ī")
+let o_macron, o_macron_str = (!!"ō", "ō")
+let u_macron, u_macron_str = (!!"ū", "ū")
+let y_macron, y_macron_str = (!!"ȳ", "ȳ")
+
 let utf8_exists_non_shortcut str ~f =
   let found = ref false in
   let i = ref 0 in
@@ -63,7 +71,9 @@ let ( #:: ) str (i, n) =
     else Stdlib.Uchar.utf_decode_uchar (Stdlib.String.get_utf_8_uchar str !i)
 
 let ortho_weak_vowels =
-  Hash_set.of_list (module Uchar) [ !!"e"; !!"é"; !!"è"; !!"ê"; !!"i"; !!"î"; !!"y" ]
+  Hash_set.of_list
+    (module Uchar)
+    [ !!"e"; !!"é"; !!"è"; !!"ê"; e_macron; !!"i"; !!"î"; i_macron; !!"y"; y_macron ]
 
 let in_ortho_weak_vowels s = Hash_set.mem ortho_weak_vowels s
 
@@ -71,18 +81,13 @@ let[@ocamlformat "disable"] ortho_vowels =
   Hash_set.union ortho_weak_vowels
     (Hash_set.of_list
        (module Uchar)
-       [ !!"a"; !!"à"; !!"â"; !!"ä"; !!"ë"; !!"ï"; !!"ù"; !!"o"; !!"ô"; !!"ö"; !!"u"; !!"û"; !!"ù"; !!"ü"; !!"ÿ"])
+       [ !!"a"; !!"à"; !!"â"; !!"ä"; a_macron; !!"ë"; !!"ï"; !!"ù"; !!"o"; !!"ô"; !!"ö"; o_macron; !!"u"; !!"û"; !!"ù"; !!"ü"; u_macron; !!"ÿ"])
 
 let in_ortho_vowels s = Hash_set.mem ortho_vowels s
 
 let ends_in_ortho_vowel word i =
-  (* The edge case to deal with the accent plat is a result of the assumption that all
-     characters in French take one codepoint (in NFC). Ideally we'd remove that
-     assumption. We don't need this special case when looking if the position is followed
-     by a vowel, since the codepoint for the vowel precedes the codepoint for the accent.
-  *)
   let c = word #:: (i, -1) in
-  in_ortho_vowels c || (Uchar.( = ) c !!"\u{0304}" && in_ortho_vowels word #:: (i, -2))
+  in_ortho_vowels c
 
 let[@ocamlformat "disable"] phon_vowels =
   Hash_set.of_list
@@ -109,7 +114,7 @@ type rule = string * rule_fun
 type t = (char, rule array) Hashtbl.t
 
 let create () : t =
-  let plat = Some "\u{0304}" in
+  let plat = true in
   let r : rule list ref = ref [] in
   let new_ a f = r := (a, f) :: !r in
   let new_fixed graphem l = new_ graphem (fun _ _ _ -> l) in
@@ -118,8 +123,6 @@ let create () : t =
   new_fixed "'" [ ("", Core) ];
   new_fixed "-" [ ("", Core) ];
   new_fixed " " [ ("", Core) ];
-  Option.iter plat ~f:(fun plat -> new_fixed plat [])
-  (* un accent plat tout seul n'est pas possible *);
 
   (* consonnes simples *)
   new_ "b" (fun word _ j ->
@@ -284,7 +287,7 @@ let create () : t =
   new_fixed "â" [ ("a", Core) ];
   new_fixed "ä" [ ("a", Core) ];
   new_fixed "a" [ ("a", Core) ];
-  Option.iter plat ~f:(fun plat -> new_fixed ("a" ^ plat) [ ("a", Core) ]);
+  if plat then new_fixed a_macron_str [ ("a", Core) ];
   new_fixed "au" [ ("o", Core) ];
   new_ "aux" (fun word _ j ->
       (* wish I could say "otherwise treat it as not a graphem" *)
@@ -315,7 +318,7 @@ let create () : t =
     ];
   new_fixed "ë" [ ("e", Core); ("E", Core) ];
   new_fixed "ê" [ ("e", Core); ("E", Core) ];
-  Option.iter plat ~f:(fun plat -> new_fixed ("e" ^ plat) [ ("e", Core); ("E", Core) ]);
+  if plat then new_fixed e_macron_str [ ("e", Core); ("E", Core) ];
   new_fixed "é" [ ("e", Core); ("E", Surprising (* médecin *)) ];
   let syllable_starts =
     Hash_set.of_list
@@ -389,7 +392,7 @@ let create () : t =
   (* I *)
   new_fixed "î" [ ("i", Core) ];
   new_fixed "ï" [ ("i", Core) ] (* maïs *);
-  Option.iter plat ~f:(fun plat -> new_fixed ("i" ^ plat) [ ("i", Core) ]);
+  if plat then new_fixed i_macron_str [ ("i", Core) ];
   new_fixed "ï" [ ("j", Core) ];
   (* paranoïaque *)
   new_ "i" (fun word i j ->
@@ -411,7 +414,7 @@ let create () : t =
 
   (* O *)
   new_fixed "o" [ ("o", Core); ("O", Core) ];
-  Option.iter plat ~f:(fun plat -> new_fixed ("o" ^ plat) [ ("o", Core); ("O", Core) ]);
+  if plat then new_fixed o_macron_str [ ("o", Core); ("O", Core) ];
   new_fixed "ô" [ ("o", Core) ];
   new_fixed "ö" [ ("o", Core) ];
   new_fixed "oo"
@@ -426,7 +429,7 @@ let create () : t =
   new_fixed "oy"
     [ ("oj", Core); ("Oj", Core); ("wa", Core); ("waj", Core); ("wai", Core) ];
   List.iter
-    [ "ou"; "oû"; "où"; +(match plat with None -> [] | Some plat -> [ "ou" ^ plat ]) ]
+    [ "ou"; "oû"; "où"; +(if plat then [ "o" ^ u_macron_str ] else []) ]
     ~f:(fun digraph ->
       new_ digraph (fun word i _ ->
           (* [true ||] pour faire marcher cacahouète. Pas sûr que ça vaille le coup en
@@ -465,7 +468,7 @@ let create () : t =
       else [ ("y", Core) ]);
   new_fixed "û" [ ("y", Core) ];
   new_fixed "ù" [ ("y", Core) ];
-  Option.iter plat ~f:(fun plat -> new_fixed ("u" ^ plat) [ ("y", Core) ]);
+  if plat then new_fixed u_macron_str [ ("y", Core) ];
   new_fixed "ü" [ ("y", Core) ];
   new_fixed "us$" [ ("y", Core (* aigus *)); ("ys", Surprising (* bonus *)) ];
   List.iter [ "um"; "ums$" ] ~f:(fun digraph ->

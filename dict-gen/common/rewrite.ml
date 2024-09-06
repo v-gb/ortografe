@@ -1057,8 +1057,10 @@ let accent_plat =
        retrouve avec «chērcher» par contre, ce qui me semble douteux. *)
   in
   new_rule' "accent-plat"
-    "remplace tous les accents aigus, graves et circonflexes par des accents plats : \
-     @été -> @e\u{0304}te\u{0304}, @être -> @e\u{0304}tre, @à -> @a\u{0304}"
+    [%string
+      "remplace tous les accents aigus, graves et circonflexes par des accents plats : \
+       @été -> @%{Rules.e_macron_str}t%{Rules.e_macron_str}, @être -> \
+       @%{Rules.e_macron_str}tre, @à -> @%{Rules.a_macron_str}"]
     (* inspiré par
        https://lactualite.com/societe/a-bas-les-accents-graves-aigus-et-circonflexes/
        On laisse les trémas tels quels par contre, car ça pose pas mal d'autres questions
@@ -1079,18 +1081,17 @@ let accent_plat =
            ; Re.str "û"
            ]))
     (fun () ->
-      let plat = "\u{0304}" in
       let patterns =
-        [ (String.Search_pattern.create "à", "a" ^ plat)
-        ; (String.Search_pattern.create "â", "a" ^ plat)
-        ; (String.Search_pattern.create "é", "e" ^ plat)
-        ; (String.Search_pattern.create "è", "e" ^ plat)
-        ; (String.Search_pattern.create "ê", "e" ^ plat)
-        ; (String.Search_pattern.create "ë", "e" ^ plat)
-        ; (String.Search_pattern.create "î", "i" ^ plat)
-        ; (String.Search_pattern.create "ô", "o" ^ plat)
-        ; (String.Search_pattern.create "ù", "u" ^ plat)
-        ; (String.Search_pattern.create "û", "u" ^ plat)
+        [ (String.Search_pattern.create "à", Rules.a_macron_str)
+        ; (String.Search_pattern.create "â", Rules.a_macron_str)
+        ; (String.Search_pattern.create "é", Rules.e_macron_str)
+        ; (String.Search_pattern.create "è", Rules.e_macron_str)
+        ; (String.Search_pattern.create "ê", Rules.e_macron_str)
+        ; (String.Search_pattern.create "ë", Rules.e_macron_str)
+        ; (String.Search_pattern.create "î", Rules.i_macron_str)
+        ; (String.Search_pattern.create "ô", Rules.o_macron_str)
+        ; (String.Search_pattern.create "ù", Rules.u_macron_str)
+        ; (String.Search_pattern.create "û", Rules.u_macron_str)
         ]
       in
       fun env aligned_row ->
@@ -1115,7 +1116,7 @@ let accent_plat =
           then
             rewrite_graphem' env aligned_row ~filter:(fun path_elt ->
                 match (path_elt.graphem, path_elt.phonem) with
-                | "e", ("e" | "E") -> Some ("e" ^ plat)
+                | "e", ("e" | "E") -> Some Rules.e_macron_str
                 | _ -> None)
           else aligned_row)
 
