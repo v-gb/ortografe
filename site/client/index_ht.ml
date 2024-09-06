@@ -301,8 +301,26 @@ module Index = struct
     margin-bottom: 0.1em;
     |}]
     in
+    let with_italics =
+      let at_re = Re.(compile (seq [ str "@"; rep (compl [ set " ->@,." ]) ])) in
+      fun str ->
+        let q = Queue.create () in
+        let flush =
+          let i = ref 0 in
+          fun (j1, j2) ->
+            if j1 <> !i
+            then Queue.enqueue q (text (String.sub str ~pos:!i ~len:(j1 - !i)));
+            i := j2
+        in
+        List.iter (Re.all at_re str) ~f:(fun group ->
+            flush (Re.Group.offset group 0);
+            let word = String.chop_prefix_exn (Re.Group.get group 0) ~prefix:"@" in
+            Queue.enqueue q (elt "i" [ text word ]));
+        flush (String.length str, String.length str);
+        match Queue.to_list q with [ elt ] -> elt | l -> span l
+    in
     let words txt ws1 ws2 =
-      ( text txt
+      ( with_italics txt
       , fun x ->
           [ x
           ; div
@@ -329,25 +347,26 @@ module Index = struct
           [ p ~cl:"margin: 0;"
               [ text
                   "Vous avez dû constater que les textes se lisent bien, même sans \
-                   explication, et vous avez peut-être deviné une partie des règles. \
-                   Excluant les noms propres :"
+                   explication, et vous avez peut-être deviné une partie des règles."
               ]
           ; div ~cl:"max-width: 25em;"
               (pseudo_list ~cl:"margin-top: 1em;"
                  [ words
                      "Les consonnes doubles qui n'ont pas d'effet sur la prononciation \
                       sont simplifiées."
-                     [ "sonnerie"; "appelle"; "accord"; "lutte"; "verre" ]
-                     [ "messe"; "accident"; "ennui"; "surréel"; "Rennes" ]
-                 ; words "Les x finaux muets deviennent des s."
+                     [ "sonnerie"; "appelle"; "accord"; "renne" ]
+                     [ "messe"; "accident"; "ennui"; "surréel"; "Rennes*" ]
+                 ; words "Les @x finaux muets deviennent des @s."
                      [ "bijoux"; "choix"; "veux"; "deux" ]
-                     [ "dix"; "duplex"; "intox" ]
+                     [ "dix"; "duplex"; "Évreux*" ]
                  ; words
-                     "Les ph, h et y d'origines grecques ou similaires sont simplifiés."
-                     [ "photo"; "rythme"; "humain"; "chaos"; "théâtre"; "huile" ]
-                     [ "hache"; "ahuri"; "pays"; "babyfoot" ]
+                     "Les @ph, @h, @y et @œ d'origine grecque ou similaire sont \
+                      simplifiés."
+                     [ "photo"; "rythme"; "humain"; "chaos"; "huile"; "œuvre" ]
+                     [ "hache"; "ahuri"; "pays"; "babyfoot"; "coexiste" ]
                  ])
           ]
+      ; p [ text "* Les noms propres sont exclus." ]
       ; p ~cl:"font-size: 0.8em; margin-top: 1.5em;"
           [ text "Érofa propose également une "
           ; a ~href:"http://www.participepasse.info/"
@@ -1077,7 +1096,9 @@ module Index = struct
                               ]
                           ; p
                               [ text "Le favicon provient de "
-                              ; a ~href:"https://www.freepik.com/free-vector/quill-pen-logo-design_34630377.htm#fromView=search&page=1&position=41&uuid=f092ab97-d7e7-4489-a6df-150bdfc5d74c"
+                              ; a
+                                  ~href:
+                                    "https://www.freepik.com/free-vector/quill-pen-logo-design_34630377.htm#fromView=search&page=1&position=41&uuid=f092ab97-d7e7-4489-a6df-150bdfc5d74c"
                                   [ text "freepik" ]
                               ; text "."
                               ]
