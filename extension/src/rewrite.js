@@ -109,7 +109,9 @@ async function detect_language_with_browser_api(browser, lazystr, lang) {
         return  { res: null, fallback: true }
     }
     const [str, dur] = lazystr();
-    if (str.length == 0) {
+    if (str.length == 0 || str == 'DuckDuckGo\n') {
+        // The initial page load on DuckDuckGo contains almost nothing, but not
+        // literally nothing...
         return { res: null, fallback: false }
     }
     const { isReliable, languages } = await browser.i18n.detectLanguage(str)
