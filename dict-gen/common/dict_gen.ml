@@ -1,7 +1,18 @@
 open Base
 
 let simplify_mapping tbl ~plurals_in_s =
-  (* remove identity mappings and trivial plurals *)
+  (* Remove identity mappings and trivial plurals.
+
+     There are a couple of bugs here:
+     - with mapping (a->a, as->a) and plurals_in_s="", we return
+       an empty mapping, which incorrectly fails to rewrite "as"
+     - with mapping (a->b, as->as) and any value of plurals_in_s,
+       we return the mapping (a->b), which incorrectly rewrites as to bs.
+       This is quite difficult to trigger accidentally (sen, sens with
+       ortograf.net would possibly do it), but triggers ~15 times when the érofa
+       dict and lexique disagree on pronunciation (pupille->pupile in érofa,
+       pupilles->pupilles from lexique), so the bug is actually making
+       the generated dictionary more consistent than it would otherwise be. *)
   Hashtbl.filteri_inplace tbl ~f:(fun ~key:old ~data:(new_, _) ->
       String.( <> ) old new_
       &&
