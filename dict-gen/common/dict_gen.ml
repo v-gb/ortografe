@@ -35,7 +35,10 @@ let simplify_mapping tbl ~plurals_in_s =
         in
         keep
   in
-  Hashtbl.filteri_inplace tbl ~f:keep
+  Hashtbl.filter_mapi_inplace tbl ~f:(fun ~key ~data ->
+      if keep ~key ~data
+      then Some (if String.( = ) key (fst data) then ("", snd data) else data)
+      else None)
 
 let change_from_1990_is_undesirable ~has_erofa post90 =
   has_erofa
