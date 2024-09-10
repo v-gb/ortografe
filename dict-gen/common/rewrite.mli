@@ -23,7 +23,7 @@ type stats [@@deriving sexp_of]
 val gen :
      ?progress:(int -> unit)
   -> ?fix_oe:bool
-  -> ?not_understood:[ `Raise | `Call of Sexplib.Sexp.t -> unit | `Ignore ]
+  -> ?not_understood:[ `Call of Sexplib.Sexp.t -> unit | `Ignore ]
   -> rules:rules
   -> Data.Lexique.t
   -> (string -> string -> unit)

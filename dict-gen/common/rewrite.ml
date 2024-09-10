@@ -1672,10 +1672,7 @@ let gen ?progress ?(fix_oe = false) ?(not_understood = `Ignore) ~rules:which_rul
           match Rules.search rules row.ortho row.phon with
           | Error s ->
               failed := !failed + 1;
-              (match not_understood with
-              | `Raise -> raise_s s
-              | `Call f -> f s
-              | `Ignore -> ());
+              (match not_understood with `Call f -> f s | `Ignore -> ());
               f row.ortho row.ortho
           | Ok search_res ->
               (* Le oe est une correction du lexique, il s'applique donc à l'orthographe de
