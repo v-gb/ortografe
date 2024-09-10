@@ -1,33 +1,41 @@
 open Base
 
 let simplify_mapping tbl ~plurals_in_s =
-  (* Remove identity mappings and trivial plurals.
-
-     There are a couple of bugs here:
-     - with mapping (a->a, as->a) and plurals_in_s="", we return
-       an empty mapping, which incorrectly fails to rewrite "as"
-     - with mapping (a->b, as->as) and any value of plurals_in_s,
-       we return the mapping (a->b), which incorrectly rewrites as to bs.
-       This is quite difficult to trigger accidentally (sen, sens with
-       ortograf.net would possibly do it), but triggers ~15 times when the érofa
-       dict and lexique disagree on pronunciation (pupille->pupile in érofa,
-       pupilles->pupilles from lexique), so the bug is actually making
-       the generated dictionary more consistent than it would otherwise be. *)
-  Hashtbl.filteri_inplace tbl ~f:(fun ~key:old ~data:(new_, _) ->
-      String.( <> ) old new_
-      &&
-      match plurals_in_s with
-      | None -> true
-      | Some plural_marker -> (
+  (* Remove identity mappings and trivial plurals. *)
+  let keep =
+    match plurals_in_s with
+    | None -> fun ~key:old ~data:(new_, _) -> String.( <> ) old new_
+    | Some plural_marker ->
+        let rec keep ~key:old ~data:(new_, _) =
+          let is_id = String.( = ) old new_ in
           match
             ( String.chop_suffix old ~suffix:"s"
             , String.chop_suffix new_ ~suffix:plural_marker )
           with
           | Some old_no_s, Some new_no_s -> (
               match Hashtbl.find tbl old_no_s with
-              | Some (new', _) when String.( = ) new' new_no_s -> false
-              | _ -> true)
-          | _ -> true))
+              | Some ((new', _) as data_no_s) when String.( = ) new' new_no_s ->
+                  (* Plural is inferrable from singular. But we can't simply filter
+                     out our entry, as the singular may have been filtered out
+                     itself, with a mapping like (a->a, as->a) and plurals_in_s="",
+                     hence the recursive call. *)
+                  (not (keep ~key:old_no_s ~data:data_no_s)) && not is_id
+              | Some _ ->
+                  (* Keep the entry even if is_id, because the "singular" implies a
+                     rewriting inconsistent with our entry. This would happen with a
+                     mapping like (a->b, as->as). This is quite difficult to trigger
+                     accidentally (sen, sens with ortograf.net would possibly do it),
+                     but triggers ~15 times when the érofa dict and lexique disagree on
+                     pronunciation (pupille->pupile in érofa, pupilles->pupilles from
+                     lexique). This is technically better behavior, but it is confusing
+                     to have a compression technique modify behavior like this. *)
+                  true
+              | None -> not is_id)
+          | _ -> not is_id
+        in
+        keep
+  in
+  Hashtbl.filteri_inplace tbl ~f:keep
 
 let change_from_1990_is_undesirable ~has_erofa post90 =
   has_erofa
