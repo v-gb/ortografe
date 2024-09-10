@@ -60,7 +60,7 @@ function rewrite_word(table, plurals_in_s, word) {
             postprocess = (x) => x;
         }
         let repl = postprocess(table.get(processed_word))
-        if (!repl && is_plural(processed_word) && plurals_in_s !== null) {
+        if (repl == null && is_plural(processed_word) && plurals_in_s !== null) {
             repl = postprocess(pluralize(plurals_in_s, table.get(depluralize(processed_word))))
         }
         return repl
