@@ -1,20 +1,21 @@
 open Base
+open String_comparison
 
 let simplify_mapping tbl ~plurals_in_s =
   (* Remove identity mappings and trivial plurals. *)
   let keep =
     match plurals_in_s with
-    | None -> fun ~key:old ~data:(new_, _) -> String.( <> ) old new_
+    | None -> fun ~key:old ~data:(new_, _) -> old <>: new_
     | Some plural_marker ->
         let rec keep ~key:old ~data:(new_, _) =
-          let is_id = String.( = ) old new_ in
+          let is_id = old =: new_ in
           match
             ( String.chop_suffix old ~suffix:"s"
             , String.chop_suffix new_ ~suffix:plural_marker )
           with
           | Some old_no_s, Some new_no_s -> (
               match Hashtbl.find tbl old_no_s with
-              | Some ((new', _) as data_no_s) when String.( = ) new' new_no_s ->
+              | Some ((new', _) as data_no_s) when new' =: new_no_s ->
                   (* Plural is inferrable from singular. But we can't simply filter
                      out our entry, as the singular may have been filtered out
                      itself, with a mapping like (a->a, as->a) and plurals_in_s="",
@@ -37,7 +38,7 @@ let simplify_mapping tbl ~plurals_in_s =
   in
   Hashtbl.filter_mapi_inplace tbl ~f:(fun ~key ~data ->
       if keep ~key ~data
-      then Some (if String.( = ) key (fst data) then ("", snd data) else data)
+      then Some (if key =: fst data then ("", snd data) else data)
       else None)
 
 let change_from_1990_is_undesirable ~has_erofa post90 =
@@ -48,7 +49,7 @@ let change_from_1990_is_undesirable ~has_erofa post90 =
      || String.is_prefix post90 ~prefix:"hindou"
         (* don't understand if the h is really
            dropped here? *)
-     || String.( = ) post90 "reboursouffler")
+     || post90 =: "reboursouffler")
 
 let add_post90_entries base post90 ~has_erofa =
   Hashtbl.iteri post90 ~f:(fun ~key:pre90 ~data:post90 ->
@@ -159,7 +160,7 @@ let custom_rule s =
   match
     String.prefix s 1000 (* reduce the chance of server problems *)
     |> String.split ~on:' '
-    |> List.filter ~f:(String.( <> ) "")
+    |> List.filter ~f:(( <>: ) "")
     |> List.filter_map ~f:(String.lsplit2 ~on:'/')
     |> List.filter ~f:(function "", _ -> false | _ -> true)
     |> List.take __ 100 (* reduce the chance of server problems *)
@@ -410,7 +411,7 @@ let gen ?(profile = false) ?progress ~rules ~all ~output ~json_to_string data =
         if all
         then
           List.iter (ranked all_tbl) ~f:(fun (old, new_) ->
-              let mod_ = if String.( = ) old new_ then "=" else "M" in
+              let mod_ = if old =: new_ then "=" else "M" in
               output [%string "%{old},%{new_},%{mod_}\n"])
         else
           List.iter (ranked all_tbl) ~f:(fun (old, new_) ->
@@ -505,7 +506,7 @@ let staged_gen data =
                   staged row
                 in
                 let opt =
-                  if phys_equal ortho new_ortho || String.( = ) ortho new_ortho
+                  if phys_equal ortho new_ortho || ortho =: new_ortho
                   then None
                   else Some new_ortho
                 in
