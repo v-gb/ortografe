@@ -933,8 +933,14 @@ module Index = struct
           ; [ a ~href:"/static/rect1990.csv"
                 ~attrs:[ ("download", "rect1990.csv") ]
                 [ text "csv rectifications de 1990" ]
-            ; text ", pareil mais seulement les rectifications de 1990 "
+            ; text ", pareil mais seulement les rectifications de 1990"
             ]
+          ]
+      ; p
+          [ text "Pour une utilisation non-programmatique, voici le "
+          ; a ~href:"https://ro.ccdmd.qc.ca/regles-et-liste-de-mots"
+              [ text "détail complet" ]
+          ; text " des rectifications de 1990."
           ]
       ]
 
