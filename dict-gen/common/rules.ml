@@ -205,6 +205,7 @@ let create () : t =
   new_fixed "gni" [ ("N", Core) ];
   new_fixed "ni" [ ("N", Core_optional) ];
   new_fixed "ng" [ ("G", Core) ];
+  new_fixed "ong" [ ("§G", Core_optional) ];
 
   (* L qui fait /j/
      Le découpage choisit est que travail est a|il, et travailleur est

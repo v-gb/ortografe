@@ -54,7 +54,6 @@ appelait,apelait
 pourrai,pourai
 appartient,apartient
 attendant,atendant
-week-end,weekend
 coûte,coute
 pourrez,pourez
 supplie,suplie
@@ -610,7 +609,6 @@ collait,colait
 mettrez,métrez
 réglera,règlera
 accable,acable
-pizzeria,pizzéria
 annoncez,anoncez
 mettrons,métrons
 paraîtra,paraitra
@@ -963,7 +961,6 @@ reconnaîtront,reconaitront
 verraient,véraient
 appréhendé,apréendé
 arrêtant,arêtant
-black-out,blackout
 effacent,éfacent
 nourrissait,nourissait
 sollicite,solicite
@@ -2154,7 +2151,6 @@ capitonnée,capitonée
 charrié,charié
 chauffera,chaufera
 commercialisé,comercialisé
-croque-monsieur,croquemonsieur
 différenciait,diférenciait
 déboutonne,déboutone
 décarrer,décarer
@@ -2426,7 +2422,6 @@ raccourcit,racourcit
 réceptionné,réceptioné
 scellaient,scélaient
 scellent,scèlent
-side-car,sidecar
 soumette,soumète
 soûlarde,soularde
 supporteraient,suporteraient
@@ -3057,7 +3052,6 @@ coopérera,coopèrera
 corrigée,corigée
 couronna,courona
 couronnent,couronent
-cover-girl,covergirl
 cramponnais,cramponais
 cramponnée,cramponée
 cristallisent,cristalisent
@@ -3480,7 +3474,6 @@ inhabituellement,inabituèlement
 interrogiez,intérogiez
 irrita,irita
 kidnapperaient,kidnaperaient
-lock-out,lockout
 lutterai,luterai
 mam'selle,mam'sèle
 marmonnez,marmonez
@@ -3527,7 +3520,6 @@ répéterez,répèterez
 résonneront,résoneront
 scellait,scélait
 stoppa,stopa
-strip-teaseur,stripteaseur
 subventionné,subventioné
 suffisions,sufisions
 supposait,suposait
@@ -4156,7 +4148,6 @@ bagarrais,bagarais
 bagarrait,bagarait
 bannit,banit
 barricadent,baricadent
-blue-jean,bluejean
 bourdonnaient,bourdonaient
 brûleraient,bruleraient
 brûliez,bruliez
@@ -8509,7 +8500,6 @@ dînerions,dinerions
 dîneuse,dineuse
 dînât,dinât
 ecchymosée,équimosée
-edelweiss,édelweiss
 edwardienne,edwardiène
 effacèrent,éfacèrent
 effara,éfara
@@ -9265,7 +9255,6 @@ lardeux,lardeus
 larronne,larone
 laryngologique,laringologique
 lausannoises,lausanoises
-leitmotive,leitmotivs
 lettonne,lettone
 lettreur,létreur
 lettriques,létriques
@@ -10093,7 +10082,6 @@ sommeillante,someillante
 sommeillèrent,someillèrent
 sommèrent,somèrent
 sonnaillaient,sonaillaient
-sostenuto,sosténuto
 soufferte,souferte
 soufflai,souflai
 souffletai,soufletai
@@ -10593,6 +10581,8 @@ base-ball,baseball
 basket-ball,basketball
 biodiesel,biodiésel
 bisaiguë,bisaigüe
+black-out,blackout
+blue-jean,bluejean
 bonhomies,bonhommies
 bonneterie,bonèterie
 boulghours,boulgours
@@ -10650,12 +10640,14 @@ condottiere,condotière
 connaître,conaitre
 contrebutter,contrebuter
 coquillier,coquiller
+cover-girl,covergirl
 cow-boy,cowboy
 coûtable,coutable
 coûteux,couteus
 craquetterez,craquèterez
 craqûre,craqure
 criqûre,criqure
+croque-monsieur,croquemonsieur
 croîtrais,croitrais
 croîtrez,croitrez
 croîtriez,croitriez
@@ -10700,6 +10692,7 @@ dînasse,dinasse
 dînette,dinète
 dînée,dinée
 eczématiser,exématiser
+edelweiss,édelweiss
 egoportrait,égoportrait
 emballotter,emballoter
 emboîtable,emboitable
@@ -10804,8 +10797,10 @@ kakemono,kakémono
 kibboutzim,kiboutz
 ladies,ladys
 laissés-pour-compte,laissés-pour-comptes
+leitmotive,leitmotivs
 lieder,lieds
 llanero,llanéro
+lock-out,lockout
 lorries,lorrys
 louveteries,louvèteries
 marguillière,marguillère
@@ -10843,6 +10838,7 @@ peillière,peillère
 pennies,pennys
 petit-maître,petit-maitre
 pipe-line,pipeline
+pizzeria,pizzéria
 poche-revolver,poche-révolver
 porte-monnaie,portemonaie
 porte-voix,portevois
@@ -10951,10 +10947,12 @@ second-maître,second-maitre
 seniornaute,séniornaute
 senoritas,sénioritas
 shekel,shékel
+side-car,sidecar
 siouplaît,siouplait
 slashes,slashs
 smorebrod,smeurebreud
 social-traître,social-traitre
+sostenuto,sosténuto
 sous-maîtresse,sous-maitresse
 sous-prieur,sous-prieurs
 soûlais,soulais
@@ -10964,6 +10962,7 @@ soûlon,soulon
 statu quo,statuquo
 steuplaît,steuplait
 strip-tease,striptease
+strip-teaseur,stripteaseur
 strip-teaseuse,stripteaseuse
 surcroîtra,surcroitra
 surcroîtrai,surcroitrai
@@ -11029,6 +11028,7 @@ voûtain,voutain
 vrillière,vrillère
 wallabies,wallabys
 webmaîtriser,webmaitriser
+week-end,weekend
 à brûle-pourpoint,à brule-pourpoint
 à cloche-pied,à clochepied
 ébûcheter,ébucheter
