@@ -1346,11 +1346,6 @@ ouvre-boîtes,2,ouvre-boite/ouvre-boites,NOM,m,,,ouvre-boîtes
 paella,1,paélia,NOM,f,s,,paella
 paellas,1,paélias,NOM,f,s,,paella
 pagaye,1,pagaille,NOM,f,s,,pagaye
-pagaye,1,pagaille,VER,,,ind:pre:3s;,pagayer
-pagayer,1,pagailler,VER,,,inf;,pagayer
-pagayeur,1,pagailleur,NOM,m,s,,pagayeur
-pagayeurs,1,pagailleurs,NOM,m,p,,pagayeur
-pagayez,1,pagaillez,VER,,,imp:pre:2p;,pagayer
 pagaïe,1,pagaille,NOM,f,s,,pagaïe
 pantelle,1,pantèle,VER,,,ind:pre:3s;,panteler
 paraît,1,parait,VER,,,ind:pre:3s;,paraître
