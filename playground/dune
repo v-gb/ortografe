@@ -12,11 +12,17 @@
 
 (rule
  (target foo.html)
- (deps x.bc.js (sandbox always))
+ (deps x.bc.js x.js (sandbox always))
  (action (bash "
 {
-echo '<html><head><script>';
-cat x.bc.js
-echo '</script></head></html>'
+echo '<!DOCTYPE html><html>'
+echo '<head>'
+echo '</head>'
+echo '<body>'
+echo '<div id=main></div>'
+echo '<script>'; cat x.bc.js; echo '</script>'
+echo '<script>'; cat x.js; echo '</script>'
+echo '</body>'
+echo '</html>'
 } > foo.html
 ")))

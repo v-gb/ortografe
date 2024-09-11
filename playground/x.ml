@@ -17,5 +17,4 @@ let () =
 { "a": [ "2", null, true, false, -2.34, { "a" : 2, "b" : 3 } ] }
 |}
   in
-  Stdlib.print_endline (Sexp.to_string_hum (sexp_of_json json));
-  ignore (Brrex.json_of_string "{")
+  Stdlib.print_endline (Sexp.to_string_hum (sexp_of_json json))
