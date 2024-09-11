@@ -469,7 +469,7 @@ let create () : t =
   new_fixed "û" [ ("y", Core) ];
   new_fixed "ù" [ ("y", Core) ];
   if plat then new_fixed u_macron_str [ ("y", Core) ];
-  new_fixed "ü" [ ("y", Core) ];
+  new_fixed "ü" [ ("y", Core); ("8", Core) ];
   new_fixed "us$" [ ("y", Core (* aigus *)); ("ys", Surprising (* bonus *)) ];
   List.iter [ "um"; "ums$" ] ~f:(fun digraph ->
       new_fixed digraph [ ("om", Surprising); ("Om", Surprising) ]);
