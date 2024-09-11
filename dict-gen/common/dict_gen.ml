@@ -81,6 +81,27 @@ let ranked tbl =
   |> List.sort ~compare:[%compare: int * (string * _)]
   |> List.map ~f:snd
 
+let post90ify post90 (row : Data.Lexique.row) =
+  match Hashtbl.find post90 row.ortho with
+  | None -> None
+  | Some post90_ortho ->
+      Some
+        { row with
+          ortho = post90_ortho
+        ; phon =
+            (match post90_ortho with
+            | "addenda" -> "ad5da"
+            | "caméramans" -> "kameRaman"
+            | "graffiti" -> "gRafiti"
+            | "maximums" -> "maksimOm"
+            | "minimums" -> "minimOm"
+            | "scénarios" -> "senaRjo"
+            | "solos" -> "solo"
+            | "stimulus" -> "stimylys"
+            | "tumulus" -> "tymylys"
+            | _ -> row.phon)
+        }
+
 let build_lexique_post90 (lexique : Data.Lexique.t) post90 ~rect1990 =
   (* this causes a few regressions like
      allécherait,alécherait
@@ -105,16 +126,10 @@ let build_lexique_post90 (lexique : Data.Lexique.t) post90 ~rect1990 =
       convert both « maitre » and « maître » separately instead of once), but maybe that
       makes no difference in practice. *)
   if rect1990
-  then
-    List.map lexique ~f:(fun r ->
-        match Hashtbl.find post90 r.ortho with
-        | None -> r
-        | Some new_ortho -> { r with ortho = new_ortho })
+  then List.map lexique ~f:(fun r -> post90ify post90 r ||? r)
   else
     List.concat_map lexique ~f:(fun r ->
-        match Hashtbl.find post90 r.ortho with
-        | None -> [ r ]
-        | Some new_ortho -> [ r; { r with ortho = new_ortho } ])
+        match post90ify post90 r with None -> [ r ] | Some r_new -> [ r; r_new ])
 
 let build_erofa_ext ~erofa ~post90 ~lexique ~all =
   (* start with whole erofa db, so [simplify_mapping] considers singular in the erofa csv *)
@@ -495,14 +510,7 @@ let staged_gen data =
                 opt
             | Some (`Lexique row) ->
                 let new_ortho =
-                  let row =
-                    if rect1990
-                    then
-                      match Hashtbl.find post90 ortho with
-                      | None -> row
-                      | Some post90_ortho -> { row with ortho = post90_ortho }
-                    else row
-                  in
+                  let row = if rect1990 then post90ify post90 row ||? row else row in
                   staged row
                 in
                 let opt =
