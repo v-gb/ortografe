@@ -523,7 +523,7 @@ let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
        [ Dream.get "/dict" (get_dict ())
        ; Dream.post "/conv" (post_conv ~max_input_size ~staged)
        ; Dream.get "/" (from_filesystem static_root "index.html")
-       ; Dream.get "/regles/alfonic" (from_filesystem static_root "regles_alfonic.html")
+       ; Dream.get "/regles/perso" (from_filesystem static_root "regles_perso.html")
        ; Dream.get "/static/**" (Dream.static ~loader:from_filesystem static_root)
        ]
 

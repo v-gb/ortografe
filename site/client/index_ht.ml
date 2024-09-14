@@ -1180,23 +1180,12 @@ module Index = struct
       ()
 end
 
-module Regles_alfonic = struct
+module Regles_perso = struct
   let main () : node =
-    let rules_set = Set.of_list (module String) [ "alfonic" ] in
-    let rules =
-      force Dict_gen_common.Dict_gen.all_builtin
-      |> List.filter ~f:(fun rule ->
-             Set.mem rules_set (Dict_gen_common.Dict_gen.name rule))
-    in
-    assert (List.length rules = 1);
-    let rules_str =
-      List.map rules ~f:Dict_gen_common.Dict_gen.name |> String.concat ~sep:" "
-    in
     html
       ~head:
-        (head ~root:false
-           ~title:("Orthographe rationnelle -- " ^ rules_str)
-           ~description:("Outils de conversion en " ^ rules_str)
+        (head ~root:false ~title:"Orthographe rationnelle -- dictionnaire personnalisé"
+           ~description:"Outils de conversion vers une orthographe personnalisée"
            ~attrs:
              [ script "/static/rewrite.js" ~defer:true
              ; script "/static/page.js" ~defer:true
@@ -1209,22 +1198,14 @@ module Regles_alfonic = struct
             [ div ~cl:"margin: 0 8px 8px 8px;"
                 [ h1 ~cl:"text-align:center; margin-top: 1em; margin-bottom: 1em;"
                     [ text "Orthographe rationnelle" ]
-                ; p [ text "Les outils de cette page appliquent les règles :" ]
-                ; list `ul
-                    (List.map
-                       (if false then [] else rules)
-                       ~f:(fun rule ->
-                         [ strong [ text (Dict_gen_common.Dict_gen.name rule) ]
-                         ; text ", "
-                         ; +nodes_of_string (Dict_gen_common.Dict_gen.html_doc rule)
-                         ; br
-                         ; +(match Dict_gen_common.Dict_gen.problems rule with
-                            | [] -> []
-                            | _ :: _ as problems ->
-                                [ text "Problèmes connus :"
-                                ; list `ul (List.map problems ~f:(fun s -> [ text s ]))
-                                ])
-                         ]))
+                ; p
+                    [ text "Les outils de cette page appliquent le dictionnaire "
+                    ; a
+                        ~attrs:[ ("id", "regles-perso-link") ]
+                        ~href:""
+                        [ text "url manquante" ]
+                    ; text "."
+                    ]
                 ; section
                     [ h3 [ text "Transcription interactive" ]
                     ; Index.interactive_transcription ~id_textarea:"user-text2"
@@ -1233,17 +1214,21 @@ module Regles_alfonic = struct
                     ]
                 ; section
                     [ h3 [ text "Transcription de documents, en ligne" ]
-                    ; Index.submit_file (fun button ->
+                    ; Index.submit_file
+                        (fun button ->
                           [ div ~cl:"display: none"
                               (Dict_gen_common.Dict_gen.all_selection_html
                                  ~url_prefix:"/static/" ~name_prefix:""
                                  ~id_prefix:"conv-"
-                                 ~checked:(fun r ->
-                                   Set.mem rules_set (Dict_gen_common.Dict_gen.name r))
+                                 ~checked:(fun _ -> false)
                                  ()
                               |> nodes_of_string)
+                          ; div ~attrs:[ ("id", "form-conv-button-error") ] []
                           ; +button
                           ])
+                        ~label_attrs:[ ("id", "form-conv-label") ]
+                        ~replace_onchange:[ ("id", "form-conv-button") ]
+                        ~attrs:[ ("id", "form-conv") ]
                     ; p [ text "Les formats acceptés sont :" ]
                     ; Index.format_acceptes ()
                     ]
@@ -1255,7 +1240,7 @@ end
 
 let () =
   List.iter
-    [ ("index.html", Index.main ()); ("regles_alfonic.html", Regles_alfonic.main ()) ]
+    [ ("index.html", Index.main ()); ("regles_perso.html", Regles_perso.main ()) ]
     ~f:(fun (filename, node) ->
       Out_channel.write_all filename
         ~data:

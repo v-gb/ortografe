@@ -52,6 +52,10 @@ if (user_text2) {
     const update = mirror_and_rewrite(user_text2, converted_text2, async () => {
         textarea_has_been_used = true;
         const dict_gen_browser = await lazy_dict_gen_browser();
+        const dict_blob =
+              regles_perso_lazy_dict
+              ? await regles_perso_lazy_dict()
+              : document.getElementById('form-conv-dict').files[0];
         const word_f =
               await dict_gen_browser.staged_generate(
                   cache2,
@@ -59,7 +63,7 @@ if (user_text2) {
                     "/static/Lexique383.gen.tsv",
                     "/static/rect1990.csv",
                   ],
-                  document.getElementById('form-conv-dict').files[0],
+                  dict_blob,
               )
         const table = { size: 1, has: (word) => word_f(word) != null, get: word_f }
         const options = {color:true, trivial:false, background_color:'#b9f4b9',
@@ -86,7 +90,10 @@ if (user_text2) {
         return doc_conversion.create();
     })
     document.getElementById('form-conv-button')?.addEventListener("change", async (e) => {
-        const dict_blob = document.getElementById('form-conv-dict').files[0];
+        const dict_blob =
+              regles_perso_lazy_dict
+              ? await regles_perso_lazy_dict()
+              : document.getElementById('form-conv-dict').files[0];
         if (!dict_blob) {
             e.target.form.submit();
             return
@@ -218,4 +225,25 @@ if (dict_search_input) {
         }
         dict_search_output.innerHTML = html;
     }))
+}
+
+const regles_perso_link = document.getElementById("regles-perso-link");
+let regles_perso_lazy_dict = null;
+if (regles_perso_link) {
+    const link = (new URL(window.location)).searchParams.get("url");
+    if (link) {
+        if (!link.startsWith("http://") && !link.startsWith("https://")) {
+            throw new Error(`${link} n'est pas un lien http/https`);
+        }
+        regles_perso_link.href = link;
+        regles_perso_link.text = link;
+
+        regles_perso_lazy_dict = async_lazy(async () => {
+            const response = await fetch(link);
+            if (!response.ok) {
+                throw new Error(`${response.status} ${response.statusText}`);
+            }
+            return await response.blob();
+        })
+    }
 }

@@ -26,7 +26,7 @@
  (modules client_bin))
 
 (rule
- (targets index.html regles_alfonic.html)
+ (targets index.html regles_perso.html)
  (deps
   (sandbox always)
    ../static/books.html
