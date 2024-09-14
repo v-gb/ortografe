@@ -237,6 +237,8 @@ if (regles_perso_link) {
         }
         regles_perso_link.href = link;
         regles_perso_link.text = link;
+        regles_perso_link.classList.add('orthographe-rationnelle-dict')
+        regles_perso_link.setAttribute('orthographe-rationnelle-dict-url', link)
 
         regles_perso_lazy_dict = async_lazy(async () => {
             const response = await fetch(link);

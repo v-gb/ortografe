@@ -10,6 +10,7 @@ let green_pale = "#e5fbe5"
 let green = "#b9f4b9"
 let _ = green_pale
 let html ~head ?body_style ~body () = html ~lang:"fr" ~head ?body_style ~body ()
+let favicon_url_abs_impl = "/static/favicon.svg"
 
 let head ~root ~attrs ~title ~description () =
   [ leafelt "meta"
@@ -36,7 +37,7 @@ let head ~root ~attrs ~title ~description () =
   ; leafelt "meta" [ ("name", "description"); ("content", description) ]
     (* It would be good to have the open-graph stuff
      *  https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML *)
-  ; leafelt "link" [ ("rel", "icon"); ("href", "/static/favicon.svg") ]
+  ; leafelt "link" [ ("rel", "icon"); ("href", favicon_url_abs_impl) ]
   ; +attrs
   ; style
       {|
@@ -570,7 +571,7 @@ module Index = struct
   let clickable_icon_box =
     "padding: 2px; border-radius: 3px; box-shadow: 0 0 5px 4px #b9f4b9;"
 
-  let section_transcription_pages () =
+  let section_transcription_pages which_page =
     let ext_in_chrome_link =
       "https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr"
     in
@@ -588,16 +589,20 @@ module Index = struct
     in
     section
       [ h3 [ text "Transcription des pages internet que vous visitez" ]
-      ; (let src = "/static/screenshot-1280-800.png" in
-         a ~href:src
-           [ img src ~cl:"max-width:min(35em,100%); height:auto"
-               [ ( "alt"
-                 , "Capture d'écran de page Éléphant de Wikipédia en orthographe Érofa"
-                 )
-               ; ("width", "1280")
-               ; ("height", "800")
-               ]
-           ])
+      ; +(match which_page with
+         | `Url_page -> []
+         | `Main_page ->
+             let src = "/static/screenshot-1280-800.png" in
+             [ a ~href:src
+                 [ img src ~cl:"max-width:min(35em,100%); height:auto"
+                     [ ( "alt"
+                       , "Capture d'écran de page Éléphant de Wikipédia en orthographe \
+                          Érofa" )
+                     ; ("width", "1280")
+                     ; ("height", "800")
+                     ]
+                 ]
+             ])
       ; p
           [ text
               "Lisez internet en orthographe rationalisée avec une extension pour \
@@ -654,6 +659,28 @@ module Index = struct
               ; text ", puis cliquez sur l'icône."
               ] )
           ]
+      ; +(match which_page with
+         | `Main_page -> []
+         | `Url_page ->
+             [ p
+                 [ text
+                     "Une fois l'extension installée, pour utiliser le dictionnaire de \
+                      cette page :"
+                 ; list `ul
+                     [ [ text
+                           "Allez dans ses options (généralement avec l'icône pièce de \
+                            puzzle en haut à droite, puis l'icône plume verte "
+                       ; img favicon_url_abs_impl
+                           ~cl:"height: 1em; width: auto; vertical-align: sub;"
+                           [ ("alt", "favicône du site")
+                           ; ("width", "186")
+                           ; ("height", "179")
+                           ]
+                       ]
+                     ; [ text "Cliquez le bouton de téléchargement vert." ]
+                     ]
+                 ]
+             ])
       ]
 
   let section_verificateurs () =
@@ -1168,7 +1195,7 @@ module Index = struct
                 ; section_transcription_interactive ()
                 ; section_transcription_en_ligne ()
                 ; section_transcription_locale ()
-                ; section_transcription_pages ()
+                ; section_transcription_pages `Main_page
                 ; section_verificateurs ()
                 ; +section_claviers ()
                 ; section_donnees ()
@@ -1232,6 +1259,7 @@ module Regles_perso = struct
                     ; p [ text "Les formats acceptés sont :" ]
                     ; Index.format_acceptes ()
                     ]
+                ; Index.section_transcription_pages `Url_page
                 ]
             ]
         ]
