@@ -294,17 +294,16 @@ const synchronous_updates = new Map([
         let to_rewrite = [];
         for (const m of mutations) {
             for (const node of m.addedNodes) {
-                if (node.nodeType == 1 && node.classList.contains('ytp-caption-segment')) {
-                    to_rewrite.push(node)
+                const elt = node.nodeType == 3 ? node.parentNode : node;
+                if (elt.nodeType == 1 && elt.classList.contains('ytp-caption-segment')) {
+                    to_rewrite.push(elt)
                 }
             }
         }
         for (const node of to_rewrite) {
             // The separate loop was to see if it would make the screen update faster
             // after the DOM was updated. Doesn't seem to help though, sadly, but maybe
-            // the batching is good anyway. Somehow for hand-written subtitles, this seems
-            // to be enough, but not for auto-generated subtitles. We seem to be sometimes
-            // missing updates for auto-generated subtitles in fact. Not clear why that is.
+            // the batching is good anyway.
             rewrite_under(options, table, node)
         }
     }]
