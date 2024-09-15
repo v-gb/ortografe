@@ -1226,7 +1226,7 @@ module Regles_perso = struct
                 [ h1 ~cl:"text-align:center; margin-top: 1em; margin-bottom: 1em;"
                     [ text "Orthographe rationnelle" ]
                 ; p
-                    [ text "Les outils de cette page appliquent le dictionnaire "
+                    [ text "Les outils de cette page appliquent un dictionnaire de "
                     ; a
                         ~attrs:[ ("id", "regles-perso-link") ]
                         ~href:""

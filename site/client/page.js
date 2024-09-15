@@ -236,7 +236,7 @@ if (regles_perso_link) {
             throw new Error(`${link} n'est pas un lien http/https`);
         }
         regles_perso_link.href = link;
-        regles_perso_link.text = link;
+        regles_perso_link.text = (new URL(link)).hostname.replace(/^www[.]([^.]+[.][^.]+)$/, (_, s) => s);
         regles_perso_link.classList.add('orthographe-rationnelle-dict')
         regles_perso_link.setAttribute('orthographe-rationnelle-dict-url', link)
 
