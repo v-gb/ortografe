@@ -350,7 +350,7 @@ module Index = struct
                   "Vous avez dû constater que les textes se lisent bien, même sans \
                    explication, et vous avez peut-être deviné une partie des règles."
               ]
-          ; div ~cl:"max-width: 25em;"
+          ; div ~cl:"max-width: 26em;"
               (pseudo_list ~cl:"margin-top: 1em;"
                  [ words
                      "Les consonnes doubles qui n'ont pas d'effet sur la prononciation \
@@ -361,13 +361,17 @@ module Index = struct
                      [ "bijoux"; "choix"; "veux"; "deux" ]
                      [ "dix"; "duplex"; "Évreux*" ]
                  ; words
-                     "Les @ph, @h, @y et @œ d'origine grecque ou similaire sont \
-                      simplifiés."
+                     "Les @h muets sont retirés, les @ph sont changés en @f, @y en @i \
+                      si la prononciation est inchangée, et œ en @eu/@é."
                      [ "photo"; "rythme"; "humain"; "chaos"; "huile"; "œuvre" ]
-                     [ "hache"; "ahuri"; "pays"; "babyfoot"; "coexiste" ]
+                     [ "hache"; "ahuri"; "pays"; "babyfoot**"; "coexiste" ]
                  ])
           ]
-      ; p [ text "* Les noms propres sont exclus." ]
+      ; p
+          [ text "* Les noms propres sont exclus."
+          ; br
+          ; text "** Les emprunts récents, notamment anglais, ne sont pas concernés."
+          ]
       ; p ~cl:"font-size: 0.8em; margin-top: 1.5em;"
           [ text "Érofa propose également une "
           ; a ~href:"http://www.participepasse.info/"
