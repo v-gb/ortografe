@@ -1048,6 +1048,13 @@ module Index = struct
             ; text " (pluriels en s plutôt qu'en x, accord du participe passé)."
             ; hr
             ]
+          ; [ a ~href:"https://monts-metalliferes.com/la-sous-bois"
+                [ cite [ text "La sous-bois" ] ]
+            ; text
+                " de Christophe Ségas est le premier livre en orthographe Érofa d'un \
+                 éditeur professionnel, et fut réalisé avec les outils de ce site."
+            ; hr
+            ]
           ; [ p ~cl:"margin-top: 0; margin-bottom: 0.2em"
                 [ text "Sur le site et les outils :" ]
             ; list `ul
@@ -1060,7 +1067,7 @@ module Index = struct
                           [ [ text
                                 "2024-06 : support pour écrire en Érofa avec les \
                                  claviers de téléphones, support de transcription avec \
-                                 des dictionnaires personnalisés, ajout de du \
+                                 des dictionnaires personnalisés, ajout du \
                                  dictionnaire consultable en ligne."
                             ]
                           ; [ text "À ce stade, les outils sont essentiellement finis."
