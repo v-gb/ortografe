@@ -361,8 +361,8 @@ module Index = struct
                      [ "bijoux"; "choix"; "veux"; "deux" ]
                      [ "dix"; "duplex"; "Évreux*" ]
                  ; words
-                     "Les @h muets sont retirés, les @ph sont changés en @f, @y en @i \
-                      si la prononciation est inchangée, et œ en @eu/@é."
+                     "Les @h muets sont retirés, les @ph sont changés en @f, @y en @i, \
+                      œ en @eu/@é/@e, si la prononciation est inchangée."
                      [ "photo"; "rythme"; "humain"; "chaos"; "huile"; "œuvre" ]
                      [ "hache"; "ahuri"; "pays"; "babyfoot**"; "coexiste" ]
                  ])
@@ -370,7 +370,9 @@ module Index = struct
       ; p
           [ text "* Les noms propres sont exclus."
           ; br
-          ; text "** Les emprunts récents, notamment anglais, ne sont pas concernés."
+          ; text "** Les "
+          ; elt "i" [ text "y" ]
+          ; text " des emprunts récents, notamment anglais, ne sont pas concernés."
           ]
       ; p ~cl:"font-size: 0.8em; margin-top: 1.5em;"
           [ text "Érofa propose également une "
