@@ -1141,11 +1141,11 @@ module Index = struct
                               ; text ". Aucunes n'ont été modifiées."
                               ]
                           ; p
-                              [ text "Le favicon provient de "
+                              [ text "Le favicon est une adaptation de "
                               ; a
                                   ~href:
-                                    "https://www.freepik.com/free-vector/quill-pen-logo-design_34630377.htm#fromView=search&page=1&position=41&uuid=f092ab97-d7e7-4489-a6df-150bdfc5d74c"
-                                  [ text "freepik" ]
+                                    "https://icon-sets.iconify.design/fluent-emoji-high-contrast/feather/"
+                                  [ text "cette icône" ]
                               ; text "."
                               ]
                           ]
