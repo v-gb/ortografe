@@ -1073,6 +1073,27 @@ module Index = struct
                   ; text " si vous avez des problèmes, questions ou suggestions !"
                   ]
                 ; [ details
+                      [ text "Discussions et présentations de ces outils" ]
+                      [ list `ul
+                          [ [ text "Juillet 2024, "
+                            ; a ~href:"https://hal.science/hal-04579389"
+                                [ text "article de linguistique" ]
+                            ; text " sur une partie du travail ci-dessus au "
+                            ; a ~href:"https://cmlf2024.sciencesconf.org/"
+                                [ text "CMLF" ]
+                            ]
+                          ; [ text "Mai 2024, "
+                            ; a ~href:
+                                "https://www.acfas.ca/evenements/congres/programme/91/300/308/c"
+                                [ text "présentation à l'ACFAS" ]
+                            ; text ", "
+                            ; a ~href:"https://lactualite.com/societe/et-si-on-rationalisait-lorthographe/"
+                                [ text "relayée dans l'Actualité"]
+                            ]
+                          ]
+                      ]
+                  ]
+                ; [ details
                       [ text "Activité" ]
                       [ list `ul
                           [ [ text
@@ -1163,12 +1184,6 @@ module Index = struct
                 ; [ text "Pour les développeurs, voici le "
                   ; a ~href:"https://github.com/v-gb/ortografe" [ text "code source" ]
                   ; text " de ce site et de ses outils."
-                  ]
-                ; [ a ~href:"https://hal.science/hal-04579389"
-                      [ text "Article scientifique" ]
-                  ; text " sur une partie du travail ci-dessus au "
-                  ; a ~href:"https://cmlf2024.sciencesconf.org/" [ text "CMLF 2024" ]
-                  ; text "."
                   ]
                 ]
             ]
