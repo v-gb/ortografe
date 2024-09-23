@@ -11,6 +11,7 @@ let green = "#b9f4b9"
 let _ = green_pale
 let html ~head ?body_style ~body () = html ~lang:"fr" ~head ?body_style ~body ()
 let favicon_url_abs_impl = "/static/favicon.svg"
+let download_url_abs_impl = "/static/download.svg"
 
 let head ~root ~attrs ~title ~description () =
   [ leafelt "meta"
@@ -675,15 +676,23 @@ module Index = struct
                  ; list `ul
                      [ [ text
                            "Allez dans ses options (généralement avec l'icône pièce de \
-                            puzzle en haut à droite, puis l'icône plume verte "
+                            puzzle en haut à droite, puis l'icône plume "
                        ; img favicon_url_abs_impl
                            ~cl:"height: 1em; width: auto; vertical-align: sub;"
-                           [ ("alt", "favicône du site")
+                           [ ("alt", "icône plume")
                            ; ("width", "186")
                            ; ("height", "179")
                            ]
+                       ; text ")."
                        ]
-                     ; [ text "Cliquez le bouton de téléchargement vert." ]
+                     ; [ text "Cliquez le bouton de téléchargement "
+                       ; img download_url_abs_impl
+                           ~cl:"height: 1em; width: auto; vertical-align: sub;"
+                           [ ("alt", "bouton de téléchargement")
+                           ; ("width", "24")
+                           ; ("height", "24")
+                           ]
+                       ; text "."]
                      ]
                  ]
              ])

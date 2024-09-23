@@ -5,7 +5,7 @@
 (copy_files (files %{project_root}/data/lexique/Lexique383.gen.tsv))
 (copy_files (files %{project_root}/dict-gen/bin/dict_gen_browser.bc.js))
 (copy_files (files %{project_root}/doc-conversion/bin/*.bc.js))
-(copy_files (files %{project_root}/extension/src/{{rewrite,dict}.js,{rules,dict}-format.html}))
+(copy_files (files %{project_root}/extension/src/{{rewrite,dict}.js,{rules,dict}-format.html,download.svg}))
 (copy_files (files %{project_root}/keyboard/*.{zip,dict}))
 (copy_files (files %{project_root}/edition/{Alice_au_pays_des_merveilles.epub,Alice_au_pays_des_merveilles-manual.epub}))
 
