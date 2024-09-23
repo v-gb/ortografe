@@ -692,7 +692,8 @@ module Index = struct
                            ; ("width", "24")
                            ; ("height", "24")
                            ]
-                       ; text "."]
+                       ; text "."
+                       ]
                      ]
                  ]
              ])
@@ -1083,12 +1084,15 @@ module Index = struct
                                 [ text "CMLF" ]
                             ]
                           ; [ text "Mai 2024, "
-                            ; a ~href:
-                                "https://www.acfas.ca/evenements/congres/programme/91/300/308/c"
+                            ; a
+                                ~href:
+                                  "https://www.acfas.ca/evenements/congres/programme/91/300/308/c"
                                 [ text "présentation à l'ACFAS" ]
                             ; text ", "
-                            ; a ~href:"https://lactualite.com/societe/et-si-on-rationalisait-lorthographe/"
-                                [ text "relayée dans l'Actualité"]
+                            ; a
+                                ~href:
+                                  "https://lactualite.com/societe/et-si-on-rationalisait-lorthographe/"
+                                [ text "relayée dans l'Actualité" ]
                             ]
                           ]
                       ]
