@@ -1,6 +1,8 @@
-.PHONY: all all-w serve serves
+.PHONY: all all-jsopt all-w all-w-jsopt serve serve-jsopt serves
 all:
 	opam exec -- dune build --trace-file _build/trace ./server_all.exe @default @runtest
+all-jsopt:
+	opam exec -- dune build --profile jsopt --trace-file _build/trace ./server_all.exe @default @runtest
 all-w:
 	opam exec -- dune build --trace-file _build/trace -w ./server_all.exe @default @runtest
 all-w-jsopt:
@@ -12,7 +14,7 @@ serve-jsopt:
 serves:
 	opam exec -- dune exec --trace-file _build/trace -w -- ./server_all.exe serve -p 8081 --tls
 
-.PHONY: build-container run-container fly-deploy
+.PHONY: build-container build-container-jsopt run-container fly-deploy build-extension
 build-container:
 	opam exec -- dune build --trace-file _build/trace -- ./server_all.exe
 	podman build -f site/deployment/Dockerfile . -t ortografe-server
@@ -26,6 +28,8 @@ run-container: build-container
 
 fly-deploy: build-container-jsopt
 	fly deploy
+
+build-extension: all-jsopt tarball
 
 .PHONY: update-opam update-lock-file upgrade-opam
 update-opam:
