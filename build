@@ -1,0 +1,100 @@
+#!/bin/bash
+
+set -e -u -o pipefail
+
+function all {
+    opam exec -- dune build "$@" --trace-file _build/trace ./server_all.exe @default @runtest
+}
+
+function serve {
+    opam exec -- dune exec "$@" --trace-file _build/trace -- ./server_all.exe serve -p 8081
+}
+
+function serves {
+    opam exec -- dune exec "$@" --trace-file _build/trace -- ./server_all.exe serve -p 8081 --tls
+}
+
+function build-container {
+    opam exec -- dune build "$@" --trace-file _build/trace -- ./server_all.exe
+    podman build -f site/deployment/Dockerfile . -t ortografe-server
+}
+
+function run-container {
+    build-container
+    # need --init otherwise we're process 1, and signals are default ignore, or something
+    podman run --init -p 8082:8080 localhost/ortografe-server
+}
+
+function fly-deploy {
+    self build-container-jsopt
+    fly deploy
+}
+
+function build-extension {
+    self all-jsopt
+    # requested by the firefox addon website, due to the generated javascript
+    jj files | tar -zcf source.tar.gz --files-from=-
+}
+
+function update-opam {
+    # it's a mystery why you have to run dune describe external-lib-deps
+    # and tell dune to put that in the opam file, rather than have dune just do it
+    local output
+    output=$(opam exec -- dune describe external-lib-deps | sexp select external_deps | sexp query 'each (index 0)' | cut -d . -f 1 | sort -u | grep -xv dynlink | xargs echo)
+    sed -i -e "s/^\( *\).*MARKER/\1$output ;; MARKER/" dune-project
+}
+
+function update-lock-file {
+    rm -f ortografe.opam.locked
+    opam lock ./ortografe.opam
+}
+
+function upgrade-opam {
+    opam upgrade
+    all
+    update-opam
+    all
+    update-lock-file
+    all
+}
+
+function first-install {
+    # instructions from https://opam.ocaml.org/doc/Install.html
+    if ! which opam > /dev/null
+    then sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
+    fi
+    if ! [ -d _opam ]
+    then opam switch create --empty .
+    fi
+    # with --locked, opam sometimes uses the listed versions and sometimes not, but
+    # using the lock file directly seems much simpler.
+    opam exec -- opam install --depext-only ./ortografe.opam.locked --yes
+    opam exec -- opam install --deps-only ./ortografe.opam.locked --yes
+    mkdir -p _build
+    self all-w
+    echo "[32mExtensions built at _build/default/extension/*.zip ![39m"
+}
+
+function self {
+    case "$1" in
+        all) all;;
+        all-jsopt) all --profile jsopt;;
+        all-w) all -w;;
+        all-w-jsopt) all -w --profile jsopt;;
+        serve) serve -w;;
+        serve-jsopt) serve -w --profile jsopt;;
+        serves) serves -w;;
+        build-container) build-container;;
+        build-container-jsopt) build-container --profile jsopt;;
+        run-container) run-container;;
+        fly-deploy) fly-deploy;;
+        build-extension) build-extension;;
+        upgrade-opam) upgrade-opam;;
+        first-install) first-install;;
+        *) echo >&2 "unknown option $1"; return 1;;
+    esac
+}
+
+for arg in "$@"; do
+    self "$arg"
+done
