@@ -357,7 +357,7 @@ module Index = struct
                      "Les consonnes doubles qui n'ont pas d'effet sur la prononciation \
                       sont simplifiées."
                      [ "sonnerie"; "appelle"; "accord"; "renne" ]
-                     [ "messe"; "accident"; "ennui"; "surréel"; "Rennes*" ]
+                     [ "poisson"; "accident"; "ennui"; "surréel"; "Rennes*" ]
                  ; words "Les @x finaux muets deviennent des @s."
                      [ "bijoux"; "choix"; "veux"; "deux" ]
                      [ "dix"; "duplex"; "Évreux*" ]
