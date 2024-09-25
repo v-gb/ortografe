@@ -330,13 +330,13 @@ module Index = struct
                 (flex_cl `Row ~wrap:true
                 ^ "justify-content: center; gap: 0.7em; margin-top: 0.2em;")
               [ table
-                  ~header:(Some [ [ text "Exemples" ] ])
+                  ~header:(Some [ [ text "Mots touchés" ] ])
                   ~cl:(transcription `green)
                   (List.map ws1 ~f:(fun w ->
                        let w' = transcribe_word w in
                        [ [ text w; text " → "; text w' ] ]))
               ; table
-                  ~header:(Some [ [ text "Mais pas" ] ])
+                  ~header:(Some [ [ text "Mots intacts" ] ])
                   ~cl:(transcription `grey)
                   (List.map ws2 ~f:(fun w -> [ [ text w ] ]))
               ]
