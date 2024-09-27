@@ -262,6 +262,26 @@ module Interleaved = struct
 
   let handle_result t l = List.concat_map l ~f:(handle_one_result t)
 
+  let count_uchars str =
+    let count = ref 0 in
+    let i = ref 0 in
+    while !i < String.length str do
+      let decode = Stdlib.String.get_utf_8_uchar str !i in
+      count := !count + 1;
+      i := !i + Stdlib.Uchar.utf_decode_length decode
+    done;
+    !count
+
+  let pos_after_length_of str ~pos:i ~skip =
+    let i = ref i in
+    let n = ref (count_uchars skip) in
+    while !n > 0 && !i < String.length str do
+      let decode = Stdlib.String.get_utf_8_uchar str !i in
+      i := !i + Stdlib.Uchar.utf_decode_length decode;
+      n := !n - 1
+    done;
+    !i
+
   let flush t =
     match t.emit_state with
     | None -> None
@@ -280,15 +300,16 @@ module Interleaved = struct
               if i + 1 = count
               then String.drop_prefix right_concat' !i_right
               else
-                let i_after =
-                  min (String.length right_concat') (!i_right + String.length s)
-                in
                 let res =
-                  String.sub right_concat' ~pos:!i_right ~len:(i_after - !i_right)
+                  String.sub right_concat' ~pos:!i_right
+                    ~len:
+                      (pos_after_length_of right_concat' ~pos:!i_right ~skip:s
+                      - !i_right)
                 in
-                i_right := i_after;
+                i_right := !i_right + String.length res;
                 res)
         in
+
         Some (src_left' ^ left' ^ List.hd_exn right', List.tl_exn right')
 
   let flush_as_list t = match flush t with None -> [] | Some (hd, tl) -> hd :: tl

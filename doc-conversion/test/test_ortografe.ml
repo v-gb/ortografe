@@ -247,10 +247,8 @@ let%expect_test "rewrite through tag noise in docx" =
           ((Element
             (docx:p
       -      ((Element (docx:t ((Text e)))) (Element (docx:t ((Text "lle elle")))))))))))
-      +      ((Element
-      +        (docx:t
-      +         ((Text "\239\191\189/w:t>")
-      +          (Element (docx:t ((Text "\239\191\189le \195\168le")))))))))))))) |}]
+      +      ((Element (docx:t ((Text "\195\168"))))
+      +       (Element (docx:t ((Text "le \195\168le"))))))))))) |}]
 
 let%expect_test "epub" =
   let src = In_channel.read_all "epub.md" in
