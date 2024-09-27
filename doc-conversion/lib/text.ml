@@ -213,6 +213,10 @@ let convert (type a) ?buf ?progress:_ ~options src ~(dst : a out) : a =
       let b = buffer buf ~n:(String.length src) in
       iter_pure_text ~options src ~f:(Buffer.add_string b);
       Buffer.contents b
+  | Substring n ->
+      let b = Buf.create n in
+      iter_pure_text ~options src ~f:(Buf.add_string b);
+      Buf.substring__consume b
   | Channel ch -> iter_pure_text ~options src ~f:(Out_channel.output_string ch)
 
 module Interleaved = struct

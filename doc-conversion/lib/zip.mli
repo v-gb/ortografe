@@ -3,6 +3,12 @@
 
 val max_size : int ref
 
+val map' :
+     ?progress:(int -> unit)
+  -> string
+  -> (path:string -> (contents:string -> Common.Substring.t) option)
+  -> string
+
 val map :
      ?progress:(int -> unit)
   -> string

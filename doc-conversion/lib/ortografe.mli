@@ -10,6 +10,7 @@ type options =
 type 'a out =
   | Channel : Out_channel.t -> unit out
   | String : string out
+  | Substring : int -> Common.Substring.t out
   | Ignore : unit out
 
 type 'a convert =

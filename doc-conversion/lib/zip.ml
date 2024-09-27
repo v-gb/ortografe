@@ -4,7 +4,7 @@ let file_size file =
   Int.max 1 (* ensure no possible division by zero *)
     (Int.max (Zipc.File.decompressed_size file) (Zipc.File.compressed_size file))
 
-let map ?(progress = ignore) src f =
+let map' ?(progress = ignore) src f =
   let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in
   let entries_to_rewrite =
     Zipc.fold
@@ -29,7 +29,7 @@ let map ?(progress = ignore) src f =
     List.fold_left
       (fun (bytes_read, acc) (member, file, rewrite_content) ->
         progress (bytes_read * 100 / bytes_to_read);
-        let new_content =
+        let new_content : Common.Substring.t =
           Zipc.File.to_binary_string file
           |> Core.Result.ok_or_failwith
           |> rewrite_content ~contents:__
@@ -37,10 +37,12 @@ let map ?(progress = ignore) src f =
         let new_file =
           match Zipc.File.compression file with
           | Stored ->
-              Zipc.File.stored_of_binary_string new_content
+              Zipc.File.stored_of_binary_string new_content.string
+                ~start:new_content.start ~len:new_content.len
               |> Core.Result.ok_or_failwith
           | Deflate ->
-              Zipc.File.deflate_of_binary_string new_content
+              Zipc.File.deflate_of_binary_string new_content.string
+                ~start:new_content.start ~len:new_content.len
               |> Core.Result.ok_or_failwith
           | _ -> failwith "unknown compression type, should have failed earlier"
         in
@@ -55,3 +57,10 @@ let map ?(progress = ignore) src f =
   in
   progress 100;
   Zipc.to_binary_string new_zipc |> Core.Result.ok_or_failwith
+
+let map ?progress src f =
+  map' ?progress src (fun ~path ->
+      match f ~path with
+      | None -> None
+      | Some next_stage ->
+          Some (fun ~contents -> Common.Substring.of_string (next_stage ~contents)))

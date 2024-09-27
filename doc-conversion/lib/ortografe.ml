@@ -40,6 +40,7 @@ module Common = Common
 type 'a out = 'a Common.out =
   | Channel : Out_channel.t -> unit out
   | String : string out
+  | Substring : int -> Common.Substring.t out
   | Ignore : unit out
 
 type options = Common.options =
@@ -63,22 +64,26 @@ let officeopenxml_old = Officeopenxml.convert_old
 let opendocument = Opendocument.convert
 
 let epub ?convert_text ?progress ~options src ~dst =
-  Zip.map ?progress src (fun ~path ->
+  Zip.map' ?progress src (fun ~path ->
       (* The xhtml is the bulk of the pages, but in principle, we
          could rewrite more stuff: content.opf, toc.ncx *)
       match Filename.extension path with
       | ".xhtml" | ".html" ->
           (* in principle we'd need to read the root file to know how
              to interpret the various files. *)
-          Some (fun ~contents -> xhtml ?convert_text ~options contents ~dst:String)
+          Some
+            (fun ~contents ->
+              xhtml ?convert_text ~options contents ~dst:(substring_out contents))
       | _ -> None)
   |> write_out dst
 
 let htmlz ?convert_text ?progress ~options src ~dst =
-  Zip.map ?progress src (fun ~path ->
+  Zip.map' ?progress src (fun ~path ->
       match Filename.extension path with
       | ".html" ->
-          Some (fun ~contents -> html ?convert_text ~options contents ~dst:String)
+          Some
+            (fun ~contents ->
+              html ?convert_text ~options contents ~dst:(substring_out contents))
       | _ -> None)
   |> write_out dst
 

@@ -80,7 +80,7 @@ let convert ?convert_text ?progress ~options src ~dst =
         let buf = buffer None in
         fun src -> Text.convert ~buf ~options src ~dst:String
   in
-  Zip.map ?progress src (fun ~path ->
+  Zip.map' ?progress src (fun ~path ->
       match path with
       | "content.xml" | "styles.xml" (* contains header/footer *) ->
           Some
@@ -90,6 +90,6 @@ let convert ?convert_text ?progress ~options src ~dst =
                   (if options.interleaved
                    then odt_transform_interleaved ~convert_text
                    else odt_transform ~convert_text)
-                contents ~dst:String)
+                contents ~dst:(substring_out contents))
       | _ -> None)
   |> write_out dst

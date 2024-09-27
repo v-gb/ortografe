@@ -99,12 +99,13 @@ let convert_xml which ?convert_text ?progress:_ ~options src ~dst =
 
 let convert which ?convert_text ?progress ~options src ~dst =
   let files_to_rewrite = files_to_rewrite which in
-  Zip.map ?progress src (fun ~path ->
+  Zip.map' ?progress src (fun ~path ->
       if files_to_rewrite path
       then
         Some
           (fun ~contents ->
-            convert_xml ?convert_text which ~options contents ~dst:String)
+            convert_xml ?convert_text which ~options contents
+              ~dst:(substring_out contents))
       else None)
   |> write_out dst
 

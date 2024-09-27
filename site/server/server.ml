@@ -508,10 +508,19 @@ let post_conv ~max_input_size ~staged request =
           | _ -> respond_error_text `Bad_Request "")
       | _ -> respond_error_text `Bad_Request "")
 
-let run ?(log = true) ?port ?tls ?(max_input_size = 50 * 1024 * 1024) () =
+let run ?(log = true) ?port ?tls () =
   let staged = lazy (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded)) in
-  Ortografe.max_size := max_input_size * 2;
-  (* xml can be quite large when decompressed *)
+  (* We have 250MB of memory in prod. If we say:
+     - 60MB used for random things, like the OS or the exe
+     - 70MB used for the persisted index
+     - 25% of gc space overhead
+     we'd have 96MB left. Give that we need to have both old and new data at once
+     in memory, that would mean 48MB max size. I'll use 40MB to give a bit of headroom
+     (like the size of the zip file before/after). In practice, maybe we should decrease
+     this further, because processing 40MB of xml is going to block the server for maybe
+     10s. *)
+  let max_input_size = 50 * 1024 * 1024 in
+  Ortografe.max_size := 45 * 1024 * 1024;
   let static_root, `In_container in_container = where_to_find_static_files () in
   Dream.run ?port ?tls
     ~interface:"0.0.0.0" (* apparently only listens on lo otherwise *)
