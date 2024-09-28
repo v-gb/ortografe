@@ -1,6 +1,5 @@
 val throw : Jv.Error.t -> _
 val or_throw : ('a, Jv.Error.t) result -> 'a
-val is_array : Jv.t -> bool
 
 val fut_to_promise : ok:('a -> Jv.t) -> 'a Fut.or_error -> Jv.Promise.t
 (** These three functions are better versions of the same names in Fut. The problem with

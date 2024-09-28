@@ -24,8 +24,6 @@ let fut_await fut f =
          f (Error e);
          Jv.Promise.resolve ()))
 
-let is_array jv = Jv.call (Jv.get Jv.global "Array") "isArray" [| jv |] |> Jv.to_bool
-
 let json_of_string str =
   match Brr.Json.decode (Jstr.of_string str) with
   | Error e -> throw e
@@ -36,7 +34,7 @@ let json_of_string str =
             (* null, object, array *)
             if Jv.is_null jv
             then `Null
-            else if is_array jv
+            else if Jv.is_array jv
             then `Array (Jv.to_list conv jv)
             else
               Jv.It.fold_bindings ~key:Jv.to_string ~value:conv
