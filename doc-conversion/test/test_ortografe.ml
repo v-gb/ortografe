@@ -33,10 +33,10 @@ let diff_strings ?(context = 1) str1 str2 =
     List.iter ranges ~f:(fun range ->
         match range with
         | Same a -> Array.iter a ~f:(fun (s, _) -> b := (" ", s) :: !b)
-        | Unified a -> Array.iter a ~f:(fun s -> b := (" ", s) :: !b)
-        | Prev a -> Array.iter a ~f:(fun s -> b := ("-", s) :: !b)
-        | Next a -> Array.iter a ~f:(fun s -> b := ("+", s) :: !b)
-        | Replace (a, a') ->
+        | Unified (a, _move_opt) -> Array.iter a ~f:(fun s -> b := (" ", s) :: !b)
+        | Prev (a, _move_opt) -> Array.iter a ~f:(fun s -> b := ("-", s) :: !b)
+        | Next (a, _move_opt) -> Array.iter a ~f:(fun s -> b := ("+", s) :: !b)
+        | Replace (a, a', _move_opt) ->
             Array.iter a ~f:(fun s -> b := ("-", s) :: !b);
             Array.iter a' ~f:(fun s -> b := ("+", s) :: !b));
     List.rev !b |> List.map ~f:(fun (sign, s) -> sign ^ s ^ "\n") |> String.concat

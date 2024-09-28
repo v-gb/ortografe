@@ -324,25 +324,16 @@ let html ~lang ~head ?body_style ~body () =
   let scripts =
     fold_node body ~init:[] ~f:(fun acc node -> List.rev_append node.scripts acc)
     |> List.rev
-    |> Set.stable_dedup_list (module String)
+    |> List.stable_dedup ~compare:String.compare
   in
   let classes =
-    let module M = struct
-      type t = string * string
-
-      let sexp_of_t _ = failwith "asd"
-
-      let compare (c1, v1) (c2, v2) =
-        let c = String.compare c1 c2 in
-        if c = 0 && String.( <> ) v1 v2
-        then raise_s [%sexp "clash between classes", (v1 : string), (v2 : string)];
-        c
-
-      include (val Comparator.make ~sexp_of_t ~compare)
-    end in
     fold_node body ~init:[] ~f:(fun acc node -> List.rev_append node.classes acc)
     |> List.rev
-    |> Set.stable_dedup_list (module M)
+    |> List.stable_dedup ~compare:(fun (c1, v1) (c2, v2) ->
+           let c = String.compare c1 c2 in
+           if c = 0 && String.( <> ) v1 v2
+           then raise_s [%sexp "clash between classes", (v1 : string), (v2 : string)];
+           c)
   in
   elt "html"
     ~attrs:[ ("lang", lang) ]

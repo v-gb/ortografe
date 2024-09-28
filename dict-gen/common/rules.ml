@@ -27,7 +27,7 @@ let uchar_of_str str =
 let _ = uchar_of_str
 
 let str_of_uchar uchar =
-  let b = Bytes.create (Uchar.utf8_byte_length uchar) in
+  let b = Bytes.create (Uchar.Utf8.byte_length uchar) in
   ignore (Stdlib.Bytes.set_utf_8_uchar b 0 uchar : int);
   Bytes.to_string b
 
