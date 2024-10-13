@@ -1,0 +1,21 @@
+(rule
+ (target en_50k.txt)
+ (deps (sandbox always))
+ (action (run curl --fail-with-body -o %{target} -sS "https://raw.githubusercontent.com/hermitdave/FrequencyWords/refs/heads/master/content/2018/en/en_50k.txt")))
+
+(rule
+ (target erofa_intersection)
+ (mode promote)
+ (deps (sandbox always) en_50k.txt %{project_root}/extension/dict.gen.csv)
+ (action  (with-stdout-to %{target}
+           (run sqlite3
+                -cmd ".bail on"
+                -cmd ".mode csv"
+                -cmd "create table e(old,new);"
+                -cmd ".import ../../extension/dict.gen.csv e"
+                -cmd "create table en(word,count);"
+                -cmd ".separator ' '"
+                -cmd ".import en_50k.txt en"
+                -cmd "select en.word from en inner join e on en.word = e.old
+                      and en.word != 'comme'
+                      "))))

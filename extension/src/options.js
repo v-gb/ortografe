@@ -2,7 +2,7 @@ if (typeof browser == "undefined") {
     globalThis.browser = chrome;
 }
 
-const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language', 'debug_lang_test'];
+const fields = ['rewrite', 'disable_watch', 'color', 'trivial', 'debug_changes', 'debug_language', 'debug_lang_test', 'fren'];
 const all_fields = ['disable'].concat(fields);
 
 async function display_dict_preview(restore) {
