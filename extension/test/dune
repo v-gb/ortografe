@@ -1,0 +1,12 @@
+(rule
+ (target test.js.corrected)
+ (deps
+  (sandbox always)
+   ../src/rewrite.js
+   test.js
+ )
+ (action (bash "cat ../src/rewrite.js test.js | SRC=test.js node -")))
+
+(rule
+ (alias runtest)
+ (action (diff test.js test.js.corrected)))

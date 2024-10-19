@@ -16,6 +16,17 @@
                 -cmd "create table en(word,count);"
                 -cmd ".separator ' '"
                 -cmd ".import en_50k.txt en"
-                -cmd "select en.word from en inner join e on en.word = e.old
+                ;; what we need for rewrite.js is not exactly English words,
+                ;; it's the subset of the Érofa entries that could rewrite english
+                ;; words. So because the Érofa entry "batterie" rewrite "batteries",
+                ;; which is an english word, we have to list "batterie", despite it
+                ;; not being an english word.
+                -cmd "select distinct ee.entry
+                      from en
+                      inner join (select e.old as entry, e.old as implied from e
+                                  union
+                                  select e.old, e.old || 's' from e
+                                 ) ee
+                      on en.word = ee.implied
                       and en.word != 'comme'
                       "))))
