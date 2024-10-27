@@ -164,9 +164,9 @@ let convert url ~books_tmp ~title =
       raise_s
         [%sexp
           (e : exn)
-          , "hint: you may need to run "
-          , (Sys.concat_quoted [ "_build/default/site/build/build.exe"; "download-all" ]
-              : string)]
+        , "hint: you may need to run "
+        , (Sys.concat_quoted [ "_build/default/site/build/build.exe"; "download-all" ]
+            : string)]
   in
   let dst = conv_path ~title in
   match source with

@@ -23,8 +23,7 @@ module Buf : sig
       Given that the processing is done in a streaming fashion, it may be possible to
       extend the streaming to the compression and decompression step, so we never have
       the full data in memory. But zipc doesn't expose any stream api either for
-      compression or decompression, so we do the easier thing.
-   *)
+      compression or decompression, so we do the easier thing. *)
 
   type t
 

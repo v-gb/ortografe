@@ -16,7 +16,10 @@ let%test_unit "basic usage" =
     ]
   in
   eq_list_int l1 (List.init 8 ~f:(fun x -> x + 1));
-  let l2 = 1 :: +[ 2 ] :: dyn [ 3 ] (* dynamic tail of list *) in
+  let l2 =
+    1 :: +[ 2 ] :: dyn [ 3 ]
+    (* dynamic tail of list *)
+  in
   eq_list_int l2 (List.init 3 ~f:(fun x -> x + 1))
 
 let%test_unit "optimized cases" =

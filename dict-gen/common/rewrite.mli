@@ -1,8 +1,8 @@
 (** Functionality to respell words in the given lexique *)
 
 val erofa_preserve : string -> bool
-(** Matches words that shouldn't change, according to the Érofa rules,
-    like proper nouns, or manual exceptions. *)
+(** Matches words that shouldn't change, according to the Érofa rules, like proper
+    nouns, or manual exceptions. *)
 
 val load_skip : unit -> Data.Lexique.row -> bool
 

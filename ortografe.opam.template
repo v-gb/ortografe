@@ -1,3 +1,7 @@
 depexts: [
   ["graphviz" "qpdf" "inkscape" "sqlite3" "pandoc" "jq"] {os-family = "debian"}
 ]
+pin-depends: [
+  ["ocamlformat" "git+https://github.com/ocaml-ppx/ocamlformat#f95975241dddfd8c8e151d4a6e17bb64f7ded0eb"]
+  ["ocamlformat-lib" "git+https://github.com/ocaml-ppx/ocamlformat#f95975241dddfd8c8e151d4a6e17bb64f7ded0eb"]
+]

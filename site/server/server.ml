@@ -182,12 +182,12 @@ let from_filesystem root path request =
       | "Lexique383.gen.tsv" | "dict.js" -> true
       | _ -> String.ends_with path ~suffix:".bc.js"
     in
-    if has_compressed_version
-       && List.exists
-            (fun s ->
-              String.split_on_char ',' s
-              |> List.exists (fun s -> String.trim s = "gzip"))
-            (Dream.headers request "Accept-Encoding")
+    if
+      has_compressed_version
+      && List.exists
+           (fun s ->
+             String.split_on_char ',' s |> List.exists (fun s -> String.trim s = "gzip"))
+           (Dream.headers request "Accept-Encoding")
     then (path ^ ".gz", [ ("Content-Encoding", "gzip") ] @ Dream.mime_lookup path)
     else (path, [])
   in
@@ -254,11 +254,12 @@ let logger = function
         (* format for request  : 13:04:49.553 GET ID IP PATH UA"
            format for response : 13:04:49.553 200 ID in INTus"
         *)
-        if String.is_suffix (Dream.target request) ~suffix:".jpg"
-           || String.is_suffix (Dream.target request) ~suffix:".svg"
-           || String.is_suffix (Dream.target request) ~suffix:".png"
-           || String.is_suffix (Dream.target request) ~suffix:".ico"
-           || String.is_suffix (Dream.target request) ~suffix:".css"
+        if
+          String.is_suffix (Dream.target request) ~suffix:".jpg"
+          || String.is_suffix (Dream.target request) ~suffix:".svg"
+          || String.is_suffix (Dream.target request) ~suffix:".png"
+          || String.is_suffix (Dream.target request) ~suffix:".ico"
+          || String.is_suffix (Dream.target request) ~suffix:".css"
         then handler request
         else
           let before = Time_ns.now () in

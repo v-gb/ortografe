@@ -489,7 +489,7 @@ let staged_gen data =
               Hashtbl.add_exn table ~key:pre90
                 ~data:
                   (`Rect1990
-                    (post90, change_from_1990_is_undesirable post90 ~has_erofa:true))));
+                     (post90, change_from_1990_is_undesirable post90 ~has_erofa:true))));
   fun rules ->
     let has_erofa, rewrite_rules, oe, rect1990, metadata = interpret_rules rules in
     let cache = Hashtbl.create (module String) ~size:200 in

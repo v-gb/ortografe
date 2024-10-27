@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "ortografe"
-version: "~dev"
+version: "dev"
 depends: [
   "angstrom" {= "0.16.1"}
   "astring" {= "0.8.5" & with-doc}
@@ -41,18 +41,21 @@ depends: [
   "dream-httpaf" {= "1.0.0~alpha2"}
   "dream-pure" {= "1.0.0~alpha2"}
   "dune" {= "3.16.0"}
+  "dune-build-info" {= "3.16.0" & with-dev-setup}
   "dune-configurator" {= "3.16.0"}
   "duration" {= "0.2.1"}
   "eio" {= "1.1"}
   "eio_linux" {= "1.1"}
   "eio_main" {= "1.1"}
   "eio_posix" {= "1.1"}
+  "either" {= "1.0.0" & with-dev-setup}
   "eqaf" {= "0.9"}
   "expect_test_helpers_core" {= "v0.17.0"}
   "faraday" {= "0.8.2"}
   "faraday-lwt" {= "0.8.2"}
   "faraday-lwt-unix" {= "0.8.2"}
   "fieldslib" {= "v0.17.0"}
+  "fix" {= "20230505" & with-dev-setup}
   "fmt" {= "0.9.0"}
   "fpath" {= "0.7.3" & with-doc}
   "gel" {= "v0.17.0"}
@@ -96,9 +99,13 @@ depends: [
   "ocaml-config" {= "3"}
   "ocaml-options-vanilla" {= "1"}
   "ocaml-syntax-shims" {= "1.0.0"}
+  "ocaml-version" {= "3.6.9" & with-dev-setup}
   "ocaml_intrinsics_kernel" {= "v0.17.1"}
   "ocamlbuild" {= "0.15.0"}
   "ocamlfind" {= "1.9.6"}
+  "ocamlformat" {= "0.26.2" & with-dev-setup}
+  "ocamlformat-lib" {= "0.26.2" & with-dev-setup}
+  "ocp-indent" {= "1.8.1" & with-dev-setup}
   "ocplib-endian" {= "1.2"}
   "odoc" {= "2.4.3" & with-doc}
   "odoc-parser" {= "2.4.3" & with-doc}

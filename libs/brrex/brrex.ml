@@ -127,8 +127,7 @@ type ww_cache = Brr_webworkers.Worker.t option ref
 
 let ww_cache () = ref None
 
-let rpc_with_progress :
-    type q r.
+let rpc_with_progress : type q r.
        (?progress:(int -> unit) -> q -> r Fut.or_error)
     -> rpc
        * (   ?ww_cache:ww_cache

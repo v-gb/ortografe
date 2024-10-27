@@ -36,9 +36,10 @@ let iter_words1 src f =
                 flush i;
                 state := `Word (i, i + nbytes)
             | `Word (start, _) -> state := `Word (start, i + nbytes)
-          else if is_ascii c (function
-                    | '-' | ':' | '.' | '/' | '_' | '0' .. '9' -> true
-                    | _ -> false)
+          else if
+            is_ascii c (function
+              | '-' | ':' | '.' | '/' | '_' | '0' .. '9' -> true
+              | _ -> false)
           then ()
           else match !state with `Word _ -> flush i | `Out _ -> ()))
     () src;
@@ -75,16 +76,17 @@ let iter_words src ~f ~f_mem =
       match what with
       | `Out -> f what start len
       | `Word ->
-          if mem_substr src start len '-'
-             && Uutf.String.fold_utf_8
-                  (fun acc _ chunk ->
-                    acc
-                    &&
-                    match chunk with
-                    | `Malformed _ -> assert false
-                    | `Uchar c ->
-                        is_letter c || is_ascii c (function '-' -> true | _ -> false))
-                  true (String.sub src start len)
+          if
+            mem_substr src start len '-'
+            && Uutf.String.fold_utf_8
+                 (fun acc _ chunk ->
+                   acc
+                   &&
+                   match chunk with
+                   | `Malformed _ -> assert false
+                   | `Uchar c ->
+                       is_letter c || is_ascii c (function '-' -> true | _ -> false))
+                 true (String.sub src start len)
           then
             let sub = String.sub src start len in
             if f_mem sub
@@ -138,18 +140,19 @@ let capitalize w =
 let map_case w f =
   let b = Buffer.create (String.length w) in
   let add l = List.iter (fun u -> Buffer.add_utf_8_uchar b u) l in
-  if Uutf.String.fold_utf_8
-       (fun bad _i -> function
-         | `Malformed _ -> true
-         | `Uchar c -> (
-             bad
-             ||
-             match f c with
-             | `Uchars l ->
-                 add l;
-                 false
-             | `Self -> true))
-       false w
+  if
+    Uutf.String.fold_utf_8
+      (fun bad _i -> function
+        | `Malformed _ -> true
+        | `Uchar c -> (
+            bad
+            ||
+            match f c with
+            | `Uchars l ->
+                add l;
+                false
+            | `Self -> true))
+      false w
   then None
   else Some (Buffer.contents b)
 
@@ -184,9 +187,10 @@ let iter_pure_text ~options src f =
                     match if options.convert_uppercase then lowercase w else None with
                     | None -> (wu, fun w -> capitalize w ||? w)
                     | Some wl ->
-                        if match capitalize wl with
-                           | None -> false
-                           | Some c -> mem dict c
+                        if
+                          match capitalize wl with
+                          | None -> false
+                          | Some c -> mem dict c
                         then ("", fun x -> x)
                         else (wl, fun w -> uppercase_as_much_as_possible w ||? w)))
           in

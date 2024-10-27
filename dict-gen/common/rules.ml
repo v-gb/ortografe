@@ -95,7 +95,7 @@ let ortho_vowels =
 let in_ortho_vowels s = Hash_set.mem ortho_vowels s
 
 let ends_in_ortho_vowel word i =
-  let c = word #:: (i, -1) in
+  let c = word#::(i, -1) in
   in_ortho_vowels c
 
 let phon_vowels =
@@ -143,7 +143,7 @@ let create () : t =
 
   (* consonnes simples *)
   new_ "b" (fun word _ j ->
-      match word #: (j, j + 1) with
+      match word#:(j, j + 1) with
       | "s" | "t" | "c" -> [ ("b", Core); ("p", Core) ]
       | _ -> [ ("b", Core) ]);
   new_fixed "bb" [ ("b", Core) ];
@@ -195,26 +195,26 @@ let create () : t =
   (* consonnes plus compliquées, et combinaisons de consonnes *)
   (* C *)
   new_ "c" (fun word _ j ->
-      if in_ortho_weak_vowels word #:: (j, 0)
+      if in_ortho_weak_vowels word#::(j, 0)
       then [ ("s", Core) ]
       else [ ("k", Core); ("g", Surprising) ]);
   new_fixed "ch" [ ("k", Core); ("S", Core) ];
   new_fixed "cch" [ ("k", Core) ];
   new_fixed "sch" [ ("S", Core) ];
   new_ "sc" (fun word _ j ->
-      if in_ortho_weak_vowels word #:: (j, 0) then [ ("s", Core) ] else [ ("sk", Core) ]);
+      if in_ortho_weak_vowels word#::(j, 0) then [ ("s", Core) ] else [ ("sk", Core) ]);
   new_ "cc" (fun word _ j ->
-      if in_ortho_weak_vowels word #:: (j, 0) then [ ("ks", Core) ] else [ ("k", Core) ]);
+      if in_ortho_weak_vowels word#::(j, 0) then [ ("ks", Core) ] else [ ("k", Core) ]);
   new_ "xc" (fun word _ j ->
-      if in_ortho_weak_vowels word #:: (j, 0) then [ ("ks", Core) ] else [ ("k", Core) ]);
+      if in_ortho_weak_vowels word#::(j, 0) then [ ("ks", Core) ] else [ ("k", Core) ]);
 
   (* G *)
   new_ "gu" (fun word _ j ->
-      if in_ortho_vowels word #:: (j, 0)
+      if in_ortho_vowels word#::(j, 0)
       then [ ("g", Core); ("gw", Surprising) ]
       else [ ("gy", Core) ]);
   new_ "g" (fun word _ j ->
-      if in_ortho_weak_vowels word #:: (j, 0) then [ ("Z", Core) ] else [ ("g", Core) ]);
+      if in_ortho_weak_vowels word#::(j, 0) then [ ("Z", Core) ] else [ ("g", Core) ]);
   new_fixed "guë" [ ("gy", Core) ];
   new_fixed "gn" [ ("N", Core) ];
   new_fixed "gn" [ ("nj", Core) ] (* pour faire marcher la réécriture gn/ni. *);
@@ -245,9 +245,9 @@ let create () : t =
   (* S *)
   new_fixed "ss" [ ("s", Core) ];
   new_ "s" (fun word i j ->
-      if in_ortho_vowels word #:: (j, 0) && ends_in_ortho_vowel word i
+      if in_ortho_vowels word#::(j, 0) && ends_in_ortho_vowel word i
       then [ ("z", Core); ("s", Surprising) ]
-      else if word #: (j, j + 1) =: "m" || word #: (i - 4, i) =: "tran"
+      else if word#:(j, j + 1) =: "m" || word#:(i - 4, i) =: "tran"
       then
         (* I think this is mostly wrong, but lexique has dubious prononciations *)
         [ ("z", Core); ("s", Core) ]
@@ -259,14 +259,12 @@ let create () : t =
 
   (* T *)
   new_ "t" (fun word _ j ->
-      if word #: (j, j + 1) =: "i"
-      then [ ("s", Core); ("t", Core) ]
-      else [ ("t", Core) ]);
+      if word#:(j, j + 1) =: "i" then [ ("s", Core); ("t", Core) ] else [ ("t", Core) ]);
   List.iter [ "t$"; "ts$" ] ~f:(fun digraph ->
       new_ digraph (fun word i _ ->
           (* Le cas surprising nous permet de dire que mamout avec un t prononcé est
              surprenant/douteux *)
-          if word #: (i - 2, i) =: "ac"
+          if word#:(i - 2, i) =: "ac"
           then [ ("", Core); ("t", Core) ]
           else [ ("", Core); ("t", Surprising) ]));
   new_fixed "th" [ ("t", Core); ("", Surprising) ] (* asthme *);
@@ -309,7 +307,7 @@ let create () : t =
   new_fixed "au" [ ("o", Core) ];
   new_ "aux" (fun word _ j ->
       (* wish I could say "otherwise treat it as not a graphem" *)
-      if in_ortho_weak_vowels word #:: (j, 0)
+      if in_ortho_weak_vowels word#::(j, 0)
       then [ ("oks", Core); ("ogz", Core) ]
       else [ ("o", Core) ] (* auxquelles *));
   new_fixed "ai"
@@ -332,7 +330,8 @@ let create () : t =
     ; ( "e"
       , Surprising
         (* Quand on ajuste le lexique avec l'orthographe post
-           90 sans ajuster la phonétique en même temps. *) )
+           90 sans ajuster la phonétique en même temps. *)
+      )
     ];
   new_fixed "ë" [ ("e", Core); ("E", Core) ];
   new_fixed "ê" [ ("e", Core); ("E", Core) ];
@@ -347,9 +346,10 @@ let create () : t =
       |> List.map ~f:(fun (a, b) -> a ^ b))
   in
   new_ "e" (fun word i j ->
-      if String.length word > j
-         && Uchar.( = ) word #:: (j, 0) word #:: (j, 1)
-         && not (in_ortho_vowels word #:: (j, 0))
+      if
+        String.length word > j
+        && Uchar.( = ) word#::(j, 0) word#::(j, 1)
+        && not (in_ortho_vowels word#::(j, 0))
       then
         [ ("e", Core)
         ; ("E", Core (* messe, eE dépend de l'ouverture de la syllabe  *))
@@ -358,21 +358,22 @@ let create () : t =
         ]
       else
         let _ = i in
-        if in_ortho_vowels word #:: (j, 0) (* pas le droit d'enlever le h de dehors *)
+        if in_ortho_vowels word#::(j, 0) (* pas le droit d'enlever le h de dehors *)
         then [ ("", Core) ]
-        else if String.length word = j (* un e en fin de mot n'est jamais é ou è *)
-                || (String.length word = j + 1 && Char.( = ) word.[j] 's')
+        else if
+          String.length word = j (* un e en fin de mot n'est jamais é ou è *)
+          || (String.length word = j + 1 && Char.( = ) word.[j] 's')
         then [ ("2", Core); ("°", Core); ("", Core) ]
         else
           let syllable_is_unfinished =
-            (not (in_ortho_vowels word #:: (j, 0)))
-            && ((not (in_ortho_vowels word #:: (j, 1)))
-               || Uchar.( = ) word #:: (j, 1) Stdlib.Uchar.rep (* fin de mot *)
-               || Uchar.( = ) word #:: (j, 0) !!"x")
-            && (not (Hash_set.mem syllable_starts word #: (j, j + 2)))
+            (not (in_ortho_vowels word#::(j, 0)))
+            && ((not (in_ortho_vowels word#::(j, 1)))
+               || Uchar.( = ) word#::(j, 1) Stdlib.Uchar.rep (* fin de mot *)
+               || Uchar.( = ) word#::(j, 0) !!"x")
+            && (not (Hash_set.mem syllable_starts word#:(j, j + 2)))
             && not
-                 ((word #: (j, j + 2) =: "ch" || word #: (j, j + 2) =: "th")
-                 && in_ortho_vowels word #:: (j, 2))
+                 ((word#:(j, j + 2) =: "ch" || word#:(j, j + 2) =: "th")
+                 && in_ortho_vowels word#::(j, 2))
           in
           if syllable_is_unfinished
           then
@@ -418,7 +419,7 @@ let create () : t =
          problem, because of syllable boundary *)
       if i = 0
       then [ ("j", Core); ("i", Core) ]
-      else if j < String.length word && not (in_ortho_vowels word #:: (j, 0))
+      else if j < String.length word && not (in_ortho_vowels word#::(j, 0))
       then
         [ ("i", Core) ]
         (* on ne permet pas le son en face d'une consonne, pour éviter
@@ -453,10 +454,11 @@ let create () : t =
           (* [true ||] pour faire marcher cacahouète. Pas sûr que ça vaille le coup en
              général, mais j'ai pas vu de problème avec le fait d'être aussi permissif
              pour l'instant*)
-          if true
-             || i = 0
-             || (not (ends_in_ortho_vowel word i))
-             || word #: (i - 2, i) =: "qu"
+          if
+            true
+            || i = 0
+            || (not (ends_in_ortho_vowel word i))
+            || word#:(i - 2, i) =: "qu"
           then [ ("u", Core); ("w", Core) ]
           else [ ("u", Core) ]));
   new_fixed "oux$" [ ("u", Core) ];
@@ -500,7 +502,7 @@ let create () : t =
 
   (* E à part, car c'est plus compliqué (deux prononciations possibles pour "en") *)
   new_ "en" (fun word _ j ->
-      if in_ortho_vowels word #:: (j, 0)
+      if in_ortho_vowels word#::(j, 0)
       then
         [ ("2n", Core)
         ; ("°n", Core (* mener *))
@@ -519,7 +521,7 @@ let create () : t =
     ; ("an", Surprising (* solennel *))
     ];
   new_ "em" (fun word _ j ->
-      match word #: (j, j + 1) with
+      match word#:(j, j + 1) with
       | "b" | "p" -> [ ("@", Core) ]
       | _ -> [ ("2m", Core); ("°m", Core); ("m", Core) ]);
   new_fixed "emm"
@@ -545,9 +547,7 @@ let create () : t =
      let r_non_nasal_preferred = r_non_nasal @ [ (nasal, Surprising) ] in
      new_fixed (x ^ "mm") r_non_nasal;
      new_ (x ^ "m") (fun word _ j ->
-         match word #: (j, j + 1) with
-         | "b" | "p" -> r_nasal
-         | _ -> r_non_nasal_preferred)
+         match word#:(j, j + 1) with "b" | "p" -> r_nasal | _ -> r_non_nasal_preferred)
    in
    rule_xm "a" [ "a" ] "@";
    rule_xm "ai" [ "e"; "E" ] "5";
@@ -561,7 +561,7 @@ let create () : t =
      let r_nasal = [ (with_n, importance) ] in
      new_fixed (graphem ^ "nn") r_non_nasal;
      new_ (graphem ^ "n") (fun word _ j ->
-         if in_ortho_vowels word #:: (j, 0) then r_non_nasal else r_nasal)
+         if in_ortho_vowels word#::(j, 0) then r_non_nasal else r_nasal)
    in
    rule_xn "a" [ "a" ] "@";
    rule_xn "ai" [ "e"; "E" ] "5";
@@ -637,10 +637,10 @@ let search (rules : t) word phon =
       Error
         [%sexp
           "can't express"
-          , (word : string)
-          , (phon : string)
-          , (String.drop_prefix word (fst !furthest) : string)
-          , (String.drop_prefix phon (snd !furthest) : string)]
+        , (word : string)
+        , (phon : string)
+        , (String.drop_prefix word (fst !furthest) : string)
+        , (String.drop_prefix phon (snd !furthest) : string)]
     else
       let i, j, surprise, path = Heap.pop_minimum pqueue in
       if i >= String.length word
@@ -659,12 +659,13 @@ let search (rules : t) word phon =
             then
               let phonems = f word i (i + String.length graphem) in
               List.iter phonems ~f:(fun (phonem, importance) ->
-                  if Option.is_none !longest_matching_core_graphem
-                     &&
-                     match importance with
-                     | Core -> true
-                     | Surprising | Core_optional -> false
-                     (* should probably count code points instead of String.length *)
+                  if
+                    Option.is_none !longest_matching_core_graphem
+                    &&
+                    match importance with
+                    | Core -> true
+                    | Surprising | Core_optional -> false
+                    (* should probably count code points instead of String.length *)
                   then longest_matching_core_graphem := Some (String.length graphem);
                   if String.is_substring_at phon ~pos:j ~substring:phonem
                   then
@@ -702,17 +703,18 @@ let accent_aigu =
          ])
   in
   fun right_phon ->
-    if Uchar.( = ) right_phon #:: (0, 1) Stdlib.Uchar.rep (* length <= 1 *)
+    if Uchar.( = ) right_phon#::(0, 1) Stdlib.Uchar.rep (* length <= 1 *)
     then
       (* true: arrêt -> é
          false: cette -> è *)
       String.is_empty right_phon
-    else if in_phon_vowels right_phon #:: (0, 1)
-            ||
-            let uc = right_phon #:: (0, 1) in
-            (Uchar.( = ) uc !!"j" || Uchar.( = ) uc !!"8" || Uchar.( = ) uc !!"w")
-            && in_phon_vowels right_phon #:: (0, 2)
-    then Uchar.( <> ) right_phon #:: (0, 1) !!"°" (* verra -> é *)
+    else if
+      in_phon_vowels right_phon#::(0, 1)
+      ||
+      let uc = right_phon#::(0, 1) in
+      (Uchar.( = ) uc !!"j" || Uchar.( = ) uc !!"8" || Uchar.( = ) uc !!"w")
+      && in_phon_vowels right_phon#::(0, 2)
+    then Uchar.( <> ) right_phon#::(0, 1) !!"°" (* verra -> é *)
     else
       let vowels_follow =
         utf8_exists_non_shortcut right_phon (fun uc ->
@@ -721,7 +723,7 @@ let accent_aigu =
       if vowels_follow
       then
         (* é dans des cas comme mettrons, effroi pas sur d'un exemple pour le cas è *)
-        Hash_set.mem (force syllable_starts) right_phon #: (0, 2)
+        Hash_set.mem (force syllable_starts) right_phon#:(0, 2)
       else
         (* si pas de voyelle dans le reste du mot, alors pas de syllabe
            mettre -> è *)

@@ -1,5 +1,5 @@
 (** High-level wrapper around zipc, that's both easier to use, and caps memory usage, to
-   limit the risk of DOS. *)
+    limit the risk of DOS. *)
 
 val max_size : int ref
 

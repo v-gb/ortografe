@@ -49,10 +49,10 @@ let debug =
               (Sexp.to_string
                  [%sexp
                    ~~(ortho2 : string)
-                   , ~~(phon2 : string)
-                   , ~~(b1 : bool)
-                   , (if b1 then Some b2 else None : bool option)
-                   , (Rules.to_string search_res2 : string)]))
+                 , ~~(phon2 : string)
+                 , ~~(b1 : bool)
+                 , (if b1 then Some b2 else None : bool option)
+                 , (Rules.to_string search_res2 : string)]))
 
 let keep_if_plausible_phon_opt env (aligned_row : aligned_row) ortho2 phon2 =
   match Rules.search env.rules ortho2 phon2 with
@@ -113,7 +113,7 @@ let accent_aigu (aligned_row : aligned_row) from =
   let right_phon =
     match from with
     | `Path_elt_starting_in_e (e_graphem : Rules.path_elt) ->
-        String.drop_prefix aligned_row.row.phon (e_graphem.j + (* e/E *) 1)
+        String.drop_prefix aligned_row.row.phon (e_graphem.j + 1 (* e/E *))
     | `Right_phon p -> p
   in
   if Rules.accent_aigu right_phon then ("e", "é") else ("E", "è")
@@ -165,7 +165,7 @@ let rewrite_e_double_consonants env (aligned_row : aligned_row) =
                 ([ p1; p2 ], e_ortho ^ String.prefix p2.graphem 1, e_phon ^ p2.phonem)
           | ( ({ graphem = "enn" | "emm"; phonem = "en" | "En" | "em" | "Em"; _ } as p1)
             , _ ) ->
-              let consonant = p1.graphem #: (1, 2) in
+              let consonant = p1.graphem#:(1, 2) in
               let e_phon, e_ortho =
                 accent_aigu aligned_row (`Path_elt_starting_in_e p1)
               in
@@ -210,8 +210,9 @@ let rewrite_graphem ?start env aligned_row ~from:(from_g, from_p) ~to_ =
   then aligned_row
   else
     rewrite_graphem' ?start env aligned_row ~filter:(fun path_elt ->
-        if path_elt.graphem =: String.Search_pattern.pattern from_g
-           && path_elt.phonem =: from_p
+        if
+          path_elt.graphem =: String.Search_pattern.pattern from_g
+          && path_elt.phonem =: from_p
         then Some to_
         else None)
 
@@ -519,9 +520,10 @@ let find_relevant_patterns ortho phon =
     | 'p' -> if Char.( = ) !prev c then bits := !bits lor (1 lsl bit_pp)
     | 'r' -> if Char.( = ) !prev c then bits := !bits lor (1 lsl bit_rr)
     | 's' ->
-        if Char.( = ) !prev c
-           && i >= 2
-           && Char.( = ) (String.unsafe_get ortho (i - 2)) 'n'
+        if
+          Char.( = ) !prev c
+          && i >= 2
+          && Char.( = ) (String.unsafe_get ortho (i - 2)) 'n'
         then bits := !bits lor (1 lsl bit_ss)
     | 't' -> if Char.( = ) !prev c then bits := !bits lor (1 lsl bit_tt)
     | 'z' -> if Char.( = ) !prev c then bits := !bits lor (1 lsl bit_zz)
@@ -977,10 +979,11 @@ let _ : rule =
   new_rule' "aux/als" "@chevaux -> @chevals, @travaux -> @travails"
     ~prefilter:(fun () -> `Re (Re.alt [ Re.str "aux"; Re.set "aus" ]))
     (fun () env aligned_row ->
-      if (String.is_suffix aligned_row.row.ortho ~suffix:"aux"
-         || String.is_suffix aligned_row.row.ortho ~suffix:"aus")
-         && (String.is_suffix aligned_row.row.lemme ~suffix:"al"
-            || String.is_suffix aligned_row.row.lemme ~suffix:"ail")
+      if
+        (String.is_suffix aligned_row.row.ortho ~suffix:"aux"
+        || String.is_suffix aligned_row.row.ortho ~suffix:"aus")
+        && (String.is_suffix aligned_row.row.lemme ~suffix:"al"
+           || String.is_suffix aligned_row.row.lemme ~suffix:"ail")
       then
         match String.chop_suffix aligned_row.row.phon ~suffix:"o" with
         | None -> aligned_row
@@ -1206,16 +1209,18 @@ let _ : rule =
           let last_uchar str = Rules.( #:: ) str (String.length str, -1) in
           let first_uchar str = Rules.( #:: ) str (0, 0) in
           Array.mapi graphems ~f:(fun i g ->
-              if g =: "c"
-                 && i + 1 < Array.length graphems
-                 && Rules.in_ortho_weak_vowels (first_uchar graphems.(i + 1))
+              if
+                g =: "c"
+                && i + 1 < Array.length graphems
+                && Rules.in_ortho_weak_vowels (first_uchar graphems.(i + 1))
               then "k" (* africain deviendrai afrincin sinon *)
               else if i = 0
               then g
               else if g =: "n" && Rules.in_ortho_vowels (last_uchar graphems.(i - 1))
               then
-                if i + 1 < Array.length graphems
-                   && Rules.in_ortho_vowels (first_uchar graphems.(i + 1))
+                if
+                  i + 1 < Array.length graphems
+                  && Rules.in_ortho_vowels (first_uchar graphems.(i + 1))
                 then g
                 else if i + 1 = Array.length graphems
                 then g ^ "e"
@@ -1232,8 +1237,9 @@ let _ : rule =
         let ortho =
           if pluriel_en_plus
           then
-            if String.is_suffix aligned_row.row.ortho ~suffix:"s"
-               && aligned_row.row.ortho =: aligned_row.row.lemme ^ "s"
+            if
+              String.is_suffix aligned_row.row.ortho ~suffix:"s"
+              && aligned_row.row.ortho =: aligned_row.row.lemme ^ "s"
             then ortho ^ "+"
             else
               (* le lemme de "les" est "les" et pas "le" ? Bizarre. *)
@@ -1430,10 +1436,11 @@ let oe_pattern = lazy (String.Search_pattern.create "oe")
 let respell_oe (aligned_row : aligned_row) =
   (* Lexique contient toujours œ écrit oe. On recolle les lettres, pour qu'on puisse
      réécrire à la fois cœur et coeur, par exemple. *)
-  if List.exists aligned_row.alignment.path ~f:(fun p ->
-         match (p.graphem, p.phonem) with
-         | "oe", ("e" | "E" | "2" | "9") | "oeu", ("2" | "9") | "coe", "se" -> true
-         | _ -> false)
+  if
+    List.exists aligned_row.alignment.path ~f:(fun p ->
+        match (p.graphem, p.phonem) with
+        | "oe", ("e" | "E" | "2" | "9") | "oeu", ("2" | "9") | "coe", "se" -> true
+        | _ -> false)
   then
     let search_res =
       { aligned_row.alignment with
@@ -1454,10 +1461,11 @@ let respell_oe (aligned_row : aligned_row) =
     let lemme =
       (* On met à jour le lemme aussi, sinon œufs devient eu en ortograf.net, au lieu
          de eu+. *)
-      if String.( = )
-           (String.Search_pattern.replace_all (force oe_pattern)
-              ~in_:aligned_row.row.ortho ~with_:"œ")
-           ortho
+      if
+        String.( = )
+          (String.Search_pattern.replace_all (force oe_pattern)
+             ~in_:aligned_row.row.ortho ~with_:"œ")
+          ortho
       then
         String.Search_pattern.replace_all (force oe_pattern) ~in_:aligned_row.row.lemme
           ~with_:"œ"
@@ -1574,9 +1582,10 @@ let compose_rules rules ~which_rules =
     let rank rule =
       if rule.name =: emment__ament.name (* avant qua/ca car on crée des qua *)
       then -3
-      else if rule.name =: qua_o__ca_o.name
-              (* avant qu__q sinon les qua ont été tranformés en qa *)
-              || rule.name =: que__c.name
+      else if
+        rule.name =: qua_o__ca_o.name
+        (* avant qu__q sinon les qua ont été tranformés en qa *)
+        || rule.name =: que__c.name
       then -2
       else if rule.name =: qu__q.name || rule.name =: qu__qou.name
       then -1
@@ -1683,8 +1692,9 @@ let gen ?progress ?(fix_oe = false) ?(not_understood = `Ignore) ~rules:which_rul
               (if row.ortho <>: aligned_row_oe.row.ortho
                then
                  let row' =
-                   if fix_oe
-                      (* Quand fix_oe, on réécrit tous les oe qui survive à la transformation
+                   if
+                     fix_oe
+                     (* Quand fix_oe, on réécrit tous les oe qui survive à la transformation
                          en œ, sinon, on s'assure simplement qu'on réécrit les deux formes
                          soient reconnues.
                          Si on réécrit tous les /k/ en lettre «k», et si le lexique contient

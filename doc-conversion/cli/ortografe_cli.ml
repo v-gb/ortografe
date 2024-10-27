@@ -250,8 +250,9 @@ let main more_cmd =
                        failwith "--in-place only makes sense with INPUT_FILEs"
                    | `File opt -> opt)
            | _ :: _ ->
-               if List.length args > 1
-                  && match output with `File (Some _) -> true | _ -> false
+               if
+                 List.length args > 1
+                 && match output with `File (Some _) -> true | _ -> false
                then failwith "can't specify -o with multiple input files";
                List.iter
                  (fun arg ->

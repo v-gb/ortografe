@@ -157,8 +157,8 @@ let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
                (Sexp_with_utf8.to_string_hum
                   [%sexp
                     "Incohérence entre Érofa et 1990"
-                    , (post90 : string)
-                    , (l2 : (string * string list) list)]);
+                  , (post90 : string)
+                  , (l2 : (string * string list) list)]);
              fail := true);
            List.map l2 ~f:Tuple.T2.swap)
     |> (fun m ->
@@ -202,9 +202,10 @@ let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
             assert (flags = 0 || flags = 1);
             let yield =
               if flags = 1
-              then (fun a b ->
-                yield a b;
-                yield (if a >= 0 then a else a - 2) (b ^ "s"))
+              then (
+                fun a b ->
+                  yield a b;
+                  yield (if a >= 0 then a else a - 2) (b ^ "s"))
               else yield
             in
             if String.( = ) b c && List.is_empty as_

@@ -7,11 +7,12 @@ let default_indent = ref 1
 
 let leave_bytes_as_is ~which str ix =
   let utf_decode = String.get_utf_8_uchar str ix in
-  if Uchar.utf_decode_is_valid utf_decode
-     &&
-     match which with
-     | `Alphabetic -> Uucp.Alpha.is_alphabetic (Uchar.utf_decode_uchar utf_decode)
-     | `All -> true
+  if
+    Uchar.utf_decode_is_valid utf_decode
+    &&
+    match which with
+    | `Alphabetic -> Uucp.Alpha.is_alphabetic (Uchar.utf_decode_uchar utf_decode)
+    | `All -> true
   then Uchar.utf_decode_length utf_decode
   else 0
 

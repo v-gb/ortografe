@@ -1,5 +1,5 @@
-(** This module provides alternatives to Sexp.to_string_him that leaves
-    some unicode in atoms unescaped, for readability. *)
+(** This module provides alternatives to Sexp.to_string_him that leaves some unicode in
+    atoms unescaped, for readability. *)
 
 val linkme : unit
 

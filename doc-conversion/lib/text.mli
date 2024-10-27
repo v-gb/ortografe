@@ -4,9 +4,9 @@ val convert : ?buf:Buffer.t -> _ Common.convert
 
 module Interleaved : sig
   type 'structure t
-  (** This is a generalization of convert that allows one to provide interleaved text and
-      structure (xml tags in practice), and tries to rewrite all words and put back all 
-      the document around the converted words. *)
+  (** This is a generalization of convert that allows one to provide interleaved text
+      and structure (xml tags in practice), and tries to rewrite all words and put back
+      all the document around the converted words. *)
 
   val create :
     embed:(string -> 'structure) -> convert:(string -> string) -> 'structure t

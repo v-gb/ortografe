@@ -27,7 +27,8 @@ let odt_transform ~convert_text signal =
                (* All four things described as "mixed content" in
                   the doc. Maybe I should instead grab all text below
                   text:h and text:p and exclude a few things as described
-                  in section 6.1.1 *) ->
+                  in section 6.1.1 *)
+               ->
                  String.( = ) ns text_ns
              | _ -> false ->
           More_markup.text_elt ~convert_text elt
@@ -64,7 +65,8 @@ let odt_transform_interleaved ~convert_text signal =
                (* All four things described as "mixed content" in
                   the doc. Maybe I should instead grab all text below
                   text:h and text:p and exclude a few things as described
-                  in section 6.1.1 *) ->
+                  in section 6.1.1 *)
+               ->
                  String.( = ) ns text_ns
              | _ -> false ->
           Text.Interleaved.emit_text state (String.concat strs)

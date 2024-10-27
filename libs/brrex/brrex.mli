@@ -3,8 +3,8 @@ val or_throw : ('a, Jv.Error.t) result -> 'a
 
 val fut_to_promise : ok:('a -> Jv.t) -> 'a Fut.or_error -> Jv.Promise.t
 (** These three functions are better versions of the same names in Fut. The problem with
-   Fut is that it fails to forward rejected promises, which breaks the propagation
-   of exceptions, and prevents exception handling like error reporting and cleanup. *)
+    Fut is that it fails to forward rejected promises, which breaks the propagation of
+    exceptions, and prevents exception handling like error reporting and cleanup. *)
 
 val fut_to_promise' :
   ok:('a -> Jv.t) -> error:('b -> Jv.t) -> ('a, 'b) Fut.result -> Jv.Promise.t
@@ -47,8 +47,8 @@ val download_from_memory :
     provided as code in the client, instead of as a url on the server. *)
 
 val fetch : Jstr.t -> string Fut.or_error
-(** The data doesn't return utf8 necessarily, it just returns whatever is received
-    on the wire. *)
+(** The data doesn't return utf8 necessarily, it just returns whatever is received on
+    the wire. *)
 
 val get_element_by_id : Jstr.t -> Jv.t
 
@@ -73,7 +73,7 @@ val rpc_with_progress :
 
 val main : rpc list -> (unit -> unit) -> unit
 
-(** Bindings  *)
+(** Bindings *)
 module B : sig
   type 'a t = Jv.t -> 'a
   type 'a t' = 'a -> Jv.t

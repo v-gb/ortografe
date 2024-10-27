@@ -1,6 +1,6 @@
-(** This module allows one to break down the pronunciation of French words into
-    a list of (graphem, phonem), and provides an indication of how surprising the
-    pronunciation is. *)
+(** This module allows one to break down the pronunciation of French words into a list
+    of (graphem, phonem), and provides an indication of how surprising the pronunciation
+    is. *)
 
 type t
 

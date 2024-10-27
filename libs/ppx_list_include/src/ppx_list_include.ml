@@ -29,7 +29,8 @@ let list_literal e =
     |> add_list_literal
     |> (function
          | [ `Literal (loc, l) ] -> Ast_builder.Default.elist ~loc l
-         | [ `Literal (loc, l); `Dyn tail ] -> Ast_builder.Default.elist_tail ~loc l tail
+         | [ `Literal (loc, l); `Dyn tail ] ->
+             Ast_builder.Default.elist_tail ~loc l tail
          | [ `Dyn e ] ->
              (* Don't optimize type errors away in things like [+""] *)
              let loc = e.pexp_loc in
@@ -39,8 +40,9 @@ let list_literal e =
              let e =
                Ast_builder.Default.elist ~loc
                  (List.map
-                    (function `Dyn e -> e
-                            | `Literal (loc, l) -> Ast_builder.Default.elist ~loc l)
+                    (function
+                      | `Dyn e -> e
+                      | `Literal (loc, l) -> Ast_builder.Default.elist ~loc l)
                     l)
              in
              (* Maybe we should use Base.List.concat, because Stdlib.List.concat
