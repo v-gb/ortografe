@@ -13,7 +13,7 @@ let is_letter c =
 
 let is_ascii c f = Uchar.is_char c && f (Uchar.to_char c)
 
-let iter_words1 src ~f =
+let iter_words1 src f =
   let state = ref (`Out 0) in
   let flush j =
     (match !state with
@@ -71,7 +71,7 @@ let split_including_delims str c =
   List.rev !l
 
 let iter_words src ~f ~f_mem =
-  iter_words1 src ~f:(fun what start len ->
+  iter_words1 src (fun what start len ->
       match what with
       | `Out -> f what start len
       | `Word ->
@@ -102,7 +102,7 @@ let string_of_uchars uchars =
   List.iter (fun c -> i := !i + Bytes.set_utf_8_uchar b !i c) uchars;
   Bytes.to_string b
 
-let split_on_first_uchar src ~f =
+let split_on_first_uchar src f =
   (* should probably split on grapheme cluster instead, but it probably doesn't matter
      given NFC normalization *)
   if String.length src = 0
@@ -124,18 +124,18 @@ let depluralize w =
   else None
 
 let uncapitalize w =
-  split_on_first_uchar w ~f:(fun w0 ->
+  split_on_first_uchar w (fun w0 ->
       if Uucp.Case.is_upper w0
       then match Uucp.Case.Map.to_lower w0 with `Uchars w0l -> Some w0l | _ -> None
       else None)
 
 let capitalize w =
-  split_on_first_uchar w ~f:(fun w0 ->
+  split_on_first_uchar w (fun w0 ->
       if Uucp.Case.is_lower w0
       then match Uucp.Case.Map.to_upper w0 with `Uchars w0u -> Some w0u | _ -> None
       else None)
 
-let map_case w ~f =
+let map_case w f =
   let b = Buffer.create (String.length w) in
   let add l = List.iter (fun u -> Buffer.add_utf_8_uchar b u) l in
   if Uutf.String.fold_utf_8
@@ -154,19 +154,18 @@ let map_case w ~f =
   else Some (Buffer.contents b)
 
 let lowercase w =
-  map_case w ~f:(fun c ->
-      if Uucp.Case.is_upper c then Uucp.Case.Map.to_lower c else `Self)
+  map_case w (fun c -> if Uucp.Case.is_upper c then Uucp.Case.Map.to_lower c else `Self)
 
 let uppercase_as_much_as_possible w =
   (* ortograf.net uses "+" as a "letter". So do a best effort uppercasing. *)
-  map_case w ~f:(fun c ->
+  map_case w (fun c ->
       match Uucp.Case.Map.to_upper c with
       | `Self -> `Uchars [ c ]
       | `Uchars _ as uchars -> uchars)
 
 let mem dict x = Option.is_some (dict x)
 
-let iter_pure_text ~options src ~f =
+let iter_pure_text ~options src f =
   let dict = options.dict in
   let src = nfc src in
   iter_words src ~f_mem:(mem dict) ~f:(fun what start len ->
@@ -211,13 +210,13 @@ let convert (type a) ?buf ?progress:_ ~options src ~(dst : a out) : a =
   | Ignore -> ()
   | String ->
       let b = buffer buf ~n:(String.length src) in
-      iter_pure_text ~options src ~f:(Buffer.add_string b);
+      iter_pure_text ~options src (Buffer.add_string b);
       Buffer.contents b
   | Substring n ->
       let b = Buf.create n in
-      iter_pure_text ~options src ~f:(Buf.add_string b);
+      iter_pure_text ~options src (Buf.add_string b);
       Buf.substring__consume b
-  | Channel ch -> iter_pure_text ~options src ~f:(Out_channel.output_string ch)
+  | Channel ch -> iter_pure_text ~options src (Out_channel.output_string ch)
 
 module Interleaved = struct
   open Core

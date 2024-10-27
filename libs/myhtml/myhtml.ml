@@ -193,9 +193,9 @@ let map_node_nonrec map_a = function
       `Element (name, attrs, List.map ~f:map_a children)
   | (`Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _) as t -> t
 
-let fold_node (n : node) ~init ~f =
+let fold_node (n : node) init f =
   let rec fold acc n =
-    let acc = f acc n in
+    let acc = f n acc in
     match n.html with
     | `Element (_, _, children) -> List.fold ~init:acc ~f:fold children
     | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ -> acc
@@ -322,12 +322,12 @@ let style txt = elt "style" [ text txt ]
 let html ~lang ~head ?body_style ~body () =
   let body = elt ?cl:body_style "body" body in
   let scripts =
-    fold_node body ~init:[] ~f:(fun acc node -> List.rev_append node.scripts acc)
+    fold_node body [] (fun node acc -> List.rev_append node.scripts acc)
     |> List.rev
     |> List.stable_dedup ~compare:String.compare
   in
   let classes =
-    fold_node body ~init:[] ~f:(fun acc node -> List.rev_append node.classes acc)
+    fold_node body [] (fun node acc -> List.rev_append node.classes acc)
     |> List.rev
     |> List.stable_dedup ~compare:(fun (c1, v1) (c2, v2) ->
            let c = String.compare c1 c2 in

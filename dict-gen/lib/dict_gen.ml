@@ -237,7 +237,7 @@ let build_erofa_ext ~root ~dict_search =
     List.iter combined_erofa ~f:(fun (old, new_) ->
         print_endline [%string "%{old},%{new_}"])
 
-let with_flow ~env ~write ~diff ~drop ~f =
+let with_flow ~env ~write ~diff ~drop f =
   match (write, diff) with
   | Some _, Some _ -> failwith "can't specify both --write and --diff"
   | Some fname, None ->
@@ -287,7 +287,7 @@ let gen ~env ?(embedded : Dict_gen.embedded option) ~rules ~all ~write ~diff ~dr
       | Some r -> `Str r.extension_dict1990_gen_csv)
   in
   match
-    with_flow ~env ~write ~diff ~drop ~f:(fun buf ->
+    with_flow ~env ~write ~diff ~drop (fun buf ->
         let write = if drop then ignore else fun str -> Eio.Buf_write.string buf str in
         let (`Stats stats) =
           Dict_gen.gen ~rules ~all ~json_to_string:Yojson.to_string ~output:write

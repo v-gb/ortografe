@@ -5,7 +5,7 @@ module Unix = Z
 
 let delete_dir s = Sys_unix.command_exn [%string "rm -rf -- %{Sys.quote s}"]
 
-let with_tempdir ?temp_dir a b ~f =
+let with_tempdir ?temp_dir a b f =
   let dir = Stdlib.Filename.temp_dir ?temp_dir a b in
   Exn.protect ~finally:(fun () -> delete_dir dir) ~f:(fun () -> f dir)
 
@@ -244,7 +244,7 @@ let books =
   ]
 
 let download_all ~root =
-  with_tempdir "books" "" ~f:(fun books_tmp ->
+  with_tempdir "books" "" (fun books_tmp ->
       (* We accumulate new entries into our tarballs without ever cleaning anything.
          Which seems better, in case of back and forth, or for building older revisions.
       *)
@@ -306,7 +306,7 @@ let html_li ~url:_ ~author ~user_title ~title ~main_file =
   ^ "\n"
 
 let convert_all ~books_tar =
-  with_tempdir "books" "" ~f:(fun books_tmp ->
+  with_tempdir "books" "" (fun books_tmp ->
       Sys_unix.command_exn
         [%string "tar -xf %{Sys.quote books_tar} -C %{Sys.quote books_tmp}"];
 

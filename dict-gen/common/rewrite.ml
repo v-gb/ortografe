@@ -999,7 +999,7 @@ let _ : rule =
             keep_regardless_exn env.rules row
       else aligned_row)
 
-let map_valid_utf_8 str ~f =
+let map_valid_utf_8 str f =
   let acc = ref [] in
   let i = ref 0 in
   while !i < String.length str do
@@ -1038,7 +1038,7 @@ let _ : rule =
                   let suffix2 =
                     if String.is_suffix p.graphem ~suffix:"s$" then "s" else ""
                   in
-                  map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem)
+                  map_valid_utf_8 p.phonem (Hashtbl.find_exn graphem_by_phonem)
                   |> String.concat
                   |> fun s -> s ^ suffix1 ^ suffix2
               | _ -> p.graphem)
@@ -1198,7 +1198,7 @@ let _ : rule =
                 | "c", "s" -> [ "ç" ]
                 | "x", ("gz" | "ks") -> [ "x" ]
                 | "e", "" -> [ "e" ]
-                | _ -> map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem))
+                | _ -> map_valid_utf_8 p.phonem (Hashtbl.find_exn graphem_by_phonem))
             |> Array.of_list
           with e -> raise_s [%sexp (e : exn), (aligned_row.row : Data.Lexique.row)]
         in
@@ -1315,7 +1315,7 @@ let _ : rule =
                 match (p.graphem, p.phonem) with
                 | "b", "p" -> [ "b" ]
                 | ("i" | "'" | "-" | " "), _ -> [ p.graphem ]
-                | _ -> map_valid_utf_8 p.phonem ~f:(Hashtbl.find_exn graphem_by_phonem))
+                | _ -> map_valid_utf_8 p.phonem (Hashtbl.find_exn graphem_by_phonem))
             |> String.concat
           with e -> raise_s [%sexp (e : exn), (aligned_row.row : Data.Lexique.row)]
         in
@@ -1479,21 +1479,20 @@ let overlapping_graphems aligned_row start end_ =
          path_elt.i + String.length path_elt.graphem <= start)
   |> List.take_while ~f:(fun path_elt -> path_elt.i < end_)
 
-let rec find_map_unfold unfold ~init:acc ~f =
+let rec find_map_unfold unfold acc f =
   match unfold acc with
   | None -> None
   | Some acc -> (
-      match f acc with
-      | None -> find_map_unfold unfold ~init:acc ~f
-      | Some _ as opt -> opt)
+      match f acc with None -> find_map_unfold unfold acc f | Some _ as opt -> opt)
 
 let rewrite_E env aligned_row ~target:from ~repl:to_ =
   repeat_until_none ~init:aligned_row (fun aligned_row ->
-      find_map_unfold ~init:(-1)
+      find_map_unfold
         (fun last_pos ->
           String.Search_pattern.index ~pos:(last_pos + 1) from
             ~in_:aligned_row.row.ortho)
-        ~f:(fun i_from_start ->
+        (-1)
+        (fun i_from_start ->
           let i_from_end =
             i_from_start + String.length (String.Search_pattern.pattern from)
           in

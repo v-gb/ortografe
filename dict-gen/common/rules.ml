@@ -9,7 +9,7 @@ let o_macron, o_macron_str = (!!"ō", "ō")
 let u_macron, u_macron_str = (!!"ū", "ū")
 let y_macron, y_macron_str = (!!"ȳ", "ȳ")
 
-let utf8_exists_non_shortcut str ~f =
+let utf8_exists_non_shortcut str f =
   let found = ref false in
   let i = ref 0 in
   while !i < String.length str do
@@ -715,7 +715,7 @@ let accent_aigu =
     then Uchar.( <> ) right_phon #:: (0, 1) !!"°" (* verra -> é *)
     else
       let vowels_follow =
-        utf8_exists_non_shortcut right_phon ~f:(fun uc ->
+        utf8_exists_non_shortcut right_phon (fun uc ->
             in_phon_vowels uc && Uchar.( <> ) uc !!"°")
       in
       if vowels_follow
