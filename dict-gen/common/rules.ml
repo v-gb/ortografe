@@ -73,15 +73,24 @@ let ( #:: ) str (i, n) =
 let ortho_weak_vowels =
   Hash_set.of_list
     (module Uchar)
-    [ !!"e"; !!"é"; !!"è"; !!"ê"; e_macron; !!"i"; !!"î"; i_macron; !!"y"; y_macron ]
+    [ +[ !!"e"; !!"é"; !!"è"; !!"ê"; e_macron ]
+    ; +[ !!"i"; !!"î"; i_macron ]
+    ; +[ !!"y"; y_macron ]
+    ]
 
 let in_ortho_weak_vowels s = Hash_set.mem ortho_weak_vowels s
 
-let[@ocamlformat "disable"] ortho_vowels =
+let ortho_vowels =
   Hash_set.union ortho_weak_vowels
     (Hash_set.of_list
        (module Uchar)
-       [ !!"a"; !!"à"; !!"â"; !!"ä"; a_macron; !!"ë"; !!"ï"; !!"ù"; !!"o"; !!"ô"; !!"ö"; o_macron; !!"u"; !!"û"; !!"ù"; !!"ü"; u_macron; !!"ÿ"])
+       [ +[ !!"a"; !!"à"; !!"â"; !!"ä"; a_macron ]
+       ; +[ !!"ë" ]
+       ; +[ !!"ï" ]
+       ; +[ !!"o"; !!"ô"; !!"ö"; o_macron ]
+       ; +[ !!"u"; !!"û"; !!"ù"; !!"ü"; u_macron ]
+       ; !!"ÿ"
+       ])
 
 let in_ortho_vowels s = Hash_set.mem ortho_vowels s
 
@@ -89,10 +98,18 @@ let ends_in_ortho_vowel word i =
   let c = word #:: (i, -1) in
   in_ortho_vowels c
 
-let[@ocamlformat "disable"] phon_vowels =
+let phon_vowels =
   Hash_set.of_list
     (module Uchar)
-    [ !!"a"; !!"e"; !!"E"; !!"2"; !!"9"; !!"°"; !!"@"; !!"5"; !!"§"; !!"1"; !!"i"; !!"y"; !!"u"; !!"o"; !!"O"; !!"ē"]
+    [ !!"a"
+    ; +[ !!"e"; !!"E"; !!"ē" ]
+    ; +[ !!"2"; !!"9"; !!"°" ]
+    ; +[ !!"@"; !!"5"; !!"§"; !!"1" ]
+    ; !!"i"
+    ; !!"y"
+    ; !!"u"
+    ; +[ !!"o"; !!"O" ]
+    ]
 
 let in_phon_vowels s = Hash_set.mem phon_vowels s
 
@@ -669,26 +686,27 @@ let search (rules : t) word phon =
   in
   loop ()
 
-let[@ocamlformat "disable"] accent_aigu =
+let accent_aigu =
   let syllable_starts =
     lazy
       (Hash_set.of_list
          (module String)
-         [ "bR" ; "bl" ; "bw" ; "bj" ; "b8"
-         ; "pR" ; "pl" ; "pw" ; "pj" ; "p8"
-         ; "tR" ; "tl" ; "tw" ; "tj" ; "t8"
-         ; "dR" ; "dl" ; "dw" ; "dj" ; "d8"
-         ; "kR" ; "kl" ; "kw" ; "kj" ; "k8"
-         ; "gR" ; "gl" ; "gw" ; "gj" ; "g8"
-         ; "vR" ; "vl" ; "vw" ; "vj" ; "v8"
-         ; "fR" ; "fl" ; "fw" ; "fj" ; "f8"
+         [ +[ "bR"; "bl"; "bw"; "bj"; "b8" ]
+         ; +[ "pR"; "pl"; "pw"; "pj"; "p8" ]
+         ; +[ "tR"; "tl"; "tw"; "tj"; "t8" ]
+         ; +[ "dR"; "dl"; "dw"; "dj"; "d8" ]
+         ; +[ "kR"; "kl"; "kw"; "kj"; "k8" ]
+         ; +[ "gR"; "gl"; "gw"; "gj"; "g8" ]
+         ; +[ "vR"; "vl"; "vw"; "vj"; "v8" ]
+         ; +[ "fR"; "fl"; "fw"; "fj"; "f8" ]
          ])
   in
   fun right_phon ->
     if Uchar.( = ) right_phon #:: (0, 1) Stdlib.Uchar.rep (* length <= 1 *)
     then
-      String.is_empty right_phon  (* true: arrêt -> é
-                                     false: cette -> è *)
+      (* true: arrêt -> é
+         false: cette -> è *)
+      String.is_empty right_phon
     else if in_phon_vowels right_phon #:: (0, 1)
             ||
             let uc = right_phon #:: (0, 1) in
