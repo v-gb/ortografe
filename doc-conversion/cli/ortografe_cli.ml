@@ -50,9 +50,9 @@ let bench =
            { convert_uppercase = true
            ; dict
            ; interleaved =
-               (match Sys.getenv "INTERLEAVED" with
-               | "false" -> false
-               | _ | (exception Not_found) -> true)
+               (match Sys.getenv_opt "INTERLEAVED" with
+               | Some "false" -> false
+               | None | Some _ -> true)
            ; plurals_in_s = metadata.plurals_in_s ||? Some "s"
            }
          arg1 (Some "/dev/null");
@@ -234,9 +234,9 @@ let main more_cmd =
                  { convert_uppercase
                  ; dict
                  ; interleaved =
-                     (match Sys.getenv "INTERLEAVED" with
-                     | "false" -> false
-                     | _ | (exception Not_found) -> true)
+                     (match Sys.getenv_opt "INTERLEAVED" with
+                     | Some "false" -> false
+                     | None | Some _ -> true)
                  ; plurals_in_s = metadata.plurals_in_s ||? Some "s"
                  }
                ?src_type:input_type in_ out

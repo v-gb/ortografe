@@ -22,7 +22,6 @@ let compute_dict ?profile ?progress embedded rules =
   in
   let t2 = Stdlib.Sys.time () in
   let sexp_str =
-    let open Base in
     Sexplib.Sexp.to_string_hum [%sexp (stats : Sexp.t), (t2 -. t1 : float)]
   in
   (Buffer.contents buf, sexp_str)
