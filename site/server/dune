@@ -3,6 +3,7 @@
  (libraries
    cmdliner
    core
+   core.filename_base
    core_unix.sys_unix
    dict_gen_common
    dict_search
@@ -11,6 +12,7 @@
    ortografe
    ortografe_embedded
    sexp_with_utf8
+   stdio
    uri
  )
  (foreign_stubs

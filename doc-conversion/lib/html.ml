@@ -1,3 +1,4 @@
+open! Core
 open! Common
 
 open struct
@@ -6,9 +7,9 @@ end
 
 let html_transform ~convert_text signal =
   (* maybe we should check the tag ns for the xhtml case *)
-  let notranslate_pattern = Core.String.Search_pattern.create "notranslate" in
-  let notranscribe_pattern = Core.String.Search_pattern.create "notranscribe" in
-  let stack = Core.Stack.create () in
+  let notranslate_pattern = String.Search_pattern.create "notranslate" in
+  let notranscribe_pattern = String.Search_pattern.create "notranscribe" in
+  let stack = Stack.create () in
   let hide_current = ref false in
   Markup.map
     (fun elt ->
@@ -19,19 +20,19 @@ let html_transform ~convert_text signal =
             | "code" | "script" | "noscript" | "style" | "textarea" -> true
             | _ ->
                 List.exists
-                  (fun ((_, attr), _value) ->
+                  ~f:(fun ((_, attr), _value) ->
                     match attr with
                     | "class" ->
-                        Core.String.Search_pattern.matches notranslate_pattern attr
-                        || Core.String.Search_pattern.matches notranscribe_pattern attr
+                        String.Search_pattern.matches notranslate_pattern attr
+                        || String.Search_pattern.matches notranscribe_pattern attr
                     | "contenteditable" -> true
                     | _ -> false)
                   attributes
           in
-          Core.Stack.push stack (tag, !hide_current);
+          Stack.push stack (tag, !hide_current);
           hide_current := hide
       | `End_element -> (
-          match Core.Stack.pop stack with
+          match Stack.pop stack with
           | None -> ()
           | Some (_, hide) -> hide_current := hide)
       | `Text _ | `Doctype _ | `Xml _ | `PI _ | `Comment _ -> ());

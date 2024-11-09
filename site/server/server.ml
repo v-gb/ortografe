@@ -1,3 +1,5 @@
+open! Core
+
 let read_until_close_or_max_size ~max_size stream =
   (* This is Dream's read_until_close function, with just an extra
      check when growing the buffer.
@@ -85,11 +87,11 @@ let my_error_template (error : Dream.error) debug_info suggested_response =
   Lwt.return suggested_response
 
 let repo_root () =
-  let root = ref (Filename.dirname Sys.executable_name) in
+  let root = ref (Filename.dirname Sys_unix.executable_name) in
   while
     not
-      (Sys.file_exists (Filename.concat !root ".git")
-      || Sys.file_exists (Filename.concat !root ".jj"))
+      (Sys_unix.file_exists_exn (Filename_base.concat !root ".git")
+      || Sys_unix.file_exists_exn (Filename_base.concat !root ".jj"))
   do
     root := Filename.dirname !root;
     match !root with
@@ -99,14 +101,14 @@ let repo_root () =
   !root
 
 let where_to_find_static_files () =
-  if Sys.file_exists "/static" (* when in container *)
+  if Sys_unix.file_exists_exn "/static" (* when in container *)
   then ("/static", `In_container true)
   else
     (* In dev, setup symlinks to the files in the repo, so we can just
        modify the files and reload without fiddling with the server. *)
     let repo_root = repo_root () in
     (* keep in sync with Dockerfile *)
-    (Filename.concat repo_root "_build/default/site/static", `In_container false)
+    (Filename_base.concat repo_root "_build/default/site/static", `In_container false)
 
 let respond_error_text status str =
   let code = Dream.status_to_int status and reason = Dream.status_to_string status in
@@ -121,9 +123,7 @@ let respond_error_text status str =
   Dream.set_field response error_has_body ();
   Lwt.return response
 
-let hum_size_of_bytes n =
-  Core.Byte_units.Short.to_string (Core.Byte_units.of_bytes_int n)
-
+let hum_size_of_bytes n = Byte_units.Short.to_string (Byte_units.of_bytes_int n)
 let stream_end = Dream.new_field ~name:"stream-end" ()
 
 let actual_from_system root disk_path _request =
@@ -131,7 +131,7 @@ let actual_from_system root disk_path _request =
      it. Two downloads of the 27MB ortografe_cli.exe in parallel were enough to crash the
      server into the 256MB limit. If we stream the data out, the memory usage is just 1MB per
      concurrent download (of files over 1MB). *)
-  let file_path = Filename.concat root disk_path in
+  let file_path = Filename_base.concat root disk_path in
   Lwt.catch
     (fun () ->
       let%lwt stat =
@@ -180,13 +180,14 @@ let from_filesystem root path request =
     let has_compressed_version =
       match path with
       | "Lexique383.gen.tsv" | "dict.js" -> true
-      | _ -> String.ends_with path ~suffix:".bc.js"
+      | _ -> String.is_suffix path ~suffix:".bc.js"
     in
     if
       has_compressed_version
       && List.exists
-           (fun s ->
-             String.split_on_char ',' s |> List.exists (fun s -> String.trim s = "gzip"))
+           ~f:(fun s ->
+             String.split ~on:',' s
+             |> List.exists ~f:(fun s -> String.( = ) (String.strip s) "gzip"))
            (Dream.headers request "Accept-Encoding")
     then (path ^ ".gz", [ ("Content-Encoding", "gzip") ] @ Dream.mime_lookup path)
     else (path, [])
@@ -200,14 +201,14 @@ let from_filesystem root path request =
        large stuff over and over in the last case). *)
     match path with
     | "dict.js" -> true
-    | _ when String.ends_with path ~suffix:".bc.js" -> true
+    | _ when String.is_suffix path ~suffix:".bc.js" -> true
     | _ -> (
-        match Filename.extension path with
+        match Stdlib.Filename.extension path with
         | ".png" | ".svg" | ".jpg" | ".csv" | ".tsv" -> true
         | _ -> false)
   in
   if cache then Dream.set_header response "Cache-Control" "max-age=3600";
-  List.iter (fun (k, v) -> Dream.set_header response k v) response_headers;
+  List.iter ~f:(fun (k, v) -> Dream.set_header response k v) response_headers;
   Lwt.return response
 
 let embedded : Dict_gen_common.Dict_gen.embedded =
@@ -238,7 +239,7 @@ let logger = function
         time_ns
         |> Time_ns.to_int63_ns_since_epoch
         |> Int63.to_int_exn
-        |> (fun i -> i mod (86400 * 1_000_000_000))
+        |> (fun i -> Int.rem i (86400 * 1_000_000_000))
         |> Time_ns.Span.of_int_ns
         |> Time_ns.Ofday.of_span_since_start_of_day_exn
         |> Time_ns.Ofday.to_millisecond_string
@@ -279,11 +280,11 @@ let logger = function
             | [ host; _port ] -> host
             | _ -> s (* ipv6 probably *)
           in
-          Stdlib.prerr_endline
+          prerr_endline
             [%string
               "%{ofday before} %{method_} %{id#Int} %{client} %{Dream.target request}  \
                %{user_agent}"];
-          Stdlib.flush stderr;
+          Out_channel.flush Out_channel.stderr;
           Lwt.try_bind
             (fun () -> handler request)
             (fun response ->
@@ -297,11 +298,11 @@ let logger = function
                 then ("[33m", "[39m")
                 else ("[32m", "[39m")
               in
-              Stdlib.prerr_endline
+              prerr_endline
                 [%string
                   "%{ofday after1} %{bcolor}%{Dream.status_to_int status#Int}%{ecolor} \
                    %{id#Int} %{client} in %{duration#Int}us"];
-              Stdlib.flush stderr;
+              Out_channel.flush Out_channel.stderr;
               (match Dream.field response stream_end with
               | None -> ()
               | Some promise ->
@@ -312,15 +313,16 @@ let logger = function
                          let duration =
                            Time_ns.Span.to_int_us (Time_ns.diff after2 before)
                          in
-                         Stdlib.prerr_endline
+                         prerr_endline
                            [%string
                              "%{ofday after2} %{bcolor}DON%{ecolor} %{id#Int} \
                               %{client} in %{duration#Int}us"];
-                         Stdlib.flush stderr)));
+                         Out_channel.flush Out_channel.stderr)));
               Lwt.return response)
             (fun exn ->
-              Stdlib.prerr_string [%string "Aborted by: %{Exn.to_string exn}"];
-              Stdlib.flush stderr;
+              Out_channel.output_string Out_channel.stderr
+                [%string "Aborted by: %{Exn.to_string exn}"];
+              Out_channel.flush Out_channel.stderr;
               Lwt.fail exn)
 
 let redirect handler request =
@@ -333,28 +335,28 @@ let redirect handler request =
   | _ -> handler request
 
 let memory () =
-  let rss = ref Core.Byte_units.zero in
-  let pss = ref Core.Byte_units.zero in
+  let rss = ref Byte_units.zero in
+  let pss = ref Byte_units.zero in
   let parse s =
-    Base.String.strip s
-    |> Base.String.chop_suffix_exn ~suffix:" kB"
-    |> int_of_string
+    String.strip s
+    |> String.chop_suffix_exn ~suffix:" kB"
+    |> Int.of_string
     |> Float.of_int
-    |> Core.Byte_units.of_kilobytes
+    |> Byte_units.of_kilobytes
   in
-  Core.List.iter (Core.In_channel.read_lines "/proc/self/smaps") ~f:(fun s ->
-      match Core.String.chop_prefix s ~prefix:"Rss:" with
-      | Some s -> rss := Core.Byte_units.( + ) !rss (parse s)
+  List.iter (In_channel.read_lines "/proc/self/smaps") ~f:(fun s ->
+      match String.chop_prefix s ~prefix:"Rss:" with
+      | Some s -> rss := Byte_units.( + ) !rss (parse s)
       | None -> (
-          match Core.String.chop_prefix s ~prefix:"Pss:" with
-          | Some s -> pss := Core.Byte_units.( + ) !pss (parse s)
+          match String.chop_prefix s ~prefix:"Pss:" with
+          | Some s -> pss := Byte_units.( + ) !pss (parse s)
           | None -> ()));
   [%sexp `rss (!rss : Core.Byte_units.t), `pss (!pss : Core.Byte_units.t)]
 
 let _print_memory () =
-  Core.print_s (memory ());
+  print_s (memory ());
   Gc.compact ();
-  Core.print_s (memory ())
+  print_s (memory ())
 
 let time f =
   let open Core in
@@ -379,7 +381,7 @@ let get_dict () =
           [%sexp "loading index", (before : Sexp.t), `ms (ms : int), (after : Sexp.t)]);
        t)
   in
-  let oe_pattern = lazy (Core.String.Search_pattern.create "œ") in
+  let oe_pattern = lazy (String.Search_pattern.create "œ") in
   fun request ->
     match Dream.query request "q" with
     | None -> respond_error_text `Bad_Request "no ?q parameter"
@@ -390,14 +392,15 @@ let get_dict () =
           else Dict_search.Erofa.search (Lazy.force dict_search) term ~limit:10
         in
         let rows =
-          Core.List.map
+          List.map
             ~f:(fun (as_, b, c, flags) ->
               let plural = if flags.implied_plural then "(s)" else "" in
               let as_display, b_display =
                 if List.is_empty as_
                 then (b ^ plural, "-")
                 else
-                  (String.concat "<br>" (List.map (fun a -> a ^ plural) as_), b ^ plural)
+                  ( String.concat ~sep:"<br>" (List.map as_ ~f:(fun a -> a ^ plural))
+                  , b ^ plural )
               in
               let c_display = if String.equal b c then "-" else c ^ plural in
               let link =
@@ -406,8 +409,8 @@ let get_dict () =
                      the floor instead of turning it into oe, which is less fine, so do it
                      ourselves. *)
                   Dream.to_percent_encoded
-                    (Core.String.Search_pattern.replace_all (Lazy.force oe_pattern)
-                       ~in_:b ~with_:"oe")
+                    (String.Search_pattern.replace_all (Lazy.force oe_pattern) ~in_:b
+                       ~with_:"oe")
                 in
                 [%string
                   {|<a href="https://dictionnaire.lerobert.com/definition/%{b_for_url}" style="background-color: #e22027; border-radius: 50%; color: white; font-weight: bold; text-align:center; display: inline-block; width: 1.3em; height: 1.3em; text-decoration: none;">R</a>|}]
@@ -415,7 +418,7 @@ let get_dict () =
               [%string
                 {|<tr><td>%{link}</td><td>%{as_display}</td><td>%{b_display}</td><td>%{c_display}</td></tr>|}])
             responses
-          |> String.concat "\n"
+          |> String.concat ~sep:"\n"
         in
         let html =
           [%string
@@ -447,32 +450,35 @@ let post_conv ~max_input_size ~staged request =
       | `Ok l -> (
           let rules, rest =
             List.partition_map
-              (fun ((name, values) as pair) ->
+              ~f:(fun a ->
+                let ((name, values) as pair) = a in
                 match name with
                 | "custom" -> (
                     match values with
                     | (_, value) :: _ ->
-                        Left (Dict_gen_common.Dict_gen.custom_rule value)
-                    | _ -> Left None)
+                        First (Dict_gen_common.Dict_gen.custom_rule value)
+                    | _ -> First None)
                 | _ -> (
                     match Dict_gen_common.Dict_gen.of_name_builtin name with
-                    | Some rule -> Left (Some rule)
-                    | None -> Right pair))
+                    | Some rule -> First (Some rule)
+                    | None -> Second pair))
               l
           in
-          let rules = List.filter_map Fun.id rules in
+          let rules = List.filter_map ~f:Fun.id rules in
           match rest with
           | [ ("file", [ (fname, fcontents) ]) ] -> (
               let fname = fname ||? "unnamed.txt" in
-              let ext = Filename.extension fname in
+              let ext = Stdlib.Filename.extension fname in
               Dream.log "upload ext:%S size:%s rules:%s" ext
                 (hum_size_of_bytes (String.length fcontents))
-                (String.concat "," (List.map Dict_gen_common.Dict_gen.name rules));
+                (String.concat ~sep:","
+                   (List.map rules ~f:Dict_gen_common.Dict_gen.name));
               let dict, plurals_in_s =
                 match rules with
                 | [] ->
                     (Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa), None)
-                | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
+                | [ rule ] when String.( = ) (Dict_gen_common.Dict_gen.name rule) "1990"
+                  ->
                     ( Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.rect1990)
                     , None )
                 | _ ->
@@ -497,7 +503,9 @@ let post_conv ~max_input_size ~staged request =
                   respond_error_text (`Status 422) str
               | None -> respond_error_text (`Status 422) ("unsupported file type " ^ ext)
               | Some (`ext new_ext, new_body) ->
-                  let new_fname = Filename.remove_extension fname ^ "-conv" ^ new_ext in
+                  let new_fname =
+                    Stdlib.Filename.remove_extension fname ^ "-conv" ^ new_ext
+                  in
                   Dream.respond
                     ~headers:
                       (Dream.mime_lookup new_fname

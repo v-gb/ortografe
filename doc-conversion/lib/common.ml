@@ -1,3 +1,5 @@
+open! Core
+
 open struct
   module Markup = Markup_t
 end
@@ -23,7 +25,7 @@ module Buf = struct
   let resize t extra =
     let new_len = Int.max (t.len + extra) ((Bytes.length t.b * 2) + 1) in
     let new_b = Bytes.create new_len in
-    Bytes.blit t.b 0 new_b 0 t.len;
+    Bytes.blit ~src:t.b ~src_pos:0 ~dst:new_b ~dst_pos:0 ~len:t.len;
     t.b <- new_b
 
   let add_char t c =
@@ -34,11 +36,14 @@ module Buf = struct
   let add_string t s =
     let n = String.length s in
     if t.len + n > Bytes.length t.b then resize t n;
-    Bytes.unsafe_blit_string s 0 t.b t.len n;
+    Bytes.From_string.unsafe_blit ~src:s ~src_pos:0 ~dst:t.b ~dst_pos:t.len ~len:n;
     t.len <- t.len + n
 
   let substring__consume t : Substring.t =
-    { string = Bytes.unsafe_to_string t.b; start = 0; len = t.len }
+    { string = Bytes.unsafe_to_string ~no_mutation_while_string_reachable:t.b
+    ; start = 0
+    ; len = t.len
+    }
 end
 
 type 'a out =

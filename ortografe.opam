@@ -30,6 +30,7 @@ depends: [
   "ppx_string"
   "re"
   "sexplib"
+  "stdio"
   "uri"
   "uucp"
   "uunf"

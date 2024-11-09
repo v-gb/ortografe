@@ -1,3 +1,5 @@
+open! Core
+
 let embedded : Dict_gen_common.Dict_gen.embedded =
   { data_lexique_Lexique383_gen_tsv = Ortografe_embedded.data_lexique_Lexique383_gen_tsv
   ; extension_dict1990_gen_csv = Ortografe_embedded.extension_dict1990_gen_csv
@@ -16,7 +18,7 @@ let load_rules rules ~prebuild =
   | [] ->
       fun () ->
         (Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.erofa), no_metadata)
-  | [ rule ] when Dict_gen_common.Dict_gen.name rule = "1990" ->
+  | [ rule ] when String.( = ) (Dict_gen_common.Dict_gen.name rule) "1990" ->
       fun () ->
         (Stdlib.Hashtbl.find_opt (Lazy.force Ortografe_embedded.rect1990), no_metadata)
   | _ ->
@@ -43,20 +45,20 @@ let bench =
      and+ prebuild = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"" [ "prebuild" ])) in
      let staged = load_rules rules ~prebuild in
      for i = 1 to 5 do
-       let t1 = Sys.time () in
+       let t1 = Stdlib.Sys.time () in
        let dict, metadata = staged () in
        Ortografe.convert_files
          ~options:
            { convert_uppercase = true
            ; dict
            ; interleaved =
-               (match Sys.getenv_opt "INTERLEAVED" with
+               (match Sys.getenv "INTERLEAVED" with
                | Some "false" -> false
                | None | Some _ -> true)
            ; plurals_in_s = metadata.plurals_in_s ||? Some "s"
            }
          arg1 (Some "/dev/null");
-       let t2 = Sys.time () in
+       let t2 = Stdlib.Sys.time () in
        Printf.printf "%d: %f\n" i (t2 -. t1)
      done)
 
@@ -105,7 +107,7 @@ let main more_cmd =
   in
   let cmd =
     C.Cmd.group
-      (C.Cmd.info (Filename.basename Sys.executable_name))
+      (C.Cmd.info (Filename.basename Sys_unix.executable_name))
       [ C.Cmd.v
           (C.Cmd.info ~doc:"extrait le texte d'un document"
              ~man:
@@ -217,7 +219,7 @@ let main more_cmd =
              in
              let from_dict_file =
                Option.map
-                 (fun file -> parse_dict (Core.In_channel.read_all file) ())
+                 ~f:(fun file -> parse_dict (In_channel.read_all file) ())
                  dict_file
              in
              match (from_rules, from_dict_file) with
@@ -234,7 +236,7 @@ let main more_cmd =
                  { convert_uppercase
                  ; dict
                  ; interleaved =
-                     (match Sys.getenv_opt "INTERLEAVED" with
+                     (match Sys.getenv "INTERLEAVED" with
                      | Some "false" -> false
                      | None | Some _ -> true)
                  ; plurals_in_s = metadata.plurals_in_s ||? Some "s"
@@ -255,7 +257,7 @@ let main more_cmd =
                  && match output with `File (Some _) -> true | _ -> false
                then failwith "can't specify -o with multiple input files";
                List.iter
-                 (fun arg ->
+                 ~f:(fun arg ->
                    convert ~in_:(Some arg)
                      ~out:(match output with `File opt -> opt | `In_place -> Some arg))
                  args)

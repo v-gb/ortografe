@@ -1,3 +1,4 @@
+open! Core
 open Common
 
 open struct
@@ -67,7 +68,7 @@ let epub ?convert_text ?progress ~options src ~dst =
   Zip.map' ?progress src (fun ~path ->
       (* The xhtml is the bulk of the pages, but in principle, we
          could rewrite more stuff: content.opf, toc.ncx *)
-      match Filename.extension path with
+      match Stdlib.Filename.extension path with
       | ".xhtml" | ".html" ->
           (* in principle we'd need to read the root file to know how
              to interpret the various files. *)
@@ -79,7 +80,7 @@ let epub ?convert_text ?progress ~options src ~dst =
 
 let htmlz ?convert_text ?progress ~options src ~dst =
   Zip.map' ?progress src (fun ~path ->
-      match Filename.extension path with
+      match Stdlib.Filename.extension path with
       | ".html" ->
           Some
             (fun ~contents ->
@@ -105,11 +106,11 @@ let known_exts =
   ]
 
 let mimetype_by_ext =
-  let tbl = lazy (Hashtbl.of_seq (List.to_seq known_exts)) in
-  fun str -> Hashtbl.find_opt (Lazy.force tbl) str
+  let tbl = lazy (Stdlib.Hashtbl.of_seq (Stdlib.List.to_seq known_exts)) in
+  fun str -> Stdlib.Hashtbl.find_opt (Lazy.force tbl) str
 
 let of_ext ext =
-  match String.lowercase_ascii ext with
+  match String.lowercase ext with
   | ".txt" | ".md" | ".mkd" -> Some (ext, `Text)
   | ".html" -> Some (ext, `Html)
   | ".xhtml" -> Some (ext, `Xhtml)
@@ -141,16 +142,16 @@ let convert_string ~ext ?progress ~options src =
   | Some (ext, typ) -> Some (`ext ext, convert typ ?progress ~options src ~dst:String)
 
 let open_channel dp name =
-  let out_ch = Out_channel.open_bin name in
+  let out_ch = Out_channel.create name in
   Dyn_protect.add dp ~finally:(fun () -> Out_channel.close out_ch);
   out_ch
 
-let read_all name = In_channel.with_open_bin name In_channel.input_all
+let read_all name = In_channel.with_file name ~f:In_channel.input_all
 
 let src_dst_typ ?src_type src dst ~dyn_protect:dp =
   let src_type =
     Option.map
-      (fun src_type -> of_ext src_type ||? failwith "unknown file type %{src_type}")
+      ~f:(fun src_type -> of_ext src_type ||? failwith "unknown file type %{src_type}")
       src_type
   in
   match src with
@@ -159,13 +160,15 @@ let src_dst_typ ?src_type src dst ~dyn_protect:dp =
       , (match dst with
         | None -> Out_channel.stdout
         | Some new_name -> open_channel dp new_name)
-      , Option.map snd src_type ||? `Text )
+      , Option.map ~f:snd src_type ||? `Text )
   | Some src_name ->
       let dst_ext, typ =
         src_type
-        ||? (of_ext (Filename.extension src_name)
+        ||? (of_ext (Stdlib.Filename.extension src_name)
             ||?
-            let exts = "{" ^ String.concat "|" (List.map fst known_exts) ^ "}" in
+            let exts =
+              "{" ^ String.concat ~sep:"|" (List.map known_exts ~f:fst) ^ "}"
+            in
             failwith
               [%string
                 "%{src_name} isn't a supported file format. You might want to pass \
@@ -174,7 +177,7 @@ let src_dst_typ ?src_type src dst ~dyn_protect:dp =
       let dst_name =
         match dst with
         | Some new_name -> new_name
-        | None -> Filename.remove_extension src_name ^ "-conv" ^ dst_ext
+        | None -> Stdlib.Filename.remove_extension src_name ^ "-conv" ^ dst_ext
       in
       (* first read, then open for writing, in case input = output *)
       let src_str = read_all src_name in
@@ -192,10 +195,10 @@ let string_of_sexp_always_quote_avoid_escapes =
            so we can trivially rewrite strings with sed from the outside without
            having to parse strings. *)
         Buffer.add_string buf "\"";
-        if String.exists (function '"' | '\\' | '\n' -> true | _ -> false) s
+        if String.exists ~f:(function '"' | '\\' | '\n' -> true | _ -> false) s
         then
           String.iter
-            (function
+            ~f:(function
               | '"' -> Buffer.add_string buf "\\\""
               | '\\' -> Buffer.add_string buf "\\\\"
               | '\n' -> Buffer.add_string buf "\\n"
@@ -205,7 +208,7 @@ let string_of_sexp_always_quote_avoid_escapes =
         Buffer.add_string buf "\""
     | List l ->
         Buffer.add_string buf "(";
-        List.iter (print_sexp buf) l;
+        List.iter ~f:(print_sexp buf) l;
         Buffer.add_string buf ")"
   in
   fun sexp ->
@@ -220,7 +223,7 @@ let ext_conv ?src_type src dst inex =
         match inex with
         | `Extract ->
             fun s ->
-              output_string dst
+              Out_channel.output_string dst
                 (string_of_sexp_always_quote_avoid_escapes (Atom s) ^ "\n");
               ""
         | `Insert f ->
@@ -229,10 +232,10 @@ let ext_conv ?src_type src dst inex =
               | None -> In_channel.input_all In_channel.stdin
               | Some f -> read_all f)
               |> Sexplib.Sexp.of_string_many
-              |> List.to_seq
-              |> Queue.of_seq
+              |> Stdlib.List.to_seq
+              |> Stdlib.Queue.of_seq
             in
-            fun _s -> Base.string_of_sexp (Queue.pop strs)
+            fun _s -> Base.string_of_sexp (Stdlib.Queue.pop strs)
       in
       let options =
         { convert_uppercase = true
@@ -250,13 +253,13 @@ let map_zip = Zip.map
 
 module Private = struct
   let grab_from_zip src name =
-    let zipc = Zipc.of_binary_string src |> Core.Result.ok_or_failwith in
+    let zipc = Zipc.of_binary_string src |> Result.ok_or_failwith in
     match Zipc.find name zipc with
     | None -> "<absent>"
     | Some member -> (
         match Zipc.Member.kind member with
         | Dir -> "<directory>"
-        | File file -> Zipc.File.to_binary_string file |> Core.Result.ok_or_failwith)
+        | File file -> Zipc.File.to_binary_string file |> Result.ok_or_failwith)
 
   let convert_officeopenxml = Officeopenxml.convert_xml
 end

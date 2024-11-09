@@ -1,3 +1,4 @@
+open! Core
 open Common
 
 open struct
@@ -82,7 +83,7 @@ let files_to_rewrite = function
       | _ -> false)
   | `Pptx ->
       fun str ->
-        if Filename.extension str = ".xml"
+        if String.( = ) (Stdlib.Filename.extension str) ".xml"
         then match Filename.dirname str with "ppt/slides" -> true | _ -> false
         else false
 
@@ -110,7 +111,7 @@ let convert which ?convert_text ?progress ~options src ~dst =
   |> write_out dst
 
 let sys_command_exn ?(handle = Fun.const None) str =
-  let i = Sys.command str in
+  let i = Sys_unix.command str in
   if i <> 0
   then
     match handle i with
@@ -120,7 +121,7 @@ let sys_command_exn ?(handle = Fun.const None) str =
 let convert_old which ?convert_text ?progress ~options src ~dst =
   let old_ext = match which with `Doc -> "doc" | `Ppt -> "ppt" in
   let new_ext = old_ext ^ "x" in
-  (match Stdlib.Sys.backend_type with
+  (match Sys.backend_type with
   | Native | Bytecode -> ()
   | Other _ ->
       failwith
@@ -129,13 +130,13 @@ let convert_old which ?convert_text ?progress ~options src ~dst =
            ancien). Veuillez l'ouvrir, et le sauver en « .%{new_ext} »."]);
   (* Should put a memory limit, perhaps with the cgroup exe? At least, in prod the OOM
      killer is selecting the open office process, not the server. *)
-  let d = Filename.temp_dir "ortografe" "tmp" in
+  let d = Filename_unix.temp_dir "ortografe" "tmp" in
   Fun.protect
     ~finally:(fun () -> sys_command_exn [%string {|rm -rf -- %{Filename.quote d}|}])
     (fun () ->
-      let old_path = Filename.concat d ("it." ^ old_ext) in
+      let old_path = Filename_base.concat d ("it." ^ old_ext) in
       let new_path = old_path ^ "x" in
-      Out_channel.with_open_bin old_path (fun oc -> Out_channel.output_string oc src);
+      Out_channel.with_file old_path ~f:(fun oc -> Out_channel.output_string oc src);
       sys_command_exn
         [%string
           {|which libreoffice > /dev/null || exit 13; cd %{Filename.quote d} && timeout -s SIGKILL 10s bwrap --unshare-all --die-with-parent --new-session --dev-bind / / libreoffice --headless --convert-to %{new_ext} %{Filename.basename old_path} >&2|}]
@@ -156,7 +157,7 @@ let convert_old which ?convert_text ?progress ~options src ~dst =
                     Ouvrez votre fichier, enregistrez-le en tant que .%{new_ext}, puis \
                     réessayez."])
         | _ -> None);
-      let src = In_channel.with_open_bin new_path (fun ic -> In_channel.input_all ic) in
+      let src = In_channel.with_file new_path ~f:(fun ic -> In_channel.input_all ic) in
       convert ?convert_text ?progress
         (match which with `Doc -> `Docx | `Ppt -> `Pptx)
         ~options src ~dst)

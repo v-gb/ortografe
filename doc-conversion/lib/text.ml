@@ -1,3 +1,4 @@
+open! Core
 open Common
 
 let nfc str =
@@ -11,7 +12,7 @@ let is_letter c =
   | `Ll | `Lm | `Lo | `Lt | `Lu -> true
   | _ -> false
 
-let is_ascii c f = Uchar.is_char c && f (Uchar.to_char c)
+let is_ascii c f = Uchar.is_char c && f (Uchar.to_char_exn c)
 
 let iter_words1 src f =
   let state = ref (`Out 0) in
@@ -30,7 +31,7 @@ let iter_words1 src f =
       | `Uchar c -> (
           if is_letter c
           then
-            let nbytes = Uchar.utf_8_byte_length c in
+            let nbytes = Uchar.Utf8.byte_length c in
             match !state with
             | `Out _ ->
                 flush i;
@@ -46,7 +47,7 @@ let iter_words1 src f =
   flush (String.length src)
 
 let rec mem_substr str start len c =
-  len > 0 && (str.[start] = c || mem_substr str (start + 1) (len - 1) c)
+  len > 0 && (Char.( = ) str.[start] c || mem_substr str (start + 1) (len - 1) c)
 
 let split_including_delims str c =
   let l = ref [] in
@@ -58,8 +59,8 @@ let split_including_delims str c =
       i := j)
   in
   while
-    match String.index_from str !i c with
-    | exception Not_found ->
+    match Stdlib.String.index_from str !i c with
+    | exception Stdlib.Not_found ->
         got (String.length str);
         false
     | j ->
@@ -86,22 +87,25 @@ let iter_words src ~f ~f_mem =
                    | `Malformed _ -> assert false
                    | `Uchar c ->
                        is_letter c || is_ascii c (function '-' -> true | _ -> false))
-                 true (String.sub src start len)
+                 true
+                 (String.sub src ~pos:start ~len)
           then
-            let sub = String.sub src start len in
+            let sub = String.sub src ~pos:start ~len in
             if f_mem sub
             then f what start len
             else
               List.iter
-                (fun (start', len') -> f what (start + start') len')
+                ~f:(fun (start', len') -> f what (start + start') len')
                 (split_including_delims sub '-')
           else f what start len)
 
 let string_of_uchars uchars =
-  let nbytes = List.fold_left (fun acc c -> acc + Uchar.utf_8_byte_length c) 0 uchars in
+  let nbytes =
+    List.fold_left ~f:(fun acc c -> acc + Uchar.Utf8.byte_length c) ~init:0 uchars
+  in
   let b = Bytes.create nbytes in
   let i = ref 0 in
-  List.iter (fun c -> i := !i + Bytes.set_utf_8_uchar b !i c) uchars;
+  List.iter ~f:(fun c -> i := !i + Bytes.Utf8.set b !i c) uchars;
   Bytes.to_string b
 
 let split_on_first_uchar src f =
@@ -110,19 +114,19 @@ let split_on_first_uchar src f =
   if String.length src = 0
   then None
   else
-    let utf_decode = String.get_utf_8_uchar src 0 in
-    let src0 = Uchar.utf_decode_uchar utf_decode in
+    let utf_decode = Stdlib.String.get_utf_8_uchar src 0 in
+    let src0 = Uchar.Decode_result.uchar_or_replacement_char utf_decode in
     match f src0 with
     | Some repl ->
-        let src0bytes = Uchar.utf_decode_length utf_decode in
+        let src0bytes = Uchar.Decode_result.bytes_consumed utf_decode in
         Some
           (string_of_uchars repl
-          ^ String.sub src src0bytes (String.length src - src0bytes))
+          ^ String.sub src ~pos:src0bytes ~len:(String.length src - src0bytes))
     | None -> None
 
 let depluralize w =
-  if String.ends_with w ~suffix:"s"
-  then Some (String.sub w 0 (String.length w - 1))
+  if String.is_suffix w ~suffix:"s"
+  then Some (String.sub w ~pos:0 ~len:(String.length w - 1))
   else None
 
 let uncapitalize w =
@@ -139,7 +143,7 @@ let capitalize w =
 
 let map_case w f =
   let b = Buffer.create (String.length w) in
-  let add l = List.iter (fun u -> Buffer.add_utf_8_uchar b u) l in
+  let add l = List.iter ~f:(fun u -> Stdlib.Buffer.add_utf_8_uchar b u) l in
   if
     Uutf.String.fold_utf_8
       (fun bad _i -> function
@@ -172,7 +176,7 @@ let iter_pure_text ~options src f =
   let dict = options.dict in
   let src = nfc src in
   iter_words src ~f_mem:(mem dict) ~f:(fun what start len ->
-      let w = String.sub src start len in
+      let w = String.sub src ~pos:start ~len in
       match what with
       | `Out -> f w
       | `Word -> (
@@ -275,7 +279,7 @@ module Interleaved = struct
     while !i < String.length str do
       let decode = Stdlib.String.get_utf_8_uchar str !i in
       count := !count + 1;
-      i := !i + Stdlib.Uchar.utf_decode_length decode
+      i := !i + Uchar.Decode_result.bytes_consumed decode
     done;
     !count
 
@@ -284,7 +288,7 @@ module Interleaved = struct
     let n = ref (count_uchars skip) in
     while !n > 0 && !i < String.length str do
       let decode = Stdlib.String.get_utf_8_uchar str !i in
-      i := !i + Stdlib.Uchar.utf_decode_length decode;
+      i := !i + Uchar.Decode_result.bytes_consumed decode;
       n := !n - 1
     done;
     !i
