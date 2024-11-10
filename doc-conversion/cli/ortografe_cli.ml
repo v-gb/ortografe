@@ -45,7 +45,7 @@ let bench =
      and+ prebuild = C.Arg.value (C.Arg.flag (C.Arg.info ~doc:"" [ "prebuild" ])) in
      let staged = load_rules rules ~prebuild in
      for i = 1 to 5 do
-       let t1 = Stdlib.Sys.time () in
+       let t1 = Time_float.now () in
        let dict, metadata = staged () in
        Ortografe.convert_files
          ~options:
@@ -58,8 +58,9 @@ let bench =
            ; plurals_in_s = metadata.plurals_in_s ||? Some "s"
            }
          arg1 (Some "/dev/null");
-       let t2 = Stdlib.Sys.time () in
-       Printf.printf "%d: %f\n" i (t2 -. t1)
+       let t2 = Time_float.now () in
+       Printf.printf "%d: %s\n" i
+         (Time_float.Span.to_string_hum (Time_float.diff t2 t1))
      done)
 
 let ext_conv ?src_type src dst which = Ortografe.ext_conv ?src_type src dst which
@@ -107,7 +108,7 @@ let main more_cmd =
   in
   let cmd =
     C.Cmd.group
-      (C.Cmd.info (Filename.basename Sys_unix.executable_name))
+      (C.Cmd.info (Filename.basename Stdlib.Sys.executable_name))
       [ C.Cmd.v
           (C.Cmd.info ~doc:"extrait le texte d'un document"
              ~man:

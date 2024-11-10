@@ -2,11 +2,7 @@
  (name ortografe)
  (libraries
    core
-   core.filename_base
-   core_unix.filename_unix
-   core_unix.sys_unix
    markup_t
-   stdio
    uucp
    uunf
    uuseg

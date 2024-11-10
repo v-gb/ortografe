@@ -90,8 +90,8 @@ let repo_root () =
   let root = ref (Filename.dirname Sys_unix.executable_name) in
   while
     not
-      (Sys_unix.file_exists_exn (Filename_base.concat !root ".git")
-      || Sys_unix.file_exists_exn (Filename_base.concat !root ".jj"))
+      (Sys_unix.file_exists_exn (Filename.concat !root ".git")
+      || Sys_unix.file_exists_exn (Filename.concat !root ".jj"))
   do
     root := Filename.dirname !root;
     match !root with
@@ -108,7 +108,7 @@ let where_to_find_static_files () =
        modify the files and reload without fiddling with the server. *)
     let repo_root = repo_root () in
     (* keep in sync with Dockerfile *)
-    (Filename_base.concat repo_root "_build/default/site/static", `In_container false)
+    (Filename.concat repo_root "_build/default/site/static", `In_container false)
 
 let respond_error_text status str =
   let code = Dream.status_to_int status and reason = Dream.status_to_string status in
@@ -131,7 +131,7 @@ let actual_from_system root disk_path _request =
      it. Two downloads of the 27MB ortografe_cli.exe in parallel were enough to crash the
      server into the 256MB limit. If we stream the data out, the memory usage is just 1MB per
      concurrent download (of files over 1MB). *)
-  let file_path = Filename_base.concat root disk_path in
+  let file_path = Filename.concat root disk_path in
   Lwt.catch
     (fun () ->
       let%lwt stat =
@@ -218,7 +218,6 @@ let embedded : Dict_gen_common.Dict_gen.embedded =
 
 let define_client_ip : Dream.middleware =
  fun handler request ->
-  let open Core in
   (match
      Dream.headers request "X-Forwarded-For"
      |> String.concat ~sep:","
@@ -234,12 +233,11 @@ let define_client_ip : Dream.middleware =
 let logger = function
   | `Long -> Dream.logger
   | `Short ->
-      let open Core in
       let ofday time_ns =
         time_ns
         |> Time_ns.to_int63_ns_since_epoch
         |> Int63.to_int_exn
-        |> (fun i -> Int.rem i (86400 * 1_000_000_000))
+        |> (fun i -> i % (86400 * 1_000_000_000))
         |> Time_ns.Span.of_int_ns
         |> Time_ns.Ofday.of_span_since_start_of_day_exn
         |> Time_ns.Ofday.to_millisecond_string
@@ -359,7 +357,6 @@ let _print_memory () =
   print_s (memory ())
 
 let time f =
-  let open Core in
   let before = Time_ns.now () in
   let res = f () in
   (res, Time_ns.Span.to_int_ms (Time_ns.diff (Time_ns.now ()) before))
@@ -376,9 +373,8 @@ let get_dict () =
              Dict_search.Erofa.of_persist Data.data_homemade_dict_erofa_dict_search)
        in
        let after = memory () in
-       (let open Core in
-        print_s
-          [%sexp "loading index", (before : Sexp.t), `ms (ms : int), (after : Sexp.t)]);
+       print_s
+         [%sexp "loading index", (before : Sexp.t), `ms (ms : int), (after : Sexp.t)];
        t)
   in
   let oe_pattern = lazy (String.Search_pattern.create "œ") in
@@ -450,8 +446,7 @@ let post_conv ~max_input_size ~staged request =
       | `Ok l -> (
           let rules, rest =
             List.partition_map
-              ~f:(fun a ->
-                let ((name, values) as pair) = a in
+              ~f:(fun ((name, values) as pair) ->
                 match name with
                 | "custom" -> (
                     match values with

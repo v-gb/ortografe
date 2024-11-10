@@ -227,8 +227,6 @@ let convert (type a) ?buf ?progress:_ ~options src ~(dst : a out) : a =
   | Channel ch -> iter_pure_text ~options src (Out_channel.output_string ch)
 
 module Interleaved = struct
-  open Core
-
   let lsplit2_delim_right str ~on =
     match String.index str on with
     | None -> None

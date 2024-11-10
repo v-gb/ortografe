@@ -9,7 +9,6 @@ let odt_transform ~convert_text signal =
   (* spec: http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#__RefHeading__1415130_253892949 *)
   (* this won't work in many cases, due to words being split up by document structure *)
   let text_ns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0" in
-  let open Core in
   let stack = Stack.create () in
   Markup.map
     (fun elt ->
@@ -38,7 +37,6 @@ let odt_transform ~convert_text signal =
 
 let odt_transform_interleaved ~convert_text signal =
   let text_ns = "urn:oasis:names:tc:opendocument:xmlns:text:1.0" in
-  let open Core in
   let stack = Stack.create () in
   let state =
     Text.Interleaved.create ~embed:(fun s -> `Text [ s ]) ~convert:convert_text

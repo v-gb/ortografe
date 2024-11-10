@@ -6,8 +6,6 @@ open struct
 end
 
 module Dyn_protect = struct
-  open Core
-
   type t = (unit -> unit) Stack.t
 
   let add (t : t) ~finally = Stack.push t finally
@@ -146,8 +144,6 @@ let open_channel dp name =
   Dyn_protect.add dp ~finally:(fun () -> Out_channel.close out_ch);
   out_ch
 
-let read_all name = In_channel.with_file name ~f:In_channel.input_all
-
 let src_dst_typ ?src_type src dst ~dyn_protect:dp =
   let src_type =
     Option.map
@@ -180,7 +176,7 @@ let src_dst_typ ?src_type src dst ~dyn_protect:dp =
         | None -> Stdlib.Filename.remove_extension src_name ^ "-conv" ^ dst_ext
       in
       (* first read, then open for writing, in case input = output *)
-      let src_str = read_all src_name in
+      let src_str = In_channel.read_all src_name in
       (src_str, open_channel dp dst_name, typ)
 
 let convert_files ?src_type ~options src dst =
@@ -230,7 +226,7 @@ let ext_conv ?src_type src dst inex =
             let strs =
               (match f with
               | None -> In_channel.input_all In_channel.stdin
-              | Some f -> read_all f)
+              | Some f -> In_channel.read_all f)
               |> Sexplib.Sexp.of_string_many
               |> Stdlib.List.to_seq
               |> Stdlib.Queue.of_seq
