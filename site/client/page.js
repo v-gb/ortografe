@@ -230,7 +230,8 @@ if (dict_search_input) {
 const regles_perso_link = document.getElementById("regles-perso-link");
 let regles_perso_lazy_dict = null;
 if (regles_perso_link) {
-    const link = (new URL(window.location)).searchParams.get("url");
+    const search_params = (new URL(window.location)).searchParams;
+    const link = search_params.get("url");
     if (link) {
         if (!link.startsWith("http://") && !link.startsWith("https://")) {
             throw new Error(`${link} n'est pas un lien http/https`);
@@ -247,5 +248,24 @@ if (regles_perso_link) {
             }
             return await response.blob();
         })
+    } else {
+        regles_perso_lazy_dict = (() => null);
+    }
+    const regles = search_params.get("regles");
+    if (regles) {
+        const custom = []
+        for (const bit of regles.split(" ")) {
+            const elt = document.getElementById("conv-" + bit);
+            if (elt) {
+                elt.checked = true;
+            } else {
+                custom.push(bit)
+            }
+        }
+        const elt = document.getElementById("conv-custom");
+        if (elt) {
+            console.log('bit', custom)
+            elt.value = custom.join(' ');
+        }
     }
 }

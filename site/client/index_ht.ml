@@ -1274,6 +1274,16 @@ module Regles_perso = struct
                         [ text "url manquante" ]
                     ; text "."
                     ]
+                ; details ~attrs:[ exp_hidden_class ]
+                    [ text "Modifier la sélection" ]
+                    [ div
+                        (Dict_gen_common.Dict_gen.all_selection_html
+                           ~url_prefix:"/static/" ~name_prefix:"" ~id_prefix:"conv-"
+                           ~checked:(fun _ -> false)
+                           ()
+                        |> nodes_of_string)
+                    ; div ~attrs:[ ("id", "form-conv-button-error") ] []
+                    ]
                 ; section
                     [ h3 [ text "Transcription interactive" ]
                     ; Index.interactive_transcription ~id_textarea:"user-text2"
@@ -1282,18 +1292,7 @@ module Regles_perso = struct
                     ]
                 ; section
                     [ h3 [ text "Transcription de documents, en ligne" ]
-                    ; Index.submit_file
-                        (fun button ->
-                          [ div ~cl:"display: none"
-                              (Dict_gen_common.Dict_gen.all_selection_html
-                                 ~url_prefix:"/static/" ~name_prefix:""
-                                 ~id_prefix:"conv-"
-                                 ~checked:(fun _ -> false)
-                                 ()
-                              |> nodes_of_string)
-                          ; div ~attrs:[ ("id", "form-conv-button-error") ] []
-                          ; +button
-                          ])
+                    ; Index.submit_file Fn.id
                         ~label_attrs:[ ("id", "form-conv-label") ]
                         ~replace_onchange:[ ("id", "form-conv-button") ]
                         ~attrs:[ ("id", "form-conv") ]

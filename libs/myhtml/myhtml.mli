@@ -177,7 +177,13 @@ val html :
   lang:string -> head:node list -> ?body_style:string -> body:node list -> unit -> node
 
 val details :
-  ?cl:string -> ?summary_cl:string -> ?open_:bool -> node list -> node list -> node
+     ?cl:string
+  -> ?summary_cl:string
+  -> ?attrs:(string * string) list
+  -> ?open_:bool
+  -> node list
+  -> node list
+  -> node
 
 val cite : ?cl:string -> node list -> node
 

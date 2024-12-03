@@ -353,9 +353,9 @@ let html ~lang ~head ?body_style ~body () =
     ; body
     ]
 
-let details ?cl ?summary_cl ?(open_ = false) summary body =
+let details ?cl ?summary_cl ?(attrs = []) ?(open_ = false) summary body =
   elt ?cl "details"
-    ~attrs:(if open_ then [ ("open", "") ] else [])
+    ~attrs:(if open_ then ("open", "") :: attrs else attrs)
     (elt ?cl:summary_cl "summary" summary :: body)
 
 let cite ?cl body = elt ?cl "cite" body
