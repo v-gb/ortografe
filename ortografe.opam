@@ -4,6 +4,7 @@ depends: [
   "ocaml"
   "dune" {>= "3.12"}
   "ocamlformat" {with-dev-setup & = "0.26.2"}
+  "sexp" {with-dev-setup}
   "base"
   "base64"
   "bheap"
