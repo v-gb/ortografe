@@ -529,7 +529,7 @@ let run ?(log = true) ?port ?tls () =
   Dream.run ?port ?tls
     ~interface:"0.0.0.0" (* apparently only listens on lo otherwise *)
     ~error_handler:(Dream.error_template my_error_template)
-  @@ (if in_container (* approximates "in prod" *) then define_client_ip else Fun.id)
+  @@ (if in_container(* approximates "in prod" *)  then define_client_ip else Fun.id)
   @@ (if log then logger `Short else Fun.id)
   @@ redirect
   @@ Dream.router

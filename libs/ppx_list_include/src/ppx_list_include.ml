@@ -27,28 +27,26 @@ let list_literal e =
            | _ -> (e :: cur, acc))
          ([], match tail with None -> [] | Some e -> [ `Dyn e ])
     |> add_list_literal
-    |> (function
-         | [ `Literal (loc, l) ] -> Ast_builder.Default.elist ~loc l
-         | [ `Literal (loc, l); `Dyn tail ] ->
-             Ast_builder.Default.elist_tail ~loc l tail
-         | [ `Dyn e ] ->
-             (* Don't optimize type errors away in things like [+""] *)
-             let loc = e.pexp_loc in
-             [%expr ([%e e] : _ Stdlib.List.t)]
-         | l ->
-             let loc = e.pexp_loc in
-             let e =
-               Ast_builder.Default.elist ~loc
-                 (List.map
-                    (function
-                      | `Dyn e -> e
-                      | `Literal (loc, l) -> Ast_builder.Default.elist ~loc l)
-                    l)
-             in
-             (* Maybe we should use Base.List.concat, because Stdlib.List.concat
+    |> ( function
+    | [ `Literal (loc, l) ] -> Ast_builder.Default.elist ~loc l
+    | [ `Literal (loc, l); `Dyn tail ] -> Ast_builder.Default.elist_tail ~loc l tail
+    | [ `Dyn e ] ->
+        (* Don't optimize type errors away in things like [+""] *)
+        let loc = e.pexp_loc in
+        [%expr ([%e e] : _ Stdlib.List.t)]
+    | l ->
+        let loc = e.pexp_loc in
+        let e =
+          Ast_builder.Default.elist ~loc
+            (List.map
+               (function
+                 | `Dyn e -> e | `Literal (loc, l) -> Ast_builder.Default.elist ~loc l)
+               l)
+        in
+        (* Maybe we should use Base.List.concat, because Stdlib.List.concat
                 is not tail rec, and rebuilds the last element of the list because
                 it uses Stdlib.(@) which fails to optimize l @ [], unlike Base.(@). *)
-             [%expr Stdlib.List.concat [%e e]])
+        [%expr Stdlib.List.concat [%e e]] )
     |> Option.some
   else None
 

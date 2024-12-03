@@ -622,7 +622,9 @@ module Heap = Binary_heap.Make (struct
        compare by decreasing j, so we try paths that match the most of the phonetics,
        which favors graphems where letters are pronounced, instead of being
        mute. Maybe a more principled search would be A* with an order by surprise. *)
-    match Int.compare j2 j1 with 0 -> Int.compare i2 i1 | c -> c
+    match Int.compare j2 j1 with
+    | 0 -> Int.compare i2 i1
+    | c -> c
 end)
 
 let search (rules : t) word phon =

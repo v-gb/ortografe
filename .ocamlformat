@@ -1,4 +1,4 @@
-version = 0.26.1-90-gf959752
+version = 0.27.0
 profile = conventional
 break-separators = before
 dock-collection-brackets = false

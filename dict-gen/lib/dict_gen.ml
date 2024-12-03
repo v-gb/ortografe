@@ -61,11 +61,10 @@ let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
               loop data))
     |> Map.of_alist_multi (module String)
     |> (fun m ->
-         Map.iter m ~f:(function
-           | [] | [ _ ] -> ()
-           | _ :: _ :: _ as l ->
-               List.iter l ~f:(fun (conflicts, _) -> conflicts := true));
-         m)
+    Map.iter m ~f:(function
+      | [] | [ _ ] -> ()
+      | _ :: _ :: _ as l -> List.iter l ~f:(fun (conflicts, _) -> conflicts := true));
+    m)
     |> Map.filter_map ~f:(function
          | [ (conflicts, s) ] -> if !conflicts then None else Some s
          | _ -> None)
@@ -162,28 +161,26 @@ let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
              fail := true);
            List.map l2 ~f:Tuple.T2.swap)
     |> (fun m ->
-         Map.mapi m ~f:(fun ~key:post90 ~data ->
-             let len_1 = List.length data = 1 in
-             List.filter_map data ~f:(fun data ->
-                 let data0 = (fst data, snd data, 0) in
-                 if not len_1
-                 then Some data0
-                 else
-                   match Map.find regular_plurals post90 with
-                   | None -> Some data0
-                   | Some (sp, other) -> (
-                       match Map.find m other with
-                       | None | Some [] | Some (_ :: _ :: _) -> Some data0
-                       | Some [ data2 ] ->
-                           let data_s, data_p =
-                             match sp with `S -> (data, data2) | `P -> (data2, data)
-                           in
-                           if [%equal: string_sp list * string_sp] data_s data_p
-                           then
-                             match sp with
-                             | `S -> Some (fst data, snd data, 1)
-                             | `P -> None
-                           else Some data0))))
+    Map.mapi m ~f:(fun ~key:post90 ~data ->
+        let len_1 = List.length data = 1 in
+        List.filter_map data ~f:(fun data ->
+            let data0 = (fst data, snd data, 0) in
+            if not len_1
+            then Some data0
+            else
+              match Map.find regular_plurals post90 with
+              | None -> Some data0
+              | Some (sp, other) -> (
+                  match Map.find m other with
+                  | None | Some [] | Some (_ :: _ :: _) -> Some data0
+                  | Some [ data2 ] ->
+                      let data_s, data_p =
+                        match sp with `S -> (data, data2) | `P -> (data2, data)
+                      in
+                      if [%equal: string_sp list * string_sp] data_s data_p
+                      then
+                        match sp with `S -> Some (fst data, snd data, 1) | `P -> None
+                      else Some data0))))
     |> Map.mapi ~f:(fun ~key:post90 ~data ->
            List.map data ~f:(fun ((pre_erofas, _, flags) as v) ->
                match Hashtbl.find special_cases post90 with

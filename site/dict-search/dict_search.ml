@@ -112,7 +112,7 @@ let search (type a) ({ index; max_length } : a t) term ~compare ~limit =
     |> Sequence.concat_map ~f:(fun (a, l) ->
            Array.to_sequence_mutable (Array.map l ~f:(fun b -> (a, b))))
     |> (fun l ->
-         sequence_take_unique ~compare:(fun (_, a1) (_, a2) -> compare a1 a2) l limit)
+    sequence_take_unique ~compare:(fun (_, a1) (_, a2) -> compare a1 a2) l limit)
     |> Sequence.to_list
   in
   all_matches

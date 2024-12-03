@@ -382,8 +382,7 @@ let interpret_rules rules =
       |> List.hd
       |> (__ ||? Some "s")
       (* until we roll this code to the safari extension, it seems best to avoid this *)
-      |>
-      function
+      |> function
       | (None | Some "s") as opt -> opt
       | _ -> None
     in

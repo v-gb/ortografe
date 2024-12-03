@@ -111,8 +111,8 @@ depends: [
   "ocaml_intrinsics_kernel" {= "v0.17.1"}
   "ocamlbuild" {= "0.15.0"}
   "ocamlfind" {= "1.9.6"}
-  "ocamlformat" {= "0.26.2" & with-dev-setup}
-  "ocamlformat-lib" {= "0.26.2" & with-dev-setup}
+  "ocamlformat" {= "0.27.0" & with-dev-setup}
+  "ocamlformat-lib" {= "0.27.0" & with-dev-setup}
   "ocp-indent" {= "1.8.1" & with-dev-setup}
   "ocplib-endian" {= "1.2"}
   "optint" {= "0.3.0"}
