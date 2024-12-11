@@ -274,7 +274,12 @@ let create () : t =
   new_fixed "l" [ ("", Surprising) (* fils *) ];
   new_fixed "l$" [ ("", Surprising) (* gentil *) ];
   new_fixed "aul" [ ("o", Surprising) (* gentil *) ];
-  new_fixed "g" [ ("", Surprising) (* sang *) ];
+  new_ "g" (fun word _ j ->
+      if in_ortho_vowels word#::(j, 0)
+      then []
+      (* limit where silent g can be, otherwise it makes it easy to accept nonsense
+         changes like c/g accepting descendre->desgendre. *)
+      else [ ("", Surprising) (* sang *) ]);
   new_fixed "x$" [ ("", Core) (* ?? too general? *) ];
   new_fixed "ct$" [ ("", Surprising) (* respect *) ];
   new_fixed "cts$" [ ("", Surprising) (* respects *) ];
