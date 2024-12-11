@@ -80,7 +80,9 @@ let transform (type a) ~transform ~flavor src ~(dst : a out) : a =
   (* https://v3.ocaml.org/p/markup/latest/doc/Markup/index.html
      Note: no implicit closing of tags *)
   Markup.string src
-  |> (match flavor with `Xml -> Markup.parse_xml __ | `Html -> Markup.parse_html __)
+  |> (match flavor with
+     | `Xml -> Markup.parse_xml ~entity:Markup.xhtml_entity __
+     | `Html -> Markup.parse_html __)
   |> Markup.signals
   |> transform
   |> (match flavor with `Xml -> Markup.write_xml __ | `Html -> Markup.write_html __)
