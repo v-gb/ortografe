@@ -104,9 +104,11 @@ module B : sig
   val t2' : 'a1 t' -> 'a2 t' -> ('a1 * 'a2) t'
   val t3' : 'a1 t' -> 'a2 t' -> 'a3 t' -> ('a1 * 'a2 * 'a3) t'
   val t4' : 'a1 t' -> 'a2 t' -> 'a3 t' -> 'a4 t' -> ('a1 * 'a2 * 'a3 * 'a4) t'
-  val fun1' : 'a1 t -> 'r t' -> ('a1 -> 'r) t'
-  val fun2' : 'a1 t -> 'a2 t -> 'r t' -> ('a1 -> 'a2 -> 'r) t'
-  val fun3' : 'a1 t -> 'a2 t -> 'a3 t -> 'r t' -> ('a1 -> 'a2 -> 'a3 -> 'r) t'
+  val fun1' : ?exn:bool -> 'a1 t -> 'r t' -> ('a1 -> 'r) t'
+  val fun2' : ?exn:bool -> 'a1 t -> 'a2 t -> 'r t' -> ('a1 -> 'a2 -> 'r) t'
+
+  val fun3' :
+    ?exn:bool -> 'a1 t -> 'a2 t -> 'a3 t -> 'r t' -> ('a1 -> 'a2 -> 'a3 -> 'r) t'
 
   val fun4' :
     'a1 t -> 'a2 t -> 'a3 t -> 'a4 t -> 'r t' -> ('a1 -> 'a2 -> 'a3 -> 'a4 -> 'r) t'

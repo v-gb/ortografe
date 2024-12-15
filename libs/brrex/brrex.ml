@@ -210,6 +210,9 @@ let main (rpcs : rpc list) f =
     ignore (loop () : [ `Never_returns ] Fut.t)
   else f ()
 
+let js_error f =
+  try f () with e -> throw (Jv.Error.v (Jstr.of_string (Printexc.to_string e)))
+
 module B = struct
   type 'a t = Jv.t -> 'a
   type 'a t' = 'a -> Jv.t
@@ -248,11 +251,22 @@ module B = struct
   let t2' f1 f2 (a1, a2) = Jv.of_jv_list [ f1 a1; f2 a2 ]
   let t3' f1 f2 f3 (a1, a2, a3) = Jv.of_jv_list [ f1 a1; f2 a2; f3 a3 ]
   let t4' f1 f2 f3 f4 (a1, a2, a3, a4) = Jv.of_jv_list [ f1 a1; f2 a2; f3 a3; f4 a4 ]
-  let fun1' f1 fres f = Jv.callback ~arity:1 (fun a1 -> fres (f (f1 a1)))
-  let fun2' f1 f2 fres f = Jv.callback ~arity:2 (fun a1 a2 -> fres (f (f1 a1) (f2 a2)))
 
-  let fun3' f1 f2 f3 fres f =
-    Jv.callback ~arity:3 (fun a1 a2 a3 -> fres (f (f1 a1) (f2 a2) (f3 a3)))
+  let fun1' ?(exn = false) f1 fres f =
+    Jv.callback ~arity:1 (fun a1 ->
+        if exn then js_error (fun () -> fres (f (f1 a1))) else fres (f (f1 a1)))
+
+  let fun2' ?(exn = false) f1 f2 fres f =
+    Jv.callback ~arity:2 (fun a1 a2 ->
+        if exn
+        then js_error (fun () -> fres (f (f1 a1) (f2 a2)))
+        else fres (f (f1 a1) (f2 a2)))
+
+  let fun3' ?(exn = false) f1 f2 f3 fres f =
+    Jv.callback ~arity:3 (fun a1 a2 a3 ->
+        if exn
+        then js_error (fun () -> fres (f (f1 a1) (f2 a2) (f3 a3)))
+        else fres (f (f1 a1) (f2 a2) (f3 a3)))
 
   let fun4' f1 f2 f3 f4 fres f =
     Jv.callback ~arity:4 (fun a1 a2 a3 a4 -> fres (f (f1 a1) (f2 a2) (f3 a3) (f4 a4)))
