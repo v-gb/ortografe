@@ -123,12 +123,23 @@ if (user_text2) {
             set_progress(0);
         }        
     })
+    const update_url = sequentialized_and_merged(async () => {
+        const url = new URL(window.location);
+        const searchParams = url.searchParams;
+        if (search_params.has("regles")) {
+            const dict_gen_browser = await lazy_dict_gen_browser();
+            const [ _rules, selection_text ] = dict_gen_browser.currently_selected_rules("conv-");
+            searchParams.set("regles", selection_text);
+            window.history.replaceState(null, "", url);
+        }
+    })
     document.getElementById('form-conv')?.addEventListener("change", () => {
         if (textarea_has_been_used) {
             // Avoid downloading all the stuff if the user hasn't typed in the
             // textarea yet.
             update();
         }
+        update_url();
     })
 }
 
