@@ -46,7 +46,7 @@ let currently_selected_rules id_prefix =
     |> Dict_gen_common.Dict_gen.custom_rule
   in
   let selected_rules : selected_rules =
-    Option.to_list custom_rule @ selected_builtins
+    selected_builtins @ Option.to_list custom_rule
   in
   let selection_text =
     if List.is_empty selected_rules
