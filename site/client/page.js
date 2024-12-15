@@ -55,7 +55,7 @@ if (user_text2) {
         const dict_blob =
               regles_perso_lazy_dict
               ? await regles_perso_lazy_dict()
-              : document.getElementById('form-conv-dict').files[0];
+              : document.getElementById('form-conv-dict')?.files?.[0];
         const word_f =
               await dict_gen_browser.staged_generate(
                   cache2,
@@ -93,7 +93,7 @@ if (user_text2) {
         const dict_blob =
               regles_perso_lazy_dict
               ? await regles_perso_lazy_dict()
-              : document.getElementById('form-conv-dict').files[0];
+              : document.getElementById('form-conv-dict')?.files?.[0];
         if (!dict_blob) {
             e.target.form.submit();
             return
@@ -238,45 +238,41 @@ if (dict_search_input) {
     }))
 }
 
-const regles_perso_link = document.getElementById("regles-perso-link");
+const search_params = (new URL(window.location)).searchParams;
 let regles_perso_lazy_dict = null;
+const regles_perso_link = document.getElementById("regles-perso-link");
 if (regles_perso_link) {
-    const search_params = (new URL(window.location)).searchParams;
     const link = search_params.get("url");
-    if (link) {
-        if (!link.startsWith("http://") && !link.startsWith("https://")) {
-            throw new Error(`${link} n'est pas un lien http/https`);
-        }
-        regles_perso_link.href = link;
-        regles_perso_link.text = (new URL(link)).hostname.replace(/^www[.]([^.]+[.][^.]+)$/, (_, s) => s);
-        regles_perso_link.classList.add('orthographe-rationnelle-dict')
-        regles_perso_link.setAttribute('orthographe-rationnelle-dict-url', link)
-
-        regles_perso_lazy_dict = async_lazy(async () => {
-            const response = await fetch(link);
-            if (!response.ok) {
-                throw new Error(`${response.status} ${response.statusText}`);
-            }
-            return await response.blob();
-        })
-    } else {
-        regles_perso_lazy_dict = (() => null);
+    if (!link.startsWith("http://") && !link.startsWith("https://")) {
+        throw new Error(`${link} n'est pas un lien http/https`);
     }
-    const regles = search_params.get("regles");
-    if (regles) {
-        const custom = []
-        for (const bit of regles.split(" ")) {
-            const elt = document.getElementById("conv-" + bit);
-            if (elt) {
-                elt.checked = true;
-            } else {
-                custom.push(bit)
-            }
+    regles_perso_link.href = link;
+    regles_perso_link.text = (new URL(link)).hostname.replace(/^www[.]([^.]+[.][^.]+)$/, (_, s) => s);
+    regles_perso_link.classList.add('orthographe-rationnelle-dict')
+    regles_perso_link.setAttribute('orthographe-rationnelle-dict-url', link)
+
+    regles_perso_lazy_dict = async_lazy(async () => {
+        const response = await fetch(link);
+        if (!response.ok) {
+            throw new Error(`${response.status} ${response.statusText}`);
         }
-        const elt = document.getElementById("conv-custom");
+        return await response.blob();
+    })
+}
+
+const regles = search_params.get("regles");
+if (regles) {
+    const custom = []
+    for (const bit of regles.split(" ")) {
+        const elt = document.getElementById("conv-" + bit);
         if (elt) {
-            console.log('bit', custom)
-            elt.value = custom.join(' ');
+            elt.checked = true;
+        } else {
+            custom.push(bit)
         }
+    }
+    const elt = document.getElementById("conv-custom");
+    if (elt) {
+        elt.value = custom.join(' ');
     }
 }
