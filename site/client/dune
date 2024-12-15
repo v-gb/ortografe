@@ -26,7 +26,11 @@
  (modules client_bin))
 
 (rule
- (targets index.html regles_perso.html)
+ (targets
+   index.html
+   regles_perso_url=true.html
+   regles_perso_url=false.html
+ )
  (deps
   (sandbox always)
    ../static/books.html

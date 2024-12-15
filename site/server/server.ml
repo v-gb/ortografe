@@ -512,6 +512,12 @@ let post_conv ~max_input_size ~staged request =
           | _ -> respond_error_text `Bad_Request "")
       | _ -> respond_error_text `Bad_Request "")
 
+let regles_perso ~static_root =
+ fun request ->
+  let url = Option.is_some (Dream.query request "url") in
+  from_filesystem static_root [%string "regles_perso_url=%{Bool.to_string url}.html"]
+    request
+
 let run ?(log = true) ?port ?tls () =
   let staged = lazy (Dict_gen_common.Dict_gen.staged_gen (`Embedded embedded)) in
   (* We have 250MB of memory in prod. If we say:
@@ -536,7 +542,7 @@ let run ?(log = true) ?port ?tls () =
        [ Dream.get "/dict" (get_dict ())
        ; Dream.post "/conv" (post_conv ~max_input_size ~staged)
        ; Dream.get "/" (from_filesystem static_root "index.html")
-       ; Dream.get "/regles/perso" (from_filesystem static_root "regles_perso.html")
+       ; Dream.get "/regles/perso" (regles_perso ~static_root)
        ; Dream.get "/static/**" (Dream.static ~loader:from_filesystem static_root)
        ]
 

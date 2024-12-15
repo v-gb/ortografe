@@ -1249,7 +1249,7 @@ module Index = struct
 end
 
 module Regles_perso = struct
-  let main () : node =
+  let main ~url_param : node =
     html
       ~head:
         (head ~root:false ~title:"Orthographe rationnelle -- dictionnaire personnalisé"
@@ -1266,40 +1266,56 @@ module Regles_perso = struct
             [ div ~cl:"margin: 0 8px 8px 8px;"
                 [ h1 ~cl:"text-align:center; margin-top: 1em; margin-bottom: 1em;"
                     [ text "Orthographe rationnelle" ]
-                ; p
-                    [ text "Les outils de cette page appliquent un dictionnaire de "
-                    ; a
-                        ~attrs:[ ("id", "regles-perso-link") ]
-                        ~href:""
-                        [ text "url manquante" ]
-                    ; text "."
-                    ]
-                ; details ~attrs:[ exp_hidden_class ]
-                    [ text "Modifier la sélection" ]
-                    [ div
-                        (Dict_gen_common.Dict_gen.all_selection_html
-                           ~url_prefix:"/static/" ~name_prefix:"" ~id_prefix:"conv-"
-                           ~checked:(fun _ -> false)
-                           ()
-                        |> nodes_of_string)
-                    ; div ~attrs:[ ("id", "form-conv-button-error") ] []
-                    ]
-                ; section
-                    [ h3 [ text "Transcription interactive" ]
-                    ; Index.interactive_transcription ~id_textarea:"user-text2"
-                        ~id_converted_text:"converted-text2"
-                        ~initial_text:(`Placeholder "Tapez le texte à transcrire ici.")
-                    ]
-                ; section
-                    [ h3 [ text "Transcription de documents, en ligne" ]
-                    ; Index.submit_file Fn.id
-                        ~label_attrs:[ ("id", "form-conv-label") ]
-                        ~replace_onchange:[ ("id", "form-conv-button") ]
-                        ~attrs:[ ("id", "form-conv") ]
-                    ; p [ text "Les formats acceptés sont :" ]
-                    ; Index.format_acceptes ()
-                    ]
-                ; Index.section_transcription_pages `Url_page
+                ; +(if url_param
+                    then
+                      [ p
+                          [ text
+                              "Les outils de cette page appliquent un dictionnaire de "
+                          ; a
+                              ~attrs:[ ("id", "regles-perso-link") ]
+                              ~href:""
+                              [ text "url manquante" ]
+                          ; text "."
+                          ]
+                      ]
+                    else [])
+                ; Index.submit_file
+                    ~label_attrs:[ ("id", "form-conv-label") ]
+                    ~replace_onchange:[ ("id", "form-conv-button") ]
+                    ~attrs:[ ("id", "form-conv") ]
+                    (fun button ->
+                      [ details
+                          ?cl:(if url_param then Some "display: none" else None)
+                          [ text
+                              "Les outils de cette page appliquent cette sélection de \
+                               règles :"
+                          ]
+                          [ div
+                              (Dict_gen_common.Dict_gen.all_selection_html
+                                 ~url_prefix:"/static/" ~name_prefix:""
+                                 ~id_prefix:"conv-"
+                                 ~checked:(fun _ -> false)
+                                 ()
+                              |> nodes_of_string)
+                          ; div ~attrs:[ ("id", "form-conv-button-error") ] []
+                          ]
+                      ; section
+                          [ h3 [ text "Transcription interactive" ]
+                          ; Index.interactive_transcription ~id_textarea:"user-text2"
+                              ~id_converted_text:"converted-text2"
+                              ~initial_text:
+                                (`Placeholder "Tapez le texte à transcrire ici.")
+                          ]
+                      ; section
+                          [ h3 [ text "Transcription de documents, en ligne" ]
+                          ; +button
+                          ; p [ text "Les formats acceptés sont :" ]
+                          ; Index.format_acceptes ()
+                          ]
+                      ; +(if url_param
+                          then [ Index.section_transcription_pages `Url_page ]
+                          else [])
+                      ])
                 ]
             ]
         ]
@@ -1308,7 +1324,10 @@ end
 
 let () =
   List.iter
-    [ ("index.html", Index.main ()); ("regles_perso.html", Regles_perso.main ()) ]
+    [ ("index.html", Index.main ())
+    ; ("regles_perso_url=true.html", Regles_perso.main ~url_param:true)
+    ; ("regles_perso_url=false.html", Regles_perso.main ~url_param:false)
+    ]
     ~f:(fun (filename, node) ->
       Out_channel.write_all filename
         ~data:
