@@ -222,7 +222,8 @@ if (dict_search_input) {
         // otherwise result in no matches.
         // Trailing spaces on the other hand could match. We remove one because
         // gboard will add a trailing space on completion.
-        const text = dict_search_input.value.replace(/^ *(.*?) ?$/, "$1");
+        // Lowercase because having no match for capitalized words can confuse.
+        const text = dict_search_input.value.replace(/^ *(.*?) ?$/, "$1").toLowerCase();
         if (text == '') {
             html = ''
         } else {
