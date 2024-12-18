@@ -59,11 +59,11 @@ let split_including_delims str c =
       i := j)
   in
   while
-    match Stdlib.String.index_from str !i c with
-    | exception Stdlib.Not_found ->
+    match Stdlib.String.index_from_opt str !i c with
+    | None ->
         got (String.length str);
         false
-    | j ->
+    | Some j ->
         got j;
         got (j + 1);
         true
