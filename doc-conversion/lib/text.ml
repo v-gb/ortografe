@@ -94,9 +94,8 @@ let iter_words src ~f ~f_mem =
             if f_mem sub
             then f what start len
             else
-              List.iter
-                ~f:(fun (start', len') -> f what (start + start') len')
-                (split_including_delims sub '-')
+              List.iter (split_including_delims sub '-') ~f:(fun (start', len') ->
+                  f what (start + start') len')
           else f what start len)
 
 let string_of_uchars uchars =
@@ -105,7 +104,8 @@ let string_of_uchars uchars =
   in
   let b = Bytes.create nbytes in
   let i = ref 0 in
-  List.iter ~f:(fun c -> i := !i + Bytes.Utf8.set b !i c) uchars;
+  List.iter uchars ~f:(fun c -> i := !i + Bytes.Utf8.set b !i c);
+
   Bytes.to_string b
 
 let split_on_first_uchar src f =
@@ -143,7 +143,7 @@ let capitalize w =
 
 let map_case w f =
   let b = Buffer.create (String.length w) in
-  let add l = List.iter ~f:(fun u -> Stdlib.Buffer.add_utf_8_uchar b u) l in
+  let add l = List.iter l ~f:(fun u -> Stdlib.Buffer.add_utf_8_uchar b u) in
   if
     Uutf.String.fold_utf_8
       (fun bad _i -> function

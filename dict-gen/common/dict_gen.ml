@@ -192,9 +192,8 @@ let all_builtin =
   lazy
     (`Oe
     :: `Rect1990
-    :: List.map
-         ~f:(fun r -> `Rewrite (`Builtin (Rewrite.name r)))
-         (force Rewrite.all_builtin))
+    :: List.map (force Rewrite.all_builtin) ~f:(fun r ->
+           `Rewrite (`Builtin (Rewrite.name r))))
 
 let name : rule -> _ = function
   | `Rewrite (`Builtin name) -> name

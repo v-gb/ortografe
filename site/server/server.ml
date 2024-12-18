@@ -184,11 +184,9 @@ let from_filesystem root path request =
     in
     if
       has_compressed_version
-      && List.exists
-           ~f:(fun s ->
+      && List.exists (Dream.headers request "Accept-Encoding") ~f:(fun s ->
              String.split ~on:',' s
              |> List.exists ~f:(fun s -> String.( = ) (String.strip s) "gzip"))
-           (Dream.headers request "Accept-Encoding")
     then (path ^ ".gz", [ ("Content-Encoding", "gzip") ] @ Dream.mime_lookup path)
     else (path, [])
   in
@@ -208,7 +206,8 @@ let from_filesystem root path request =
         | _ -> false)
   in
   if cache then Dream.set_header response "Cache-Control" "max-age=3600";
-  List.iter ~f:(fun (k, v) -> Dream.set_header response k v) response_headers;
+  List.iter response_headers ~f:(fun (k, v) -> Dream.set_header response k v);
+
   Lwt.return response
 
 let embedded : Dict_gen_common.Dict_gen.embedded =
@@ -388,8 +387,7 @@ let get_dict () =
           else Dict_search.Erofa.search (Lazy.force dict_search) term ~limit:10
         in
         let rows =
-          List.map
-            ~f:(fun (as_, b, c, flags) ->
+          List.map responses ~f:(fun (as_, b, c, flags) ->
               let plural = if flags.implied_plural then "(s)" else "" in
               let as_display, b_display =
                 if List.is_empty as_
@@ -413,7 +411,6 @@ let get_dict () =
               in
               [%string
                 {|<tr><td>%{link}</td><td>%{as_display}</td><td>%{b_display}</td><td>%{c_display}</td></tr>|}])
-            responses
           |> String.concat ~sep:"\n"
         in
         let html =
@@ -445,8 +442,7 @@ let post_conv ~max_input_size ~staged request =
       match%lwt Dream.multipart ~csrf:false request with
       | `Ok l -> (
           let rules, rest =
-            List.partition_map
-              ~f:(fun ((name, values) as pair) ->
+            List.partition_map l ~f:(fun ((name, values) as pair) ->
                 match name with
                 | "custom" -> (
                     match values with
@@ -457,7 +453,6 @@ let post_conv ~max_input_size ~staged request =
                     match Dict_gen_common.Dict_gen.of_name_builtin name with
                     | Some rule -> First (Some rule)
                     | None -> Second pair))
-              l
           in
           let rules = List.filter_map ~f:Fun.id rules in
           match rest with

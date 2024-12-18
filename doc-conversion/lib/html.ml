@@ -19,15 +19,13 @@ let html_transform ~convert_text signal =
             match tag with
             | "code" | "script" | "noscript" | "style" | "textarea" -> true
             | _ ->
-                List.exists
-                  ~f:(fun ((_, attr), _value) ->
+                List.exists attributes ~f:(fun ((_, attr), _value) ->
                     match attr with
                     | "class" ->
                         String.Search_pattern.matches notranslate_pattern attr
                         || String.Search_pattern.matches notranscribe_pattern attr
                     | "contenteditable" -> true
                     | _ -> false)
-                  attributes
           in
           Stack.push stack (tag, !hide_current);
           hide_current := hide

@@ -204,7 +204,8 @@ let string_of_sexp_always_quote_avoid_escapes =
         Buffer.add_string buf "\""
     | List l ->
         Buffer.add_string buf "(";
-        List.iter ~f:(print_sexp buf) l;
+        List.iter l ~f:(print_sexp buf);
+
         Buffer.add_string buf ")"
   in
   fun sexp ->

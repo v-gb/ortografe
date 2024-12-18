@@ -257,11 +257,9 @@ let main more_cmd =
                  List.length args > 1
                  && match output with `File (Some _) -> true | _ -> false
                then failwith "can't specify -o with multiple input files";
-               List.iter
-                 ~f:(fun arg ->
+               List.iter args ~f:(fun arg ->
                    convert ~in_:(Some arg)
-                     ~out:(match output with `File opt -> opt | `In_place -> Some arg))
-                 args)
+                     ~out:(match output with `File opt -> opt | `In_place -> Some arg)))
       ; bench
       ; +more_cmd
       ]
