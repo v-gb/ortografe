@@ -849,6 +849,23 @@ module Index = struct
           &::-webkit-details-marker { display: none; }|}
       summary body
 
+  let csv_link () =
+    [ a ~href:"dict.csv"
+        ~attrs:[ ("id", "download-dict") ]
+        ~cl:
+          [%string
+            {|&.loading {
+                          border-radius: 6px;
+                          background: linear-gradient(to right,
+                            white 0 var(--progress),
+                            %{green_pale} var(--progress) 100%);
+                          border: 2px solid %{green};
+                          padding: 0 3px 3px 3px;
+                        }|}]
+        [ text "csv" ]
+    ; text " contenant l'orthographe avant/après."
+    ]
+
   let section_autres_orthographes () =
     details__summary_unstyled (* ~open_:true *)
       [ h3
@@ -938,23 +955,7 @@ module Index = struct
       ; interactive_transcription ~id_textarea:"user-text2"
           ~id_converted_text:"converted-text2"
           ~initial_text:(`Placeholder "Tapez le texte à transcrire ici.")
-      ; p
-          [ text "Données : "
-          ; a ~href:"dict.csv"
-              ~attrs:[ ("id", "download-dict") ]
-              ~cl:
-                [%string
-                  {|&.loading {
-                               border-radius: 6px;
-                               background: linear-gradient(to right,
-                                 white 0 var(--progress),
-                                 %{green_pale} var(--progress) 100%);
-                               border: 2px solid %{green};
-                               padding: 0 3px 3px 3px;
-                             }|}]
-              [ text "csv" ]
-          ; text " contenant l'orthographe avant/après."
-          ]
+      ; p [ text "Données : "; +csv_link () ]
       ]
 
   let section_donnees () =
@@ -1315,6 +1316,10 @@ module Regles_perso = struct
                       ; +(if url_param
                           then [ Index.section_transcription_pages `Url_page ]
                           else [])
+                      ; section
+                          [ h3 [ text "Données" ]
+                          ; p [ text "Voici un "; +Index.csv_link () ]
+                          ]
                       ])
                 ]
             ]
