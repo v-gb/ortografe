@@ -850,11 +850,9 @@ module Index = struct
       summary body
 
   let csv_link () =
-    [ a ~href:"dict.csv"
-        ~attrs:[ ("id", "download-dict") ]
-        ~cl:
-          [%string
-            {|&.loading {
+    let cl =
+      [%string
+        {|&.loading {
                           border-radius: 6px;
                           background: linear-gradient(to right,
                             white 0 var(--progress),
@@ -862,8 +860,14 @@ module Index = struct
                           border: 2px solid %{green};
                           padding: 0 3px 3px 3px;
                         }|}]
-        [ text "csv" ]
-    ; text " contenant l'orthographe avant/après."
+    in
+    [ a ~href:"dict.csv" ~attrs:[ ("id", "download-dict") ] ~cl [ text "csv" ]
+    ; text " contenant l'orthographe avant/après (ou "
+    ; a ~href:"dict.csv"
+        ~attrs:[ ("id", "download-dict-all") ]
+        ~cl
+        [ text "version incluant les mots inchangés" ]
+    ; text ")."
     ]
 
   let section_autres_orthographes () =

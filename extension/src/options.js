@@ -118,7 +118,7 @@ function add_rule_selection_ui() {
 }
 
 async function compute_dict(rules, set_progress) {
-    const [dict, stats] = await dict_gen_browser.generate("./Lexique383.gen.tsv", "./dict1990.gen.csv", rules, false, set_progress);
+    const [dict, stats] = await dict_gen_browser.generate("./Lexique383.gen.tsv", "./dict1990.gen.csv", rules, false, false, set_progress);
     console.log(stats);
     return dict;
 }

@@ -12,11 +12,11 @@ let time_fut ~profile name f =
     Fut.return x)
   else f ()
 
-let compute_dict ?profile ?progress embedded rules =
+let compute_dict ~all ?profile ?progress embedded rules =
   let t1 = Stdlib.Sys.time () in
   let buf = Buffer.create 1_000_000 in
   let (`Stats stats) =
-    Dict_gen_common.Dict_gen.gen ?profile ?progress ~rules ~all:false
+    Dict_gen_common.Dict_gen.gen ?profile ?progress ~rules ~all
       ~output:(Buffer.add_string buf) ~json_to_string:Brrex.json_to_string
       (`Embedded embedded)
   in
@@ -74,7 +74,8 @@ let generate_ww_rpc, generate_ww =
   (* We need to run this in a worker, otherwise the loading animation doesn't actually
      animate, which we kind of want it to, since the a 2s of waiting is on the longer
      side. *)
-  Brrex.rpc_with_progress (fun ?progress (lexique_url, dict1990_url, rules, profile) ->
+  Brrex.rpc_with_progress
+    (fun ?progress (lexique_url, dict1990_url, rules, all, profile) ->
       let open Fut.Result_syntax in
       let* embedded =
         time_fut ~profile "fetch" (fun () ->
@@ -85,18 +86,18 @@ let generate_ww_rpc, generate_ww =
       match
         compute_dict
           ?progress:(Option.map progress ~f:(fun f x -> f (10 + (x * 9 / 10))))
-          ~profile embedded rules
+          ~profile ~all embedded rules
       with
       | exception e -> Fut.error (Jv.Error.v (Jstr.of_string (Exn.to_string e)))
       | v -> Fut.ok v)
 
 let generate =
   Brrex.B.(
-    fun5' jstr jstr selected_rules bool
+    fun6' jstr jstr selected_rules bool bool
       (option (fun1 int' unit))
       (promise_or_error' (t2' string' string')))
-    (fun lexique_url dict1990_url rules profile progress ->
-      generate_ww ?progress (lexique_url, dict1990_url, rules, profile))
+    (fun lexique_url dict1990_url rules all profile progress ->
+      generate_ww ?progress (lexique_url, dict1990_url, rules, all, profile))
 
 let cached cache (type a r) key ~eq (v : a) (f : int -> a -> r) =
   match Jv.to_option (Stdlib.Obj.magic : Jv.t -> a * r * int) (Jv.get cache key) with

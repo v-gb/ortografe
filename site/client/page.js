@@ -173,28 +173,31 @@ if ((new URL(window.location)).searchParams.get("exp")) {
 }
 
 
-document.getElementById("download-dict")?.addEventListener("click", async (e) => {
-    e.preventDefault();
-    function set_progress(v) {
-        e.target.style.setProperty("--progress", v + "%")
-    }
-    set_progress(0);
-    e.target.classList.add("loading");
-    try {
-        const dict_gen_browser = await lazy_dict_gen_browser();
-        set_progress(10);
-        const [ rules, selection_text ] = dict_gen_browser.currently_selected_rules("conv-");
-        const [ dict, _stats ] =
-              await dict_gen_browser.generate("/static/Lexique383.gen.tsv",
-                                              "/static/rect1990.csv", rules, false,
-                                              (i) => set_progress(10 + i * 8 / 10));
-        set_progress(90);
-        dict_gen_browser.download_from_memory("text/plain", "dict.csv", dict);
-    } finally {
-        e.target.classList.remove("loading");
-    }
-})
-
+for (id of [ "download-dict", "download-dict-all" ]) {
+    const all = (id == "download-dict-all");
+    document.getElementById(id)?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        function set_progress(v) {
+            e.target.style.setProperty("--progress", v + "%")
+        }
+        set_progress(0);
+        e.target.classList.add("loading");
+        try {
+            const dict_gen_browser = await lazy_dict_gen_browser();
+            set_progress(10);
+            const [ rules, selection_text ] = dict_gen_browser.currently_selected_rules("conv-");
+            const [ dict, _stats ] =
+                  await dict_gen_browser.generate("/static/Lexique383.gen.tsv",
+                                                  "/static/rect1990.csv", rules, all,
+                                                  false,
+                                                  (i) => set_progress(10 + i * 8 / 10));
+            set_progress(90);
+            dict_gen_browser.download_from_memory("text/plain", "dict.csv", dict);
+        } finally {
+            e.target.classList.remove("loading");
+        }
+    })
+}
 
 // duplicated from rewrite.js
 function sequentialized_and_merged(f) {
