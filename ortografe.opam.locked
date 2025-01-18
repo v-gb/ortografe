@@ -33,7 +33,7 @@ depends: [
   "conf-g++" {= "1.0" & with-dev-setup}
   "conf-libev" {= "4-12"}
   "conf-libssl" {= "4"}
-  "conf-pkg-config" {= "3"}
+  "conf-pkg-config" {= "4"}
   "core" {= "v0.17.1"}
   "core_kernel" {= "v0.17.0"}
   "core_unix" {= "v0.17.0"}
@@ -47,9 +47,9 @@ depends: [
   "dream" {= "1.0.0~alpha6"}
   "dream-httpaf" {= "1.0.0~alpha2"}
   "dream-pure" {= "1.0.0~alpha2"}
-  "dune" {= "3.17.0"}
-  "dune-build-info" {= "3.17.0" & with-dev-setup}
-  "dune-configurator" {= "3.17.0"}
+  "dune" {= "3.17.1"}
+  "dune-build-info" {= "3.17.1" & with-dev-setup}
+  "dune-configurator" {= "3.17.1"}
   "duration" {= "0.2.1"}
   "eio" {= "1.2"}
   "eio_linux" {= "1.2"}
@@ -112,7 +112,7 @@ depends: [
   "ocaml-config" {= "3"}
   "ocaml-options-vanilla" {= "1"}
   "ocaml-syntax-shims" {= "1.0.0"}
-  "ocaml-version" {= "3.7.1" & with-dev-setup}
+  "ocaml-version" {= "3.7.3" & with-dev-setup}
   "ocaml_intrinsics_kernel" {= "v0.17.1"}
   "ocamlbuild" {= "0.15.0"}
   "ocamlfind" {= "1.9.6"}
@@ -160,7 +160,7 @@ depends: [
   "ppx_tydi" {= "v0.17.0"}
   "ppx_typerep_conv" {= "v0.17.0"}
   "ppx_variants_conv" {= "v0.17.0"}
-  "ppxlib" {= "0.33.0"}
+  "ppxlib" {= "0.34.0"}
   "ppxlib_jane" {= "v0.17.0"}
   "prettym" {= "0.0.3"}
   "protocol_version_header" {= "v0.17.0" & with-dev-setup}
