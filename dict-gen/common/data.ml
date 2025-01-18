@@ -87,7 +87,7 @@ module Lexique = struct
         "house"; "clean"; "saloon"; "cacahuète"; "lutz"; "bacon";
         "ketchup"; "girl"; "puzzle"; "supporter"; "dealer";
         "jeep"; "hamburger"; "must"; "bunker"; "mm"; "light";
-        "poney"; "punch"; "marijuana"; "jean"; "timing";
+        "punch"; "marijuana"; "jean"; "timing";
         "people"; "meeting"; "speed"; "scooter"; "spider";
         "junkie"; "milady"; "please"; "banjo"; "flirter"; "boom";
         "pudding"; "because"; "gentlemen"; "shoote"; "alléluia";
