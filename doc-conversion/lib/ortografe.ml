@@ -147,7 +147,8 @@ let open_channel dp name =
 let src_dst_typ ?src_type src dst ~dyn_protect:dp =
   let src_type =
     Option.map
-      ~f:(fun src_type -> of_ext src_type ||? failwith "unknown file type %{src_type}")
+      ~f:(fun src_type ->
+        of_ext src_type ||? failwith [%string "unknown file type %{src_type}"])
       src_type
   in
   match src with
