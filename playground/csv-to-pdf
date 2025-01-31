@@ -1,0 +1,22 @@
+#!/bin/bash
+# cat csv | sed 's/,$//' | sort | awk -vFS=, '{ if ($1 != $2) { print } }' | ./csv-to-pdf
+set -e -u -o pipefail
+f=$(mktemp ~/tmp/csv-to-pdf-XXXXXX.html)
+trap 'rm -f "$f"' EXIT
+{
+    grep -B 1000 MARKER csv-to-pdf.html
+    if [ $# -eq 0 ]; then
+        cat
+    else
+        cat "$1"
+    fi | tr -d '%"' | awk -vFS=, '{
+printf "<div class=row>"
+for(i=1; i<=NF; i++) {
+ printf "<span class=cell>" $i "</span>"
+}
+print "</div>"
+}'
+    grep -A 1000 MARKER csv-to-pdf.html
+} > "$f"
+xdg-open "$f"
+sleep 5
