@@ -790,10 +790,12 @@ let emment__ament =
     (fun () ->
       let pattern_emment = String.Search_pattern.create "emment" in
       let pattern_cemment = String.Search_pattern.create "cemment" in
+      let pattern_gemment = String.Search_pattern.create "gemment" in
       fun env aligned_row ->
         let aligned_row = ref aligned_row in
         aligned_row := rewrite env !aligned_row ~target:pattern_emment ~repl:"ament";
         aligned_row := rewrite env !aligned_row ~target:pattern_cemment ~repl:"çament";
+        aligned_row := rewrite env !aligned_row ~target:pattern_gemment ~repl:"geament";
         !aligned_row)
 
 let _ : rule =
