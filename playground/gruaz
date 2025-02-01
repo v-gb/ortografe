@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e -u -o pipefail
+rules="oe 1990 erofa m-mbp/n-mbp â/a sch/ch oo/o mn/n con/gon ck/c ck/qu emm/am enn/an ao/a chs/ch cq/q êi/ei ey/et oe/oi ouin/oin w/v xs/x xt/x"
+case "${1-}" in
+site)
+    xdg-open "https://orthographe-rationnelle.info/regles/perso?regles=$rules";;
+dict)
+    exe=$(jj workspace root)/_build/default/dict-gen/bin/dict_gen.exe
+    flags=$("$exe" gen --help plain | grep -o -e '--[^ ]*')
+    builtin=()
+    custom=()
+    for rule in $rules; do
+        if grep -qxFe "--$rule" 2> /dev/null <<< "$flags"
+        then
+            builtin+=("--$rule")
+        else
+            custom+=("$rule")
+        fi
+    done
+    $(jj workspace root)/_build/default/dict-gen/bin/dict_gen.exe gen \
+                        "${builtin[@]}" --custom "${custom[*]}"
+    ;;
+*)
+    echo >&2 "unknown option ${1-argv[1]}"
+    exit 1
+esac
