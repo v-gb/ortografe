@@ -20,6 +20,66 @@ dict)
     $(jj workspace root)/_build/default/dict-gen/bin/dict_gen.exe gen \
                         "${builtin[@]}" --custom "${custom[*]}"
     ;;
+word-list)
+    cd $(jj workspace root)
+    { sqlite3 <<EOF
+.mode tabs
+.import _build/default/data/lexique/Lexique383-full.gen.tsv t
+.mode csv
+select
+  ortho
+from (select distinct ortho, freqlemfilms2 from t
+      where ortho = lemme
+      and ((ortho like '%ll%' and phon like '%l%')
+           or (ortho like '%aî%')
+           or (ortho like '%ain%')
+           or (ortho like '%amp%' or ortho like '%amb%' or ortho like '%amm%')
+           or (ortho like '%ao%')
+           or (ortho like '%août%')
+           or (ortho like '%saoûl%')
+           or (ortho like '%bb%')
+           or (ortho like '%con%' and phon like '%k§%')
+           or (ortho like '%cc%')
+           or (ortho like '%ch%' and phon like '%k%')
+           or (ortho like '%chs%')
+           or (ortho like '%ck%')
+           or (ortho like '%cq%')
+           or (ortho like '%cz%')
+           or (ortho like '%dd%')
+           or (ortho like '%em%' and phon like '%am%')
+           or (ortho like '%en%' and phon like '%an%')
+           or (ortho like '%êi%')
+           or (ortho like '%emp%' or ortho like '%emb%' or ortho like '%emm%')
+           or (ortho like '%ey%')
+           or (ortho like '%ff%')
+           or (ortho like '%gg%')
+           or (ortho like '%î%')
+           or (ortho like '%ign%')
+           or (ortho like '%imp%' or ortho like '%imb%' or ortho like '%imm%')
+           or (ortho like '%nn%')
+           or (ortho like '%mm%')
+           or (ortho like '%oe%' or ortho like '%œ%')
+           or (ortho like '%oî%')
+           or (ortho like '%omp%' or ortho like '%omb%' or ortho like '%omm%')
+           or (ortho like '%nn%')
+           or (ortho like '%oo%')
+           or (ortho like '%où%')
+           or (ortho like '%aoû%')
+           or (ortho like '%pp%')
+           or (ortho like '%ph%')
+           or (ortho like '%rh%')
+           or (ortho like '%sc%')
+           or (ortho like '%th%')
+           or (ortho like '%tt%')
+           or (ortho like '%w%' and phon like '%v%')
+           or (ortho like '%xt%')
+           or (ortho like '%y%')
+           or (ortho like '%zz%'))
+)
+order by cast (freqlemfilms2 as real) desc, ortho
+EOF
+} | tr -d '"'
+  ;;
 *)
     echo >&2 "unknown option ${1-argv[1]}"
     exit 1
