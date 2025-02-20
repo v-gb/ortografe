@@ -88,34 +88,53 @@ for k in table:
         table[k]["old"].remove(k)
     except ValueError:
         pass
-for line in open("playground/csv-to-pdf.html").read().splitlines():
-    if "MARKER" in line:
-        count = 0
-        for k in sorted(list(table.keys()), key=locale.strxfrm):
-            count += 1
-            # if count > 1000:
-            #    break
-            if (k == table[k]["new"]):
-                classes="row unchanged"
-            else:
-                classes="row changed"
-            if (table[k]["touched"]): # web browsers are unabled to print to pdf if we
-                                      # include everything. Maybe try pandoc? typst?
-              print(f"<div class=\"{classes}\">", end="")
-              print("<span class=cell>", end="")
-              print(k, end="")
-              for old in table[k]["old"]:
-                  print("<br><span class=alt>", end="")
-                  print(old, end="")
-                  print("</span>", end="")
-              print("</span>", end="")
-              print("<span class=cell>", end="")
-              print(table[k]["new"], end="")
-              print("</span>", end="")
-              print("</div>")
-    else:
-      print(line)
+def print_json(f):
+    import json
+    print("{", file=f)
+    sep=""
+    count = 0
+    for k in sorted(list(table.keys()), key=locale.strxfrm):
+        count += 1
+        # if (count >= 1000): break
+        print(sep, end="", file=f)
+        print(json.dumps(k), end="", file=f)
+        print(":", end="", file=f)
+        print(json.dumps(table[k]), file=f)
+        sep=","
+    print("}", file=f)
+print_json(open("/tmp/lexique.json", "w"))
+def print_html(f):
+    for line in open("playground/csv-to-pdf.html").read().splitlines():
+        if "MARKER" in line:
+            count = 0
+            for k in sorted(list(table.keys()), key=locale.strxfrm):
+                count += 1
+                # if count > 1000:
+                #    break
+                if (k == table[k]["new"]):
+                    classes="row unchanged"
+                else:
+                    classes="row changed"
+                if (table[k]["touched"]): # web browsers are unabled to print to pdf if we
+                                          # include everything. Maybe try pandoc? typst?
+                  print(f"<div class=\"{classes}\">", end="", file=f)
+                  print("<span class=cell>", end="", file=f)
+                  print(k, end="", file=f)
+                  for old in table[k]["old"]:
+                      print("<br><span class=alt>", end="", file=f)
+                      print(old, end="", file=f)
+                      print("</span>", end="", file=f)
+                  print("</span>", end="", file=f)
+                  print("<span class=cell>", end="", file=f)
+                  print(table[k]["new"], end="", file=f)
+                  print("</span>", end="", file=f)
+                  print("</div>", file=f)
+        else:
+          print(line, file=f)
+print_html(open("/tmp/lexique.html", "w"))
 '
+    cp playground/csv.typst /tmp
+    typst c /tmp/csv.typst
     ;;
 dict)
     compute_flags

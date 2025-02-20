@@ -1,0 +1,20 @@
+#set page(columns: 2)
+#set text(hyphenate: true) // avoid overflowing for anticonstitutionnellement
+#{
+    let dict = json("lexique.json")
+    let content = ();
+    let row = 0
+    for (k, v) in dict {
+        let left_bit = [ #k ]
+        for old in v.old {
+            left_bit = left_bit + [ \ #h(0.3cm) #old ]
+        }
+        let light_green = rgb("f0f0ff")
+        let light_blue = rgb("f0fff0")
+        let color = if k == v.new { white } else if calc.odd(row) { light_green } else { light_blue }
+        content.push(table.cell(fill: color, left_bit))
+        content.push(table.cell(fill: color, v.new))
+        row += 1
+    }
+    table(columns: 2, stroke:none, ..content)
+}
