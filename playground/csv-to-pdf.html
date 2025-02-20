@@ -1,28 +1,12 @@
 <!DOCTYPE html>
-<!-- cat ~/Téléchargements/dict.csv | head -n 100 | while IFS=, read a b; do echo "<div class=row><span class=cell>$a</span><span class=cell>$b</span></div>"; done -->
 <html>
   <head>
     <title>truc</title>
     <style>
-      /* @page { size: auto;  margin: 0mm; } */
-      /* tr td:nth-child(1) { */
-      /*     text-align: right; */
-      /* } */
-      tr:nth-of-type(even) {
-          background-color: #eee;
-      }
-      td {
-          break-after: always;
-      }
       div {
-          /* column-count: 2; */
           column-width: 15em;
           column-gap: 5em;
           print-color-adjust: exact;
-      }
-      table { page-break-inside:auto }
-      table {
-          margin: auto;
       }
       .flex {
           margin: auto;
@@ -33,17 +17,28 @@
       .row:nth-of-type(odd) {
           background-color: #eee;
       }
+      .row.unchanged {
+          background-color: white;
+      }
+      .changed.row:nth-of-type(even) {
+          background-color: #f0fff0;
+      }
+      .changed.row:nth-of-type(odd) {
+          background-color: #f0f0ff;
+      }
+      .alt {
+          font-size: 0.9em;
+          padding-left: 1em;
+      }
       .row {
           display: flex;
           gap: 0.5em;
-          /* max-width: 20%; */
-          /* max-width: 20em; */
       }
     </style>
   </head>
   <body>
     <div>
-      <div class=flex>
+      <div class="flex notranscribe">
         <!-- MARKER -->
       </div>
     </div>

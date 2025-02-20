@@ -1,11 +1,35 @@
 #!/bin/bash
 
 set -e -u -o pipefail
-rules="oe 1990 erofa m-mbp/n-mbp â/a sch/ch oo/o mn/n con/gon ck/c ck/qu emm/am enn/an ao/a chs/ch cq/q êi/ei ey/et oe/oi ouin/oin w/v xs/x xt/x"
+rules="oe 1990 erofa m-mbp/n-mbp â/a sch/ch oo/o mn/n con/gon ck/c ck/qu emm/am enn/an ao/a chs/ch cq/q êi/ei ey/et oe/oi î/i ouin/oin w/v xs/x xt/x"
+function dict_gen {
+    $(jj workspace root)/_build/default/dict-gen/bin/dict_gen.exe "$@"
+}
+function ortografe_cli {
+    $(jj workspace root)/_build/default/doc-conversion/bin/ortografe_cli.exe "$@"
+}
+rules_flags=()
+function compute_flags {
+    if [ "${#rules_flags[@]}" -eq 0 ]; then
+        flags=$(dict_gen gen --help plain | grep -o -e '--[^ ]*')
+        builtin=()
+        custom=()
+        for rule in $rules; do
+            if grep -qxFe "--$rule" 2> /dev/null <<< "$flags"
+            then
+                builtin+=("--$rule")
+            else
+                custom+=("$rule")
+            fi
+        done
+        rules_flags=("${builtin[@]}" --custom "${custom[*]}")
+    fi
+}
+
 case "${1-}" in
 site)
     xdg-open "https://orthographe-rationnelle.info/regles/perso?regles=$rules";;
-csv)
+lexique)
     {
         sqlite3 <<EOF
 .mode tabs
@@ -17,21 +41,85 @@ order by cast (freqlemfilms2 as real) desc
 EOF
     } | tr -d '"'
     ;;
-dict)
-    exe=$(jj workspace root)/_build/default/dict-gen/bin/dict_gen.exe
-    flags=$("$exe" gen --help plain | grep -o -e '--[^ ]*')
-    builtin=()
-    custom=()
-    for rule in $rules; do
-        if grep -qxFe "--$rule" 2> /dev/null <<< "$flags"
-        then
-            builtin+=("--$rule")
-        else
-            custom+=("$rule")
+pdf)
+    # Inclusion des féminins, pas des pluriels?
+    # sc pas inclus, mais règle à clarifier
+    cd $(jj workspace root)
+    compute_flags
+    {
+        sqlite3 <<EOF
+.mode tabs
+.import _build/default/data/lexique/Lexique383-full.gen.tsv t
+.mode csv
+select ortho from t
+where (ortho = lemme or (genre = 'f' and nombre <> 'p') or ortho = 'arrhes')
+order by cast (freqlemfilms2 as real) desc
+EOF
+    } | tr -d '"' > /tmp/lexique
+    ortografe_cli conv --type .txt /tmp/lexique -o /tmp/lexique-oe --oe
+    ortografe_cli conv --type .txt /tmp/lexique -o /tmp/lexique-1990-oe --oe --1990
+    ortografe_cli conv --type .txt /tmp/lexique -o /tmp/lexique-fascicule "${rules_flags[@]}"
+    rules_flags_no_1990=()
+    for v in "${rules_flags[@]}"; do
+        if [ "$v" != --1990 ]; then
+            rules_flags_no_1990+=("$v")
         fi
     done
-    $(jj workspace root)/_build/default/dict-gen/bin/dict_gen.exe gen \
-                        "${builtin[@]}" --custom "${custom[*]}"
+    ortografe_cli conv --type .txt /tmp/lexique -o /tmp/lexique-fascicule-no-1990 "${rules_flags_no_1990[@]}"
+    # strange things happening with black-out, not quite clear why it's ultimately
+    # included
+    python -c '
+import sys, os
+lexique_oe = open("/tmp/lexique-oe").read().splitlines()
+lexique_1990_oe = open("/tmp/lexique-1990-oe").read().splitlines()
+lexique_fascicule = open("/tmp/lexique-fascicule").read().splitlines()
+lexique_fascicule_no_1990 = open("/tmp/lexique-fascicule-no-1990").read().splitlines()
+table = {}
+for i in range(len(lexique_oe)):
+    r = table.setdefault(lexique_1990_oe[i], { "old": [], "new": lexique_fascicule[i], "touched": False })
+    r["old"].append(lexique_oe[i])
+    r["touched"] = r["touched"] or (lexique_fascicule_no_1990[i] != lexique_oe[i])
+import locale
+locale.setlocale(locale.LC_ALL, "fr_FR.UTF-8")
+for k in table:
+    table[k]["old"] = list(set(table[k]["old"]))
+    table[k]["old"].sort(key=locale.strxfrm)
+    try:
+        table[k]["old"].remove(k)
+    except ValueError:
+        pass
+for line in open("playground/csv-to-pdf.html").read().splitlines():
+    if "MARKER" in line:
+        count = 0
+        for k in sorted(list(table.keys()), key=locale.strxfrm):
+            count += 1
+            # if count > 1000:
+            #    break
+            if (k == table[k]["new"]):
+                classes="row unchanged"
+            else:
+                classes="row changed"
+            if (table[k]["touched"]): # web browsers are unabled to print to pdf if we
+                                      # include everything. Maybe try pandoc? typst?
+              print(f"<div class=\"{classes}\">", end="")
+              print("<span class=cell>", end="")
+              print(k, end="")
+              for old in table[k]["old"]:
+                  print("<br><span class=alt>", end="")
+                  print(old, end="")
+                  print("</span>", end="")
+              print("</span>", end="")
+              print("<span class=cell>", end="")
+              print(table[k]["new"], end="")
+              print("</span>", end="")
+              print("</div>")
+    else:
+      print(line)
+'
+    ;;
+dict)
+    compute_flags
+    dict_gen gen "${rules_flags[@]}"
     ;;
 word-list)
     cd $(jj workspace root)
