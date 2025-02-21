@@ -1,13 +1,31 @@
-#set page(columns: 2)
+#set document(title: [Dictionnaire de transcription])
 #set text(hyphenate: true) // avoid overflowing for anticonstitutionnellement
+
+#align(center + horizon, text(17pt)[
+    *Dictionnaire de transcription pour #text(style: "italic")[La réforme de l'orthographe lexicale du français] de Claude Gruaz*
+])
+
+#set page(columns: 2)
+
 #{
-    let dict = json("lexique.json")
+    let json = json("lexique.json")
     let content = ();
     let row = 0
-    for (k, v) in dict {
+    [ Ce dictionnaire est bâti à partir des règles suivantes :]
+    for r in json.rules {
+        if r != "oe" and r != "1990" {
+            [ - #r ]
+        }
+    }
+    [ La colonne de gauche indique l'orthographe actuelle, puis le cas échéant, d'autres
+      orthographes existantes (par exemple, une orthographe prédatant la réforme de 1990).
+      Les mots changés par les règles sont colorés, les mots inchangés
+      sont laissés sur fond blanc.
+    ]
+    for (k, v) in json.table {
         let left_bit = [ #k ]
         for old in v.old {
-            left_bit = left_bit + [ \ #h(0.3cm) #old ]
+            left_bit = left_bit + [ \ #h(0.3cm) #text(0.9em)[#old] ]
         }
         let light_green = rgb("f0f0ff")
         let light_blue = rgb("f0fff0")

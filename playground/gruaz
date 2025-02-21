@@ -68,6 +68,7 @@ EOF
     ortografe_cli conv --type .txt /tmp/lexique -o /tmp/lexique-fascicule-no-1990 "${rules_flags_no_1990[@]}"
     # strange things happening with black-out, not quite clear why it's ultimately
     # included
+    export rules
     python -c '
 import sys, os
 lexique_oe = open("/tmp/lexique-oe").read().splitlines()
@@ -90,18 +91,12 @@ for k in table:
         pass
 def print_json(f):
     import json
-    print("{", file=f)
-    sep=""
-    count = 0
-    for k in sorted(list(table.keys()), key=locale.strxfrm):
-        count += 1
-        # if (count >= 1000): break
-        print(sep, end="", file=f)
-        print(json.dumps(k), end="", file=f)
-        print(":", end="", file=f)
-        print(json.dumps(table[k]), file=f)
-        sep=","
-    print("}", file=f)
+    table_ordered = (
+      { k: table[k] for (i, k) in enumerate(sorted(table.keys(), key=locale.strxfrm))
+                    if -i < 1000 })
+    print(json.dumps(
+            { "rules": os.environ["rules"].split(" "), "table": table_ordered }
+          ), file=f)
 print_json(open("/tmp/lexique.json", "w"))
 def print_html(f):
     for line in open("playground/csv-to-pdf.html").read().splitlines():
