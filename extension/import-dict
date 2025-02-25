@@ -29,11 +29,14 @@ and old not like 'vacill%' -- entrée utilise une prononcation /l/, mais /j/ est
 and not (old like 'achène' or old like 'achaine') -- pris en compte de 1990 bancale -- https://ro.ccdmd.qc.ca/regles/recommandations/son-k/liste
 and old not like 'sheikh' -- 1990 pas pris en compte
 and old not like 'œcuméni%' -- œ->eu. Autant utiliser é comme pour les autres œ
+and new not like 'eudémat%' -- préfère œ->é à œ->eu
 and not (old like 'douc%' and new like 'douss%') -- entrée non justifiée par les règles
 and old not like 'déhotter' -- sans le préfixe, le h est aspiré, donc il est à garder ici
 and old not like '%succion%' -- prononciation en /s/ au lieu /ks/ est possible mais moins commune
 and old not like 'wallonne' -- erreur du DOR, qui touche un nom de peuple
 and old not like 'zorille' -- prononcé /y/, pas /l/
+and new not like 'couane'
+and new not like 'couaneus' -- préfère couène, prononciation plus répandue, https://dictionnaire.orthodidacte.com/article/prononciation-couenne
 EOF
     } \
         | tr -d '"' \

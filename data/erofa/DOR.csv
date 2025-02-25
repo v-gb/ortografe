@@ -1,4 +1,9 @@
 ﻿#ligne,Grafie initiale,Lème,Catégorie,Complément,Règles,Grafie modifiée
+47,a capella,a capella,loc.adj.,,1,a capéla
+47,a capella,a capella,loc.adv.,,1,a capéla
+48,a cappella,a cappella,loc.adj.,,1,a capéla
+48,a cappella,a cappella,loc.adv.,,1,a capéla
+15002,à faux,à faux,loc.adv.,,2,à faus
 1,abandonnataire,abandonnataire,n.,,1,abandonataire
 2,abandonné,abandonné,adj.,,1,abandoné
 2,abandonnée,abandonné,adj.,,1,abandonée
@@ -1207,7 +1212,7 @@
 981,appareiller,appareiller,v.tr.,(1 sens),1,apareiller
 982,appareilleur,appareilleur,n.,,1,apareilleur
 982,appareilleuse,appareilleur,n.,,1,apareilleuse
-983,apparemment,apparemment,adv.,,1,aparemment
+983,apparemment,apparemment,adv.,,1,aparament
 984,apparence,apparence,n.f.,,1,aparence
 985,apparent,apparent,adj.,,1,aparent
 985,apparente,apparent,adj.,,1,aparente
@@ -1428,6 +1433,7 @@
 1146,architecturaux,architectural,adj.m.pl.,,2,architecturaus
 1147,archontat,archontat,n.m.,,3,arcontat
 1148,archonte,archonte,n.m.,,3,arconte
+15163,ardemment,ardemment,adv.,,1,ardament
 1149,areligieux,areligieux,adj.m.sg.pl.,,2,areligieus
 1150,aréostyle,aréostyle,n.m.,,3,aréostile
 1151,argileux,argileux,adj.m.sg.pl.,,2,argileus
@@ -1589,10 +1595,10 @@
 1281,asphyxiée,asphyxié,adj.,,3,asfixiée
 1281,asphyxiée,asphyxié,n.,,3,asfixiée
 1282,asphyxier,asphyxier,v.tr.,,3,asfixier
+1283,assa fœtida,assa fœtida,n.f.,,3’,assa fétida
 1284,assa-fœtida,assa-fœtida,n.f.,,3’,assa-fétida
 1285,assaisonnement,assaisonnement,n.m.,,1,assaisonement
 1286,assaisonner,assaisonner,v.tr.,,1,assaisoner
-1283,assa fœtida,assa fœtida,n.f.,,3’,assa fétida
 1287,asseaux,asseau,n.m.pl.,,2,asseaus
 1288,assette,assette,n.f.,,1,assète
 1289,assiette,assiette,n.f.,,1,assiète
@@ -1900,11 +1906,6 @@
 1528,azygos,azygos,adj.,,3,azigos
 1528,azygos,azygos,n.f.,,3,azigos
 1529,azyme,azyme,adj.,,3,azime
-47,a capella,a capella,loc.adj.,,1,a capéla
-47,a capella,a capella,loc.adv.,,1,a capéla
-48,a cappella,a cappella,loc.adj.,,1,a capéla
-48,a cappella,a cappella,loc.adv.,,1,a capéla
-15002,à faux,à faux,loc.adv.,,2,à faus
 1530,babelutte,babelutte,n.f.,,* 1,babelute
 1531,babeurre,babeurre,n.m.,,1,babeure
 1532,babysitteur,babysitteur,n.,,1,babysiteur
@@ -2003,8 +2004,8 @@
 1617,barcarolle,barcarolle,n.f.,,1,barcarole
 1618,bardeaux,bardeau,n.m.pl.,(1 sens),2,bardeaus
 1619,baresthésie,baresthésie,n.f.,,3,barestésie
-1620,barillet,barilet,n.m.,,1,barilet
 1620,barillet,barillet,n.m.,,,barillet
+1620,barillet,barillet,n.m.,,1,barilet
 1621,bar-mitsvah,bar-mitsvah,n.f.inv.,,3’,bar-mitsva
 1622,barographe,barographe,n.m.,,3,barografe
 1623,baronnage,baronnage,n.m.,,1,baronage
@@ -4021,7 +4022,7 @@
 3297,conchylis,conchylis,n.m.,,3,conquilis
 3298,concitoyenne,concitoyen,n.f.,,1,concitoyène
 3299,concomitamment,concomitamment,adv.,,1,concomitament
-3300,concurremment,concurremment,adv.,,1,concuremment
+3300,concurremment,concurremment,adv.,,1,concurament
 3301,concurrence,concurrence,n.f.,,1,concurence
 3302,concurrencer,concurrencer,v.tr.,,1,concurencer
 3303,concurrent,concurrent,adj.,,1,concurent
@@ -4112,8 +4113,10 @@
 3362,connoter,connoter,v.tr.,,1,conoter
 3363,connu,connu,adj.,,1,conu
 3363,connue,connu,adj.,,1,conue
+15164,consciemment,consciemment,adv.,,1,consciament
 3364,consciencieux,consciencieux,adj.m.sg.pl.,,2,consciencieus
 3365,consensuelle,consensuel,adj.f.,,1,consensuèle
+15165,conséquemment,conséquemment,adv.,,1,conséquament
 3366,consistoriaux,consistorial,adj.m.pl.,,2,consistoriaus
 3366,consistoriaux,consistorial,n.m.pl.,,2,consistoriaus
 3367,consœur,consœur,n.f.,,3’,conseur
@@ -4353,6 +4356,8 @@
 3543,couchette,couchette,n.f.,,1,couchète
 3544,coucougnettes,coucougnettes,n.f.pl.,,1,coucougnètes
 3545,coucoumelle,coucoumelle,n.f.,,1,coucoumèle
+15192,couenne,couenne,n.f.,,1,couane
+15192,couenne,couenne,n.f.,,1,couène
 3546,couenneux,couenneux,adj.,,2,couenneus
 3547,couette,couette,n.f.,,1,couète
 3548,couffin,couffin,n.m.,,1,coufin
@@ -4788,6 +4793,7 @@
 3932,décavaillonner,décavaillonner,v.tr.,,1,décavailloner
 3933,décavaillonneuse,décavaillonneuse,n.f.,,1,décavailloneuse
 3934,decca,decca,n.m.,,1,déca
+15167,décemment,décemment,adv.,,1,déçament
 3935,décemviraux,décemviral,adj.m.pl.,,2,décemviraus
 3936,décennal,décennal,adj.,,1,décénal
 3936,décennale,décennal,adj.,,1,décénale
@@ -5238,7 +5244,7 @@
 4312,diffamée,diffamé,adj.,,1,difamée
 4313,diffamer,diffamer,v.tr.,,1,difamer
 4314,différé,différé,n.m.,,1,diféré
-4315,différemment,différemment,adv.,,1,diféremment
+4315,différemment,différemment,adv.,,1,diférament
 4316,différence,différence,n.f.,,1,diférence
 4317,différenciateur,différenciateur,adj.,,1,diférenciateur
 4317,différenciateur,différenciateur,n.m.,,1,diférenciateur
@@ -5286,6 +5292,7 @@
 4352,dilemme,dilemme,n.m.,,1,dilème
 4353,dilettante,dilettante,n.,,1,dilétante
 4354,dilettantisme,dilettantisme,n.m.,,1,dilétantisme
+15166,diligemment,diligemment,adv.,,1,diligeament
 4355,diluviaux,diluvial,adj.m.pl.,,2,diluviaus
 4356,diluvienne,diluvien,adj.f.,,1,diluviène
 4357,dimensionnel,dimensionnel,adj.,,1,dimensionel
@@ -5418,9 +5425,9 @@
 4461,doublette,doublette,n.f.,,1,doublète
 4462,doublonner,doublonner,v.intr.,,1,doubloner
 4463,doucereux,doucereux,adj.m.sg.pl.,,2,doussereus
-4464,doucette,doucette,adj.,,1,doussète
-4464,doucette,doucette,n.f.,,1,doussète
-4465,doucettement,doucettement,adv.,,1,doussètement
+4464,doucette,doucette,adj.,,1,doucète
+4464,doucette,doucette,n.f.,,1,doucète
+4465,doucettement,doucettement,adv.,,1,doucètement
 4466,douchette,douchette,n.f.,,1,douchète
 4467,douelle,douelle,n.f.,,1,douèle
 4468,douillette,douillette,adj.,,1,douillète
@@ -5869,6 +5876,7 @@
 4847,elliptique,elliptique,adj.,,1,éliptique
 4848,elliptiquement,elliptiquement,adv.,,1,éliptiquement
 4849,élogieux,élogieux,adj.m.sg.pl.,,2,élogieus
+15189,éloquemment,éloquemment,adv.,,1,éloquament
 4850,éluviaux,éluvial,adj.m.pl.,,2,éluviaus
 4851,élyséenne,élyséen,adj.f.,,1,élyséène
 4852,élytre,élytre,n.m.,,3,élitre
@@ -5920,6 +5928,7 @@
 15124,émiette,émietter,v.tr.conj.,,1,émiète
 4889,émietter,émietter,v.tr.,,1,émiéter
 4890,émietteuse,émietteuse,n.f.,,1,émiéteuse
+15190,éminemment,éminemment,adv.,,1,éminament
 4891,emmental,emmental,n.m.,,1,émental
 4892,emmenthal,emmenthal,n.m.,,1 3’,émental
 4893,emmétrope,emmétrope,adj.,,1,émétrope
@@ -6488,6 +6497,7 @@
 5364,évènementielle,évènementiel,adj.f.,,1,évènementièle
 5365,éventuelle,éventuel,adj.f.,,1,éventuèle
 5366,éventuellement,éventuellement,adv.,,1,éventuèlement
+15191,évidemment,évidemment,adv.,,1,évidament
 5367,évolutionnisme,évolutionnisme,n.m.,,1,évolutionisme
 5368,évolutionniste,évolutionniste,adj.,,1,évolutioniste
 5368,évolutionniste,évolutionniste,n.,,1,évolutioniste
@@ -6496,7 +6506,7 @@
 5370,exanthématique,exanthématique,adj.,,3,exantématique
 5371,exanthème,exanthème,n.m.,,3,exantème
 5372,exarchat,exarchat,n.m.,,3,exarcat
-5373,excellemment,excellemment,adv.,,1,excélemment
+5373,excellemment,excellemment,adv.,,1,excélament
 5374,excellence,excellence,n.f.,,1,excélence
 5375,excellent,excellent,adj.,,1,excélent
 5375,excellente,excellent,adj.,,1,excélente
@@ -6961,6 +6971,7 @@
 5736,fredonnement,fredonnement,n.m.,,1,fredonement
 5737,fredonner,fredonner,v.tr.,,1,fredoner
 5738,free-jazz,free-jazz,n.m.inv.,,1,free-jaz
+15168,fréquemment,fréquemment,adv.,,1,fréquament
 5739,fréquentielle,fréquentiel,adj.f.,,1,fréquentièle
 5740,frettage,frettage,n.m.,,1,frétage
 5741,frette,frette,n.f.,,1,frète
@@ -9200,6 +9211,7 @@
 7558,imparipennée,imparipenné,adj.,,1,imparipénée
 7559,imparisyllabique,imparisyllabique,adj.,,1 3,imparisilabique
 7560,impartiaux,impartial,adj.m.pl.,,2,impartiaus
+15169,impatiemment,impatiemment,adv.,,1,impatiament
 7561,impeccable,impeccable,adj.,,1,impécable
 7562,impeccablement,impeccablement,adv.,,1,impécablement
 7563,impécunieux,impécunieux,adj.m.sg.pl.,,2,impécunieus
@@ -9210,6 +9222,7 @@
 7567,impersonnel,impersonnel,adj.,,1,impersonel
 7567,impersonnelle,impersonnel,adj.,,1,impersonèle
 7568,impersonnellement,impersonnellement,adv.,,1,impersonèlement
+15170,impertinemment,impertinemment,adv.,,1,impertinament
 7569,impétigineux,impétigineux,adj.m.sg.pl.,,2,impétigineus
 7570,impétueux,impétueux,adj.m.sg.pl.,,2,impétueus
 7571,impressionnabilité,impressionnabilité,n.f.,,1,impressionabilité
@@ -9220,6 +9233,8 @@
 7575,impressionnisme,impressionnisme,n.m.,,1,impressionisme
 7576,impressionniste,impressionniste,n.,,1,impressioniste
 7576,impressionniste,impressionniste,adj.,,1,impressioniste
+15171,imprudemment,imprudemment,adv.,,1,imprudament
+15172,impudemment,impudemment,adv.,,1,impudament
 7577,impulsionnel,impulsionnel,adj.,,1,impulsionel
 7577,impulsionnelle,impulsionnel,adj.,,1,impulsionèle
 7578,inaccompli,inaccompli,adj.,,1,inacompli
@@ -9254,6 +9269,7 @@
 7601,incestueux,incestueux,adj.m.sg.pl.,,2,incestueus
 7602,inchauffable,inchauffable,adj.,,1,inchaufable
 7603,inchoatif,inchoatif,adj.,,3’,incoatif
+15174,incidemment,incidemment,adv.,,1,incidament
 7604,incohérence,incohérence,n.f.,,3’,incoérence
 7605,incohérent,incohérent,adj.,,3’,incoérent
 7605,incohérente,incohérent,adj.,,3’,incoérente
@@ -9288,6 +9304,7 @@
 7628,inconnu,inconnu,n.,,1,inconu
 7628,inconnue,inconnu,adj.,,1,inconue
 7628,inconnue,inconnu,n.,,1,inconue
+15173,inconsciemment,inconsciemment,adv.,,1,inconsciament
 7629,inconsommable,inconsommable,adj.,,1,inconsomable
 7630,inconstitutionnalité,inconstitutionnalité,n.f.,,1,inconstitutionalité
 7631,inconstitutionnel,inconstitutionnel,adj.,,1,inconstitutionel
@@ -9307,6 +9324,7 @@
 7643,incristallisable,incristallisable,adj.,,1,incristalisable
 7644,incurieux,incurieux,adj.m.sg.pl.,,2,incurieus
 7645,indéboulonnable,indéboulonnable,adj.,,1,indéboulonable
+15175,indécemment,indécemment,adv.,,1,indéçament
 7646,indéchiffrable,indéchiffrable,adj.,,1,indéchifrable
 7647,indécrottable,indécrottable,adj.,,1,indécrotable
 7648,indéhiscence,indéhiscence,n.f.,,3’,indéiscence
@@ -9315,7 +9333,7 @@
 7650,indépendamment,indépendamment,adv.,,1,indépendament
 7651,indicielle,indiciel,adj.f.,,1,indicièle
 7652,indienne,indien,n.f.,,1,indiène
-7653,indifféremment,indifféremment,adv.,,1,indiféremment
+7653,indifféremment,indifféremment,adv.,,1,indiférament
 7654,indifférence,indifférence,n.f.,,1,indiférence
 7655,indifférenciation,indifférenciation,n.f.,,1,indiférenciation
 7656,indifférencié,indifférencié,adj.,,1,indiférencié
@@ -9326,6 +9344,7 @@
 7659,indifférer,indifférer,v.tr.,,1,indiférer
 7660,individuelle,individuel,adj.f.,,1,individuèle
 7661,individuellement,individuellement,adv.,,1,individuèlement
+15176,indolemment,indolemment,adv.,,1,indolament
 7662,indonésienne,indonésien,adj.f.,,1,indonésiène
 7662,indonésienne,indonésien,n.f.,,1,indonésiène
 7663,indophénol,indophénol,n.m.,,3,indofénol
@@ -9426,7 +9445,7 @@
 7741,innervante,innervant,adj.,,1,inervante
 7742,innervation,innervation,n.f.,,1,inervation
 7743,innerver,innerver,v.tr.,,1,inerver
-7744,innocemment,innocemment,adv.,,1,inocemment
+7744,innocemment,innocemment,adv.,,1,inoçament
 7745,innocence,innocence,n.f.,,1,inocence
 7746,innocent,innocent,adj.,,1,inocent
 7746,innocent,innocent,n.,,1,inocent
@@ -9462,6 +9481,7 @@
 7766,inoxydable,inoxydable,adj.,,3,inoxidable
 7768,inquisitoriaux,inquisitorial,adj.m.pl.,,2,inquisitoriaus
 7769,insidieux,insidieux,adj.m.sg.pl.,,2,insidieus
+15177,insolemment,insolemment,adv.,,1,insolament
 15023,insomnieux,insomnieux,n.m.,,2,insomnieus
 15023,insomnieux,insomnieux,adj.m.,,2,insomnieus
 7770,insoucieux,insoucieux,adj.m.sg.pl.,,2,insoucieus
@@ -9512,7 +9532,7 @@
 7806,intellectuelle,intellectuel,adj.,,1,intélectuèle
 7806,intellectuelle,intellectuel,n.,,1,intélectuèle
 7807,intellectuellement,intellectuellement,adv.,,1,intélectuèlement
-7808,intelligemment,intelligemment,adv.,,1,intéligemment
+7808,intelligemment,intelligemment,adv.,,1,intéligeament
 7809,intelligence,intelligence,n.f.,,1,intéligence
 7810,intelligent,intelligent,adj.,,1,intéligent
 7810,intelligente,intelligent,adj.,,1,intéligente
@@ -11494,6 +11514,7 @@
 9463,négationnisme,négationnisme,n.m.,,1,négationisme
 9464,négationniste,négationniste,n.,,1,négationiste
 9464,négationniste,négationniste,adj.,,1,négationiste
+15178,négligemment,négligemment,adv.,,1,négligeament
 9465,négrillonne,négrillon,n.f.,,1,négrillone
 9466,neigeux,neigeux,adj.m.sg.pl.,,2,neigeus
 9467,némathelminthes,némathelminthes,n.m.pl.,,3,nématelmintes
@@ -11811,7 +11832,9 @@
 9713,œcuménisme,œcuménisme,n.m.,,3,eucuménisme
 9713,œcuménisme,œcuménisme,n.m.,,3,écuménisme
 9714,œdémateuse,œdémateux,adj.f.,,3,eudémateuse
+9714,œdémateuse,œdémateux,adj.f.,,3,édémateuse
 9714,œdémateux,œdémateux,adj.m.,,2 3,eudémateus
+9714,œdémateux,œdémateux,adj.m.,,2 3,édémateus
 9715,œdème,œdème,n.m.,,3,eudème
 9715,œdème,œdème,n.m.,,3,édème
 9716,œdicnème,œdicnème,n.m.,,3,édicnème
@@ -12530,6 +12553,7 @@
 10301,pathologiste,pathologiste,adj.,,3,patologiste
 10302,pathomimie,pathomimie,n.f.,,3,patomimie
 10303,pathos,pathos,n.m.,,3,patos
+15179,patiemment,patiemment,adv.,,1,patiament
 10304,patinette,patinette,n.f.,,1,patinète
 10305,patriarcaux,patriarcal,adj.m.pl.,,2,patriarcaus
 10306,patriciaux,patricial,adj.m.pl.,,2,patriciaus
@@ -12762,6 +12786,7 @@
 10492,personnifié,personnifié,adj.,,1,personifié
 10492,personnifiée,personnifié,adj.,,1,personifiée
 10493,personnifier,personnifier,v.tr.,,1,personifier
+15180,pertinemment,pertinemment,adv.,,1,pertinament
 10494,pesamment,pesamment,adv.,,1,pesament
 10495,pesette,pesette,n.f.,,1,pesète
 10496,pesteux,pesteux,adj.m.sg.pl.,,2,pesteus
@@ -13726,6 +13751,7 @@
 11308,précautionneusement,précautionneusement,adv.,,1,précautioneusement
 11309,précautionneuse,précautionneux,adj.,,1,précautioneuse
 11309,précautionneux,précautionneux,adj.,,1 2,précautioneus
+15181,précédemment,précédemment,adv.,,1,précédament
 11310,précellence,précellence,n.f.,,1,précélence
 11311,préchauffage,préchauffage,n.m.,,1,préchaufage
 11312,préchauffer,préchauffer,v.tr.,,1,préchaufer
@@ -13785,7 +13811,10 @@
 11353,presbytérale,presbytéral,adj.,,3’,presbitérale
 11353,presbytéraux,presbytéral,adj.,,2 3’,presbitéraus
 11354,presbytère,presbytère,n.m.,,3’,presbitère
-11355,presbytérienne,presbytérien,n.f.,,1 3’,presbitériène
+11355,presbytérien,presbytérien,n.,,3’,presbitérien
+11355,presbytérien,presbytérien,adj.,,3’,presbitérien
+11355,presbytérienne,presbytérien,n.,,1 3’,presbitériène
+11355,presbytérienne,presbytérien,adj.,,1 3’,presbitériène
 11356,presbytie,presbytie,n.f.,,3,presbitie
 11357,présélectionner,présélectionner,v.tr.,,1,présélectioner
 11358,présidentielle,présidentiel,adj.f.,,1,présidentièle
@@ -13812,9 +13841,9 @@
 11373,prévisionnelle,prévisionnel,adj.,,1,prévisionèle
 11374,prévisionniste,prévisionniste,n.,,1,prévisioniste
 11375,prévôtaux,prévôtal,adj.m.pl.,,2,prévôtaus
+11376,prima donna,prima donna,n.f.,,1,prima dona
 11377,primaux,primal,adj.m.pl.,,2,primaus
 11378,primatiaux,primatial,adj.m.pl.,,2,primatiaus
-11376,prima donna,prima donna,n.f.,,1,prima dona
 11379,primordiaux,primordial,adj.m.pl.,,2,primordiaus
 11380,prince de galles,prince de galles,n.m.inv.,,1,prince de gales
 11381,principaux,principal,adj.m.pl.,,2,principaus
@@ -13958,6 +13987,7 @@
 11482,prud’homaux,prud’homal,adj.,,2 3’,prud’omaus
 11484,prud’homie,prud’homie,n.f.,,3’,prud’omie
 11486,prud’homme,prud’homme,n.m.,,1 3’,prud’ome
+15182,prudemment,prudemment,adv.,,1,prudament
 11483,prudhommal,prudhommal,adj.,,1 3’,prudomal
 11483,prudhommale,prudhommal,adj.,,1 3’,prudomale
 11483,prudhommaux,prudhommal,adj.,,1 2 3’,prudomaus
@@ -14551,6 +14581,7 @@
 11971,rebuffade,rebuffade,n.f.,,1,rebufade
 11972,recachette,recacheter,v.tr.conj.,,1,recachète
 11973,recarreler,recarreler,v.tr.,,1,recareler
+15183,récemment,récemment,adv.,,1,réçament
 11974,réceptionnaire,réceptionnaire,n.,,1,réceptionaire
 11975,réceptionner,réceptionner,v.tr.,,1,réceptioner
 11976,réceptionniste,réceptionniste,n.,,1,réceptioniste
@@ -15273,6 +15304,7 @@
 12570,scholie,scholie,n.m.,,* 3,scolie
 12570,scholie,scholie,n.f.,,* 3,scolie
 12571,schorre,schorre,n.m.,,1,schore
+15184,sciemment,sciemment,adv.,,1,sciament
 12572,scille,scille,n.f.,,1,scile
 12573,scintigramme,scintigramme,n.m.,,1,scintigrame
 12574,scintigraphie,scintigraphie,n.f.,,3,scintigrafie
@@ -15547,8 +15579,9 @@
 12796,soiffarde,soiffard,n.,,1,soifarde
 12797,soigneux,soigneux,adj.m.sg.pl.,,2,soigneus
 12798,soldanelle,soldanelle,n.f.,,1,soldanèle
-12799,solennelle,solennel,adj.f.,,1,solennèle
-12800,solennellement,solennellement,adv.,,1,solennèlement
+12799,solennel,solennel,adj.,,1,solanel
+12799,solennelle,solennel,adj.f.,,1,solanèle
+12800,solennellement,solennellement,adv.,,1,solanèlement
 12801,solfatarienne,solfatarien,adj.f.,,1,solfatariène
 12802,soliveaux,soliveau,n.m.pl.,,2,soliveaus
 12803,sollicitation,sollicitation,n.f.,,1,solicitation
@@ -15920,6 +15953,7 @@
 13113,styrolène,styrolène,n.m.,,3,stirolène
 13114,subaérienne,subaérien,adj.f.,,1,subaériène
 13115,subcellulaire,subcellulaire,adj.,,1,subcélulaire
+15185,subconsciemment,subconsciemment,adv.,,1,subconsciament
 13116,subdivisionnaire,subdivisionnaire,adj.,,1,subdivisionaire
 13117,subéquatoriaux,subéquatorial,adj.m.pl.,,2,subéquatoriaus
 13118,subéreux,subéreux,adj.m.sg.pl.,,2,subéreus
@@ -15936,6 +15970,7 @@
 13123,subordonnée,subordonné,n.,,1,subordonée
 13124,subordonner,subordonner,v.tr.,,1,subordoner
 13125,subsaharienne,subsaharien,adj.f.,,1,subsahariène
+15186,subséquemment,subséquemment,adv.,,1,subséquament
 13126,substantielle,substantiel,adj.f.,,1,substantièle
 13127,substantiellement,substantiellement,adv.,,1,substantièlement
 13128,subtropicaux,subtropical,adj.m.pl.,,2,subtropicaus
@@ -16585,6 +16620,7 @@
 13656,téréphtalique,téréphtalique,adj.,,3,téréftalique
 13657,terminaux,terminal,adj.m.pl.,,2,terminaus
 13658,terminaux,terminal,n.m.pl.,,2,terminaus
+13664,terra rossa,terra rossa,n.f.,,1,téra rossa
 13659,terrage,terrage,n.m.,,1,térage
 13660,terrain,terrain,n.m.,,1,térain
 13661,terramare,terramare,n.f.,,1,téramare
@@ -16595,7 +16631,6 @@
 13666,terrassement,terrassement,n.m.,,1,térassement
 13667,terrasser,terrasser,v.tr.,,1,térasser
 13668,terrassier,terrassier,n.m.,,1,térassier
-13664,terra rossa,terra rossa,n.f.,,1,téra rossa
 13669,terre,terre,n.f.,,1,tère
 13670,terreau,terreau,n.m.,,1,téreau
 13670,terreaux,terreau,n.m.,,1 2,téreaus
@@ -17427,6 +17462,7 @@
 14358,urétéraux,urétéral,adj.m.pl.,,2,urétéraus
 14359,uréthane,uréthane,n.m.,,3,urétane
 14360,urétraux,urétral,adj.m.pl.,,2,urétraus
+15187,urgemment,urgemment,adv.,,1,urgeament
 14361,urinaux,urinal,n.m.pl.,,2,urinaus
 14362,urineux,urineux,adj.m.sg.pl.,,2,urineus
 14363,urogénitaux,urogénital,adj.m.pl.,,2,urogénitaus
@@ -17675,6 +17711,7 @@
 14566,vineux,vineux,adj.m.sg.pl.,,2,vineus
 14567,vinyle,vinyle,n.m.,,3,vinile
 14568,vinylique,vinylique,adj.,,3,vinilique
+15188,violemment,violemment,adv.,,1,violament
 14569,violette,violet,adj.f.,,1,violète
 14569,violette,violet,n.f.,,1,violète
 14570,violette,violette,n.f.,,1,violète

@@ -1,3 +1,3 @@
 #!/bin/bash
 set -e -u -o pipefail
-curl https://gitlab.com/erofa/coorte/-/raw/3681e401127ec934023d35631624f725f1944cd7/DOR/DOR.csv -O
+curl https://gitlab.com/erofa/coorte/-/raw/301ea3259f4d2e1639fd2516df4362e989a657ac/DOR/DOR.csv -O

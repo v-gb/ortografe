@@ -339,6 +339,7 @@ let[@ocamlformat "disable"] erofa_preserve =
              ; str "trotsky"
              ; str "brecht"
              ; str "héraclit"
+             ; str "rouen"
              ; prefix "letton"
              ; prefix "mycén"
              ; prefix "mycèn"
@@ -354,6 +355,7 @@ let[@ocamlformat "disable"] erofa_preserve =
              ; prefix "hawaï"
              ; prefix "nippo"
              ; str "prométhé"
+             ; str "femme" (* éviter femme->fame *)
              ; seq [rep any; str "flux"] (* reflux, influx comme flux *)
              (* pour préserver le t dans wisigoth et quelques autres mots. Je
                 ne comprends pas ce que fait le dico Érofa d'ailleurs. ostrogoth
@@ -591,32 +593,35 @@ let erofa_rule rules =
   in
   let patterns_double_consonants =
     List.map
-      [ (bit_bb, "b")
-      ; (bit_cc, "c")
-      ; (bit_dd, "d")
-      ; (bit_ff, "f")
-      ; (bit_gg, "g")
-      ; (bit_ll, "l")
-      ; (bit_mm, "m")
-      ; (bit_nn, "n")
-      ; (bit_pp, "p")
-      ; (bit_rr, "r")
-      ; (bit_ss, "s")
-      ; (bit_tt, "t")
-      ; (bit_zz, "z")
+      [ (bit_bb, `Simple "b")
+      ; (bit_cc, `Simple "c")
+      ; (bit_dd, `Simple "d")
+      ; (bit_ff, `Simple "f")
+      ; (bit_gg, `Simple "g")
+      ; (bit_ll, `Simple "l")
+      ; (bit_mm, `Simple "m")
+      ; (bit_mm, `Complex ("cemment", "çament"))
+      ; (bit_mm, `Complex ("gemment", "geament"))
+      ; (bit_mm, `Complex ("emm", "am"))
+      ; (bit_nn, `Simple "n")
+      ; (bit_nn, `Complex ("enn", "an")) (* solennel *)
+      ; (bit_pp, `Simple "p")
+      ; (bit_rr, `Simple "r")
+        (* On ne réécrit pas ss en s, mais que nss en ns, car sinon le code considère
+           que le ss dans dessus ou ressource peut être simplifié car on a une
+           surprise avant (e prononcé eu devant une double consonne) et une surprise
+           après (s prononcé s entre deux voyelles, comme dans parasol). La deuxième
+           règle est probablement plus forte que la première et donc on devrait que
+           la réécriture augmente la surprise, mais bon. Les seuls mots qui changent
+           sont les subjonctifs imparfaits, que l'on peut capturer avec "nss". *)
+      ; (bit_ss, `Complex ("nss", "ns"))
+      ; (bit_tt, `Simple "t")
+      ; (bit_zz, `Simple "z")
       ]
-      ~f:(fun (bit, s) ->
-        if bit = bit_ss
-        then
-          (* On ne réécrit pas ss en s, mais que nss en ns, car sinon le code considère
-             que le ss dans dessus ou ressource peut être simplifié car on a une
-             surprise avant (e prononcé eu devant une double consonne) et une surprise
-             après (s prononcé s entre deux voyelles, comme dans parasol). La deuxième
-             règle est probablement plus forte que la première et donc on devrait que
-             la réécriture augmente la surprise, mais bon. Les seuls mots qui changent
-             sont les subjonctifs imparfaits, que l'on peut capturer avec "nss". *)
-          (bit, String.Search_pattern.create "nss", "ns")
-        else (bit, String.Search_pattern.create (s ^ s), s))
+      ~f:(fun (bit, change) ->
+        match change with
+        | `Complex (src, dst) -> (bit, String.Search_pattern.create src, dst)
+        | `Simple s -> (bit, String.Search_pattern.create (s ^ s), s))
   in
   { rules
   ; compute =
