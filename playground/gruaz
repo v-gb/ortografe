@@ -1,7 +1,11 @@
 #!/bin/bash
 
 set -e -u -o pipefail
-rules="oe 1990 erofa m-mbp/n-mbp â/a sch/ch oo/o mn/n con/gon ck/c ck/qu emm/am enn/an ao/a chs/ch cq/q êi/ei ey/et oe/oi î/i ouin/oin w/v xs/x xt/x"
+rules="oe 1990 erofa m-mbp/n-mbp â/a sch/ch oo/o mn/n con/gon ck/c ck/qu emm/am enn/an ao/a chsi/chi cq/q êi/ei ey/et oe/oi î/i ouin/oin w/v xs/x xt/x"
+# Quelques justifications des règles ci-dessus :
+# - chsi/chi, au lieu de chs/ch, car sinon on inclue des pluriels almanachs->almanach
+# - con/gon, au lieu de c/g, pour éviter les c muets, estomac->estomag
+# - sc/s manquant car règle qui introduirait beaucoup d'exceptions
 link="https://orthographe-rationnelle.info/regles/perso?regles=$rules"
 function dict_gen {
     $(jj workspace root)/_build/default/dict-gen/bin/dict_gen.exe "$@"
