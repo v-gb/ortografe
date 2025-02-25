@@ -11,17 +11,28 @@
     let json = json("lexique.json")
     let content = ();
     let row = 0
-    [ Ce dictionnaire est bâti à partir des règles suivantes :]
-    for r in json.rules {
-        if r != "oe" and r != "1990" {
-            [ - #r ]
-        }
-    }
-    [ La colonne de gauche indique l'orthographe actuelle, puis le cas échéant, d'autres
-      orthographes existantes (par exemple, une orthographe prédatant la réforme de 1990).
-      Les mots changés par les règles sont colorés, les mots inchangés
-      sont laissés sur fond blanc.
-    ]
+    place(
+        top + left,
+        float: true,
+        scope: "parent",
+        [#{
+            [ Ce dictionnaire est bâti à partir des règles suivantes :]
+            let items = ();
+            for r in json.rules {
+                if r != "oe" and r != "1990" {
+                    items.push(r)
+                }
+            }
+            list(indent: 0.5cm, ..items)
+
+            [ Des #link(json.link)[#underline(offset: 2pt, stroke: (thickness: 1pt, dash: "densely-dotted"), [outils en ligne])] permettent également d'utiliser ces
+              règles pour transcrire des textes entiers. ]
+
+            [ La colonne de gauche indique l'orthographe actuelle, puis le cas échéant,
+              d'autres orthographes existantes (par exemple, une orthographe prédatant
+              la réforme de 1990). Les mots changés par les règles sont colorés, les mots
+              inchangés sont laissés sur fond blanc. ]
+        }])
     for (k, v) in json.table {
         let left_bit = [ #k ]
         for old in v.old {
