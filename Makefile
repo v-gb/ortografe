@@ -63,4 +63,4 @@ first-install:
 .PHONY: tarball
 tarball:
 	@ # requested by the firefox addon website, due to the generated javascript
-	jj files | tar -zcf source.tar.gz --files-from=-
+	jj file list | tar -zcf source.tar.gz --files-from=-
