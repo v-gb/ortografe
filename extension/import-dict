@@ -12,7 +12,6 @@ alter table t rename column "Grafie modifiée" to new;
 select old, new
 from t
 where old != ''
-and old not like 'coordonner' -- new=cordoner, ce qui est faux
 and old not like 'héro' -- on laisse tomber tout ça, car le sens de héroîque
 and old not like 'héroïne' -- garde le h, mais le sens de la drogue non, et comme on ne
 and old not like 'héroïq%' -- peut pas distinguer, garder tous les h est préférable
@@ -30,7 +29,6 @@ and not (old like 'achène' or old like 'achaine') -- pris en compte de 1990 ban
 and old not like 'sheikh' -- 1990 pas pris en compte
 and old not like 'œcuméni%' -- œ->eu. Autant utiliser é comme pour les autres œ
 and new not like 'eudémat%' -- préfère œ->é à œ->eu
-and not (old like 'douc%' and new like 'douss%') -- entrée non justifiée par les règles
 and old not like 'déhotter' -- sans le préfixe, le h est aspiré, donc il est à garder ici
 and old not like '%succion%' -- prononciation en /s/ au lieu /ks/ est possible mais moins commune
 and old not like 'wallonne' -- erreur du DOR, qui touche un nom de peuple

@@ -4200,7 +4200,7 @@
 3421,coordonnée,coordonné,adj.,,1,coordonée
 3421,coordonnée,coordonné,n.,,1,coordonée
 3422,coordonnées,coordonnées,n.f.pl.,,1,coordonées
-3423,coordonner,coordonner,v.tr.,,1,cordoner
+3423,coordonner,coordonner,v.tr.,,1,coordoner
 3424,coparentaux,coparental,adj.m.pl.,,2,coparentaus
 3425,copeaux,copeau,n.m.pl.,,2,copeaus
 3426,copernicienne,copernicien,adj.f.,,1,coperniciène
@@ -4358,7 +4358,7 @@
 3545,coucoumelle,coucoumelle,n.f.,,1,coucoumèle
 15192,couenne,couenne,n.f.,,1,couane
 15192,couenne,couenne,n.f.,,1,couène
-3546,couenneux,couenneux,adj.,,2,couenneus
+3546,couenneux,couenneux,adj.,,1 2,couaneus
 3547,couette,couette,n.f.,,1,couète
 3548,couffin,couffin,n.m.,,1,coufin
 3549,couillonne,couillon,n.,,1,couillone
@@ -5424,7 +5424,7 @@
 4460,doubleaux,doubleau,n.m.pl.,,2,doubleaus
 4461,doublette,doublette,n.f.,,1,doublète
 4462,doublonner,doublonner,v.intr.,,1,doubloner
-4463,doucereux,doucereux,adj.m.sg.pl.,,2,doussereus
+4463,doucereux,doucereux,adj.m.sg.pl.,,2,doucereus
 4464,doucette,doucette,adj.,,1,doucète
 4464,doucette,doucette,n.f.,,1,doucète
 4465,doucettement,doucettement,adv.,,1,doucètement
@@ -15582,6 +15582,8 @@
 12799,solennel,solennel,adj.,,1,solanel
 12799,solennelle,solennel,adj.f.,,1,solanèle
 12800,solennellement,solennellement,adv.,,1,solanèlement
+15193,solenniser,solenniser,v.tr.,,1,solaniser
+15194,solennité,solennité,n.f.,,1,solanité
 12801,solfatarienne,solfatarien,adj.f.,,1,solfatariène
 12802,soliveaux,soliveau,n.m.pl.,,2,soliveaus
 12803,sollicitation,sollicitation,n.f.,,1,solicitation
