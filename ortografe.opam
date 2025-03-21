@@ -15,7 +15,6 @@ depends: [
   "dream"
   "eio"
   "eio_main"
-  "hyper"
   "js_of_ocaml"
   "lwt_ppx"
   "patience_diff"

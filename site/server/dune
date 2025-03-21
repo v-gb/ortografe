@@ -7,7 +7,6 @@
    dict_gen_common
    dict_search
    dream
-   hyper
    ortografe
    ortografe_embedded
    sexp_with_utf8

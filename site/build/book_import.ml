@@ -27,16 +27,25 @@ let mkdir_and_write_all path ~data =
   then Unix.mkdir (Filename.dirname path) 0o777;
   Out_channel.write_all path ~data
 
+let http_download url =
+  Exn.protectx (Filename_unix.temp_file "ortografe-http" "") ~finally:Sys_unix.remove
+    ~f:(fun tmp_name ->
+      Sys_unix.command_exn
+        (Sys.concat_quoted [ "curl"; "--fail-with-body"; "-sS"; "--"; url ]
+        ^ " > "
+        ^ Sys.quote tmp_name);
+      In_channel.read_all tmp_name)
+
 let download_from_wikisource url =
   (* url looks like "https://fr.wikisource.org/wiki/Pens%C3%A9es_de_Marc-Aur%C3%A8le_(Couat)/01"
      epub url looks like "https://ws-export.wmcloud.org/?format=epub&lang=fr&page=Pens%C3%A9es_de_Marc-Aur%C3%A8le_(Couat)/01"
   *)
   let title = String.chop_prefix_exn ~prefix:"/wiki/" (Uri.path url) in
-  Hyper.get ("https://ws-export.wmcloud.org/?format=epub&lang=fr&page=" ^ title)
+  http_download ("https://ws-export.wmcloud.org/?format=epub&lang=fr&page=" ^ title)
 
 let download_from_gutenberg url =
   let id = Filename.basename (Uri.path url) in
-  Hyper.get [%string "https://www.gutenberg.org/cache/epub/%{id}/pg%{id}-h.zip"]
+  http_download [%string "https://www.gutenberg.org/cache/epub/%{id}/pg%{id}-h.zip"]
 
 let download ~before url ~books_tmp ~title =
   let url = Uri.of_string url in

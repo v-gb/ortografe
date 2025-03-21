@@ -4,8 +4,8 @@
    cmdliner
    core
    core_unix.sys_unix
+   core_unix.filename_unix
    dream
-   hyper
    ortografe
    ortografe_embedded
    re
