@@ -48,14 +48,14 @@ let odt_transform_interleaved ~convert_text signal =
           Stack.push stack ns_tag;
           Text.Interleaved.emit_structure state elt `Not_special
       | `End_element ->
-          let effect =
+          let effect_ =
             match Stack.pop stack with
             | Some (ns, ("h" | "p")) when String.( = ) ns text_ns -> `Flush
             | Some (ns, ("s" | "tab" | "line-break")) when String.( = ) ns text_ns ->
                 `Space
             | _ -> `Not_special
           in
-          Text.Interleaved.emit_structure state elt effect
+          Text.Interleaved.emit_structure state elt effect_
       | `Text strs
         when let ns, tag = Stack.top_exn stack in
              match tag with

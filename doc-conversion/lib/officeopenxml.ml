@@ -56,12 +56,12 @@ let convert_stream ~convert_text ~doc_ns signal =
           Stack.push stack ns_tag;
           Text.Interleaved.emit_structure state elt `Not_special
       | `End_element ->
-          let effect =
+          let effect_ =
             match Stack.pop stack with
             | Some (ns, "p") when String.( = ) ns doc_ns -> `Flush
             | _ -> `Not_special
           in
-          Text.Interleaved.emit_structure state elt effect
+          Text.Interleaved.emit_structure state elt effect_
       | `Text strs
         when [%compare.equal: (string * string) option] (Stack.top stack)
                (Some (doc_ns, "t")) ->

@@ -366,8 +366,8 @@ module Interleaved = struct
       Queue.enqueue t.waiting (`Structure a);
       [])
 
-  let emit_structure t a effect =
-    match effect with
+  let emit_structure t a effect_ =
+    match effect_ with
     | `Not_special -> emit_structure_not_special t a
     | `Flush | `Space -> handle_result t (flush_as_list t) @ [ a ]
 end
