@@ -6,6 +6,9 @@
 ])
 
 #set page(columns: 2)
+#let user_facing_link(url, text) = {
+    link(url)[#underline(offset: 2pt, stroke: (thickness: 1pt, dash: "densely-dotted"), text)]
+}
 
 #{
     let json = json("lexique.json")
@@ -16,7 +19,7 @@
         float: true,
         scope: "parent",
         {
-            [ Ce dictionnaire est bâti à partir des règles suivantes :]
+            [ Ce dictionnaire est bâti à partir des règles suivantes, appliquées à #{calc.quo(json.count,1000)}k mots du #user_facing_link("http://lexique.org", [lexique lexique.org]) :]
             let items = ();
             for r in json.rules {
                 if r != "oe" and r != "1990" {
@@ -25,7 +28,7 @@
             }
             list(indent: 0.5cm, ..items)
 
-            [ Des #link(json.link)[#underline(offset: 2pt, stroke: (thickness: 1pt, dash: "densely-dotted"), [outils en ligne])] permettent également d'utiliser ces
+            [ Des #user_facing_link(json.link, [outils en ligne]) permettent également d'utiliser ces
               règles pour transcrire des textes entiers. ]
 
             [ La colonne de gauche indique l'orthographe actuelle, puis le cas échéant,

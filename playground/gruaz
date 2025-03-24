@@ -105,6 +105,7 @@ def print_json(f):
             { "rules": list(sorted(os.environ["rules"].split(" "), key=lambda x: (x != "erofa", locale.strxfrm(x)))),
               "link": os.environ["link"],
               "table": table_ordered,
+              "count": len(lexique_oe),
             }
           ), file=f)
 print_json(open("/tmp/lexique.json", "w"))
