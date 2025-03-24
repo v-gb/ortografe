@@ -15,7 +15,7 @@
         top + left,
         float: true,
         scope: "parent",
-        [#{
+        {
             [ Ce dictionnaire est bâti à partir des règles suivantes :]
             let items = ();
             for r in json.rules {
@@ -32,7 +32,7 @@
               d'autres orthographes existantes (par exemple, une orthographe prédatant
               la réforme de 1990). Les mots changés par les règles sont colorés, les mots
               inchangés sont laissés sur fond blanc. ]
-        }])
+        })
     for (k, v) in json.table {
         let left_bit = [ #k ]
         for old in v.old {
