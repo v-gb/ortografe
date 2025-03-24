@@ -38,9 +38,9 @@
         for old in v.old {
             left_bit = left_bit + [ \ #h(0.3cm) #text(0.9em)[#old] ]
         }
-        let light_green = rgb("f0f0ff")
-        let light_blue = rgb("f0fff0")
-        let color = if k == v.new { white } else if calc.odd(row) { light_green } else { light_blue }
+        let color1 = rgb("83EE99")
+        let color2 = rgb("CBFACF")
+        let color = if k == v.new { white } else if calc.odd(row) { color1 } else { color2 }
         content.push(table.cell(fill: color, left_bit))
         content.push(table.cell(fill: color, v.new))
         row += 1
