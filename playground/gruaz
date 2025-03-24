@@ -57,6 +57,12 @@ pdf)
 .mode tabs
 .import _build/default/data/lexique/Lexique383-full.gen.tsv t
 .mode csv
+.import _build/default/data/homemade/lexique-extra.csv extra
+insert into t(ortho,lemme,nombre,genre,freqlemfilms2)
+select ortho, coalesce(nullif(lemme,''),ortho),'s','f','0'
+from extra
+where not exists (select 1 from t where t.ortho = extra.ortho)
+and ortho <> '#';
 select ortho from t
 where (ortho = lemme or (genre = 'f' and nombre <> 'p') or ortho = 'arrhes')
 order by cast (freqlemfilms2 as real) desc
