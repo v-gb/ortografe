@@ -1,9 +1,14 @@
 #set document(title: [Dictionnaire de transcription])
 #set text(hyphenate: true) // avoid overflowing for anticonstitutionnellement
 
-#align(center + horizon, text(17pt)[
+
+#{
+if false {
+    align(center + horizon, text(17pt)[
     *Dictionnaire de transcription pour #text(style: "italic")[La réforme de l'orthographe lexicale du français] de Claude Gruaz*
 ])
+}
+}
 
 #set page(columns: 2)
 #let user_facing_link(url, text) = {
@@ -14,6 +19,7 @@
     let json = json("lexique.json")
     let content = ();
     let row = 0
+    if false {
     place(
         top + left,
         float: true,
@@ -36,13 +42,14 @@
               la réforme de 1990). Les mots changés par les règles sont colorés, les mots
               inchangés sont laissés sur fond blanc. ]
         })
+    }
     for (k, v) in json.table {
         let left_bit = [ #k ]
         for old in v.old {
             left_bit = left_bit + [ \ #h(0.3cm) #text(0.9em)[#old] ]
         }
-        let color1 = rgb("83EE99")
-        let color2 = rgb("CBFACF")
+        let color1 = rgb("dff2ff")
+        let color2 = rgb("a3d5ff")
         let color = if k == v.new { white } else if calc.odd(row) { color1 } else { color2 }
         content.push(table.cell(fill: color, left_bit))
         content.push(table.cell(fill: color, v.new))
