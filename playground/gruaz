@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e -u -o pipefail
-rules="oe 1990 erofa m-mbp/n-mbp â/a sch/ch oo/o mn/n con/gon ck/c ck/qu emm/am ao/a chsi/chi cq/q êi/ei ey/et oe/oi î/i ouin/oin w/v xs/x xt/x"
+rules="oe 1990 erofa m-mbp/n-mbp â/a sch/ch oo/o mn/n con/gon ck/c ck/qu emm/am ao/a chsi/chi cq/q êi/ei ey/et oell/oil oe/oi oê/oi î/i ouin/oin w/v xs/x xt/x"
 # Quelques justifications des règles ci-dessus :
 # - chsi/chi, au lieu de chs/ch, car sinon on inclue des pluriels almanachs->almanach
 # - con/gon, au lieu de c/g, pour éviter les c muets, estomac->estomag
