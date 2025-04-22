@@ -1,12 +1,14 @@
 #!/bin/bash
 
 set -e -u -o pipefail
-rules="oe 1990 erofa m-mbp/n-mbp â/a sch/ch oo/o mn/n con/gon ck/c ck/qu emm/am ao/a chsi/chi cq/q êi/ei ey/et oell/oil oe/oi oê/oi î/i ouin/oin esc/éc esc/èc sc/c esç/éç esç/èç sç/ç w/v xs/x xt/x"
+rules="oe 1990 erofa m-mbp/n-mbp â/a sch/ch oo/o mn/n con/gon ck/c ck/qu emm/am ao/a chsi/chi cq/q êi/ei ey/et oell/oil oe/oi oê/oi î/i ouin/oin esc/éc esc/èc sc/c esç/éç esç/èç sç/ç w/v xs/x xt/x poulain/poulin copain/copin"
 # Quelques justifications des règles ci-dessus :
 # - chsi/chi, au lieu de chs/ch, car sinon on inclue des pluriels almanachs->almanach
 # - con/gon, au lieu de c/g, pour éviter les c muets, estomac->estomag
 # - sc/s manquant car règle qui introduirait beaucoup d'exceptions
 # - emm/am est inclus dans les règles érofa, sauf pour femme, donc on garde la règle
+# - ain/in ne s'applique que si le a est systématiquement perdu dans les mots dérivés, mais
+#   ce qui est incalculable en l'état actuel des choses
 link="https://orthographe-rationnelle.info/regles/perso?regles=$rules"
 function dict_gen {
     $(jj workspace root)/_build/default/dict-gen/bin/dict_gen.exe "$@"
