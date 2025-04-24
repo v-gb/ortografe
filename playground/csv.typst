@@ -10,6 +10,8 @@ if false {
 }
 }
 
+#set page(numbering: "1")
+#counter(page).update(7)
 #set page(columns: 2)
 #let user_facing_link(url, text) = {
     link(url)[#underline(offset: 2pt, stroke: (thickness: 1pt, dash: "densely-dotted"), text)]
