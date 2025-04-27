@@ -48,6 +48,8 @@ let limit_body_size ~max_size request =
       Dream.set_body request body;
       Lwt.return (Ok ())
 
+let allow_all_origins = ("Access-Control-Allow-Origin", "*") (* for erofa.org *)
+
 let html_of_response ~title_unescaped ~body_unescaped =
   Printf.sprintf
     {|<html>
@@ -431,7 +433,7 @@ let get_dict () =
 </table>
 |}]
         in
-        Dream.html html
+        Dream.html ~headers:[ allow_all_origins ] html
 
 let post_conv ~max_input_size ~staged request =
   match%lwt limit_body_size ~max_size:max_input_size request with

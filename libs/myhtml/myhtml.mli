@@ -176,6 +176,8 @@ val style : string -> node
 val html :
   lang:string -> head:node list -> ?body_style:string -> body:node list -> unit -> node
 
+val style_tag : node -> node list
+
 val details :
      ?cl:string
   -> ?summary_cl:string

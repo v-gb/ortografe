@@ -28,6 +28,7 @@
 (rule
  (targets
    index.html
+   outils.html
    regles_perso_url=true.html
    regles_perso_url=false.html
  )

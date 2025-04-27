@@ -10,10 +10,34 @@ let green_pale = "#e5fbe5"
 let green = "#b9f4b9"
 let _ = green_pale
 let html ~head ?body_style ~body () = html ~lang:"fr" ~head ?body_style ~body ()
-let favicon_url_abs_impl = "/static/favicon.svg"
-let download_url_abs_impl = "/static/download.svg"
 
-let head ~root ~attrs ~title ~description () =
+let url ~from abs =
+  assert (String.is_prefix abs ~prefix:"/");
+  match from with
+  | `same_site -> abs
+  | `other -> "https://orthographe-rationnelle.info" ^ abs
+
+let favicon_url_abs_impl ~from = url ~from "/static/favicon.svg"
+let download_url_abs_impl ~from = url ~from "/static/download.svg"
+
+let global_style_shared_with_other =
+  {|
+.for-active-browser {
+  background-color: #e5fbe5;
+  padding: 3px;
+  border-radius: 6px;
+}
+
+.exp-hidden {
+  display: none;
+}
+.exp-shown {
+  background-color: #ffecce;
+  border-radius: 4px;
+}
+|}
+
+let head ~from ~root ~attrs ~title ~description () =
   [ leafelt "meta"
       [ ("name", "viewport"); ("content", "width=device-width, initial-scale=1") ]
   ; leafelt "meta" [ ("charset", "utf-8") ]
@@ -38,10 +62,10 @@ let head ~root ~attrs ~title ~description () =
   ; leafelt "meta" [ ("name", "description"); ("content", description) ]
     (* It would be good to have the open-graph stuff
      *  https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML *)
-  ; leafelt "link" [ ("rel", "icon"); ("href", favicon_url_abs_impl) ]
+  ; leafelt "link" [ ("rel", "icon"); ("href", favicon_url_abs_impl ~from) ]
   ; +attrs
   ; style
-      {|
+      ({|
 /* https://www.joshwcomeau.com/css/custom-css-reset/ */
 input, button, textarea, select {
   font: inherit;
@@ -52,20 +76,8 @@ a:link, a:visited {
   text-underline-offset: 1.5px;
 }
 
-.for-active-browser {
-  background-color: #e5fbe5;
-  padding: 3px;
-  border-radius: 6px;
-}
-
-.exp-hidden {
-  display: none;
-}
-.exp-shown {
-  background-color: #ffecce;
-  border-radius: 4px;
-}
 |}
+      ^ global_style_shared_with_other)
   ]
 
 let exp_hidden = "exp-hidden"
@@ -143,7 +155,7 @@ module Index = struct
       ; (aller_plus_loin_ref, [ text "Aller plus loin" ])
       ]
 
-  let introduction () =
+  let introduction ~from () =
     let books ~attrs =
       (* ça, on peut le calculer direct en mémoire, pas besoin de passer par un fichier *)
       nodes_of_string ~attrs (In_channel.read_all "../static/books.html")
@@ -155,7 +167,8 @@ module Index = struct
                margin:0; margin-left: 0.5em; position: relative;"
             [ a ~href:"https://www.youtube.com/embed/5YO7Vg1ByA8?autoplay=1"
                 ~attrs:[ ("target", "_blank") ]
-                [ img "/static/hoedt_piron.jpg"
+                [ img
+                    (url ~from "/static/hoedt_piron.jpg")
                     ~cl:"aspect-ratio:320/180; max-width: 100%; height: auto;"
                     [ ( "alt"
                       , "La faute de l'orthographe | Arnaud Hoedt, Jérôme Piron | \
@@ -385,29 +398,34 @@ module Index = struct
           ]
       ]
 
-  let section_dictionnaire () =
+  let section_dictionnaire ~from () =
+    let not_full_width_in_erofa_org = "width: auto; margin: auto; " in
     section
       [ h3 [ text "Dictionnaire de transcription" ]
-      ; div ~cl:"text-align: center;"
+      ; div
           [ leafelt "input"
-              [ ("type", "text")
+              [ ("style", "text-align: center;" ^ not_full_width_in_erofa_org)
+                (* inline for higher specificity in erofa.org *)
+              ; ("type", "text")
               ; ("placeholder", "Cherchez un mot !")
               ; ("id", "dict-search-input")
+              ; ("dict-search-url", url ~from "/dict")
               ]
           ]
       ; div
           ~attrs:[ ("id", "dict-search-output") ]
           ~cl:
-            {|table { margin: auto }
-             td { text-align: center }
+            ({|table { margin: auto; |}
+            ^ not_full_width_in_erofa_org
+            ^ {|}
+             table, td, th { border-width: 0; }
+             td, th { text-align: center }
+             td { padding: 0.1em }
              tbody tr:nth-child(odd) {
                background-color: #FAF9F6;
              }|}
+            )
           []
-      ; p ~cl:"font-size: 0.8em;"
-          [ text
-              "Il est possible qu'il y ait quelques erreurs sur des mots peu communs."
-          ]
       ]
 
   let section_transcription_interactive () =
@@ -423,7 +441,7 @@ module Index = struct
 
   let email_link children = elt "a" ~attrs:[ ("class", "mailelt") ] children
 
-  let submit_file ?replace_onchange ?label_attrs ?(attrs = []) f =
+  let submit_file ~from ?replace_onchange ?label_attrs ?(attrs = []) f =
     let upload_css =
       [%string
         {|
@@ -446,7 +464,7 @@ module Index = struct
     in
     elt "form"
       ~attrs:
-        [ ("action", "/conv")
+        [ ("action", url ~from "/conv")
         ; ("method", "post")
         ; ("enctype", "multipart/form-data")
         ; +attrs
@@ -498,28 +516,34 @@ module Index = struct
 
   let image_list l = image_list' (List.map l ~f:(fun (img, desc) -> ([], img, desc)))
 
-  let format_acceptes () =
+  let format_acceptes ~from () =
     image_list
       [ ( (fun ~cl ->
-            img "/static/word.svg" ~cl
+            img
+              (url ~from "/static/word.svg")
+              ~cl
               [ ("alt", "Microsoft Office Word (2019–present).svg")
               ; ("width", "1881" (* can we go and compute this? *))
               ; ("height", "1750")
               ])
         , [ text "Word et similaires (.doc, .docx, .odt)" ] )
       ; ( (fun ~cl ->
-            img "/static/powerpoint.svg" ~cl
+            img
+              (url ~from "/static/powerpoint.svg")
+              ~cl
               [ ("alt", "Microsoft Office PowerPoint (2019–present).svg")
               ; ("width", "512")
               ; ("height", "476")
               ])
         , [ text "PowerPoint et similaires (.ppt, .pptx, .odp)" ] )
       ; ( (fun ~cl ->
-            img "/static/text_file.svg" ~cl
+            img
+              (url ~from "/static/text_file.svg")
+              ~cl
               [ ("alt", "Text file icon"); ("width", "822"); ("height", "754") ])
         , [ text "fichiers textes (.txt, .mkd, .md)" ] )
       ; ( (fun ~cl ->
-            img "/static/pdf.svg" ~cl
+            img (url ~from "/static/pdf.svg") ~cl
               [ ("alt", "PDF file icon"); ("width", "544"); ("height", "580") ])
         , [ text
               "Pas supporté directement. Soumettez soit le fichier dont est tiré le \
@@ -531,7 +555,9 @@ module Index = struct
           ; text ")."
           ] )
       ; ( (fun ~cl ->
-            img "/static/epub.svg" ~cl
+            img
+              (url ~from "/static/epub.svg")
+              ~cl
               [ ("alt", "Epub logo color.svg"); ("width", "600"); ("height", "800") ])
         , [ text "livres numériques (.epub), comme ceux de "
           ; a ~href:"https://fr.wikisource.org/wiki/Wikisource:Accueil"
@@ -539,29 +565,33 @@ module Index = struct
           ; text " plus haut"
           ] )
       ; ( (fun ~cl ->
-            img "/static/internet_globe.svg" ~cl
+            img
+              (url ~from "/static/internet_globe.svg")
+              ~cl
               [ ("alt", "Internet Symbol"); ("width", "407"); ("height", "407") ])
         , [ text "sources de pages web (.html, .xhtml, .htmlz)" ] )
       ]
 
-  let section_transcription_en_ligne () =
+  let section_transcription_en_ligne ~from () =
     section
       [ h3 [ text "Transcription de documents, en ligne" ]
-      ; submit_file Fn.id
+      ; submit_file ~from Fn.id
       ; p [ text "Les formats acceptés sont :" ]
-      ; format_acceptes ()
+      ; format_acceptes ~from ()
       ]
 
-  let section_transcription_locale () =
+  let section_transcription_locale ~from () =
     section
       [ h3 [ text "Transcription de documents, sur votre ordinateur" ]
       ; p
           [ text "Ce n'est utilisable que par les développeurs, actuellement. Voici un "
-          ; a ~href:"/static/ortografe_cli.exe"
+          ; a
+              ~href:(url ~from "/static/ortografe_cli.exe")
               ~attrs:[ ("download", "ortografe-cli") ]
               [ text "exécutable Linux natif" ]
           ; text ", ou "
-          ; a ~href:"/static/ortografe.bc.js"
+          ; a
+              ~href:(url ~from "/static/ortografe.bc.js")
               ~attrs:[ ("download", "ortografe-cli.js") ]
               [ text "javascript" ]
           ; text
@@ -570,7 +600,7 @@ module Index = struct
           ]
       ]
 
-  let icon = "height: 1em; width: auto;"
+  let icon = "height: 1em; width: auto; display: inline-block; "
 
   let clickable_icon_round =
     "padding: 2px; border-radius:50%; box-shadow: 0 0 5px 4px #b9f4b9;"
@@ -578,7 +608,7 @@ module Index = struct
   let clickable_icon_box =
     "padding: 2px; border-radius: 3px; box-shadow: 0 0 5px 4px #b9f4b9;"
 
-  let section_transcription_pages which_page =
+  let section_transcription_pages ~from which_page =
     let ext_in_chrome_link =
       "https://chromewebstore.google.com/detail/orthographe-rationnelle/jdicbfmgcajnpealjodkghahiakdafcl?hl=fr"
     in
@@ -599,7 +629,7 @@ module Index = struct
       ; +(match which_page with
          | `Url_page -> []
          | `Main_page ->
-             let src = "/static/screenshot-1280-800.png" in
+             let src = url ~from "/static/screenshot-1280-800.png" in
              [ a ~href:src
                  [ img src ~cl:"max-width:min(35em,100%); height:auto"
                      [ ( "alt"
@@ -619,7 +649,8 @@ module Index = struct
           [ ( [ ("class", "for-chrome") ]
             , (fun ~cl ->
                 a ~href:ext_in_chrome_link
-                  [ img ~cl:(cl ^ clickable_icon_round) "/static/chrome.svg"
+                  [ img ~cl:(cl ^ clickable_icon_round)
+                      (url ~from "/static/chrome.svg")
                       [ ("alt", ""); ("width", "48"); ("height", "48") ]
                   ])
             , [ text
@@ -627,37 +658,49 @@ module Index = struct
                    extensions, nous vous conseillons donc "
               ; a ~href:firefox_on_android_link
                   [ text "Firefox "
-                  ; img ~cl:icon "/static/firefox.svg"
-                      [ ("alt", ""); ("width", "77"); ("height", "79") ]
+                  ; img
+                      (url ~from "/static/firefox.svg")
+                      [ ("style", icon)
+                        (* style instead of class so it's higher specificity in
+                           erofa.org *)
+                      ; ("alt", "")
+                      ; ("width", "77")
+                      ; ("height", "79")
+                      ]
                   ]
               ; text ". "
               ] )
           ; ( [ ("class", "for-firefox") ]
             , (fun ~cl ->
                 a ~href:ext_in_firefox_link
-                  [ img ~cl:(cl ^ clickable_icon_round) "/static/firefox.svg"
+                  [ img ~cl:(cl ^ clickable_icon_round)
+                      (url ~from "/static/firefox.svg")
                       [ ("alt", ""); ("width", "77"); ("height", "79") ]
                   ])
             , [ text "Ordinateur et téléphone." ] )
           ; ( [ ("class", "for-safari") ]
             , (fun ~cl ->
                 a ~href:ext_in_safari_link
-                  [ img ~cl:(cl ^ clickable_icon_round) "/static/safari.svg"
+                  [ img ~cl:(cl ^ clickable_icon_round)
+                      (url ~from "/static/safari.svg")
                       [ ("alt", ""); ("width", "187"); ("height", "186") ]
                   ])
             , [ text
                   "MacOS et iOS. Si l'extension n'a pas d'effet, vérifiez qu'il n'y a \
                    pas de triangle d'avertissement orange en haut près de la barre d'"
-              ; a ~href:"/static/extension.zip"
+              ; a
+                  ~href:(url ~from "/static/extension.zip")
                   ~attrs:
-                    [ ("style", "cursor:default; text-decoration:none; color:black; ") ]
+                    [ ("style", "cursor:default; text-decoration:none; color: inherit; ")
+                    ]
                   [ text "adresse" ]
               ; text "."
               ] )
           ; ( [ ("class", "for-edge") ]
             , (fun ~cl ->
                 a ~href:ext_in_chrome_link
-                  [ img ~cl:(cl ^ clickable_icon_round) "/static/edge.svg"
+                  [ img ~cl:(cl ^ clickable_icon_round)
+                      (url ~from "/static/edge.svg")
                       [ ("alt", ""); ("width", "256"); ("height", "256") ]
                   ])
             , [ text "Ordinateur, et peut-être téléphone. Suivez "
@@ -677,7 +720,7 @@ module Index = struct
                      [ [ text
                            "Allez dans ses options (généralement avec l'icône pièce de \
                             puzzle en haut à droite, puis l'icône plume "
-                       ; img favicon_url_abs_impl
+                       ; img (favicon_url_abs_impl ~from)
                            ~cl:"height: 1em; width: auto; vertical-align: sub;"
                            [ ("alt", "icône plume")
                            ; ("width", "186")
@@ -686,7 +729,7 @@ module Index = struct
                        ; text ")."
                        ]
                      ; [ text "Cliquez le bouton de téléchargement "
-                       ; img download_url_abs_impl
+                       ; img (download_url_abs_impl ~from)
                            ~cl:"height: 1em; width: auto; vertical-align: sub;"
                            [ ("alt", "bouton de téléchargement")
                            ; ("width", "24")
@@ -699,7 +742,7 @@ module Index = struct
              ])
       ]
 
-  let section_verificateurs () =
+  let section_verificateurs ~from () =
     let firefox_link =
       "https://addons.mozilla.org/fr/firefox/addon/corecteur-ortografe-simplifiee/"
     in
@@ -721,14 +764,16 @@ module Index = struct
           [ ( []
             , (fun ~cl ->
                 a ~href:firefox_link
-                  [ img ~cl:(cl ^ clickable_icon_round) "/static/firefox.svg"
+                  [ img ~cl:(cl ^ clickable_icon_round)
+                      (url ~from "/static/firefox.svg")
                       [ ("alt", ""); ("width", "77"); ("height", "79") ]
                   ])
             , [ text "navigateur Firefox (non supporté sur téléphones)" ] )
           ; ( []
             , (fun ~cl ->
                 a ~href:thunderbird_link
-                  [ img ~cl:(cl ^ clickable_icon_round) "/static/thunderbird.svg"
+                  [ img ~cl:(cl ^ clickable_icon_round)
+                      (url ~from "/static/thunderbird.svg")
                       [ ("alt", ""); ("width", "512"); ("height", "512") ]
                   ])
             , [ text "messagerie Thunderbird" ] )
@@ -736,14 +781,15 @@ module Index = struct
           ; ( [ ("style", "display:none") ]
             , (fun ~cl ->
                 a ~href:libreoffice_link
-                  [ img ~cl:(cl ^ clickable_icon_box) "/static/libreoffice_writer.png"
+                  [ img ~cl:(cl ^ clickable_icon_box)
+                      (url ~from "/static/libreoffice_writer.png")
                       [ ("alt", ""); ("width", "128"); ("height", "128") ]
                   ])
             , [ text "suite bureautique LibreOffice" ] )
           ]
       ]
 
-  let section_claviers () =
+  let section_claviers ~from () =
     [ section
         [ h3 [ text "Clavier pour téléphone" ]
         ; p
@@ -770,7 +816,9 @@ module Index = struct
                           " (le clavier virtuel), puis suivez ses instructions pour \
                            l'activer."
                       ]
-                    ; [ a ~href:"/static/heliboard_erofa.dict" [ text "Téléchargez" ]
+                    ; [ a
+                          ~href:(url ~from "/static/heliboard_erofa.dict")
+                          [ text "Téléchargez" ]
                       ; text " le dictionnaire français Érofa pour HeliBoard."
                       ]
                     ; [ text "Utilisez ce dictionnaire :"
@@ -815,10 +863,12 @@ module Index = struct
              utilisateur voudrait passer d'une orthographe à l'autre. *)
         ; div ~attrs:[ exp_hidden_class ]
             [ list `ul
-                [ [ a ~href:"/static/gboard-1990-1000.zip"
+                [ [ a
+                      ~href:(url ~from "/static/gboard-1990-1000.zip")
                       [ text "Dictionnaire 1990 pour gboard" ]
                   ]
-                ; [ a ~href:"/static/gboard-erofa-1000.zip"
+                ; [ a
+                      ~href:(url ~from "/static/gboard-erofa-1000.zip")
                       [ text "Dictionnaire Érofa pour gboard" ]
                   ]
                 ; [ a
@@ -870,7 +920,7 @@ module Index = struct
     ; text ")."
     ]
 
-  let section_autres_orthographes () =
+  let section_autres_orthographes ~from () =
     details__summary_unstyled (* ~open_:true *)
       [ h3
           [ text "Support pour d'autres orthographes"
@@ -908,10 +958,10 @@ module Index = struct
                des futures recommendations), simplement des possibilités \
                d'expérimentation."
           ]
-      ; submit_file
+      ; submit_file ~from
           (fun button ->
-            [ +(Dict_gen_common.Dict_gen.all_selection_html ~url_prefix:"/static/"
-                  ~name_prefix:"" ~id_prefix:"conv-"
+            [ +(Dict_gen_common.Dict_gen.all_selection_html
+                  ~url_prefix:(url ~from "/static/") ~name_prefix:"" ~id_prefix:"conv-"
                   ~checked:(fun r ->
                     String.( = ) (Dict_gen_common.Dict_gen.name r) "1990")
                   ()
@@ -927,7 +977,7 @@ module Index = struct
                            none;" )
                       ; ("target", "_blank")
                       ]
-                    ~href:"/static/dict-format.html"
+                    ~href:(url ~from "/static/dict-format.html")
                     [ text "?" ]
                 ; text " : "
                 ; span ~cl:"cursor: pointer;"
@@ -962,7 +1012,7 @@ module Index = struct
       ; p [ text "Données : "; +csv_link () ]
       ]
 
-  let section_donnees () =
+  let section_donnees ~from () =
     section
       [ h3 [ text "Données" ]
       ; p
@@ -971,14 +1021,16 @@ module Index = struct
                l'orthographe usuelle à d'autres orthographes :"
           ]
       ; list `ul ~cl:"list-style: none"
-          [ [ a ~href:"/static/erofa.csv"
+          [ [ a
+                ~href:(url ~from "/static/erofa.csv")
                 ~attrs:[ ("download", "erofa.csv") ]
                 [ text "csv Érofa" ]
             ; text
                 " contenant l'orthographe avant/après, ce qui inclut l'essentiel des \
                  rectifications de 1990"
             ]
-          ; [ a ~href:"/static/rect1990.csv"
+          ; [ a
+                ~href:(url ~from "/static/rect1990.csv")
                 ~attrs:[ ("download", "rect1990.csv") ]
                 [ text "csv rectifications de 1990" ]
             ; text ", pareil mais seulement les rectifications de 1990"
@@ -992,7 +1044,7 @@ module Index = struct
           ]
       ]
 
-  let section_aller_plus_loin () =
+  let section_aller_plus_loin ~from () =
     let hr = hr ~cl:"width: 70%; border: 0.1px solid #f4f4f4; margin: 0.8em;" () in
     section ~attrs:[ aller_plus_loin_def ]
       [ h2 [ text "Aller plus loin" ]
@@ -1003,18 +1055,23 @@ module Index = struct
                      sans être expert) :"
                 ]
             ; list `ul
-                [ [ a ~href:"/static/erofa-texte.pdf#page=47"
+                [ [ a
+                      ~href:(url ~from "/static/erofa-texte.pdf#page=47")
                       [ text "Les consonnes doubles" ]
                   ; text " (sept pages)"
                   ]
-                ; [ a ~href:"/static/erofa-texte.pdf#page=55" [ text "Les x finaux" ]
+                ; [ a
+                      ~href:(url ~from "/static/erofa-texte.pdf#page=55")
+                      [ text "Les x finaux" ]
                   ; text " (quatre pages)"
                   ]
-                ; [ a ~href:"/static/erofa-texte.pdf#page=59"
+                ; [ a
+                      ~href:(url ~from "/static/erofa-texte.pdf#page=59")
                       [ text "Les lettres grecques et similaires" ]
                   ; text " (onze pages)"
                   ]
-                ; [ a ~href:"/static/erofa-texte.pdf#page=17"
+                ; [ a
+                      ~href:(url ~from "/static/erofa-texte.pdf#page=17")
                       [ text
                           "Explications de l'histoire de l'orthographe et pourquoi \
                            cette réforme"
@@ -1048,7 +1105,8 @@ module Index = struct
             ; hr
             ]
           ; [ text "Le livre numérique gratuit "
-            ; a ~href:"/static/orthographe-qui-a-peur-de-la-reforme.epub"
+            ; a
+                ~href:(url ~from "/static/orthographe-qui-a-peur-de-la-reforme.epub")
                 [ cite [ text "Orthographe : qui a peur de la réforme ?" ] ]
             ; text
                 " (de Marie-Louise Moreau et Georges Legros) explique un tas de choses \
@@ -1199,69 +1257,98 @@ module Index = struct
           ]
       ]
 
-  let head () =
-    head ~root:true ~title:"Orthographe rationnelle"
+  let head ~from () =
+    head ~from ~root:true ~title:"Orthographe rationnelle"
       ~description:
         "Outils pour utiliser l'orthographe rationalisée du français Érofa. Ou \
          d'autres orthographes, comme celle des rectifications de 1990."
       ~attrs:
-        [ script "/static/dict.js" ~defer:true
-        ; script "/static/rewrite.js" ~defer:true
-        ; script "/static/page.js" ~defer:true
+        [ script (url ~from "/static/dict.js") ~defer:true
+        ; script (url ~from "/static/rewrite.js") ~defer:true
+        ; script (url ~from "/static/page.js") ~defer:true
         ]
       ()
 
+  let section_outils ~from ~include_title =
+    [ +(if not include_title
+        then []
+        else
+          [ section ~attrs:[ outils_def ]
+              [ h2 [ text "Outils de mise en pratique" ]
+              ; p ~cl:"margin-top:0"
+                  [ text
+                      "Pour rédiger de nouveaux textes en cette orthographe, vous \
+                       trouverez ici un vérificateur d'orthographe, un clavier pour \
+                       télephone, et un dictionnaire pour consulter l'orthographe de \
+                       n'importe quel mot."
+                  ]
+              ; p ~cl:"margin-top:0"
+                  [ text
+                      "Pour transcrire des textes existants, vous pourrez soumettre \
+                       plus bas du texte, des documents, ou récupérer un outil pour \
+                       transcrire les pages internet à la volée."
+                  ]
+              ]
+          ])
+    ; section_dictionnaire ~from ()
+    ; section_transcription_interactive ()
+    ; section_transcription_en_ligne ~from ()
+    ; section_transcription_locale ~from ()
+    ; section_transcription_pages ~from `Main_page
+    ; section_verificateurs ~from ()
+    ; +section_claviers ~from ()
+    ; section_donnees ~from ()
+    ]
+
   let main () : node =
-    html ~head:(head ()) ~body_style:"margin: 0; font-size: 1.1rem; line-height: 1.3;"
+    let from = `same_site in
+    html ~head:(head ~from ())
+      ~body_style:"margin: 0; font-size: 1.1rem; line-height: 1.3;"
       ~body:
         [ navbar ()
         ; elt "main" ~cl:"max-width: 55em; margin: auto;"
             [ div ~cl:"margin: 0 8px 8px 8px;"
                 [ h1 ~cl:"text-align:center;"
                     [ text "Une orthographe rationnelle"; br; text "ici et maintenant" ]
-                ; +introduction ()
+                ; +introduction ~from ()
                 ; section_regles ()
-                ; section ~attrs:[ outils_def ]
-                    [ h2 [ text "Outils de mise en pratique" ]
-                    ; p ~cl:"margin-top:0"
-                        [ text
-                            "Pour rédiger de nouveaux textes en cette orthographe, \
-                             vous trouverez ici un vérificateur d'orthographe, un \
-                             clavier pour télephone, et un dictionnaire pour consulter \
-                             l'orthographe de n'importe quel mot."
-                        ]
-                    ; p ~cl:"margin-top:0"
-                        [ text
-                            "Pour transcrire des textes existants, vous pourrez \
-                             soumettre plus bas du texte, des documents, ou récupérer \
-                             un outil pour transcrire les pages internet à la volée."
-                        ]
-                    ]
-                ; section_dictionnaire ()
-                ; section_transcription_interactive ()
-                ; section_transcription_en_ligne ()
-                ; section_transcription_locale ()
-                ; section_transcription_pages `Main_page
-                ; section_verificateurs ()
-                ; +section_claviers ()
-                ; section_donnees ()
-                ; section_autres_orthographes ()
-                ; section_aller_plus_loin ()
+                ; +section_outils ~include_title:true ~from
+                ; section_autres_orthographes ~from ()
+                ; section_aller_plus_loin ~from ()
                 ]
             ]
         ]
       ()
+
+  let outils () : node =
+    let from = `other in
+    let node =
+      elt "main" ~cl:"max-width: 55em; margin: auto;"
+        [ +section_outils ~include_title:false ~from ]
+    in
+    div
+      [ +style_tag node
+      ; style
+          (global_style_shared_with_other
+          ^ "section { padding: 0 }\n" (* avoid huge gaps between sections *))
+      ; script (url ~from "/static/dict.js") ~defer:true
+      ; script (url ~from "/static/rewrite.js") ~defer:true
+      ; script (url ~from "/static/page.js") ~defer:true
+      ; node
+      ]
 end
 
 module Regles_perso = struct
   let main ~url_param : node =
+    let from = `same_site in
     html
       ~head:
-        (head ~root:false ~title:"Orthographe rationnelle -- dictionnaire personnalisé"
+        (head ~from ~root:false
+           ~title:"Orthographe rationnelle -- dictionnaire personnalisé"
            ~description:"Outils de conversion vers une orthographe personnalisée"
            ~attrs:
-             [ script "/static/rewrite.js" ~defer:true
-             ; script "/static/page.js" ~defer:true
+             [ script (url ~from "/static/rewrite.js") ~defer:true
+             ; script (url ~from "/static/page.js") ~defer:true
              ]
            ())
       ~body_style:"margin: 0; font-size: 1.1rem; line-height: 1.3;"
@@ -1284,7 +1371,7 @@ module Regles_perso = struct
                           ]
                       ]
                     else [])
-                ; Index.submit_file
+                ; Index.submit_file ~from
                     ~label_attrs:[ ("id", "form-conv-label") ]
                     ~replace_onchange:[ ("id", "form-conv-button") ]
                     ~attrs:[ ("id", "form-conv") ]
@@ -1297,7 +1384,7 @@ module Regles_perso = struct
                           ]
                           [ div
                               (Dict_gen_common.Dict_gen.all_selection_html
-                                 ~url_prefix:"/static/" ~name_prefix:""
+                                 ~url_prefix:(url ~from "/static/") ~name_prefix:""
                                  ~id_prefix:"conv-"
                                  ~checked:(fun _ -> false)
                                  ()
@@ -1315,10 +1402,10 @@ module Regles_perso = struct
                           [ h3 [ text "Transcription de documents, en ligne" ]
                           ; +button
                           ; p [ text "Les formats acceptés sont :" ]
-                          ; Index.format_acceptes ()
+                          ; Index.format_acceptes ~from ()
                           ]
                       ; +(if url_param
-                          then [ Index.section_transcription_pages `Url_page ]
+                          then [ Index.section_transcription_pages ~from `Url_page ]
                           else [])
                       ; section
                           [ h3 [ text "Données" ]
@@ -1334,6 +1421,7 @@ end
 let () =
   List.iter
     [ ("index.html", Index.main ())
+    ; ("outils.html", Index.outils ())
     ; ("regles_perso_url=true.html", Regles_perso.main ~url_param:true)
     ; ("regles_perso_url=false.html", Regles_perso.main ~url_param:false)
     ]

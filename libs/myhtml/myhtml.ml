@@ -319,15 +319,9 @@ let script src ~defer =
 
 let style txt = elt "style" [ text txt ]
 
-let html ~lang ~head ?body_style ~body () =
-  let body = elt ?cl:body_style "body" body in
-  let scripts =
-    fold_node body [] (fun node acc -> List.rev_append node.scripts acc)
-    |> List.rev
-    |> List.stable_dedup ~compare:String.compare
-  in
+let style_tag node =
   let classes =
-    fold_node body [] (fun node acc -> List.rev_append node.classes acc)
+    fold_node node [] (fun node acc -> List.rev_append node.classes acc)
     |> List.rev
     |> List.stable_dedup ~compare:(fun (c1, v1) (c2, v2) ->
            let c = String.compare c1 c2 in
@@ -335,20 +329,28 @@ let html ~lang ~head ?body_style ~body () =
            then raise_s [%sexp "clash between classes", (v1 : string), (v2 : string)];
            c)
   in
+  match classes with
+  | [] -> []
+  | _ ->
+      [ style
+          (classes
+          |> List.map ~f:(fun (class_, value) -> [%string ".%{class_} { %{value} }"])
+          |> String.concat ~sep:"\n")
+      ]
+
+let html ~lang ~head ?body_style ~body () =
+  let body = elt ?cl:body_style "body" body in
+  let scripts =
+    fold_node body [] (fun node acc -> List.rev_append node.scripts acc)
+    |> List.rev
+    |> List.stable_dedup ~compare:String.compare
+  in
   elt "html"
     ~attrs:[ ("lang", lang) ]
     [ elt "head"
         [ +head
         ; +List.map scripts ~f:(fun src -> script src ~defer:true)
-        ; +(match classes with
-           | [] -> []
-           | _ ->
-               [ style
-                   (classes
-                   |> List.map ~f:(fun (class_, value) ->
-                          [%string ".%{class_} { %{value} }"])
-                   |> String.concat ~sep:"\n")
-               ])
+        ; +style_tag body
         ]
     ; body
     ]

@@ -232,7 +232,9 @@ if (dict_search_input) {
         } else {
             const p = new URLSearchParams();
             p.set("q", text);
-            const response = (await fetch("/dict?" + p.toString()));
+            const response =
+                  await fetch(dict_search_input.getAttribute("dict-search-url")
+                              + "?" + p.toString());
             if (!response.ok) {
                 throw new Error(`${response.status} ${response.statusText}`);
             }
