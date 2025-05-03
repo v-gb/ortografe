@@ -21,6 +21,14 @@ if false {
     let json = json("lexique.json")
     let content = ();
     let row = 0
+    if true {
+        place(
+            top + center,
+            float: true,
+            scope: "parent",
+            text(17pt, weight:"bold", link(json.link)[Le dictionnaire])
+        )
+    }
     if false {
     place(
         top + left,
