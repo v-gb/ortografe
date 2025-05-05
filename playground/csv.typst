@@ -11,7 +11,7 @@ if false {
 }
 
 #set page(numbering: "1")
-#counter(page).update(7)
+#counter(page).update(6)
 #set page(columns: 2)
 #let user_facing_link(url, text) = {
     link(url)[#underline(offset: 2pt, stroke: (thickness: 1pt, dash: "densely-dotted"), text)]
@@ -26,7 +26,7 @@ if false {
             top + center,
             float: true,
             scope: "parent",
-            text(17pt, weight:"bold", link(json.link)[Le dictionnaire])
+            text(14pt, weight:"bold", link(json.link)[LE DICTIONNAIRE #linebreak() #linebreak()])
         )
     }
     if false {
