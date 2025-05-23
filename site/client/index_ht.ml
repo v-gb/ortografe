@@ -375,8 +375,9 @@ module Index = struct
                      [ "bijoux"; "choix"; "veux"; "deux" ]
                      [ "dix"; "duplex"; "Évreux*" ]
                  ; words
-                     "Les @h muets sont retirés, les @ph sont changés en @f, @y en @i, \
-                      œ en @eu/@é/@e, si la prononciation est inchangée."
+                     "Les @h muets sont retirés, les @ph changent en @f, @ch en \
+                      @c/@qu, @y en @i, œ en @eu/@é/@e, si la prononciation est \
+                      inchangée."
                      [ "photo"; "rythme"; "humain"; "chaos"; "huile"; "œuvre" ]
                      [ "hache"; "ahuri"; "pays"; "babyfoot**"; "coexiste" ]
                  ])
