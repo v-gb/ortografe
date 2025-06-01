@@ -368,7 +368,7 @@ module Index = struct
               (pseudo_list ~cl:"margin-top: 1em;"
                  [ words
                      "Les consonnes doubles qui n'ont pas d'effet sur la prononciation \
-                      sont simplifiées."
+                      sont dédoublées."
                      [ "sonnerie"; "appelle"; "accord"; "renne" ]
                      [ "poisson"; "accident"; "ennui"; "surréel"; "Rennes*" ]
                  ; words "Les @x finaux muets deviennent des @s."
