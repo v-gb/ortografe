@@ -58,16 +58,38 @@ if false {
               inchangés sont laissés sur fond blanc. ]
         })
     }
+
+    let style = 5 // 0: color
+                  // 1: bold
+                  // 2: "-" for unchanged words
+                  // 3: "-" for unchanged words, and line separators
+                  // 4: "-" for unchanged words, alternating bold
+                  // 5: greyscale
+                  // 6: "-" for unchanged words, and dots to line up rows
+                  // 7: "" for unchanged words,  and dots to line up changed rows
+    let hline = table.hline(stroke: (thickness: 0.00001pt, paint: luma(180)))
+    if style == 3 { content.push(hline) }
     for (k, v) in json.table {
-        let left_bit = [ #k ]
-        for old in v.old {
-            left_bit = left_bit + [ \ #h(0.3cm) #text(0.9em)[#old] ]
+        let color1 = if style == 5 { luma(180) } else { rgb("dff2ff") }
+        let color2 = if style == 5 { luma(180) } else { rgb("a3d5ff") }
+        let color = if k == v.new or style != 0 and style != 5 { white } else if calc.odd(row) { color1 } else { color2 }
+        let weight = {
+            if style == 4 {
+                if calc.odd(row) { "regular" } else { "semibold" }
+            }
+            else {
+                if k == v.new or style != 1 { "regular" }
+                else if calc.odd(row) { "bold" } else { "extrabold" }
+            }
         }
-        let color1 = rgb("dff2ff")
-        let color2 = rgb("a3d5ff")
-        let color = if k == v.new { white } else if calc.odd(row) { color1 } else { color2 }
+        let left_bit = if style == 6 or (style == 7 and k != v.new) { [#k #box(width: 1fr, line(stroke: (dash: "loosely-dotted"), length:100%, start:(0% + 5pt, 0% - 2pt)))] } else { [ #text(weight: weight)[#k] ] }
+        for old in v.old {
+            left_bit = left_bit + [ \ #h(0.3cm) #text(0.9em, weight: weight)[#old] ]
+        }
         content.push(table.cell(fill: color, left_bit))
-        content.push(table.cell(fill: color, v.new))
+        let new = if k == v.new and (style == 2 or style == 3 or style == 4 or style == 6 or style == 7) { if style == 6 or style == 7 { "" } else { "-" } } else { v.new }
+        content.push(table.cell(fill: color, text(weight: weight)[#new]))
+        if style == 3 { content.push(hline) }
         row += 1
     }
     table(columns: 2, stroke:none, ..content)
