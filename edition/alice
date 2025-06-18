@@ -2,7 +2,11 @@
 set -e -u -o pipefail
 
 function patdiff {
-    ~/.opam/5.1.1/bin/patdiff "$@"
+    if which patdiff &> /dev/null; then
+        command patdiff "$@"
+    else
+        "$(ls -1 ~/.opam/*/bin/patdiff | sort | tail -n 1)" "$@"
+    fi
 }
 
 function manual-changes2 {
