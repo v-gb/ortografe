@@ -4,12 +4,10 @@ async function main() {
     const src_text = await fs.readFile(src, 'utf8')
 
     const updates = []
-    function expect(input, expect) {
-        const res = probably_en_rather_than_fr(input)
+    function expect(input, expect, base_entropy) {
+        const res = probably_en_rather_than_fr(input, base_entropy || 0)
         const lang = (res[0] ? 'EN' : 'FR');
-        const entropy_en = res[1][0].toFixed(1)
-        const entropy_fr = res[1][1].toFixed(1)
-        const output = `${lang} en:${entropy_en} fr:${entropy_fr}`
+        const output = `${lang} ${res[1]}`
         if (output != expect) {
             const input_end = src_text.indexOf(input) + input.length + 2;
             const expect_start = src_text.indexOf("\"", input_end);
@@ -34,22 +32,23 @@ async function main() {
         return buf
     }
 
-    expect("Comment stocker des fichiers sur de l'ADN", "EN en:594.7 fr:597.1")
+    expect("Comment stocker des fichiers sur de l'ADN", "EN -2.4")
     // bad. Because of "ck"
     
-    expect("Comment Taiwan domine le monde", "EN en:400.3 fr:403.0")
+    expect("Comment Taiwan domine le monde", "EN -2.7")
     // bad. Because of "wa"
 
-    expect("Perte d'habitat", "FR en:168.9 fr:167.8") // good
-    expect("Support pour d'autres orthographes", "FR en:412.0 fr:408.0") // good
+    expect("Perte d'habitat", "FR 1") // good
+    expect("Support pour d'autres orthographes", "FR 4") // good
 
-    expect("Formats photos", "EN en:146.5 fr:155.5")
+    expect("Formats photos", "EN -9")
     // bad, but quite difficult, as both words are English and French
 
-    expect("an alien intelligence", "FR en:235.9 fr:232.9") // bad
-    expect("Modifions les prototypes", "EN en:270.0 fr:275.5") // bad
-    expect("Prototypes", "EN en:71.8 fr:79.4") // Impossible without more context
-    expect("Analyse", "EN en:44.9 fr:50.5") // Impossible without more context
+    expect("an alien intelligence", "FR 3") // bad
+    expect("Modifions les prototypes", "EN -5.5") // bad
+    expect("Prototypes", "EN -7.7") // Impossible without more context
+    expect("Analyse", "EN -5.7") // Impossible without more context
+    expect("Dynamite", "FR 6.2,base_entropy,10", 10)
 
     // console.log(collides_with_english(
     //     { text_is_en: null,
