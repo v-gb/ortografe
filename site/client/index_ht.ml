@@ -802,7 +802,7 @@ module Index = struct
                  vous puissiez choisir quand écrire en Érofa, nous vous proposons un \
                  dictionnaire pour le clavier HeliBoard pour Android."
             ; details
-                [ text "Instructions pour l'utiliser." ]
+                [ text "Instructions pour l'utiliser" ]
                 [ list `ol
                     [ [ a
                           ~href:(url ~from "/static/heliboard_erofa.dict")
@@ -823,14 +823,14 @@ module Index = struct
                            l'activer."
                       ]
                     ; [ text "Utilisez le dictionnaire Érofa :"
-                      ; list `ol
+                      ; list `ol ~cl:"list-style: \"→ \""
                           [ [ text "Allez dans les paramètres d'HeliBoard" ]
-                          ; [ text "-> « Langues & Dispositions »" ]
-                          ; [ text "-> « français »" ]
-                          ; [ text "-> « Dictionnaires + »" ]
-                          ; [ text "-> « Ajouter »" ]
-                          ; [ text "tapez « erofa » dans la barre de recherche" ]
-                          ; [ text "sélectionnez « heliboard_erofa.dict »" ]
+                          ; [ text "« Langues & Dispositions »" ]
+                          ; [ text "« français »" ]
+                          ; [ text "« Dictionnaires + »" ]
+                          ; [ text "« Ajouter »" ]
+                          ; [ text "Tapez « erofa » dans la barre de recherche" ]
+                          ; [ text "Sélectionnez « heliboard_erofa.dict »" ]
                           ]
                       ]
                     ; [ text
@@ -840,13 +840,13 @@ module Index = struct
                     ; [ text
                           "(optionnel) Pour éviter le soulignage rouge des mots en \
                            orthographe Érofa :"
-                      ; list `ol
-                          [ [ text "allez dans les « Paramètres » d'Android" ]
-                          ; [ text "-> « Système »" ]
-                          ; [ text "-> « Clavier »" ]
-                          ; [ text "-> « Correcteur orthographique »" ]
-                          ; [ text "-> « Correcteur par défaut »" ]
-                          ; [ text "puis choisissez HeliBoard." ]
+                      ; list `ol ~cl:"list-style: \"→ \""
+                          [ [ text "Allez dans les « Paramètres » d'Android" ]
+                          ; [ text "« Système »" ]
+                          ; [ text "« Clavier »" ]
+                          ; [ text "« Correcteur orthographique »" ]
+                          ; [ text "« Correcteur par défaut »" ]
+                          ; [ text "Puis choisissez HeliBoard." ]
                           ]
                       ]
                     ]
