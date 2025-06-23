@@ -797,14 +797,19 @@ module Index = struct
             [ text
                 "La plupart des claviers virtuels pour téléphone s'adaptent à votre \
                  orthographe : après avoir tapé les mots quelques fois en orthographe \
-                 Érofa, ces orthographes vont seront proposés. Mais pour ne pas avoir \
+                 Érofa, ces orthographes vous seront proposées. Mais pour ne pas avoir \
                  à apprendre toute l'orthographe à votre clavier, et aussi pour que \
                  vous puissiez choisir quand écrire en Érofa, nous vous proposons un \
                  dictionnaire pour le clavier HeliBoard pour Android."
             ; details
                 [ text "Instructions pour l'utiliser." ]
                 [ list `ol
-                    [ [ text "Installez "
+                    [ [ a
+                          ~href:(url ~from "/static/heliboard_erofa.dict")
+                          [ text "Téléchargez" ]
+                      ; text " le dictionnaire français Érofa pour HeliBoard."
+                      ]
+                    ; [ text "Installez "
                       ; a ~href:"https://f-droid.org/" [ text "F-Droid" ]
                       ; text
                           " depuis son site (pas disponible dans le Play Store). C'est \
@@ -817,12 +822,7 @@ module Index = struct
                           " (le clavier virtuel), puis suivez ses instructions pour \
                            l'activer."
                       ]
-                    ; [ a
-                          ~href:(url ~from "/static/heliboard_erofa.dict")
-                          [ text "Téléchargez" ]
-                      ; text " le dictionnaire français Érofa pour HeliBoard."
-                      ]
-                    ; [ text "Utilisez ce dictionnaire :"
+                    ; [ text "Utilisez le dictionnaire Érofa :"
                       ; list `ol
                           [ [ text "Allez dans les paramètres d'HeliBoard" ]
                           ; [ text "-> « Langues & Dispositions »" ]
