@@ -801,62 +801,70 @@ module Index = struct
                  à apprendre toute l'orthographe à votre clavier, et aussi pour que \
                  vous puissiez choisir quand écrire en Érofa, nous vous proposons un \
                  dictionnaire pour le clavier HeliBoard pour Android."
-            ; details
-                [ text "Instructions pour l'utiliser" ]
-                [ list `ol
-                    [ [ a
-                          ~href:(url ~from "/static/heliboard_erofa.dict")
-                          [ text "Téléchargez" ]
-                      ; text " le dictionnaire français Érofa pour HeliBoard."
+            ]
+        ; p ~cl:"margin-bottom:0"
+            [ text "Pour l'utiliser, voici des instructions "
+            ; a
+                ~href:
+                  "https://www.erofa.org/wp-content/uploads/2025/06/tuto_clavier-2.mp4"
+                ~attrs:[ ("target", "_blank") ]
+                [ text "en vidéo" ]
+            ; text "."
+            ]
+        ; details ~cl:"margin-top:0"
+            [ text "Ou instructions textuelles" ]
+            [ list `ol
+                [ [ a
+                      ~href:(url ~from "/static/heliboard_erofa.dict")
+                      [ text "Téléchargez" ]
+                  ; text " le dictionnaire français Érofa pour HeliBoard."
+                  ]
+                ; [ text "Installez "
+                  ; a ~href:"https://f-droid.org/" [ text "F-Droid" ]
+                  ; text
+                      " depuis son site (pas disponible dans le Play Store). C'est un \
+                       catalogue d'applications comme le Play Store."
+                  ]
+                ; [ text "Installez "
+                  ; a ~href:"https://f-droid.org/fr/packages/helium314.keyboard"
+                      [ text "HeliBoard" ]
+                  ; text
+                      " (le clavier virtuel), puis suivez ses instructions pour \
+                       l'activer."
+                  ]
+                ; [ text "Utilisez le dictionnaire Érofa :"
+                  ; list `ol ~cl:"list-style: \"→ \""
+                      [ [ text "Allez dans les paramètres d'HeliBoard" ]
+                      ; [ text "« Langues & Dispositions »" ]
+                      ; [ text "« français »" ]
+                      ; [ text "« Dictionnaires + »" ]
+                      ; [ text "« Ajouter »" ]
+                      ; [ text "Tapez « erofa » dans la barre de recherche" ]
+                      ; [ text "Sélectionnez « heliboard_erofa.dict »" ]
                       ]
-                    ; [ text "Installez "
-                      ; a ~href:"https://f-droid.org/" [ text "F-Droid" ]
-                      ; text
-                          " depuis son site (pas disponible dans le Play Store). C'est \
-                           un catalogue d'applications comme le Play Store."
+                  ]
+                ; [ text
+                      "Testez le clavier où vous voulez (par exemple Messages, \
+                       WhatsApp, GMail)."
+                  ]
+                ; [ text
+                      "(optionnel) Pour éviter le soulignage rouge des mots en \
+                       orthographe Érofa :"
+                  ; list `ol ~cl:"list-style: \"→ \""
+                      [ [ text "Allez dans les « Paramètres » d'Android" ]
+                      ; [ text "« Système »" ]
+                      ; [ text "« Clavier »" ]
+                      ; [ text "« Correcteur orthographique »" ]
+                      ; [ text "« Correcteur par défaut »" ]
+                      ; [ text "Puis choisissez HeliBoard." ]
                       ]
-                    ; [ text "Installez "
-                      ; a ~href:"https://f-droid.org/fr/packages/helium314.keyboard"
-                          [ text "HeliBoard" ]
-                      ; text
-                          " (le clavier virtuel), puis suivez ses instructions pour \
-                           l'activer."
-                      ]
-                    ; [ text "Utilisez le dictionnaire Érofa :"
-                      ; list `ol ~cl:"list-style: \"→ \""
-                          [ [ text "Allez dans les paramètres d'HeliBoard" ]
-                          ; [ text "« Langues & Dispositions »" ]
-                          ; [ text "« français »" ]
-                          ; [ text "« Dictionnaires + »" ]
-                          ; [ text "« Ajouter »" ]
-                          ; [ text "Tapez « erofa » dans la barre de recherche" ]
-                          ; [ text "Sélectionnez « heliboard_erofa.dict »" ]
-                          ]
-                      ]
-                    ; [ text
-                          "Testez le clavier où vous voulez (par exemple Messages, \
-                           WhatsApp, GMail)."
-                      ]
-                    ; [ text
-                          "(optionnel) Pour éviter le soulignage rouge des mots en \
-                           orthographe Érofa :"
-                      ; list `ol ~cl:"list-style: \"→ \""
-                          [ [ text "Allez dans les « Paramètres » d'Android" ]
-                          ; [ text "« Système »" ]
-                          ; [ text "« Clavier »" ]
-                          ; [ text "« Correcteur orthographique »" ]
-                          ; [ text "« Correcteur par défaut »" ]
-                          ; [ text "Puis choisissez HeliBoard." ]
-                          ]
-                      ]
-                    ]
-                ; text
-                    "Pour repasser en orthographe usuelle, quand le clavier est \
-                     visible, cliquez sur l'icône de clavier en bas à droite et \
-                     sélectionnez votre ancien clavier (probablement Gboard). Et pour \
-                     repasser en Érofa, même manipulation, mais sélectionnez \
-                     HeliBoard."
+                  ]
                 ]
+            ; text
+                "Pour repasser en orthographe usuelle, quand le clavier est visible, \
+                 cliquez sur l'icône de clavier en bas à droite et sélectionnez votre \
+                 ancien clavier (probablement Gboard). Et pour repasser en Érofa, même \
+                 manipulation, mais sélectionnez HeliBoard."
             ]
           (* Avec gboard, le fait qu'on ne puisse pas supprimer les entrées de façon
              simple limite l'utilisation aux orthographes qu'on veut utiliser
