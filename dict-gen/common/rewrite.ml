@@ -735,7 +735,7 @@ let erofa_rule rules =
   }
 
 let erofa =
-  new_rule "erofa" "Les règles telles que décrites sur http://erofa.free.fr"
+  new_rule "erofa" "Les règles telles que décrites sur https://www.erofa.org"
     ~prefilter:(fun () -> `Re (force erofa_prefilter'))
     erofa_rule
 

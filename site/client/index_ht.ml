@@ -196,7 +196,7 @@ module Index = struct
             ]
         ; p
             [ text "Les linguistes de l'"
-            ; a ~href:"http://erofa.free.fr/" [ text "association Érofa" ]
+            ; a ~href:"https://www.erofa.org/" [ text "association Érofa" ]
             ; text
                 " proposent trois règles qui rationalisent quelques points difficiles \
                  de l'orthographe du français."
@@ -1105,11 +1105,10 @@ module Index = struct
                      background-color: #e5fbe5;
                      border: 1.5px solid;
                      padding: 1px 4px;|}
-                ~href:
-                  "http://erofa.free.fr/index.php?option=com_content&view=article&id=56&Itemid=67"
+                ~href:"https://www.erofa.org/soutenir-et-adherer/"
                 [ text "Rejoignez" ]
             ; text " l'"
-            ; a ~href:"http://erofa.free.fr/" [ text "association Érofa" ]
+            ; a ~href:"https://www.erofa.org/" [ text "association Érofa" ]
             ; text " qui propose cette réforme !"
             ; hr
             ]
@@ -1210,9 +1209,7 @@ module Index = struct
                               [ text
                                   "Les outils de cette page utilisent des \
                                    dictionnaires construits à partir d'Érofa ("
-                              ; a
-                                  ~href:
-                                    "http://erofa.free.fr/index.php?option=com_content&view=article&id=59&Itemid=68"
+                              ; a ~href:"https://www.erofa.org/mentions-legales/"
                                   [ text "utilisation non-commerciale" ]
                               ; text "), de "
                               ; a ~href:"http://www.lexique.org" [ text "Lexique" ]
