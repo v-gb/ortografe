@@ -125,8 +125,8 @@ module Erofa = struct
   type index = int
 
   let compare_index a b =
-    let a = if a < 0 then a asr 2 else a in
-    let b = if b < 0 then b asr 2 else b in
+    let a = if a < 0 then -(-a asr 2) else a in
+    let b = if b < 0 then -(-b asr 2) else b in
     Int.compare a b
 
   let sexp_of_index index =
@@ -134,7 +134,7 @@ module Erofa = struct
     then
       [%sexp
         { index : int
-        ; value : int = -index asr 2
+        ; value : int = -(-index asr 2)
         ; implied_plural_in_s : bool = -index land 1 <> 0
         ; is_implied_plural : bool = -index land 2 <> 0
         }]
