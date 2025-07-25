@@ -15,7 +15,12 @@ type 'a t [@@deriving bin_io]
 val create : (('a -> string -> unit) -> unit) -> 'a t
 
 val search :
-  'a t -> string -> compare:('a -> 'a -> int) -> limit:int -> (string * 'a) list
+     'a t
+  -> ?sexp_of:('a -> Sexplib0.Sexp.t)
+  -> compare:('a -> 'a -> int)
+  -> limit:int
+  -> string
+  -> (string * 'a) list
 
 module Erofa : sig
   type index = int

@@ -72,19 +72,20 @@ let create iter =
   in
   { index; max_length = Map.max_elt_exn index |> fst |> fst }
 
-let search (type a) ({ index; max_length } : a t) term ~compare ~limit =
+let search (type a) ({ index; max_length } : a t) ?(sexp_of = [%sexp_of: _]) ~compare
+    ~limit term =
   let markless_term = strip_marks term in
   let search n =
     Map.to_sequence index ~keys_greater_or_equal_to:(n, markless_term)
       ~keys_less_or_equal_to:(n, markless_term ^ "zzzzzzzzzzzzzzzzzzzzzzzzz")
     |> Sequence.map ~f:snd
   in
-  let sequence_take_unique (type a) ~compare s limit =
+  let sequence_take_unique (type a) ~sexp_of ~compare s limit =
     let module C = struct
       type t = a
 
       let compare : t -> t -> int = compare
-      let sexp_of_t = [%sexp_of: _]
+      let sexp_of_t = sexp_of
 
       include (val Comparator.make ~sexp_of_t ~compare)
     end in
@@ -112,7 +113,10 @@ let search (type a) ({ index; max_length } : a t) term ~compare ~limit =
     |> Sequence.concat_map ~f:(fun (a, l) ->
            Array.to_sequence_mutable (Array.map l ~f:(fun b -> (a, b))))
     |> (fun l ->
-    sequence_take_unique ~compare:(fun (_, a1) (_, a2) -> compare a1 a2) l limit)
+    sequence_take_unique
+      ~sexp_of:(fun (s, i) -> [%sexp (s : string), (sexp_of i : Sexp.t)])
+      ~compare:(fun (_, a1) (_, a2) -> compare a1 a2)
+      l limit)
     |> Sequence.to_list
   in
   all_matches
@@ -124,6 +128,17 @@ module Erofa = struct
     let a = if a < 0 then a asr 2 else a in
     let b = if b < 0 then b asr 2 else b in
     Int.compare a b
+
+  let sexp_of_index index =
+    if index < 0
+    then
+      [%sexp
+        { index : int
+        ; value : int = -index asr 2
+        ; implied_plural_in_s : bool = -index land 1 <> 0
+        ; is_implied_plural : bool = -index land 2 <> 0
+        }]
+    else [%sexp (index : int)]
 
   module T = struct
     type nonrec t = (string list * string * string * int) array * int t
@@ -141,7 +156,7 @@ module Erofa = struct
   let convert_record (a, b, c, d) = (a, b, c, flags d)
 
   let search (q, t) term ~limit =
-    search t ~compare:compare_index term ~limit
+    search t ~compare:compare_index ~sexp_of:sexp_of_index term ~limit
     |> List.map ~f:(fun (str, a) ->
            if a >= 0
            then convert_record q.(a)
