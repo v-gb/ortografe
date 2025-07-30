@@ -105,6 +105,38 @@ let options =
          | "sentimens" -> Some "sentiments"
          | "excellens" -> Some "excélents"
          | "appartemens" -> Some "apartements"
+         (* Same reasoning, but for les fleurs du mal. gutenberg.org doesn't seeem to
+            provide access to the scanned texts, but we can compare to:
+            - https://fleursdumal.org/alphabetical-listing
+            - https://fr.wikisource.org/wiki/Livre:Baudelaire_Les_Fleurs_du_Mal.djvu
+          *)
+         | "détonneraient" -> Some "détoneraient"
+         | "clef" -> Some "clé"
+         | "soûlerai" -> Some "soulerai"
+         | "soûleront" -> Some "souleront"
+         | "ennuîrai" -> Some "ennuierai"
+         | "mimoir" -> Some "miroir" (* typo *)
+         | "étranches" -> Some "étranges" (* typo *)
+         | "provoquants" -> Some "provocants" (* adjectif ici, pas participe présent *)
+         | "gît" -> Some "git"
+         | "OFFENSEE" -> Some "OFENSEE"
+         | "tonneras" -> Some "toneras"
+         | "tettent" -> Some "tètent"
+         | "allaita" -> Some "alaita"
+         | "dor" -> Some "d'or" (* typo *)
+         | "dors" -> Some ""
+         | "eperonnant" -> Some "éperonant"
+         | "refraîchir" -> Some "rafraichir"
+         | "buttant" -> Some "butant"
+         | "sompteux" -> Some "somptueus" (* typo *)
+         | "arome" -> Some "arôme"
+         | "enveloppait.--Eh" ->
+             Some "envelopait.--Eh" (* bad word break due to missing spaces *)
+         | "Etonnants" -> Some "Etonants"
+         | "remercîment" -> Some "remerciement"
+         | "ressasiera" -> Some "rassasiera" (* typo *)
+         | "refraîchira" -> Some "rafraichira" (* typo *)
+         | "choif" -> Some "soif" (* typo *)
          | s -> Stdlib.Hashtbl.find_opt dict s)
     ; interleaved = true
     ; plurals_in_s = Some "s"
