@@ -137,6 +137,8 @@ let options =
          | "ressasiera" -> Some "rassasiera" (* typo *)
          | "refraîchira" -> Some "rafraichira" (* typo *)
          | "choif" -> Some "soif" (* typo *)
+         (* Same, Le misantrope *)
+         | "reçoi" -> Some "reçois"
          | s -> Stdlib.Hashtbl.find_opt dict s)
     ; interleaved = true
     ; plurals_in_s = Some "s"
