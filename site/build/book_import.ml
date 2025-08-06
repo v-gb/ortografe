@@ -139,6 +139,18 @@ let options =
          | "choif" -> Some "soif" (* typo *)
          (* Same, Le misantrope *)
          | "monnoie" -> Some "monoie" (* garde l'archaïsme pour la rime *)
+         (* Same, Les misérables *)
+         | "siége" -> Some "siège"
+         (* Same, Frankenstein *)
+         | "long-temps" -> Some "longtemps"
+         | "allasse" -> Some "alasse"
+         | "jetta" -> Some "jeta"
+         (* Same, Vingt milles lieues *)
+         | "skipper" -> Some "skipeur"
+         | "ichthyologiste" -> Some "ictiologiste"
+         | "norwégien" -> Some "norvégien"
+         | "transocéanienne" -> Some "transocéaniène"
+         | "très-redouté" -> Some "très redouté"
          | s -> Stdlib.Hashtbl.find_opt dict s)
     ; interleaved = true
     ; plurals_in_s = Some "s"
