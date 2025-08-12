@@ -66,10 +66,15 @@ from extra
 where not exists (select 1 from t where t.ortho = extra.ortho)
 and ortho <> '#';
 select ortho from t
-where (ortho = lemme or (genre = 'f' and nombre <> 'p') or ortho = 'arrhes')
+where (ortho = lemme or (genre = 'f' and nombre <> 'p' and coalesce(cgram not like '%VER%', true)) or ortho = 'arrhes')
 order by cast (freqlemfilms2 as real) desc
 EOF
     } | tr -d '"' > /tmp/lexique
+    # On essaie d'exclure les pluriels et les conjugaisons, mais d'avoir les mêmes féminins que masculins.
+    # ortho = lemme exclut les conjugaisons, les pluriels, et les féminins.
+    # genre = 'f' and nombre <> 'p' rajoute les féminins, mais aussi les participe passé comme "mangée" qu'on n'a pas au masculin
+    # genre = 'f' and nombre <> 'p' and ... cgram ... rajoute les féminins sans rajouter ces participe passé
+    # Ça devrait faire en sorte que masculin et féminin soient symétriques.
     ortografe_cli conv --type .txt /tmp/lexique -o /tmp/lexique-oe --oe
     ortografe_cli conv --type .txt /tmp/lexique -o /tmp/lexique-1990-oe --oe --1990
     ortografe_cli conv --type .txt /tmp/lexique -o /tmp/lexique-fascicule "${rules_flags[@]}"
