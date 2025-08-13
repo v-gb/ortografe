@@ -173,7 +173,7 @@ let rewrite_e_double_consonants env (aligned_row : aligned_row) =
                 ([ p1 ], e_ortho ^ consonant, e_phon ^ consonant)
           | _ -> None))
 
-let rewrite_graphem' ?(start = 0) env aligned_row ~filter =
+let rewrite_graphem' ?(start = 0) ?(end_ = 0) env aligned_row ~filter =
   let keep_going = ref true in
   let aligned_row = ref aligned_row in
   while !keep_going do
@@ -182,7 +182,10 @@ let rewrite_graphem' ?(start = 0) env aligned_row ~filter =
     let (None | Some ()) =
       List.find_mapi aligned_row1.alignment.path
         ~f:(fun k (path_elt : Rules.path_elt) ->
-          if path_elt.i < start
+          if
+            path_elt.i < start
+            || path_elt.i + String.length path_elt.graphem
+               > String.length aligned_row1.row.ortho - end_
           then None
           else
             match filter path_elt with
@@ -205,11 +208,11 @@ let rewrite_graphem' ?(start = 0) env aligned_row ~filter =
   done;
   !aligned_row
 
-let rewrite_graphem ?start env aligned_row ~from:(from_g, from_p) ~to_ =
+let rewrite_graphem ?start ?end_ env aligned_row ~from:(from_g, from_p) ~to_ =
   if not (String.Search_pattern.matches from_g aligned_row.row.ortho)
   then aligned_row
   else
-    rewrite_graphem' ?start env aligned_row ~filter:(fun path_elt ->
+    rewrite_graphem' ?start ?end_ env aligned_row ~filter:(fun path_elt ->
         if
           path_elt.graphem =: String.Search_pattern.pattern from_g
           && path_elt.phonem =: from_p
@@ -367,32 +370,31 @@ let[@ocamlformat "disable"] erofa_preserve =
     "croyiez"; "payiez"; "appuyiez"; "essuyions"; "envoyiez"; "fuyions";
     "ennuyiez"; "ennuyions";
 
-    "sexy"; "jury"; "papy"; "mamy"; "thomas"; "manhattan"; "ecstasy"; "antihéros"; "brandy";
-    "off"; "dandy"; "bodhi"; "maharadjah"; "monopoly"; "zloty"; "body"; "sophie"; "crucifix";
-    "party"; "fanny"; "gruyère"; "mylord"; "rotary"; "rochelle"; "lloyd"; "pennies"; "carry";
-    "mary"; "city"; "hadji"; "yéyé"; "derby"; "till"; "cheikh"; "husky"; "anya";
-    "dharma"; "oye"; "hodja"; "mickey"; "bighorn"; "kalachnikov"; "roy"; "charybde"; "henry";
-    "boukha"; "grizzly"; "haggadah"; "angleterre"; "bobsleigh"; "lobby"; "bobby"; "hickory";
-    "scottish"; "sikh"; "sulky"; "théo"; "sammy"; "thrace"; "cosy"; "tommy"; "byte"; "regency";
-    "william"; "mach"; "thrill"; "dolby"; "fifty"; "graff"; "hun"; "panty"; "bacchanal"; "bacchanale"; "bacchante"; "chouya";
-    "moly"; "gipsy"; "dey"; "goth"; "machmètre"; "ohm"; "cypriote"; "chypriote"; "finnois"; "fy";
-    "harpagon"; "hurrah"; "kabyle"; "lyonnais"; "lyonnaise"; "moghol"; "nay"; "perrier"; "pouilly";
-    "royalty"; "abkhaze"; "alhambra"; "antiallemand"; "bachaghas"; "banyuls"; "bertha"; "bithynien";
-    "bouzy"; "béhémoth"; "cattleyas"; "chaboisseaux"; "chaix"; "chypre"; "chnord"; "cécidomyies";
+    "thomas"; "manhattan"; "antihéros";
+    "off"; "bodhi"; "maharadjah"; "sophie"; "crucifix";
+    "fanny"; "gruyère"; "mylord"; "rochelle"; "lloyd"; "pennies"; "carry";
+    "hadji"; "yéyé"; "till"; "cheikh"; "anya";
+    "dharma"; "oye"; "hodja"; "bighorn"; "kalachnikov"; "charybde"; "henry";
+    "boukha"; "haggadah"; "angleterre"; "bobsleigh";
+    "scottish"; "sikh"; "théo"; "sammy"; "thrace"; "tommy"; "byte";
+    "william"; "mach"; "thrill"; "graff"; "hun"; "bacchanal"; "bacchanale"; "bacchante"; "chouya";
+    "goth"; "machmètre"; "ohm"; "cypriote"; "chypriote"; "finnois";
+    "harpagon"; "hurrah"; "kabyle"; "lyonnais"; "lyonnaise"; "moghol"; "perrier";
+    "abkhaze"; "alhambra"; "antiallemand"; "bachaghas"; "banyuls"; "bertha"; "bithynien";
+    "béhémoth"; "cattleyas"; "chaboisseaux"; "chaix"; "chypre"; "chnord"; "cécidomyies";
     "dandysme"; "galathée"; "ganymèdes"; "gaulle"; "gaullisme"; "gaulliste"; "gengiskhanide";
     "ghât"; "golgotha"; "havanais"; "hittite"; "hosannah"; "jeannot"; "jerseys";
-    "khazar"; "landwehr"; "lillois"; "lilloise"; "malherbe"; "marennes"; "margay"; "mathurins";
-    "mercurey"; "mithriaque"; "ouighour"; "parthique"; "phynances"; "proudhonisme";
-    "préraphaélite"; "puy"; "ptyx"; "pyrrhonien"; "pyrrhonisme"; "raphaélesque"; "rennais";
+    "khazar"; "landwehr"; "lillois"; "lilloise"; "malherbe"; "marennes"; "mathurins";
+    "mithriaque"; "ouighour"; "parthique"; "phynances"; "proudhonisme";
+    "préraphaélite"; "ptyx"; "pyrrhonien"; "pyrrhonisme"; "raphaélesque"; "rennais";
     "rennaise"; "rhodanien"; "rhodia"; "rhénan"; "rhénane"; "rébecca"; "smyrniote"; "sopha";
     "sylvie"; "syriaque"; "sévillan"; "sévillane"; "thomisme";
-    "thomiste"; "tilbury"; "tokharien"; "transylvain"; "varenne"; "vouvray"; "youyou"; "wallace";
-    "chantilly"; "marianne"; "ardennais"; "joseph"; "hégélienne"; "tommies"; "allemagne"; "apollon";
-    "margaux"; "crécy"; "cary"; "cayenne"; "antigaulliste"; "ardennaise";
+    "thomiste"; "tokharien"; "transylvain"; "varenne"; "youyou"; "wallace";
+    "marianne"; "ardennais"; "joseph"; "hégélienne"; "tommies"; "allemagne"; "apollon";
+    "margaux"; "cayenne"; "antigaulliste"; "ardennaise";
     "chaldaïque"; "garrick"; "hébertisme"; "hégélianisme"; "hégélien"; "narbonnais"; "sarrois";
-    "sarroise"; "siennois"; "siennoise"; "sorbonne"; "sorbonnarde"; "ferry"; "rallye"; "haseki";
-    "hobby"; "curry"; "paddy"; "caddy"; "guppy"; "hippy"; "cherry"; "wallaby"; "jenny"; "shimmy";
-    "bobbies"; "scrabble"; "sherry"; "hermès";
+    "sarroise"; "siennois"; "siennoise"; "sorbonne"; "sorbonnarde"; "rallye"; "haseki";
+    "scrabble"; "hermès";
   ]) in
   fun old_ortho ->
   Hash_set.mem (force set) old_ortho
@@ -680,14 +682,28 @@ let erofa_rule rules =
           if bits land (1 lsl bit_y) <> 0
           then (
             (* exclut des trucs du genre tramway -> tramwai *)
+            let end_ =
+              if String.is_suffix !aligned_row.row.lemme ~suffix:"y"
+              then
+                match !aligned_row.row.ortho with
+                | "psy" | "psys" | "époxy" | "poly" | "polys" -> 0
+                | _ ->
+                    if String.is_suffix !aligned_row.row.ortho ~suffix:"ys"
+                    then 2 (* pénaltys (pluriel de 1990) *)
+                    else 1
+              else 0
+            in
             aligned_row :=
-              rewrite_graphem env !aligned_row ~from:(pattern_y, "i") ~to_:"i" ~start:1;
+              rewrite_graphem env !aligned_row ~from:(pattern_y, "i") ~to_:"i" ~start:1
+                ~end_;
             aligned_row :=
               rewrite_graphem env !aligned_row ~from:(pattern_y, "j") ~to_:"i"
                 ~start:
-                  (match !aligned_row.row.ortho with "yeus" | "yeuse" -> 0 | _ -> 1);
+                  (match !aligned_row.row.ortho with "yeus" | "yeuse" -> 0 | _ -> 1)
+                ~end_;
             aligned_row :=
-              rewrite_graphem env !aligned_row ~from:(pattern_y, "ij") ~to_:"i" ~start:1;
+              rewrite_graphem env !aligned_row ~from:(pattern_y, "ij") ~to_:"i" ~start:1
+                ~end_;
             aligned_row :=
               rewrite_graphem env !aligned_row ~from:(pattern_yn, "in") ~to_:"in";
             aligned_row :=

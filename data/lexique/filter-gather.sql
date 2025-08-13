@@ -15,7 +15,7 @@ where not exists (select 1 from w where r.ortho = w.word);
 .mode tab
 .import Lexique383-full.gen.tsv tmp
 update tmp
-set phon = l.phon
+set phon = l.phon, lemme = coalesce(nullif(l.lemme, ''), tmp.lemme)
 from l where tmp.ortho = l.ortho;
 
 insert into tmp(ortho,phon,lemme)
