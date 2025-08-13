@@ -92,7 +92,7 @@ module Lexique = struct
         "junkie"; "milady"; "please"; "banjo"; "flirter"; "boom";
         "pudding"; "because"; "gentlemen"; "shoote"; "alléluia";
         "cake"; "pancake"; "ace"; "sniper"; "ranger";
-        "shampooing"; "macho"; "audition"; "full"; "zoom";
+        "shampooing"; "macho"; "full"; "zoom";
         "jumper"; "mail"; "cheeseburger"; "duce"; "jogging";
         "boomer"; "boomerang"; "mister"; "skate"; "bey";
         "sushi"; "masters"; "footballeur"; "pizzeria"; "flirt";
