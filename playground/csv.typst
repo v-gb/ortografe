@@ -70,8 +70,8 @@ if false {
     let hline = table.hline(stroke: (thickness: 0.00001pt, paint: luma(180)))
     if style == 3 { content.push(hline) }
     for (k, v) in json.table {
-        let color1 = if style == 5 { luma(180) } else { rgb("dff2ff") }
-        let color2 = if style == 5 { luma(180) } else { rgb("a3d5ff") }
+        let color1 = if style == 5 { luma(210) } else { rgb("dff2ff") }
+        let color2 = if style == 5 { luma(210) } else { rgb("a3d5ff") }
         let color = if k == v.new or style != 0 and style != 5 { white } else if calc.odd(row) { color1 } else { color2 }
         let weight = {
             if style == 4 {
