@@ -143,7 +143,7 @@ let h3 children =
 |}
     children
 
-module Index = struct
+module Old_index = struct
   let regles_ref, regles_def = id "regles"
   let outils_ref, outils_def = id "outils"
   let aller_plus_loin_ref, aller_plus_loin_def = id "aller-plus-loin"
@@ -1264,7 +1264,7 @@ module Index = struct
       ]
 
   let head ~from () =
-    head ~from ~root:true ~title:"Orthographe rationnelle"
+    head ~from ~root:false ~title:"Orthographe rationnelle"
       ~description:
         "Outils pour utiliser l'orthographe rationalisée du français Érofa. Ou \
          d'autres orthographes, comme celle des rectifications de 1990."
@@ -1345,6 +1345,67 @@ module Index = struct
 end
 
 module Regles_perso = struct
+  let body ~from ~url_param =
+    [ +(if url_param then [] else [ span ~attrs:[ ("class", "regle_param_marker") ] [] ])
+    ; +(if url_param
+        then
+          [ p
+              [ text "Les outils de cette page appliquent un dictionnaire de "
+              ; a
+                  ~attrs:[ ("id", "regles-perso-link") ]
+                  ~href:""
+                  [ text "url manquante" ]
+              ; text "."
+              ]
+          ]
+        else [])
+    ; Old_index.submit_file ~from
+        ~label_attrs:[ ("id", "form-conv-label") ]
+        ~replace_onchange:[ ("id", "form-conv-button") ]
+        ~attrs:[ ("id", "form-conv") ]
+        (fun button ->
+          let hidden_if_url_param = if url_param then Some "display: none" else None in
+          [ p ?cl:hidden_if_url_param
+              [ text
+                  "Les outils de cette page permettent d'appliquer un changement \
+                   d'orthographe à des textes ou des documents. Vous pouvez créer \
+                   votre propre orthographe em combinant les règles fournies ici."
+              ]
+          ; details ?cl:hidden_if_url_param
+              [ text
+                  "Actuellement, la sélection de règles est la suivante (Érofa si \
+                   sélection vide) :"
+              ]
+              [ div
+                  (Dict_gen_common.Dict_gen.all_selection_html
+                     ~url_prefix:(url ~from "/static/") ~name_prefix:""
+                     ~id_prefix:"conv-"
+                     ~checked:(fun _ -> false)
+                     ()
+                  |> nodes_of_string)
+              ; div ~attrs:[ ("id", "form-conv-button-error") ] []
+              ]
+          ; section
+              [ h3 [ text "Transcription interactive" ]
+              ; Old_index.interactive_transcription ~id_textarea:"user-text2"
+                  ~id_converted_text:"converted-text2"
+                  ~initial_text:
+                    (`Placeholder "Tapez le texte à transcrire ici, par ex. éléphant.")
+              ]
+          ; section
+              [ h3 [ text "Transcription de documents, en ligne" ]
+              ; +button
+              ; p [ text "Les formats acceptés sont :" ]
+              ; Old_index.format_acceptes ~from ()
+              ]
+          ; +(if url_param
+              then [ Old_index.section_transcription_pages ~from `Url_page ]
+              else [])
+          ; section
+              [ h3 [ text "Données" ]; p [ text "Voici un "; +Old_index.csv_link () ] ]
+          ])
+    ]
+
   let main ~url_param : node =
     let from = `same_site in
     html
@@ -1364,60 +1425,47 @@ module Regles_perso = struct
             [ div ~cl:"margin: 0 8px 8px 8px;"
                 [ h1 ~cl:"text-align:center; margin-top: 1em; margin-bottom: 1em;"
                     [ text "Orthographe rationnelle" ]
-                ; +(if url_param
-                    then
-                      [ p
-                          [ text
-                              "Les outils de cette page appliquent un dictionnaire de "
-                          ; a
-                              ~attrs:[ ("id", "regles-perso-link") ]
-                              ~href:""
-                              [ text "url manquante" ]
-                          ; text "."
-                          ]
-                      ]
-                    else [])
-                ; Index.submit_file ~from
-                    ~label_attrs:[ ("id", "form-conv-label") ]
-                    ~replace_onchange:[ ("id", "form-conv-button") ]
-                    ~attrs:[ ("id", "form-conv") ]
-                    (fun button ->
-                      [ details
-                          ?cl:(if url_param then Some "display: none" else None)
-                          [ text
-                              "Les outils de cette page appliquent cette sélection de \
-                               règles :"
-                          ]
-                          [ div
-                              (Dict_gen_common.Dict_gen.all_selection_html
-                                 ~url_prefix:(url ~from "/static/") ~name_prefix:""
-                                 ~id_prefix:"conv-"
-                                 ~checked:(fun _ -> false)
-                                 ()
-                              |> nodes_of_string)
-                          ; div ~attrs:[ ("id", "form-conv-button-error") ] []
-                          ]
-                      ; section
-                          [ h3 [ text "Transcription interactive" ]
-                          ; Index.interactive_transcription ~id_textarea:"user-text2"
-                              ~id_converted_text:"converted-text2"
-                              ~initial_text:
-                                (`Placeholder "Tapez le texte à transcrire ici.")
-                          ]
-                      ; section
-                          [ h3 [ text "Transcription de documents, en ligne" ]
-                          ; +button
-                          ; p [ text "Les formats acceptés sont :" ]
-                          ; Index.format_acceptes ~from ()
-                          ]
-                      ; +(if url_param
-                          then [ Index.section_transcription_pages ~from `Url_page ]
-                          else [])
-                      ; section
-                          [ h3 [ text "Données" ]
-                          ; p [ text "Voici un "; +Index.csv_link () ]
-                          ]
-                      ])
+                ; +body ~from ~url_param
+                ]
+            ]
+        ]
+      ()
+end
+
+module Index = struct
+  let from = `same_site
+
+  let introduction () =
+    p ~cl:"margin-top: 2em"
+      [ text "Cette page présentait précedemment des outils pour "
+      ; a ~href:"https://www.erofa.org/" [ text "Érofa" ]
+      ; text ". Ces outils vivent maintenant "
+      ; a ~href:"https://www.erofa.org/outils" [ text "sur le site Érofa" ]
+      ; text ". Si vous voulez voir l'ancienne page, elle vit "
+      ; a ~href:"/static/old_index.html" [ text "ici" ]
+      ; text "."
+      ]
+
+  let head () =
+    head ~from ~root:true ~title:"Orthographe rationnelle"
+      ~description:
+        "Outils pour utiliser des orthographe rationalisée du français, comme \
+         l'orthographe des rectifications, d'Érofa ou d'autres."
+      ~attrs:
+        [ script (url ~from "/static/rewrite.js") ~defer:true
+        ; script (url ~from "/static/page.js") ~defer:true
+        ]
+      ()
+
+  let main () : node =
+    html ~head:(head ()) ~body_style:"margin: 0; font-size: 1.1rem; line-height: 1.3;"
+      ~body:
+        [ elt "main" ~cl:"max-width: 55em; margin: auto;"
+            [ div ~cl:"margin: 0 8px 8px 8px;"
+                [ introduction ()
+                ; h1 ~cl:"text-align:center;"
+                    [ text "Une orthographe rationnelle"; br; text "ici et maintenant" ]
+                ; +Regles_perso.body ~from ~url_param:false
                 ]
             ]
         ]
@@ -1426,8 +1474,9 @@ end
 
 let () =
   List.iter
-    [ ("index.html", Index.main ())
-    ; ("outils.html", Index.outils ())
+    [ ("old_index.html", Old_index.main ())
+    ; ("index.html", Index.main ())
+    ; ("outils.html", Old_index.outils ())
     ; ("regles_perso_url=true.html", Regles_perso.main ~url_param:true)
     ; ("regles_perso_url=false.html", Regles_perso.main ~url_param:false)
     ]

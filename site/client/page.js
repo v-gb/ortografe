@@ -124,12 +124,17 @@ if (user_text2) {
         }        
     })
     const update_url = sequentialized_and_merged(async () => {
-        const url = new URL(window.location);
-        const searchParams = url.searchParams;
-        if (search_params.has("regles")) {
+        if (document.getElementsByClassName("regle_param_marker").length > 0) {
+            const url = new URL(window.location);
+            const searchParams = url.searchParams;
             const dict_gen_browser = await lazy_dict_gen_browser();
-            const [ _rules, selection_text ] = dict_gen_browser.currently_selected_rules("conv-");
-            searchParams.set("regles", selection_text);
+            const [ _rules, selection_text, selection_is_nonempty ] =
+                  dict_gen_browser.currently_selected_rules("conv-");
+            if (selection_is_nonempty) {
+                searchParams.set("regles", selection_text);
+            } else {
+                searchParams.delete("regles");
+            }
             window.history.replaceState(null, "", url);
         }
     })

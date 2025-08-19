@@ -27,6 +27,7 @@
 
 (rule
  (targets
+   old_index.html
    index.html
    outils.html
    regles_perso_url=true.html
