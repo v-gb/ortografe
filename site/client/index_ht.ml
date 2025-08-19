@@ -1466,6 +1466,7 @@ module Index = struct
                 ; h1 ~cl:"text-align:center;"
                     [ text "Une orthographe rationnelle"; br; text "ici et maintenant" ]
                 ; +Regles_perso.body ~from ~url_param:false
+                ; Old_index.section_transcription_pages ~from `Main_page
                 ]
             ]
         ]
