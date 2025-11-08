@@ -699,7 +699,9 @@ let erofa_rule rules =
             aligned_row :=
               rewrite_graphem env !aligned_row ~from:(pattern_y, "j") ~to_:"i"
                 ~start:
-                  (match !aligned_row.row.ortho with "yeus" | "yeuse" -> 0 | _ -> 1)
+                  (match !aligned_row.row.ortho with
+                  | "yeus" | "yeuse" | "yeuses" -> 0
+                  | _ -> 1)
                 ~end_;
             aligned_row :=
               rewrite_graphem env !aligned_row ~from:(pattern_y, "ij") ~to_:"i" ~start:1
