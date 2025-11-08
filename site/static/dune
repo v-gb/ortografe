@@ -140,12 +140,12 @@ fi")))
  (target word.svg)
  (deps (sandbox always))
  (action
-  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/f/fd/Microsoft_Office_Word_%282019%E2%80%93present%29.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/e/e8/Microsoft_Office_Word_%282025%E2%80%93present%29.svg")))
 (rule
  (target powerpoint.svg)
  (deps (sandbox always))
  (action
-  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/0/0d/Microsoft_Office_PowerPoint_%282019%E2%80%93present%29.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/d/df/Microsoft_Office_PowerPoint_%282025%E2%80%93present%29.svg")))
 
 ;; https://creativecommons.org/licenses/by-sa/4.0/deed.en
 ;; should be fine with link + note at the bottom
