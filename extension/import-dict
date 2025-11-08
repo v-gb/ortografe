@@ -47,7 +47,7 @@ EOF
 .mode csv
 create table t(before,after);
 .import dict.external-sources.gen.csv t
-select replace(replace(before,"œ","oe"),"æ","ae") as rewritten, after
+select replace(replace(before,'œ','oe'),'æ','ae') as rewritten, after
 from t
 where rewritten != before and rewritten != after
 EOF
@@ -100,7 +100,7 @@ where (w.post1990 is null
             or substring(l.post90,1,instr(l.post90,'/')-1) = w.post1990
           end)
 and suggested_new <> l.ortho
-and l.ortho <> "fût" -- the nom is rewritten, not the verb
+and l.ortho <> 'fût' -- the nom is rewritten, not the verb
 union all
 select distinct w.pre1990,w.post1990
 from w
