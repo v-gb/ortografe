@@ -66,7 +66,7 @@ from extra
 where not exists (select 1 from t where t.ortho = extra.ortho)
 and ortho <> '#';
 select ortho from t
-where (ortho = lemme or (genre = 'f' and nombre <> 'p' and coalesce(cgram not like '%VER%', true)) or ortho = 'arrhes')
+where (ortho = lemme or (genre = 'f' and nombre <> 'p' and coalesce(cgram not like '%VER%', true)) or ortho = 'arrhes' or ortho = 'yeux')
 order by cast (freqlemfilms2 as real) desc
 EOF
     } | tr -d '"' > /tmp/lexique
