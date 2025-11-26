@@ -459,7 +459,8 @@ let erofa_prefilter' =
         ; str "auxq"
         ; str "auxd"
         ; str "deux"
-        ; seq [ any; str "y" ]
+        ; alt [ seq [ any; str "y" ];
+                seq [ str "yeu"; any ] ]
         ; str "h"
         ; str "nss"
         ]
