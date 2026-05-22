@@ -13,7 +13,8 @@ This project contains tools to help with proposed spelling rationalizations for 
     
 - a [website](https://orthographe-rationnelle.info/) that provides an entry point to all
   the tools, and in particular transcribe text and documents interactively without
-  installing anything. [Source](site/).
+  installing anything. Also used on the [Érofa website](https://www.erofa.org/outils).
+  [Source](site/).
 
 - a [CLI tool](doc-conversion/) that:
 
