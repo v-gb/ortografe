@@ -35,15 +35,16 @@ let%expect_test "dict_search" =
   search "met";
   [%expect
     {|
-    ((met met) (méta méta) (mette mète) (mets mets) (métal métal)
-     (météo météo) (mettes mètes) (mettez métez) (métis métis)
-     (métra métra)) |}];
+    ((met met) (méta méta) (mette mète) (mets mets) (métal métal) (météo météo)
+     (mettes mètes) (mettez métez) (métis métis) (métra métra))
+    |}];
   (* diacritics in the pattern are respected though *)
   search "mét";
   [%expect
     {|
-    ((méta méta) (métal métal) (météo météo) (mettez métez)
-     (métis métis) (métra métra)) |}];
+    ((méta méta) (métal métal) (météo météo) (mettez métez) (métis métis)
+     (métra métra))
+    |}];
   search "mèt";
   [%expect {| ((mette mète) (mettes mètes)) |}];
 
