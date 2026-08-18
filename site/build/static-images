@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e -u -o pipefail
+shopt -s nullglob
+for i in *.{png,svg,jpg}; do
+    basename=$(tr '-' '_' <<< "${i%.*}" | tr -c -d '[a-zA-Z0-9_]')
+    format=$(identify -format %g "$i")
+    IFS="+x" read w h etc <<< "$format"
+    w=$((w)) # ensure we get a number
+    h=$((h)) # ensure we get a number
+    echo "let $basename = (\"/static/$i\", $w, $h)"
+done

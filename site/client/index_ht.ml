@@ -20,6 +20,10 @@ let url ~from abs =
 let favicon_url_abs_impl ~from = url ~from "/static/favicon.svg"
 let download_url_abs_impl ~from = url ~from "/static/download.svg"
 
+let static_img ~from ?cl (url_text, w, h) attrs =
+  img (url ~from url_text) ?cl
+    (("width", Int.to_string w) :: ("height", Int.to_string h) :: attrs)
+
 let global_style_shared_with_other =
   {|
 .for-active-browser {
@@ -167,14 +171,11 @@ module Old_index = struct
                margin:0; margin-left: 0.5em; position: relative;"
             [ a ~href:"https://www.youtube.com/embed/5YO7Vg1ByA8?autoplay=1"
                 ~attrs:[ ("target", "_blank") ]
-                [ img
-                    (url ~from "/static/hoedt_piron.jpg")
+                [ static_img ~from Links.hoedt_piron
                     ~cl:"aspect-ratio:320/180; max-width: 100%; height: auto;"
                     [ ( "alt"
                       , "La faute de l'orthographe | Arnaud Hoedt, Jérôme Piron | \
                          TEDxRennes" )
-                    ; ("width", "320")
-                    ; ("height", "180")
                     ]
                 ]
               (* Svg and some of the styling taken from youtube's embed iframes instead of
@@ -520,32 +521,16 @@ module Old_index = struct
   let format_acceptes ~from () =
     image_list
       [ ( (fun ~cl ->
-            img
-              (url ~from "/static/word.svg")
-              ~cl
-              [ ("alt", "Microsoft Office Word (2019–present).svg")
-              ; ("width", "1881" (* can we go and compute this? *))
-              ; ("height", "1750")
-              ])
+            static_img ~from Links.word ~cl
+              [ ("alt", "Microsoft Office Word (2019–present).svg") ])
         , [ text "Word et similaires (.doc, .docx, .odt)" ] )
       ; ( (fun ~cl ->
-            img
-              (url ~from "/static/powerpoint.svg")
-              ~cl
-              [ ("alt", "Microsoft Office PowerPoint (2019–present).svg")
-              ; ("width", "512")
-              ; ("height", "476")
-              ])
+            static_img ~from Links.powerpoint ~cl
+              [ ("alt", "Microsoft Office PowerPoint (2019–present).svg") ])
         , [ text "PowerPoint et similaires (.ppt, .pptx, .odp)" ] )
-      ; ( (fun ~cl ->
-            img
-              (url ~from "/static/text_file.svg")
-              ~cl
-              [ ("alt", "Text file icon"); ("width", "822"); ("height", "754") ])
+      ; ( (fun ~cl -> static_img ~from Links.text_file ~cl [ ("alt", "Text file icon") ])
         , [ text "fichiers textes (.txt, .mkd, .md)" ] )
-      ; ( (fun ~cl ->
-            img (url ~from "/static/pdf.svg") ~cl
-              [ ("alt", "PDF file icon"); ("width", "544"); ("height", "580") ])
+      ; ( (fun ~cl -> static_img ~from Links.pdf ~cl [ ("alt", "PDF file icon") ])
         , [ text
               "Pas supporté directement. Soumettez soit le fichier dont est tiré le \
                PDF (préférable), ou un fichier Word recréé depuis le PDF (voir "
@@ -555,21 +540,14 @@ module Old_index = struct
           ; a ~href:"https://tools.pdf24.org/en/pdf-to-word" [ text "Pdf24" ]
           ; text ")."
           ] )
-      ; ( (fun ~cl ->
-            img
-              (url ~from "/static/epub.svg")
-              ~cl
-              [ ("alt", "Epub logo color.svg"); ("width", "600"); ("height", "800") ])
+      ; ( (fun ~cl -> static_img ~from Links.epub ~cl [ ("alt", "Epub logo color.svg") ])
         , [ text "livres numériques (.epub), comme ceux de "
           ; a ~href:"https://fr.wikisource.org/wiki/Wikisource:Accueil"
               [ text "wikisource" ]
           ; text " plus haut"
           ] )
       ; ( (fun ~cl ->
-            img
-              (url ~from "/static/internet_globe.svg")
-              ~cl
-              [ ("alt", "Internet Symbol"); ("width", "407"); ("height", "407") ])
+            static_img ~from Links.internet_globe ~cl [ ("alt", "Internet Symbol") ])
         , [ text "sources de pages web (.html, .xhtml, .htmlz)" ] )
       ]
 
@@ -630,14 +608,15 @@ module Old_index = struct
       ; +(match which_page with
          | `Url_page -> []
          | `Main_page ->
-             let src = url ~from "/static/screenshot-1280-800.png" in
+             let url_text, w, h = Links.screenshot_1280_800 in
+             let src = url ~from url_text in
              [ a ~href:src
                  [ img src ~cl:"max-width:min(35em,100%); height:auto"
                      [ ( "alt"
                        , "Capture d'écran de page Éléphant de Wikipédia en orthographe \
                           Érofa" )
-                     ; ("width", "1280")
-                     ; ("height", "800")
+                     ; ("width", Int.to_string w)
+                     ; ("height", Int.to_string h)
                      ]
                  ]
              ])
@@ -650,23 +629,19 @@ module Old_index = struct
           [ ( [ ("class", "for-chrome") ]
             , (fun ~cl ->
                 a ~href:ext_in_chrome_link
-                  [ img ~cl:(cl ^ clickable_icon_round)
-                      (url ~from "/static/chrome.svg")
-                      [ ("alt", ""); ("width", "48"); ("height", "48") ]
+                  [ static_img ~cl:(cl ^ clickable_icon_round) ~from Links.chrome
+                      [ ("alt", "") ]
                   ])
             , [ text
                   "Que sur ordinateur. Sur téléphone, Chrome ne supporte pas les \
                    extensions, nous vous conseillons donc "
               ; a ~href:firefox_on_android_link
                   [ text "Firefox "
-                  ; img
-                      (url ~from "/static/firefox.svg")
+                  ; static_img ~from Links.firefox
                       [ ("style", icon)
                         (* style instead of class so it's higher specificity in
                            erofa.org *)
                       ; ("alt", "")
-                      ; ("width", "77")
-                      ; ("height", "79")
                       ]
                   ]
               ; text ". "
@@ -674,17 +649,15 @@ module Old_index = struct
           ; ( [ ("class", "for-firefox") ]
             , (fun ~cl ->
                 a ~href:ext_in_firefox_link
-                  [ img ~cl:(cl ^ clickable_icon_round)
-                      (url ~from "/static/firefox.svg")
-                      [ ("alt", ""); ("width", "77"); ("height", "79") ]
+                  [ static_img ~cl:(cl ^ clickable_icon_round) ~from Links.firefox
+                      [ ("alt", "") ]
                   ])
             , [ text "Ordinateur et téléphone." ] )
           ; ( [ ("class", "for-safari") ]
             , (fun ~cl ->
                 a ~href:ext_in_safari_link
-                  [ img ~cl:(cl ^ clickable_icon_round)
-                      (url ~from "/static/safari.svg")
-                      [ ("alt", ""); ("width", "187"); ("height", "186") ]
+                  [ static_img ~cl:(cl ^ clickable_icon_round) ~from Links.safari
+                      [ ("alt", "") ]
                   ])
             , [ text
                   "MacOS et iOS. Si l'extension n'a pas d'effet, vérifiez qu'il n'y a \
@@ -700,9 +673,8 @@ module Old_index = struct
           ; ( [ ("class", "for-edge") ]
             , (fun ~cl ->
                 a ~href:ext_in_chrome_link
-                  [ img ~cl:(cl ^ clickable_icon_round)
-                      (url ~from "/static/edge.svg")
-                      [ ("alt", ""); ("width", "256"); ("height", "256") ]
+                  [ static_img ~cl:(cl ^ clickable_icon_round) ~from Links.edge
+                      [ ("alt", "") ]
                   ])
             , [ text "Ordinateur, et peut-être téléphone. Suivez "
               ; a ~href:edge_instructions_link
@@ -765,26 +737,24 @@ module Old_index = struct
           [ ( []
             , (fun ~cl ->
                 a ~href:firefox_link
-                  [ img ~cl:(cl ^ clickable_icon_round)
-                      (url ~from "/static/firefox.svg")
-                      [ ("alt", ""); ("width", "77"); ("height", "79") ]
+                  [ static_img ~cl:(cl ^ clickable_icon_round) ~from Links.firefox
+                      [ ("alt", "") ]
                   ])
             , [ text "navigateur Firefox (non supporté sur téléphones)" ] )
           ; ( []
             , (fun ~cl ->
                 a ~href:thunderbird_link
-                  [ img ~cl:(cl ^ clickable_icon_round)
-                      (url ~from "/static/thunderbird.svg")
-                      [ ("alt", ""); ("width", "512"); ("height", "512") ]
+                  [ static_img ~cl:(cl ^ clickable_icon_round) ~from Links.thunderbird
+                      [ ("alt", "") ]
                   ])
             , [ text "messagerie Thunderbird" ] )
             (* libreoffice pas encore prêt *)
           ; ( [ ("style", "display:none") ]
             , (fun ~cl ->
                 a ~href:libreoffice_link
-                  [ img ~cl:(cl ^ clickable_icon_box)
-                      (url ~from "/static/libreoffice_writer.png")
-                      [ ("alt", ""); ("width", "128"); ("height", "128") ]
+                  [ static_img ~cl:(cl ^ clickable_icon_box) ~from
+                      Links.libreoffice_writer
+                      [ ("alt", "") ]
                   ])
             , [ text "suite bureautique LibreOffice" ] )
           ]

@@ -11,6 +11,11 @@
  (modules :standard \ client_bin)
  (preprocess (pps ppx_string ppx_list_include ppx_partial ppx_sexp_value ppx_lazy_option_op)))
 
+(rule
+ (deps (sandbox always) (glob_files ../static/*.{jpg,png,svg}))
+ (mode promote)
+ (action (with-stdout-to links.ml (chdir ../static (run ../build/static-images)))))
+
 (executable
  (name client_bin)
  (libraries

@@ -102,10 +102,10 @@ fi")))
 
 ;; public domain
 (rule
- (target safari.svg)
+ (target safari.png)
  (deps (sandbox always))
  (action
-  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/en/7/71/Safari_Liquid_Glass_icon.png")))
 
 ;; MIT
 (rule
@@ -116,10 +116,10 @@ fi")))
 
 ;; MPL2, same as firefox
 (rule
- (target thunderbird.svg)
+ (target thunderbird.png)
  (deps (sandbox always))
  (action
-  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/2/2f/Thunderbird_2023_icon.svg")))
+  (run curl --fail-with-body -o %{target} -sS "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Thunderbird_2023_icon.png/250px-Thunderbird_2023_icon.png")))
 
 ;; https://creativecommons.org/licenses/by-sa/3.0/deed.en
 (rule
