@@ -17,10 +17,10 @@ serves:
 .PHONY: build-container build-container-jsopt run-container fly-deploy build-extension
 build-container:
 	opam exec -- dune build --trace-file _build/trace -- ./server_all.exe
-	podman build -f site/deployment/Dockerfile . -t ortografe-server
+	podman build --ignorefile site/deployment/.dockerignore -f site/deployment/Dockerfile . -t ortografe-server
 build-container-jsopt:
 	opam exec -- dune build --profile jsopt --trace-file _build/trace -- ./server_all.exe
-	podman build -f site/deployment/Dockerfile . -t ortografe-server
+	podman build --ignorefile site/deployment/.dockerignore -f site/deployment/Dockerfile . -t ortografe-server
 
 run-container: build-container
 	@ # need --init otherwise we're process 1, and signals are default ignore, or something

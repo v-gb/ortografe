@@ -8,6 +8,7 @@ primary_region = "cdg"
 
 [build]
   dockerfile = "site/deployment/Dockerfile"
+  ignorefile = "site/deployment/.dockerignore"
 
 [http_service]
 # https://fly.io/docs/networking/services/
