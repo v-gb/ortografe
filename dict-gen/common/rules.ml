@@ -544,7 +544,6 @@ let create () : t =
   new_fixed "onts$" [ ("§", Core) ];
   new_fixed "ands$" [ ("@", Core) ];
   new_fixed "ants$" [ ("@", Core) ];
-  new_fixed "ans$" [ ("@", Core) ];
 
   (let rule_xm x alone nasal =
      let r_non_nasal = List.map alone ~f:(fun a -> (a ^ "m", Core)) in
