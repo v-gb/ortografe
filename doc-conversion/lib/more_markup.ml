@@ -81,8 +81,8 @@ let transform (type a) ~transform ~flavor src ~(dst : a out) : a =
      Note: no implicit closing of tags *)
   Markup.string src
   |> (match flavor with
-     | `Xml -> Markup.parse_xml ~entity:Markup.xhtml_entity __
-     | `Html -> Markup.parse_html __)
+    | `Xml -> Markup.parse_xml ~entity:Markup.xhtml_entity __
+    | `Html -> Markup.parse_html __)
   |> Markup.signals
   |> transform
   |> (match flavor with `Xml -> Markup.write_xml __ | `Html -> Markup.write_html __)

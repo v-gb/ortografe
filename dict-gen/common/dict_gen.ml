@@ -193,7 +193,7 @@ let all_builtin =
     (`Oe
     :: `Rect1990
     :: List.map (force Rewrite.all_builtin) ~f:(fun r ->
-           `Rewrite (`Builtin (Rewrite.name r))))
+        `Rewrite (`Builtin (Rewrite.name r))))
 
 let name : rule -> _ = function
   | `Rewrite (`Builtin name) -> name
@@ -233,18 +233,18 @@ let html_doc =
     doc rule
     |> String.substr_replace_all ~pattern:"->" ~with_:"→"
     |> Re.replace re_word ~all:true ~f:(fun group ->
-           let word = String.chop_prefix_exn (Re.Group.get group 0) ~prefix:"@" in
-           [%string "<i>%{word}</i>"])
+        let word = String.chop_prefix_exn (Re.Group.get group 0) ~prefix:"@" in
+        [%string "<i>%{word}</i>"])
     |> Re.replace re_url ~all:true ~f:(fun group ->
-           let url = Re.Group.get group 0 in
-           let display_url =
-             url
-             |> String.chop_prefix_if_exists ~prefix:"http://"
-             |> String.chop_prefix_if_exists ~prefix:"https://"
-             |> String.chop_prefix_if_exists ~prefix:"www."
-             |> String.chop_suffix_if_exists ~suffix:"/"
-           in
-           [%string "<a href=\"%{url}\">%{display_url}</a>"])
+        let url = Re.Group.get group 0 in
+        let display_url =
+          url
+          |> String.chop_prefix_if_exists ~prefix:"http://"
+          |> String.chop_prefix_if_exists ~prefix:"https://"
+          |> String.chop_prefix_if_exists ~prefix:"www."
+          |> String.chop_suffix_if_exists ~suffix:"/"
+        in
+        [%string "<a href=\"%{url}\">%{display_url}</a>"])
 
 let all_selection_html ~url_prefix ~id_prefix ~name_prefix ?(checked = Fn.const false)
     () =

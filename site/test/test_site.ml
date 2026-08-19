@@ -26,8 +26,8 @@ let%expect_test "dict_search" =
     let res =
       Dict_search.search t term ~compare:[%compare: string * string] ~limit:10
       |> List.map ~f:(fun (found, (a, b)) ->
-             assert (String.( = ) found a || String.( = ) found b);
-             (a, b))
+          assert (String.( = ) found a || String.( = ) found b);
+          (a, b))
     in
     print_s [%sexp (res : (string * string) list)]
   in

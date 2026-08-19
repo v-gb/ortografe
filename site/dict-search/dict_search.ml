@@ -63,12 +63,12 @@ let create iter =
             yield ((String.length str', str'), (str, a))))
     |> Map.of_alist_multi (module K)
     |> Map.map ~f:(fun l ->
-           Map.of_alist_multi (module String) l
-           (* The 'a here are in order that iter gives them to us. We could take a
+        Map.of_alist_multi (module String) l
+        (* The 'a here are in order that iter gives them to us. We could take a
               compare function like search, but in search, the ordering is meaningless,
               only the equality is, so the situation is different, so it doesn't follow
               that we should do what search does. *)
-           |> Map.map ~f:Array.of_list)
+        |> Map.map ~f:Array.of_list)
   in
   { index; max_length = Map.max_elt_exn index |> fst |> fst }
 
@@ -111,7 +111,7 @@ let search (type a) ({ index; max_length } : a t) ?(sexp_of = [%sexp_of: _]) ~co
     |> Sequence.concat_map ~f:(fun map -> Sequence.of_list (Map.to_alist map))
     |> Sequence.filter ~f:(is_compat term)
     |> Sequence.concat_map ~f:(fun (a, l) ->
-           Array.to_sequence_mutable (Array.map l ~f:(fun b -> (a, b))))
+        Array.to_sequence_mutable (Array.map l ~f:(fun b -> (a, b))))
     |> (fun l ->
     sequence_take_unique
       ~sexp_of:(fun (s, i) -> [%sexp (s : string), (sexp_of i : Sexp.t)])
@@ -158,12 +158,12 @@ module Erofa = struct
   let search (q, t) term ~limit =
     search t ~compare:compare_index ~sexp_of:sexp_of_index term ~limit
     |> List.map ~f:(fun (str, a) ->
-           if a >= 0
-           then convert_record q.(a)
-           else
-             let a = -a in
-             let str =
-               if a land 2 <> 0 then String.chop_suffix_exn str ~suffix:"s" else str
-             in
-             convert_record ([], str, str, a mod 2))
+        if a >= 0
+        then convert_record q.(a)
+        else
+          let a = -a in
+          let str =
+            if a land 2 <> 0 then String.chop_suffix_exn str ~suffix:"s" else str
+          in
+          convert_record ([], str, str, a mod 2))
 end

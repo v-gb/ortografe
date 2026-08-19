@@ -324,10 +324,10 @@ let style_tag node =
     fold_node node [] (fun node acc -> List.rev_append node.classes acc)
     |> List.rev
     |> List.stable_dedup ~compare:(fun (c1, v1) (c2, v2) ->
-           let c = String.compare c1 c2 in
-           if c = 0 && String.( <> ) v1 v2
-           then raise_s [%sexp "clash between classes", (v1 : string), (v2 : string)];
-           c)
+        let c = String.compare c1 c2 in
+        if c = 0 && String.( <> ) v1 v2
+        then raise_s [%sexp "clash between classes", (v1 : string), (v2 : string)];
+        c)
   in
   match classes with
   | [] -> []

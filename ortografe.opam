@@ -3,7 +3,7 @@ opam-version: "2.0"
 depends: [
   "ocaml"
   "dune" {>= "3.12"}
-  "ocamlformat" {with-dev-setup & = "0.27.0"}
+  "ocamlformat" {with-dev-setup & = "0.29.0"}
   "sexp" {with-dev-setup}
   "ocaml-lsp-server" {with-dev-setup}
   "base"

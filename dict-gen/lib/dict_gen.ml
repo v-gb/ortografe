@@ -66,8 +66,8 @@ let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
       | _ :: _ :: _ as l -> List.iter l ~f:(fun (conflicts, _) -> conflicts := true));
     m)
     |> Map.filter_map ~f:(function
-         | [ (conflicts, s) ] -> if !conflicts then None else Some s
-         | _ -> None)
+      | [ (conflicts, s) ] -> if !conflicts then None else Some s
+      | _ -> None)
   in
   let special_cases =
     [ ("héro", "éro (drogue)")
@@ -101,8 +101,8 @@ let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
     ; ("œdème", "eudème, édème")
     ]
     |> List.concat_map ~f:(fun (k, v) ->
-           let k' = String.substr_replace_all k ~pattern:"œ" ~with_:"oe" in
-           if String.( = ) k k' then [ (k, v) ] else [ (k, v); (k', v) ])
+        let k' = String.substr_replace_all k ~pattern:"œ" ~with_:"oe" in
+        if String.( = ) k k' then [ (k, v) ] else [ (k, v); (k', v) ])
     |> Hashtbl.of_alist_exn (module String)
   in
   let oe_pattern = Core.String.Search_pattern.create "œ" in
@@ -134,32 +134,32 @@ let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
     Of_iter.list (List.iter combined_erofa ~f:__)
     |> discard_oe
     |> List.map ~f:(fun (pre_erofa, erofa) ->
-           let post90 = Hashtbl.find post90 pre_erofa ||? pre_erofa in
-           (post90, (pre_erofa, erofa)))
+        let post90 = Hashtbl.find post90 pre_erofa ||? pre_erofa in
+        (post90, (pre_erofa, erofa)))
     |> Map.of_alist_multi (module String)
     |> Map.mapi ~f:(fun ~key:post90 ~data:l ->
-           (* On a souvent multiples orthographes Érofa car combined_erofa contient des
+        (* On a souvent multiples orthographes Érofa car combined_erofa contient des
               entrées du style apparaître->aparaitre and appara*i*tre->aparaitre, et
               donc erofas contient les deux valeurs à droite des flèches. Donc on
               regroupe par orthographe Érofa. *)
-           let l2 =
-             List.map l ~f:Tuple.T2.swap
-             |> Map.of_alist_multi (module String)
-             |> Map.map ~f:(fun l ->
-                    List.filter l ~f:(fun s -> String.( <> ) s post90)
-                    |> List.dedup_and_sort ~compare:String.compare)
-             |> Map.to_alist
-           in
-           if List.length l2 > 1
-           then (
-             Printf.eprintf "%s\n%!"
-               (Sexp_with_utf8.to_string_hum
-                  [%sexp
-                    "Incohérence entre Érofa et 1990"
-                  , (post90 : string)
-                  , (l2 : (string * string list) list)]);
-             fail := true);
-           List.map l2 ~f:Tuple.T2.swap)
+        let l2 =
+          List.map l ~f:Tuple.T2.swap
+          |> Map.of_alist_multi (module String)
+          |> Map.map ~f:(fun l ->
+              List.filter l ~f:(fun s -> String.( <> ) s post90)
+              |> List.dedup_and_sort ~compare:String.compare)
+          |> Map.to_alist
+        in
+        if List.length l2 > 1
+        then (
+          Printf.eprintf "%s\n%!"
+            (Sexp_with_utf8.to_string_hum
+               [%sexp
+                 "Incohérence entre Érofa et 1990"
+               , (post90 : string)
+               , (l2 : (string * string list) list)]);
+          fail := true);
+        List.map l2 ~f:Tuple.T2.swap)
     |> (fun m ->
     Map.mapi m ~f:(fun ~key:post90 ~data ->
         let len_1 = List.length data = 1 in
@@ -182,13 +182,13 @@ let create_dict_search ~post90 ~(lexique : Data.Lexique.t) ~combined_erofa =
                         match sp with `S -> Some (fst data, snd data, 1) | `P -> None
                       else Some data0))))
     |> Map.mapi ~f:(fun ~key:post90 ~data ->
-           List.map data ~f:(fun ((pre_erofas, _, flags) as v) ->
-               match Hashtbl.find special_cases post90 with
-               | Some erofa' -> (pre_erofas, erofa', flags)
-               | None -> v))
+        List.map data ~f:(fun ((pre_erofas, _, flags) as v) ->
+            match Hashtbl.find special_cases post90 with
+            | Some erofa' -> (pre_erofas, erofa', flags)
+            | None -> v))
     |> Map.to_alist
     |> List.concat_map ~f:(fun (post90, l) ->
-           List.map l ~f:(fun (a, b, flags) -> (a, post90, b, flags)))
+        List.map l ~f:(fun (a, b, flags) -> (a, post90, b, flags)))
   in
   if !fail then assert false;
   let q = Queue.create () in

@@ -1,4 +1,4 @@
-version = 0.27.0
+version = 0.29.0
 profile = conventional
 break-separators = before
 dock-collection-brackets = false

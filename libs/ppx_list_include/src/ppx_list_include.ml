@@ -53,38 +53,38 @@ let list_literal e =
 let () =
   Driver.register_transformation "ppx_list_include"
     ~impl:
-      (object (self)
-         inherit Ppxlib_traverse_builtins.map
-         inherit map as super
+      object (self)
+        inherit Ppxlib_traverse_builtins.map
+        inherit map as super
 
-         method expression_skip_cons e =
-           (* Skip over the conses to avoid a quadratic complexity in the length of list
+        method expression_skip_cons e =
+          (* Skip over the conses to avoid a quadratic complexity in the length of list
               literals *)
-           match e with
-           | { pexp_desc =
-                 Pexp_construct
-                   ( ({ txt = Lident "::"; _ } as id)
-                   , Some ({ pexp_desc = Pexp_tuple [ a; b ]; _ } as e2) )
-             ; _
-             } ->
-               let a' = self#expression a in
-               let b' = self#expression_skip_cons b in
-               if a == a' && b == b'
-               then e
-               else
-                 { e with
-                   pexp_desc =
-                     Pexp_construct
-                       (id, Some { e2 with pexp_desc = Pexp_tuple [ a'; b' ] })
-                 }
-           | _ -> self#expression e
+          match e with
+          | { pexp_desc =
+                Pexp_construct
+                  ( ({ txt = Lident "::"; _ } as id)
+                  , Some ({ pexp_desc = Pexp_tuple [ a; b ]; _ } as e2) )
+            ; _
+            } ->
+              let a' = self#expression a in
+              let b' = self#expression_skip_cons b in
+              if a == a' && b == b'
+              then e
+              else
+                { e with
+                  pexp_desc =
+                    Pexp_construct
+                      (id, Some { e2 with pexp_desc = Pexp_tuple [ a'; b' ] })
+                }
+          | _ -> self#expression e
 
-         method! expression e =
-           match e with
-           | [%expr [%e? _] :: [%e? _]] -> (
-               match list_literal e with
-               | None -> self#expression_skip_cons e
-               | Some e -> super#expression e)
-           | _ -> super#expression e
-      end)
+        method! expression e =
+          match e with
+          | [%expr [%e? _] :: [%e? _]] -> (
+              match list_literal e with
+              | None -> self#expression_skip_cons e
+              | Some e -> super#expression e)
+          | _ -> super#expression e
+      end
         #structure

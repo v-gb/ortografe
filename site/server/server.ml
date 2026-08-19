@@ -187,8 +187,8 @@ let from_filesystem root path request =
     if
       has_compressed_version
       && List.exists (Dream.headers request "Accept-Encoding") ~f:(fun s ->
-             String.split ~on:',' s
-             |> List.exists ~f:(fun s -> String.( = ) (String.strip s) "gzip"))
+          String.split ~on:',' s
+          |> List.exists ~f:(fun s -> String.( = ) (String.strip s) "gzip"))
     then (path ^ ".gz", [ ("Content-Encoding", "gzip") ] @ Dream.mime_lookup path)
     else (path, [])
   in

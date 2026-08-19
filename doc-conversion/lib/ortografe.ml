@@ -227,8 +227,8 @@ let ext_conv ?src_type src dst inex =
         | `Insert f ->
             let strs =
               (match f with
-              | None -> In_channel.input_all In_channel.stdin
-              | Some f -> In_channel.read_all f)
+                | None -> In_channel.input_all In_channel.stdin
+                | Some f -> In_channel.read_all f)
               |> Sexplib.Sexp.of_string_many
               |> Stdlib.List.to_seq
               |> Stdlib.Queue.of_seq

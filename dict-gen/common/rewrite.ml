@@ -459,8 +459,7 @@ let erofa_prefilter' =
         ; str "auxq"
         ; str "auxd"
         ; str "deux"
-        ; alt [ seq [ any; str "y" ];
-                seq [ str "yeu"; any ] ]
+        ; alt [ seq [ any; str "y" ]; seq [ str "yeu"; any ] ]
         ; str "h"
         ; str "nss"
         ]
@@ -1510,7 +1509,7 @@ let all_builtin = lazy (List.rev !all_builtin)
 let overlapping_graphems aligned_row start end_ =
   aligned_row.alignment.path
   |> List.drop_while ~f:(fun path_elt ->
-         path_elt.i + String.length path_elt.graphem <= start)
+      path_elt.i + String.length path_elt.graphem <= start)
   |> List.take_while ~f:(fun path_elt -> path_elt.i < end_)
 
 let rec find_map_unfold unfold acc f =
